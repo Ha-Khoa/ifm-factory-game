@@ -15,4 +15,5 @@ export interface Field {
     img: string; 
     x: number;
     y: number;
+    isWalkable: boolean;
 }
