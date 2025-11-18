@@ -1,6 +1,18 @@
+
+export interface GameField {
+    fieldSize: number;
+    cols: number;
+    rows : number;
+    readonly grid: readonly FieldObjects[][];
+}
+
+export interface FieldObjects {
+    objects: Field[];
+}
+
 export interface Field {
-    readonly fieldSize: number;
-    readonly rows: number;  // Optional: Anzahl Zeilen als readonly-Property
-  readonly cols: number;  // Optional: Anzahl Spalten als readonly-Property
-  readonly grid: readonly number[][];
+    name: string;
+    img: string; 
+    x: number;
+    y: number;
 }
