@@ -1,70 +1,90 @@
+import { EnvironmentInjector } from "@angular/core";
 import { Field, GameField, FieldObjects } from "../../interfaces/field";
 
 export class Gamefield {
-    gamefield: GameField;
+    
+    environmetObjects!: Field[];
+    interactableObjects!: Field[];
+    fieldsize!: number;
+    rows!: number;
+    cols!: number;
 
     constructor()
     {
-        const cols = 10;
-        const rows = 15;
-        const fieldSize = 50;
-        
+        this.environmetObjects = [];
+        this.interactableObjects = [];
+        this.fieldsize = 50;
+        this.cols = 10;
+        this.rows =15;
+        this.generateEnvironment();
+        this.generateInteractableObjects();
 
-        const grid: FieldObjects[][] = [];
-        for (let i = 0; i < cols; i++)
-        {
-            grid[i] = [];
-            for(let j = 0; j < rows; j++)
-            {
-                grid[i][j] = {  // jede Gridposition enthält ein Array an Objekten
-                    objects: [{
-                        name: "floor", 
-                        img: "/images/StoneFloorTexture.png", 
-                        x: i, 
-                        y: j,
-                        isWalkable: true
-                    }]
-                };
-            }
-            
-        }
-
-        grid[5][5].objects = [
-            {
-                name: "wall",
-                img: "/images/wall.png",
-                x: 5,
-                y: 5,
-                isWalkable: false
-            }
-        ]
-
-        grid[6][5].objects = [
-            {
-                name: "wall",
-                img: "/images/wall.png",
-                x: 6,
-                y: 5,
-                isWalkable: false
-            }
-        ]
-
-        grid[2][8].objects = [
-            {
-                name: "wall",
-                img: "/images/wall.png",
-                x: 2,
-                y: 8,
-                isWalkable: false
-            }
-        ]
-        
-        this.gamefield = {
-            fieldSize: fieldSize,
-            cols: cols,
-            rows: rows,
-            grid: grid
-        };
     }
 
+    generateEnvironment()
+    {
+        let floor;
+        for(let i = 0; i < this.cols; i++)
+        {
+            for (let j = 0; j < this.rows; j++)
+            {
+                this.environmetObjects.push({
+                    name: "floor",
+                    img: "/images/StoneFloorTexture.png",
+                    x: i * this.fieldsize,
+                    y: j * this.fieldsize,
+                    width: this.fieldsize,
+                    height: this.fieldsize
+                })
+
+            }
+        }
+    }
+
+    generateInteractableObjects()
+    {
+        this.interactableObjects.push(
+             {
+                name: "wall",
+                img: "/images/wall.png",
+                x: 5 * this.fieldsize,
+                y: 5 * this.fieldsize,
+                width: this.fieldsize,
+                height: this.fieldsize
+             }
+        )
+        this.interactableObjects.push(
+            {
+                name: "wall",
+                img: "/images/wall.png",
+                x: 6 * this.fieldsize + 10,
+                y: 5 * this.fieldsize + 10,
+                width: this.fieldsize,
+                height: this.fieldsize
+            }
+        )
+        this.interactableObjects.push(
+            {
+                name: "wall",
+                img: "/images/wall.png",
+                x: 3 * this.fieldsize + 10,
+                y: 3 * this.fieldsize + 30,
+                width: this.fieldsize - 10,
+                height: this.fieldsize - 10
+            }
+        )
+        for (let i = 0; i < 5; i++)
+        {
+        this.interactableObjects.push(
+            {
+                name: "wall",
+                img: "/images/wall.png",
+                x: i * this.fieldsize,
+                y: 8 * this.fieldsize,
+                width: this.fieldsize ,
+                height: this.fieldsize 
+            }
+        )
+    }
+    }
 }

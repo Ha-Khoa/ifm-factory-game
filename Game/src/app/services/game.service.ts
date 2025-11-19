@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Gamefield } from '../models/gamefield/gamefield';
+import { Field } from '../interfaces/field';
 
 @Injectable({
   providedIn: 'root'
@@ -8,14 +9,12 @@ export class GameService {
   private GameRunning!: boolean;
   private ctx!: CanvasRenderingContext2D
   private gamefield!: Gamefield;
-  private fieldSize!: number;
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
   private playerSize!: number;
   private playerX!: number;
   private playerY!: number;
   private velocity!: number;
-  private kollisionOffset: number = 1;
   constructor() { }
 
 
@@ -30,7 +29,6 @@ export class GameService {
     this.playerY = 100;
     this.ctx = ctx;
     this.gamefield = new Gamefield();
-    this.fieldSize = this.gamefield.gamefield.fieldSize;
     await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png"]);
   }
 
@@ -86,7 +84,28 @@ export class GameService {
 
 
   updatePlayer() {
-    if (!this.checkBorder() && !this.checkObject()) { // normale Bewegung wenn nichts im Weg
+ 
+/*
+    //für Diagonale bewegung
+
+    let countPressed = 0;
+    let calculatedVelocity
+    for (const key of Object.keys(this.inputs)) {
+      if ((key === 'w' || key === 's' || key === 'd' || key === 'a') && this.inputs[key]) {
+        countPressed++;
+      }
+    }
+    if(countPressed === 2)
+    {
+      calculatedVelocity = this.velocity / Math.sqrt(2);
+    }
+    else{
+      calculatedVelocity = this.velocity;
+    }
+    */
+    let Obj = this.checkObject(); // Das Objekt mit dem Kollidiert wurde (null | Field)
+
+    if (!this.checkBorder() && !Obj) { // normale Bewegung wenn nichts im Weg
       if (this.inputs['s']) {
         this.playerY += this.velocity;
       }
@@ -100,60 +119,84 @@ export class GameService {
         this.playerX -= this.velocity;
       }
     }
-    else{
-      if (this.inputs['s']) { //Falls Objekt oder Boarder im Weg, Setze Spieler direkt an Grenze
-        this.playerY = Math.floor(this.playerY/this.fieldSize) * this.fieldSize + (this.fieldSize - this.playerSize/2) - this.kollisionOffset;
+    else {
+      if (this.inputs['s'] ) { //Falls Objekt oder Boarder im Weg, setze Spieler direkt an Grenze
+        if(Obj){
+          this.playerY = Obj.y - this.playerSize / 2;
+        }
+        else{
+          this.playerY = this.gamefield.rows * this.gamefield.fieldsize - this.playerSize / 2;
+        }
+         
       }
       else if (this.inputs['w']) {
-        this.playerY = Math.floor(this.playerY/this.fieldSize) * this.fieldSize +  this.playerSize/2 + this.kollisionOffset;
+        if (Obj)
+        {
+        this.playerY = Obj.y + Obj.height + this.playerSize / 2;
+        }
+        else
+        {
+          this.playerY = this.playerSize / 2
+        }
       }
       else if (this.inputs['d']) {
-        this.playerX = Math.floor(this.playerX/this.fieldSize) * this.fieldSize + (this.fieldSize - this.playerSize/2) - this.kollisionOffset;
+        if (Obj){
+          this.playerX = Obj.x - this.playerSize / 2;
+        }
+        else
+        {
+          this.playerX = this.gamefield.cols * this.gamefield.fieldsize - this.playerSize / 2
+        }
       }
       else if (this.inputs['a']) {
-        this.playerX= Math.floor(this.playerX/this.fieldSize) * this.fieldSize + this.playerSize/2 + this.kollisionOffset;
+        if (Obj){
+          this.playerX = Obj.x + Obj.width + this.playerSize / 2;
+        }
+        else {
+          this.playerX = this.playerSize / 2;
+        }
       }
     }
-  }
+  } 
 
 
   // Prüft ob ein einzelner Punkt kollidiert
-  checkPoint(x: number, y: number): boolean {
-    const grid = this.gamefield.gamefield.grid;
-    const rows = this.gamefield.gamefield.rows;
-    const cols = this.gamefield.gamefield.cols;
-    const gridX = (x - 0.5) / this.fieldSize; // welche Gridfeld ist der Spieler 
-    const gridY = (y - 0.5) / this.fieldSize; // runter gerundet
-    let nextGridX = 0;
-    let nextGridY = 0;
+  checkPoint(x: number, y: number): Field | null {
+
+    const Objects = this.gamefield.interactableObjects;
+
+    let nextX = x;
+    let nextY = y;
+    let collidedObject = null;
 
 
-    //Wo ist der Spieler im nächsten Frame
     if (this.inputs['s']) {
-      nextGridY = (y + this.velocity - 0.5) / this.fieldSize;
-    } else if (this.inputs['w']) {
-      nextGridY = (y - this.velocity - 0.5) / this.fieldSize;
-    } else if (this.inputs['d']) {
-      nextGridX = (x + this.velocity - 0.5) / this.fieldSize;
-    } else if (this.inputs['a']) {
-      nextGridX = (x - this.velocity - 0.5) / this.fieldSize;
+      nextY = y + this.velocity;
     }
-
-    //Kontrolliert ob nächster Frame Out of Bounds wäre
-    if (nextGridY < 0 || nextGridY >= rows || nextGridX < 0 || nextGridX >= cols) {
-      return true; 
+    else if (this.inputs['w']) {
+      nextY = y - this.velocity;
     }
-    // Prüfe ob ein Feld walkable
-      if ((this.inputs['s'] || this.inputs['w']) && gridY != nextGridY) {
-        return grid[Math.floor(gridX)][Math.floor(nextGridY)].objects.some(obj => !obj.isWalkable)
-      } else if ((this.inputs['d'] || this.inputs['a']) && gridX != nextGridX) {
-        return grid[Math.floor(nextGridX)][Math.floor(gridY)].objects.some(obj => !obj.isWalkable)
-      }
-  return false;
+    else if (this.inputs['d']) {
+      nextX = x+ this.velocity;
+    }
+    else if (this.inputs['a']) {
+      nextX = x - this.velocity;
+    }
+ 
+    Objects.forEach(Obj => // gibt Objekt zurückt, welches im nächsten Frame Kollidieren würde
+    {
+        if (Obj.y < nextY   && nextY  < Obj.y + Obj.height && Obj.x < nextX && nextX < Obj.x + Obj.width)
+          {
+            collidedObject = Obj;
+          }
+    }
+    )
+    return collidedObject;
 }
 
+
   // Prüft Kollision mit vollständiger Hitbox
-  checkObject(): boolean {
+  checkObject(): Field | null {
 
     // Hitbox Ecken
     const halfSize = this.playerSize / 2;
@@ -162,28 +205,62 @@ export class GameService {
     const left = this.playerX - halfSize;
     const right = this.playerX + halfSize;
 
+    const leftbot  = this.checkPoint(left,bottom);
+    const rightbot = this.checkPoint(right, bottom);
+    const lefttop = this.checkPoint(left, top);
+    const righttop = this.checkPoint(right, top)
     
     // Prüfe relevante Ecken in Bewegungsrichtung
-    if (this.inputs['s']) {
-      return this.checkPoint(left, bottom) || this.checkPoint(right, bottom);
+    if (this.inputs['s'] ) {
+      if(leftbot)
+      {
+          return leftbot
+      }
+      else if(rightbot)
+      {
+        return rightbot
+      }
     } else if (this.inputs['w']) {
-      return this.checkPoint(left, top) || this.checkPoint(right, top);
+      if(lefttop)
+        {
+            return lefttop
+        }
+        else if(righttop)
+        {
+          return righttop
+        }
     } else if (this.inputs['d']) {
-      return this.checkPoint(right, top) || this.checkPoint(right, bottom);
+      if(rightbot)
+        {
+            return rightbot
+        }
+        else if(righttop)
+        {
+          return righttop
+        }
     } else if (this.inputs['a']) {
-      return this.checkPoint(left, top) || this.checkPoint(left, bottom);
+      if(leftbot)
+        {
+            return leftbot
+        }
+        else if(lefttop)
+        {
+          return lefttop
+        }
     }
 
-    return false;
+    return null;
   }
 
-  checkBorder(): string | null {
-    const rows = this.gamefield.gamefield.rows;
-    const cols = this.gamefield.gamefield.cols;
+  checkBorder(): boolean {
+    const rows = this.gamefield.rows;
+    const cols = this.gamefield.cols;
 
     let nextX = this.playerX;
     let nextY = this.playerY;
-    let collision = null;
+    let collision = false;
+
+
 
     if (this.inputs['s']) {
       nextY = this.playerY + this.velocity;
@@ -200,26 +277,24 @@ export class GameService {
 
 
     if (nextX - this.playerSize / 2 < 0) {
-      collision = "left"
+      collision = true;
     }
-    else if (nextX + this.playerSize / 2 > cols * this.fieldSize) {
-      collision = "right";
+    else if (nextX + this.playerSize / 2 > cols * this.gamefield.fieldsize) {
+      collision = true;
     }
 
 
     if (nextY - this.playerSize / 2 < 0) {
-      collision = "up";
+      collision = true;
     }
-    else if (nextY + this.playerSize / 2 > rows * this.fieldSize) {
-      collision = "down";
+    else if (nextY + this.playerSize / 2 > rows * this.gamefield.fieldsize) {
+      collision = true;
     }
-
     return collision;
   }
 
 
   renderPlayer() {
-    const radius = this.playerSize;
     this.ctx.fillStyle = "red";
     this.ctx.beginPath();
     this.ctx.rect(this.playerX - this.playerSize / 2, this.playerY - this.playerSize / 2, this.playerSize, this.playerSize)
@@ -227,33 +302,40 @@ export class GameService {
   }
 
   renderGameField() {
-    // Canvas lösche   
-    for (let i = 0; i < this.gamefield.gamefield.cols; i++) {
-      for (let j = 0; j < this.gamefield.gamefield.rows; j++) {
-        this.renderField(i, j);
-      }
+
+    for (let i = 0; i < this.gamefield.environmetObjects.length; i++) {
+      this.renderField(i, false);
+    }
+    for (let i = 0; i < this.gamefield.interactableObjects.length; i++)
+    {
+      
+      this.renderField(i, true);
     }
   }
 
-  renderField(x: number, y: number) {
-    const fieldObj = this.gamefield.gamefield.grid[x][y];
-    const xPos = x * this.gamefield.gamefield.fieldSize;
-    const yPos = y * this.gamefield.gamefield.fieldSize;
+  renderField(x: number, interactable: boolean) {
+    let Obj;
 
+    if (interactable)
+    {
+      Obj = this.gamefield.interactableObjects[x];
+    }
+    else
+    {
+      Obj = this.gamefield.environmetObjects[x]
+    }
 
-    for (const obj of fieldObj.objects) {
-      if (obj.img) {
-        const img = this.images[obj.img];
-        if (img) {
-          this.ctx.drawImage(
-            img,
-            xPos,
-            yPos,
-            this.gamefield.gamefield.fieldSize,
-            this.gamefield.gamefield.fieldSize
-          );
-        }
-      }
+    const img = this.images[Obj.img];
+
+    if (img)
+    {
+      this.ctx.drawImage(
+        img,
+        Obj.x,
+        Obj.y,
+        Obj.width,
+        Obj.height
+      )
     }
   }
 
