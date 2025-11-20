@@ -390,6 +390,7 @@ export class GameService {
     if (interactable) {
       projectionY -= this.tableHeight * Math.sin(this.angle);
       // Schattierung für die Erhöhung
+
       this.ctx.beginPath();
       this.ctx.rect(
         Obj.x,
@@ -408,6 +409,7 @@ export class GameService {
       );
       this.ctx.fillStyle = "gray";
       this.ctx.fill();
+       // Schatten zurücksetzen
     }
 
     // Zeichne Oberfläche

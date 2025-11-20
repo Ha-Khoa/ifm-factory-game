@@ -1,5 +1,5 @@
 import { EnvironmentInjector } from "@angular/core";
-import { Field, GameField, FieldObjects } from "../../interfaces/field";
+import { Field } from "../../interfaces/field";
 
 export class Gamefield {
     
@@ -23,7 +23,6 @@ export class Gamefield {
 
     generateEnvironment()
     {
-        let floor;
         for(let i = 0; i < this.cols; i++)
         {
             for (let j = 0; j < this.rows; j++)
