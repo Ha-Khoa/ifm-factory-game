@@ -14,7 +14,7 @@ export class Gamefield {
         this.environmetObjects = [];
         this.interactableObjects = [];
         this.fieldsize = 50;
-        this.cols = 10;
+        this.cols = 20;
         this.rows =15;
         this.generateEnvironment();
         this.generateInteractableObjects();
@@ -30,7 +30,7 @@ export class Gamefield {
             {
                 this.environmetObjects.push({
                     name: "floor",
-                    img: "/images/StoneFloorTexture.png",
+                    img: "/images/Concrete-Floor-Tile.png",
                     x: i * this.fieldsize,
                     y: j * this.fieldsize,
                     width: this.fieldsize,
@@ -43,37 +43,47 @@ export class Gamefield {
 
     generateInteractableObjects()
     {
+        
+        
+    for (let i = 0; i < 5; i++)
+        {
         this.interactableObjects.push(
-             {
+            {
                 name: "wall",
                 img: "/images/wall.png",
-                x: 5 * this.fieldsize,
+                x: 4 * this.fieldsize,
+                y: i * this.fieldsize,
+                width: this.fieldsize ,
+                height: this.fieldsize 
+            }
+        )
+    }
+    for (let i = 0; i < 5; i++)
+        {
+        this.interactableObjects.push(
+            {
+                name: "wall",
+                img: "/images/wall.png",
+                x: (i + 4)* this.fieldsize,
                 y: 5 * this.fieldsize,
-                width: this.fieldsize,
-                height: this.fieldsize
-             }
-        )
-        this.interactableObjects.push(
-            {
-                name: "wall",
-                img: "/images/wall.png",
-                x: 6 * this.fieldsize + 10,
-                y: 5 * this.fieldsize + 10,
-                width: this.fieldsize,
-                height: this.fieldsize
+                width: this.fieldsize ,
+                height: this.fieldsize 
             }
         )
-        this.interactableObjects.push(
-            {
-                name: "wall",
-                img: "/images/wall.png",
-                x: 3 * this.fieldsize + 10,
-                y: 3 * this.fieldsize + 30,
-                width: this.fieldsize - 10,
-                height: this.fieldsize - 10
-            }
-        )
-        for (let i = 0; i < 5; i++)
+    }
+    
+    this.interactableObjects.push(
+        {
+            name: "wall",
+            img: "/images/wall.png",
+            x: 7 * this.fieldsize,
+            y: 6 * this.fieldsize,
+            width: this.fieldsize ,
+            height: this.fieldsize 
+        }
+    )
+  
+    for (let i = 0; i < 8; i++)
         {
         this.interactableObjects.push(
             {
@@ -85,6 +95,16 @@ export class Gamefield {
                 height: this.fieldsize 
             }
         )
-    }
+        }
+        this.interactableObjects.push(
+            {
+                name: "wall",
+                img: "/images/wall.png",
+                x: 5* this.fieldsize ,
+                y: 11 * this.fieldsize,
+                width: this.fieldsize ,
+                height: this.fieldsize 
+            }
+        )
     }
 }
