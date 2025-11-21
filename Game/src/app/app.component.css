@@ -1,0 +1,16 @@
+.game-container {
+  position: relative;
+  width: fit-content;
+}
+
+canvas {
+  display: block;
+}
+
+app-hud {
+  position: absolute; /* schwebe effekt */
+  top: 10px;
+  left: 10px;
+  z-index: 10; /* liegt so über canvas */
+  pointer-events: all; 
+}
