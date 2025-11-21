@@ -1,6 +1,19 @@
 <div class="stats-box">
-  <h3>Player: {{ playerName }}</h3>
-  <p>Geld: {{ money }}</p>
-  <p>Score: {{ score }}</p>
-  <button (click)="addScore()">Test</button>
+  <div class="stat-item">
+    <span class="player-name">{{ playerName }}</span>
+  </div>
+
+  <div class="separator"></div>
+
+  <div class="stat-item">
+    <span class="money-val">{{ money | number }}</span>
+    <span class="money-val">$</span>
+  </div>
+
+  <div class="separator"></div>
+
+  <div class="stat-item">
+    <span>🏆</span>
+    <span class="score-val">{{ score }}</span>
+  </div>
 </div>
