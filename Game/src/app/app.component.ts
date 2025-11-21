@@ -1,10 +1,10 @@
 import { Component, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { GameService } from './services/game.service';
-
+import { HudComponent } from './components/hud/hud.component';
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, HudComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

@@ -1,0 +1,46 @@
+/* Der Container: Schwebt oben links */
+.stats-box {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Abstand zwischen den Elementen */
+  
+  background: rgba(0, 0, 0, 0.75); /* Dunkler, durchsichtiger Hintergrund */
+  backdrop-filter: blur(5px); /* Cooler Milchglas-Effekt */
+  
+  padding: 5px 20px;
+  border-radius: 10px; /* Runde Pillen-Form */
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Schatten für 3D-Effekt */
+  
+  /* Positionierung */
+  position: absolute;
+  top: 5x;
+  left: 5px;
+  z-index: 100;
+  pointer-events: auto; /* Damit der Button klickbar bleibt */
+}
+
+/* Icons und Werte stylen */
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Farben für die verschiedenen Werte */
+.money-val { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4); } /* Neon Grün */
+.score-val { color: #facc15; text-shadow: 0 0 10px rgba(250, 204, 21, 0.4); } /* Neon Gelb */
+.player-name { color: #60a5fa; text-transform: uppercase; letter-spacing: 1px;} /* Neon Blau */
+
+/* Vertikaler Strich als Trenner */
+.separator {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.2);
+}
