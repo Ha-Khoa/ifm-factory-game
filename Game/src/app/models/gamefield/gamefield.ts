@@ -1,5 +1,6 @@
-import { EnvironmentInjector } from "@angular/core";
+
 import { Field } from "../../interfaces/field";
+import { Machine } from "../machine/machine";
 
 export class Gamefield {
     
@@ -19,6 +20,26 @@ export class Gamefield {
         this.generateEnvironment();
         this.generateInteractableObjects();
 
+    }
+
+
+    updateMachines(machines: Machine[])
+    {
+        this.interactableObjects = [];
+        this.generateInteractableObjects();
+        machines.forEach(machine => {
+            const imgMachine = machine.unlocked ? machine.imgUnlocked : machine.imgLocked;
+            this.interactableObjects.push(
+                {
+                    name: machine.name,
+                    img: imgMachine,
+                    x: machine.x,
+                    y: machine.y,
+                    width: this.fieldsize,
+                    height: this.fieldsize
+                }
+            )
+        });
     }
 
     generateEnvironment()

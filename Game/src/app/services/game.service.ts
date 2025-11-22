@@ -3,6 +3,10 @@
 import { Injectable } from '@angular/core';
 import { Gamefield } from '../models/gamefield/gamefield';
 import { Field } from '../interfaces/field';
+import { Machine } from '../models/machine/machine';
+import { Player } from '../models/player/player';
+import { MachineManager } from '../models/machine/machine-manager';
+import { Hitbox } from '../interfaces/hitbox';
 
 @Injectable({
   providedIn: 'root'
@@ -20,17 +24,15 @@ export class GameService {
   // Vorgehaltene Bilder für die Darstellung
   private images: { [key: string]: HTMLImageElement } = {};
   // Größe des Spielers (Quadrat)
-  private playerSize!: number;
-  // Spielerposition X
-  private playerX!: number;
-  // Spielerposition Y
-  private playerY!: number;
-  // Geschwindigkeit des Spielers
-  private velocity!: number;
+  //private playerSize!: number;
+  // Geschwindigkeit des Spielers wird jetzt im Player-Objekt gehalten
   // Winkel für Projektion (z.B. Pseudo-3D-Effekt)
   private angle!: number;
   // Höhe der Tische
   private tableHeight!: number;
+  private machines: Machine[] = [];
+  private player!: Player;
+  private machineManager!: MachineManager; 
 
   constructor() { }
 
@@ -41,8 +43,8 @@ export class GameService {
    */
   async init(ctx: CanvasRenderingContext2D) {
     this.tableHeight = 40; // Höhe der Tische
-    this.playerSize = 40; // Spielergröße
-    this.velocity = 2; // Bewegungsgeschwindigkeit
+    const startSize = 40; // Startgröße des Spielers (Breite und Höhe)
+    const startVelocity = 2; // Startgeschwindigkeit des Spielers
     this.angle = 0/360*2*Math.PI; // Startwinkel für Projektion
     // Initialisiere Eingaben
     this.inputs['w'] = false;
@@ -50,10 +52,12 @@ export class GameService {
     this.inputs['s'] = false;
     this.inputs['d'] = false;
     // Setze Startposition
-    this.playerX = 100;
-    this.playerY = 100;
+    this.player = new Player(100, 100, "player", startSize, startSize, startVelocity);
     this.ctx = ctx;
     this.gamefield = new Gamefield();
+    this.machineManager = new MachineManager(this.gamefield);
+    this.machines = this.machineManager.getMachines();
+    this.gamefield.updateMachines(this.machines); 
     // Lade benötigte Texturen vor
     await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"]);
   }
@@ -115,6 +119,7 @@ export class GameService {
       this.renderEnvironment();
       this.renderPlayer();
       this.renderInteractableObjects();
+      this.checkForInteraction();
 
 
       // Nächsten Frame anfordern
@@ -157,57 +162,139 @@ export class GameService {
     // Normale Bewegung, wenn nichts im Weg
     if (!this.checkBorder() && !Obj) {
       if (this.inputs['s']) {
-        this.playerY += this.velocity;
+        this.player.y += this.player.velocity;
       }
       else if (this.inputs['w']) {
-        this.playerY -= this.velocity;
+        this.player.y -= this.player.velocity;
       }
       else if (this.inputs['d']) {
-        this.playerX += this.velocity;
+        this.player.x += this.player.velocity;
       }
       else if (this.inputs['a']) {
-        this.playerX -= this.velocity;
+        this.player.x -= this.player.velocity;
       }
     }
     // Falls Objekt oder Rand im Weg, setze Spieler direkt an Grenze
     else {
       if (this.inputs['s'] ) {
         if(Obj){
-          this.playerY = Obj.y - this.playerSize / 2;
+          this.player.y = Obj.y - this.player.height / 2;
         }
         else{
-          this.playerY = this.gamefield.rows * this.gamefield.fieldsize - this.playerSize / 2;
+          this.player.y = this.gamefield.rows * this.gamefield.fieldsize - this.player.height / 2;
         }
       }
       else if (this.inputs['w']) {
         if (Obj)
         {
-          this.playerY = Obj.y + Obj.height + this.playerSize / 2;
+          this.player.y = Obj.y + Obj.height + this.player.height / 2;
         }
         else
         {
-          this.playerY = this.playerSize / 2
+          this.player.y = this.player.height / 2
         }
       }
       else if (this.inputs['d']) {
         if (Obj){
-          this.playerX = Obj.x - this.playerSize / 2;
+          this.player.x = Obj.x - this.player.width / 2;
         }
         else
         {
-          this.playerX = this.gamefield.cols * this.gamefield.fieldsize - this.playerSize / 2;
+          this.player.x = this.gamefield.cols * this.gamefield.fieldsize - this.player.width / 2;
         }
       }
       else if (this.inputs['a']) {
         if (Obj){
-          this.playerX = Obj.x + Obj.width + this.playerSize / 2;
+          this.player.x = Obj.x + Obj.width + this.player.width / 2;
         }
         else {
-          this.playerX = this.playerSize / 2;
+          this.player.x = this.player.width / 2;
         }
       }
     }
   } 
+
+  /**
+   * 
+   * Prüft, ob der Spieler sich in Reichweite einer Maschine befindet und hebt die Interaktionszone hervor.
+   * 
+   */
+  checkForInteraction()
+  {
+    this.machines.forEach(machine => {
+      const accessDirection = machine.accessDirection;
+      const interactionX = accessDirection === "right" ? machine.x + this.gamefield.fieldsize :
+                           accessDirection === "left" ? machine.x - this.gamefield.fieldsize : machine.x;
+      const interactionY = accessDirection === "down" ? machine.y + this.gamefield.fieldsize :
+                           accessDirection === "up" ? machine.y - this.gamefield.fieldsize : machine.y;
+      const interactionwidth = this.gamefield.fieldsize;
+      const interactionheight = this.gamefield.fieldsize;
+
+      const interactionHitbox: Hitbox = { // Hitbox der Interaktionszone
+        x: interactionX,
+        y: interactionY,
+        width: interactionwidth,
+        height: interactionheight
+      };
+      const playerHitbox: Hitbox = { // Hitbox des Spielers
+        x: this.player.x - this.player.width / 2,
+        y: this.player.y - this.player.height / 2,
+        width: this.player.width,
+        height: this.player.height
+      }; 
+
+      const collision = this.checkCollision(playerHitbox, interactionHitbox); // Prüfe Kollision zwischen Spieler und Interaktionszone
+      if (collision)
+      {
+      if(accessDirection === "right")
+      {
+        this.ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
+        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      }
+      else if(accessDirection === "left")
+      {
+        this.ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
+        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      }
+      else if(accessDirection === "up")
+      {
+        this.ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
+        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      }
+      else if(accessDirection === "down")
+      {
+        this.ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
+        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      }
+    }
+  });
+  }
+
+  //prüft Kollision zweier Hitbox Objekte
+  checkCollision(obj1: Hitbox, obj2: Hitbox) : boolean
+  {
+    if(this.checkPointCollision(obj1.x, obj1.y, obj2) ||
+      this.checkPointCollision(obj1.x + obj1.width, obj1.y, obj2) ||
+      this.checkPointCollision(obj1.x, obj1.y + obj1.height, obj2) ||
+      this.checkPointCollision(obj1.x + obj1.width, obj1.y + obj1.height, obj2)
+    )
+    {
+      return true;
+    }
+    return false;
+  }
+
+  //prüft Kollision eines Punktes mit einem Hitbox Objekt
+  checkPointCollision(x: number, y: number, obj: Hitbox) : boolean
+  {
+    if(obj.x < x && x < obj.x + obj.width && obj.y < y && y < obj.y + obj.height)
+    {
+      return true;
+    }
+    return false
+  }
+
+
 
 
 
@@ -225,20 +312,27 @@ export class GameService {
 
     // Berechne nächste Position je nach Eingabe
     if (this.inputs['s']) {
-      nextY = y + this.velocity;
+      nextY = y + this.player.velocity;
     }
     else if (this.inputs['w']) {
-      nextY = y - this.velocity;
+      nextY = y - this.player.velocity;
     }
     else if (this.inputs['d']) {
-      nextX = x+ this.velocity;
+      nextX = x+ this.player.velocity;
     }
     else if (this.inputs['a']) {
-      nextX = x - this.velocity;
+      nextX = x - this.player.velocity;
     }
     // Prüfe, ob ein Objekt an der neuen Position ist
+     // Hitbox des Spielers
     Objects.forEach(Obj => {
-      if (Obj.y < nextY && nextY < Obj.y + Obj.height && Obj.x < nextX && nextX < Obj.x + Obj.width) {
+      const ObjHitbox: Hitbox = {
+        x: Obj.x,
+        y: Obj.y,
+        width: Obj.width,
+        height: Obj.height
+      };
+      if (this.checkPointCollision(nextX, nextY, ObjHitbox)) {
         collidedObject = Obj;
       }
     });
@@ -254,11 +348,12 @@ export class GameService {
    */
   checkObject(): Field | null {
     // Hitbox-Ecken berechnen
-    const halfSize = this.playerSize / 2;
-    const top = this.playerY - halfSize;
-    const bottom = this.playerY + halfSize;
-    const left = this.playerX - halfSize;
-    const right = this.playerX + halfSize;
+    const halfSizeX = this.player.width / 2;
+    const halfSizeY = this.player.height / 2;
+    const top = this.player.y - halfSizeY;
+    const bottom = this.player.y + halfSizeY;
+    const left = this.player.x - halfSizeX;
+    const right = this.player.x + halfSizeX;
 
     // Prüfe alle vier Ecken
     const leftbot  = this.checkPoint(left,bottom);
@@ -303,35 +398,35 @@ export class GameService {
   checkBorder(): boolean { 
     const rows = this.gamefield.rows;
     const cols = this.gamefield.cols;
-    let nextX = this.playerX;
-    let nextY = this.playerY;
+    let nextX = this.player.x;
+    let nextY = this.player.y;
     let collision = false;
 
     // Berechne nächste Position je nach Eingabe
     if (this.inputs['s']) {
-      nextY = this.playerY + this.velocity;
+      nextY = this.player.y + this.player.velocity;
     }
     else if (this.inputs['w']) {
-      nextY = this.playerY - this.velocity;
+      nextY = this.player.y - this.player.velocity;
     }
     else if (this.inputs['d']) {
-      nextX = this.playerX + this.velocity;
+      nextX = this.player.x + this.player.velocity;
     }
     else if (this.inputs['a']) {
-      nextX = this.playerX - this.velocity;
+      nextX = this.player.x - this.player.velocity;
     }
 
     // Prüfe Kollision mit Spielfeldgrenzen
-    if (nextX - this.playerSize / 2 < 0) {
+    if (nextX - this.player.width / 2 < 0) {
       collision = true;
     }
-    else if (nextX + this.playerSize / 2 > cols * this.gamefield.fieldsize) {
+    else if (nextX + this.player.width / 2 > cols * this.gamefield.fieldsize) {
       collision = true;
     }
-    if (nextY - this.playerSize / 2 < 0) {
+    if (nextY - this.player.height / 2 < 0) {
       collision = true;
     }
-    else if (nextY + this.playerSize / 2 > rows * this.gamefield.fieldsize) {
+    else if (nextY + this.player.height / 2 > rows * this.gamefield.fieldsize) {
       collision = true;
     }
     return collision;
@@ -346,10 +441,10 @@ export class GameService {
     this.ctx.beginPath();
     this.ctx.fillStyle = "red";
     this.ctx.rect(
-      this.playerX - this.playerSize / 2,
-      (this.playerY - this.playerSize / 2) * Math.cos(this.angle),
-      this.playerSize,
-      this.playerSize * Math.cos(this.angle)
+      this.player.x - this.player.width / 2,
+      (this.player.y - this.player.height / 2) * Math.cos(this.angle),
+      this.player.width,
+      this.player.height * Math.cos(this.angle)
     );
     this.ctx.fill();
   }
@@ -415,6 +510,7 @@ export class GameService {
     // Zeichne Oberfläche
     if (img) {
       if (interactable) {
+        
         // Tischoberfläche als gefülltes Rechteck
         this.ctx.fillStyle = "#dddddd";
         this.ctx.beginPath();
