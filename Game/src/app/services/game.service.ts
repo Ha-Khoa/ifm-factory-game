@@ -2,11 +2,12 @@
 // Importiere notwendige Angular- und Projektmodule
 import { Injectable } from '@angular/core';
 import { Gamefield } from '../models/gamefield/gamefield';
-import { Field } from '../interfaces/field';
 import { Machine } from '../models/machine/machine';
 import { Player } from '../models/player/player';
 import { MachineManager } from '../models/machine/machine-manager';
 import { Hitbox } from '../interfaces/hitbox';
+import { Rendering } from '../models/rendering/rendering';
+import { RenderObject } from '../models/rendering/render-object';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +34,7 @@ export class GameService {
   private machines: Machine[] = [];
   private player!: Player;
   private machineManager!: MachineManager; 
+  private renderer!: Rendering;
 
   constructor() { }
 
@@ -45,7 +47,7 @@ export class GameService {
     this.tableHeight = 40; // Höhe der Tische
     const startSize = 40; // Startgröße des Spielers (Breite und Höhe)
     const startVelocity = 2; // Startgeschwindigkeit des Spielers
-    this.angle = 0/360*2*Math.PI; // Startwinkel für Projektion
+    this.angle = 30/360*2*Math.PI; // Startwinkel für Projektion
     // Initialisiere Eingaben
     this.inputs['w'] = false;
     this.inputs['a'] = false;
@@ -58,8 +60,14 @@ export class GameService {
     this.machineManager = new MachineManager(this.gamefield);
     this.machines = this.machineManager.getMachines();
     this.gamefield.updateMachines(this.machines); 
+    
     // Lade benötigte Texturen vor
     await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"]);
+
+    this.renderer = new Rendering(this.ctx, this.images, this.angle);
+
+      this.renderInteractableObjects();
+      this.renderEnvironment()
   }
 
 
@@ -111,14 +119,15 @@ export class GameService {
 
       // Spielerposition aktualisieren
       this.updatePlayer();
-
+      
+      this.renderer.render();
       // Optional: Karte rotieren
-      this.rotateMap();
+      //this.rotateMap();
 
       // Spielfeld und Spieler rendern
-      this.renderEnvironment();
+      //this.renderEnvironment();
       this.renderPlayer();
-      this.renderInteractableObjects();
+      //this.renderInteractableObjects();
       this.checkForInteraction();
 
 
@@ -304,7 +313,7 @@ export class GameService {
    * @param y Y-Koordinate
    * @returns Das kollidierte Objekt oder null
    */
-  checkPoint(x: number, y: number): Field | null {
+  checkPoint(x: number, y: number): RenderObject | null {
     const Objects = this.gamefield.interactableObjects;
     let nextX = x;
     let nextY = y;
@@ -326,12 +335,14 @@ export class GameService {
     // Prüfe, ob ein Objekt an der neuen Position ist
      // Hitbox des Spielers
     Objects.forEach(Obj => {
+      
       const ObjHitbox: Hitbox = {
         x: Obj.x,
         y: Obj.y,
         width: Obj.width,
         height: Obj.height
       };
+
       if (this.checkPointCollision(nextX, nextY, ObjHitbox)) {
         collidedObject = Obj;
       }
@@ -346,7 +357,7 @@ export class GameService {
    * Überprüft die vier Ecken der Hitbox in Bewegungsrichtung.
    * @returns Das kollidierte Objekt oder null
    */
-  checkObject(): Field | null {
+  checkObject(): RenderObject | null {
     // Hitbox-Ecken berechnen
     const halfSizeX = this.player.width / 2;
     const halfSizeY = this.player.height / 2;
@@ -438,15 +449,20 @@ export class GameService {
    * Zeichnet den Spieler als rotes Rechteck auf das Canvas.
    */
   renderPlayer() {
-    this.ctx.beginPath();
-    this.ctx.fillStyle = "red";
-    this.ctx.rect(
-      this.player.x - this.player.width / 2,
-      (this.player.y - this.player.height / 2) * Math.cos(this.angle),
-      this.player.width,
-      this.player.height * Math.cos(this.angle)
-    );
-    this.ctx.fill();
+   this.renderer.deleteRenderingObjektByName("player");
+   this.renderer.addRenderObject(new RenderObject(
+    "player",
+    "rect",
+    this.player.x - this.player.width / 2,
+    this.player.y - this.player.height / 2,
+    0,
+    this.player.width,
+    this.player.height,
+    undefined,
+    undefined,
+    "red",
+    []
+  ));
   }
 
 
@@ -477,61 +493,10 @@ export class GameService {
     } else {
       Obj = this.gamefield.environmetObjects[x];
     }
-
-    const img = this.images[Obj.img];
-    let projectionY = Obj.y * Math.cos(this.angle);
-
-    // Zeichne Erhöhung für interaktive Objekte (z.B. Tische)
-    if (interactable) {
-      projectionY -= this.tableHeight * Math.sin(this.angle);
-      // Schattierung für die Erhöhung
-
-      this.ctx.beginPath();
-      this.ctx.rect(
-        Obj.x,
-        (Obj.y + Obj.height) * Math.cos(this.angle) - this.tableHeight * Math.sin(this.angle),
-        Obj.width,
-        (this.tableHeight / 2) * Math.sin(this.angle)
+    const type = interactable ? "rect" : "img";
+    const z = interactable ? 50 : -1;
+    this.renderer.addRenderObject(Obj
       );
-      this.ctx.fillStyle = "#b0b0b0";
-      this.ctx.fill();
-      this.ctx.beginPath();
-      this.ctx.rect(
-        Obj.x,
-        (Obj.y + Obj.height) * Math.cos(this.angle) - (this.tableHeight / 2) * Math.sin(this.angle),
-        Obj.width,
-        (this.tableHeight / 2) * Math.sin(this.angle)
-      );
-      this.ctx.fillStyle = "gray";
-      this.ctx.fill();
-       // Schatten zurücksetzen
-    }
-
-    // Zeichne Oberfläche
-    if (img) {
-      if (interactable) {
-        
-        // Tischoberfläche als gefülltes Rechteck
-        this.ctx.fillStyle = "#dddddd";
-        this.ctx.beginPath();
-        this.ctx.rect(
-          Obj.x,
-          projectionY,
-          Obj.width,
-          Obj.height * Math.cos(this.angle) + 1 // +1 aufgrund von Rundungsfehlern bei Winkeln
-        );
-        this.ctx.fill();
-      } else {
-        // Boden als Bild
-        this.ctx.drawImage(
-          img,
-          Obj.x,
-          projectionY,
-          Obj.width,
-          Obj.height * Math.cos(this.angle)
-        );
-      }
-    }
   }
 
 
