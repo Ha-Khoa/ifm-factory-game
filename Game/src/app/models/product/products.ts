@@ -1,6 +1,8 @@
 import {Product} from '../../interfaces/product';
 
 export class Products {
+
+    //Einfach Produkte Liste für das frühe Spiel, später können wir komplexere Produkte mit mehreren Zutaten hinzufügen
     private static simple_productsList: Product[] =[
         {
             id: 1,
@@ -47,6 +49,7 @@ export class Products {
 
     ]
 
+    //Methoden um Produkte anzurufen
     public static getProductById(id: number): Product | undefined {
         return this.simple_productsList.find(product => product.id === id);
     }
@@ -61,9 +64,8 @@ export class Products {
 
 
 
-    //Addtional methods for the game later
-    //generateRandomProducts()
-    //calculateProductCost()
+    //Generiere eine zufällige Produkt für Bestellungen (wenn die Spieler höhere Level erreichen, können wir schwere Bestellung hinzufügen)
+    //für komplexe Produkte mit mehreren Zutaten, müssen wir die Logik hier erweitern
     static getRandomProductId(): number {
         const randomIndex = Math.floor(Math.random() * this.simple_productsList.length);
         return this.simple_productsList[randomIndex].id;
@@ -73,6 +75,8 @@ export class Products {
         return this.simple_productsList[randomIndex];
     }
 
+
+    //Berechne den Gesamtpreis für eine Liste von Produkten basierend auf deren Menge
     static calculateProductPrice(items: {productId: number, quantity: number}[]): number{
         let totalPrice = 0;
         for (const item of items){

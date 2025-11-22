@@ -2,6 +2,7 @@ import { Order, OrderItem } from '../../interfaces/order';
 import {Products} from '../product/products';
 
 export class Orders {
+    //einfach Bestellliste für das frühe Spiel, später können wir komplexere Bestellungen hinzufügen
     private static ordersList: Order[] = [
         {
             id: 1,
@@ -30,7 +31,6 @@ export class Orders {
             status: false
         }
     ]
-
     static getActiveOrders(): Order[] {
         return this.ordersList.filter(order => order.status === false);
     }
@@ -70,9 +70,7 @@ export class Orders {
     } 
 
 
-    //Additional methods for the game later
-    //generateRandomOrders()
-    //calculateOrderReward()
+    //Generiere eine zufällige Bestellung basierend auf dem aktuellen Spielfortschritt (je höher das Level, desto komplexer die Bestellung)
     static generateRandomOrders(): Order {
         const productCount = Math.floor(Math.random() * 3) + 1;
         const items= [];
@@ -86,26 +84,31 @@ export class Orders {
         return Orders.addOrder(items, reward);
 
     }
+
+    // Wir können diese Methode verwenden, wenn wir die Spielerprogression (Niveau) implementieren
     // static generateProgressiveOrder(playerLevel: number) {
 //     if (playerLevel === 1) {
 //         return Orders.addOrder(
-//             [{ productId: 2, quantity: 2 }], // Simple: 2x Plastic Casing
+//             [{ productId: 2, quantity: 2 }],
 //             50
+//.            ...
 //         );
+//. 
 //     } else if (playerLevel === 2) {
 //         return Orders.addOrder(
 //             [
-//                 { productId: 2, quantity: 2 }, // Plastic Casing
-//                 { productId: 3, quantity: 1 }  // Circuit Board
+//                 { productId: 2, quantity: 2 }, 
+//                 { productId: 3, quantity: 1 }  
 //             ],
 //             100
+//             ...
 //         );
 //     } else {
 //         return Orders.addOrder(
 //             [
 //                 { productId: 2, quantity: 1 },
 //                 { productId: 3, quantity: 1 },
-//                 { productId: 4, quantity: 1 }  // Basic Sensor
+//                 { productId: 4, quantity: 1 }  
 //             ],
 //             200
 //         );
