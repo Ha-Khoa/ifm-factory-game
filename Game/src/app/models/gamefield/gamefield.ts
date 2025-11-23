@@ -31,37 +31,37 @@ export class Gamefield {
             const imgMachine = machine.unlocked ? machine.imgUnlocked : machine.imgLocked;
             this.interactableObjects.push(new RenderObject(
                 machine.name,
-                "img",
+                "rect",
                 machine.x,
                 machine.y,
                 50,
                 this.fieldsize,
                 this.fieldsize,
-                imgMachine,
-                imgMachine
+                0,
+                undefined,
+                undefined,
+                "rgba(200, 206, 255, 1)",
+                ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
             ));
         });
     }
 
     generateEnvironment()
     {
-        for(let i = 0; i < this.cols; i++)
-        {
-            for (let j = 0; j < this.rows; j++)
-            {
-                this.environmetObjects.push(new RenderObject(
-                    `floor-${i}-${j}`,
-                    "img",
-                    i * this.fieldsize,
-                    j * this.fieldsize,
-                    -1,
-                    this.fieldsize,
-                    this.fieldsize,
-                    "/images/Concrete-Floor-Tile.png"
-                ))
-
-            }
-        }
+        this.environmetObjects.push(new RenderObject(
+            `floor`,
+            "rect",
+            0,
+            0,
+            0,
+            this.fieldsize * this.cols,
+            this.fieldsize * this.rows,
+            0,
+            undefined,
+            undefined,
+            "#494949ff",
+            []
+        ))
     }
 
     generateInteractableObjects()
@@ -78,6 +78,7 @@ export class Gamefield {
             50,
             this.fieldsize,
             this.fieldsize,
+            0,
             undefined,
             undefined,
             "#dddddd",
@@ -94,6 +95,7 @@ export class Gamefield {
             50,
             this.fieldsize,
             this.fieldsize,
+            0,
             undefined,
             undefined,
             "#dddddd",
@@ -109,6 +111,7 @@ export class Gamefield {
         50,
         this.fieldsize,
         this.fieldsize,
+        0,
         undefined,
         undefined,
         "#dddddd",
@@ -125,6 +128,7 @@ export class Gamefield {
             50,
             this.fieldsize,
             this.fieldsize,
+            0,
             undefined,
             undefined,
             "#dddddd",
@@ -139,6 +143,7 @@ export class Gamefield {
             50,
             this.fieldsize,
             this.fieldsize,
+            0,
             undefined,
             undefined,
             "#dddddd",

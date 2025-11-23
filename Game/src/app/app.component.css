@@ -14,3 +14,6 @@ app-hud {
   z-index: 10; /* liegt so über canvas */
   pointer-events: all; 
 }
+
+
+

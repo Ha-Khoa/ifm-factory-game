@@ -1,18 +1,20 @@
-import { group } from "@angular/animations";
 import { RenderObject } from "./render-object"
-import { last } from "rxjs";
+
 
 export class Rendering {
 
+    
     private _renderingBuffer: RenderObject[] = [];
     private _images!: { [key: string]: HTMLImageElement };
     private _ctx!: CanvasRenderingContext2D;
     private _angle!: number;
+    private height: number = 0;
 
     constructor(ctx: CanvasRenderingContext2D , images: { [key:string]: HTMLImageElement }, angle: number) {
         this._ctx = ctx;
         this._images = images;
         this._angle = angle;
+        
     }
 
     addRenderObject(renderObject: RenderObject) {
@@ -27,32 +29,28 @@ export class Rendering {
         this.sortRenderingBuffer();
     }
 
-    // Sortiert Rendering Buffer erst nach z-Wert, dann nach y-Wert
+    // Sortiert Rendering Buffer erst nach z-Wert, dann nach prirität, dann nach y-Wert
     sortRenderingBuffer() { 
-        this._renderingBuffer.sort((a, b) => a.z - b.z);
-        let lastObj = this._renderingBuffer[0];
-        let newRenderingBuffer: RenderObject[] = [];
-        let groupedYRenderingBuffer: RenderObject[] = [];
-        this._renderingBuffer.forEach((obj) => {
-            
-            if (obj.z === lastObj.z) {
-                groupedYRenderingBuffer.push(obj);
-                lastObj = obj;
-            }
-            else {
-                groupedYRenderingBuffer.sort((a,b) => a.y - b.y)
-                newRenderingBuffer.push.apply(newRenderingBuffer, groupedYRenderingBuffer);
-                groupedYRenderingBuffer = [];
-                groupedYRenderingBuffer.push(obj);
-                lastObj = obj;
-            }
-            
-        });
-        groupedYRenderingBuffer.sort((a,b) => a.y - b.y)
-        newRenderingBuffer.push.apply(newRenderingBuffer, groupedYRenderingBuffer);
-        this._renderingBuffer = newRenderingBuffer;
+        let zKoordinates = Array.from(new Set(this._renderingBuffer.map(obj => obj.z)));
+        let prioritys = Array.from(new Set(this._renderingBuffer.map(obj => obj.priority)));
+        zKoordinates.sort((a,b) => a - b)
+        prioritys.sort((a,b) => a - b)
+        console.log(prioritys)
+        let newRenderBuffer : RenderObject[] = []
 
-    }
+        zKoordinates.forEach((z) => {
+            let zRenderBuffer = this._renderingBuffer.filter((obj) => obj.z === z)
+            prioritys.forEach((priority) => {
+                let priorityRenderBuffer = zRenderBuffer.filter((obj) => obj.priority === priority)
+                priorityRenderBuffer.sort((a,b) => a.y + a.height - (b.y + b.height))
+                newRenderBuffer.push.apply(newRenderBuffer, priorityRenderBuffer)
+            })
+            
+        })
+
+        this._renderingBuffer = newRenderBuffer
+
+       }
 
     getRenderingObjektByID(id: number): RenderObject | undefined {
         {
@@ -95,18 +93,7 @@ export class Rendering {
             const yProjection = Obj.y * Math.cos(this._angle) - zTransform
             if(Obj.type === "rect")
             {  
-                this._ctx.beginPath();
-                this._ctx.fillStyle = Obj.rectColor!;
- 
-                this._ctx.fillRect(
-                    Obj.x,
-                    yProjection,
-                    Obj.width,
-                    Obj.height * Math.cos(this._angle)
-                );
-                this._ctx.fill();
                 const layers = Obj.rectLayers!.length;
-
                 for (let i = 0; i < layers; i++)
                 {
                     this._ctx.beginPath();
@@ -119,7 +106,16 @@ export class Rendering {
                     );
                     this._ctx.fill();
                 }
-                
+                this._ctx.beginPath();
+                this._ctx.fillStyle = Obj.rectColor!;
+                this._ctx.fillRect(
+                    Obj.x, 
+                    yProjection,
+                    Obj.width,
+                    Obj.height  * Math.cos(this._angle) + 1
+                );
+                this._ctx.fill();
+            
             }
             else if (Obj.type === "img")
             {
@@ -142,5 +138,18 @@ export class Rendering {
             }
             }
     });
+    }
+
+    get renderingBuffer()
+    {
+        return this._renderingBuffer;
+    }
+
+    set angle(value: number) {
+        this._angle = value;
+    }
+
+    get angle(): number {
+        return this._angle;
     }
 }

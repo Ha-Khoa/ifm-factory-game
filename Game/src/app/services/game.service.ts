@@ -8,6 +8,7 @@ import { MachineManager } from '../models/machine/machine-manager';
 import { Hitbox } from '../interfaces/hitbox';
 import { Rendering } from '../models/rendering/rendering';
 import { RenderObject } from '../models/rendering/render-object';
+import { last } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -29,13 +30,13 @@ export class GameService {
   // Geschwindigkeit des Spielers wird jetzt im Player-Objekt gehalten
   // Winkel für Projektion (z.B. Pseudo-3D-Effekt)
   private angle!: number;
-  // Höhe der Tische
-  private tableHeight!: number;
   private machines: Machine[] = [];
   private player!: Player;
   private machineManager!: MachineManager; 
   private renderer!: Rendering;
-
+  private rotationDirection: boolean = false;
+  private startVelocity!: number;   
+  private lastFrameTime!: number;
   constructor() { }
 
 
@@ -44,17 +45,17 @@ export class GameService {
    * @param ctx CanvasRenderingContext2D zum Zeichnen
    */
   async init(ctx: CanvasRenderingContext2D) {
-    this.tableHeight = 40; // Höhe der Tische
+    
     const startSize = 40; // Startgröße des Spielers (Breite und Höhe)
-    const startVelocity = 2; // Startgeschwindigkeit des Spielers
-    this.angle = 30/360*2*Math.PI; // Startwinkel für Projektion
+    this.startVelocity = 200; // Startgeschwindigkeit des Spielers in [Pixel pro Sekunde]
+    this.angle = 0/360*2*Math.PI; // Startwinkel für Projektion
     // Initialisiere Eingaben
     this.inputs['w'] = false;
     this.inputs['a'] = false;
     this.inputs['s'] = false;
     this.inputs['d'] = false;
     // Setze Startposition
-    this.player = new Player(100, 100, "player", startSize, startSize, startVelocity);
+    this.player = new Player(100, 100, "player", startSize, startSize, this.startVelocity);
     this.ctx = ctx;
     this.gamefield = new Gamefield();
     this.machineManager = new MachineManager(this.gamefield);
@@ -68,6 +69,7 @@ export class GameService {
 
       this.renderInteractableObjects();
       this.renderEnvironment()
+      this.lastFrameTime = performance.now();
   }
 
 
@@ -113,16 +115,16 @@ export class GameService {
     this.ctx.imageSmoothingEnabled = true;
     const loop = () => {
       if (!this.GameRunning) return;
-
+      
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
       // Spielerposition aktualisieren
       this.updatePlayer();
+      this.changeVelocity();
       
-      this.renderer.render();
       // Optional: Karte rotieren
-      //this.rotateMap();
+      this.rotateMap();
 
       // Spielfeld und Spieler rendern
       //this.renderEnvironment();
@@ -130,6 +132,7 @@ export class GameService {
       //this.renderInteractableObjects();
       this.checkForInteraction();
 
+      this.renderer.render();
 
       // Nächsten Frame anfordern
       requestAnimationFrame(loop);
@@ -148,17 +151,51 @@ export class GameService {
 
 
   /**
-   * Erhöht den Winkel für die Projektion (Pseudo-3D-Effekt).
+   * Erhöht den Winkel für die Projektion.
    */
-  rotateMap()
+  async rotateMap()
   {
-    if(this.angle <= 30/360*2*Math.PI)
+
+    setTimeout(() => {
+      if(this.renderer.angle <= 30/360*2*Math.PI)
+      {
+            this.renderer.angle += (Math.log(this.renderer.angle + 1.01) * 0.003);
+      }
+            }, 1000);
+          
+
+/*
+    if(this.renderer.angle <= 90/360*2*Math.PI && !this.rotationDirection)
     {
-    this.angle+=0.003;
+    this.renderer.angle+=0.003;
+    return;
     }
+    else{
+      this.rotationDirection = true;
+    }
+    if(this.renderer.angle >= 0/360*2*Math.PI && this.rotationDirection)
+    {
+      this.renderer.angle-=0.003;
+    }
+    else{
+      this.rotationDirection = false;
+    }
+    */
   }
 
 
+
+  //konstante Geschwindigkeit auf jedem Rechner
+  //unabhängig der CPU Leistung
+  changeVelocity()
+  {
+    const now = performance.now();
+    const deltaTime = now - this.lastFrameTime;
+    this.player.velocity = this.startVelocity * deltaTime / 1000; //in [pixel pro sekunde]
+    this.lastFrameTime = now;
+    //const fps = 1/(deltaTime/1000) //Misst die Leistung mit FPS
+    //console.log("FPS:", fps)       //Für Debugging
+  }
 
   /**
    * Aktualisiert die Spielerposition basierend auf Eingaben und prüft Kollisionen.
@@ -230,6 +267,7 @@ export class GameService {
    */
   checkForInteraction()
   {
+
     this.machines.forEach(machine => {
       const accessDirection = machine.accessDirection;
       const interactionX = accessDirection === "right" ? machine.x + this.gamefield.fieldsize :
@@ -255,28 +293,68 @@ export class GameService {
       const collision = this.checkCollision(playerHitbox, interactionHitbox); // Prüfe Kollision zwischen Spieler und Interaktionszone
       if (collision)
       {
-      if(accessDirection === "right")
-      {
-        this.ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
-        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+        this.updateMachineOnInteraction(machine, interactionHitbox);
       }
-      else if(accessDirection === "left")
+      else
       {
-        this.ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
-        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+        this.resetMachineOnInteraction(machine, interactionHitbox);
       }
-      else if(accessDirection === "up")
-      {
-        this.ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
-        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-      }
-      else if(accessDirection === "down")
-      {
-        this.ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
-        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-      }
-    }
   });
+  }
+
+  updateMachineOnInteraction(machine: Machine, interactionHitbox: Hitbox)
+  {
+    this.renderer.deleteRenderingObjektByName(machine.name);
+
+        this.renderer.addRenderObject(new RenderObject(
+          machine.name,
+          "rect",
+          machine.x,
+          machine.y,
+          50,
+          machine.width,
+          machine.height,
+          0,
+          undefined,
+          undefined,
+          "rgba(81, 255, 81, 1)",
+          ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"]
+        ));
+  }
+
+  resetMachineOnInteraction(machine: Machine, interactionHitbox: Hitbox)
+  {
+    this.renderer.deleteRenderingObjektByName(machine.name);
+        this.renderer.addRenderObject(new RenderObject(
+          machine.name,
+          "rect",
+          machine.x,
+          machine.y,
+          50,
+          machine.width,
+          machine.height,
+          0,
+          undefined,
+          undefined,
+          "rgba(226, 229, 255, 1)",
+          ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
+        ));
+    this.renderer.deleteRenderingObjektByName(`interactionField-${machine.id}`)
+    console.log(interactionHitbox.x, interactionHitbox.y)
+    this.renderer.addRenderObject(new RenderObject(
+      `interactionField-${machine.id}`,
+      "rect",
+      interactionHitbox.x,
+      interactionHitbox.y,
+      0,
+      interactionHitbox.width,
+      interactionHitbox.height,
+      1,
+      undefined,
+      undefined,
+      "#eef114ff",
+      []
+    ));
   }
 
   //prüft Kollision zweier Hitbox Objekte
@@ -455,13 +533,14 @@ export class GameService {
     "rect",
     this.player.x - this.player.width / 2,
     this.player.y - this.player.height / 2,
-    0,
+    50,
     this.player.width,
     this.player.height,
+    0,
     undefined,
     undefined,
     "red",
-    []
+    ["red"]
   ));
   }
 
@@ -493,8 +572,6 @@ export class GameService {
     } else {
       Obj = this.gamefield.environmetObjects[x];
     }
-    const type = interactable ? "rect" : "img";
-    const z = interactable ? 50 : -1;
     this.renderer.addRenderObject(Obj
       );
   }

@@ -9,6 +9,7 @@ export class RenderObject {
     private _x!: number;
     private _y!: number;
     private _z!: number;
+    private _priority!: number;
     private _width!: number;
     private _height!: number;
     private _img!: string | void;
@@ -16,7 +17,7 @@ export class RenderObject {
     private _rectColor!: string | void;
     private _rectLayers!: string[] | void; //Nur Farben für jedden Layer
 
-    constructor(name: string, type: string, x: number, y: number, z: number, width: number, height: number, img?: string, imgWall?: string, rectColor?: string, rectLayers?: string[])
+    constructor(name: string, type: string, x: number, y: number, z: number, width: number, height: number, priority: number, img?: string, imgWall?: string, rectColor?: string, rectLayers?: string[])
     {
         this._id = RenderObject.lastID++;
         this._name = name;
@@ -30,6 +31,7 @@ export class RenderObject {
         this._imgWall = imgWall;
         this._rectColor = rectColor;
         this._rectLayers = rectLayers;
+        this._priority = priority;
     }
 
     // get / set Methoden
@@ -67,4 +69,7 @@ export class RenderObject {
 
     get rectLayers(): string[] | void { return this._rectLayers; }
     set rectLayers(v: string[] | void) { this._rectLayers = v; } 
+
+    get priority(): number { return this._priority }
+    set priority(v: number) { this._priority = v; }
 }
