@@ -1,7 +1,7 @@
-import { Inventory } from './inventory';
+import { InventoryManager } from './inventory';
 
 describe('Inventory', () => {
   it('should create an instance', () => {
-    expect(new Inventory()).toBeTruthy();
+    expect(new InventoryManager()).toBeTruthy();
   });
 });
