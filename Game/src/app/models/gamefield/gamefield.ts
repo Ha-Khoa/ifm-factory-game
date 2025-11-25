@@ -1,13 +1,23 @@
 
 import { Machine } from "../machine/machine";
 import { RenderObject } from "../rendering/render-object";
+import { Rendering } from "../rendering/rendering";
 
+/**
+ * Gamefield-Klasse: Verwaltet das Spielfeld mit Umgebungsobjekten und interaktiven Objekten.
+ * Generiert Böden, Wände und Maschinen.
+ */
 export class Gamefield {
     
+    // Umgebungsobjekte (Böden)
     environmetObjects!: RenderObject[];
+    // Interaktive Objekte (Wände, Maschinen)
     interactableObjects!: RenderObject[];
+    // Größe eines einzelnen Feldes in Pixeln
     fieldsize!: number;
+    // Anzahl der Reihen
     rows!: number;
+    // Anzahl der Spalten
     cols!: number;
 
     constructor()
@@ -22,7 +32,44 @@ export class Gamefield {
 
     }
 
+    /**
+     * Fügt alle Spielfeld-Objekte zum Rendering-Buffer hinzu.
+     * @param renderer Der Renderer, dem die Objekte hinzugefügt werden
+     */
+    addGameFieldToRenderingBuffer(renderer: Rendering)
+  {
+    // Erst Umgebungsobjekte (Böden) hinzufügen
+    for (let i = 0; i < this.environmetObjects.length; i++) {
+      this.renderField(i, false, renderer);
+    }
+    // Dann interaktive Objekte (Wände, Maschinen) hinzufügen
+    for (let i = 0; i < this.interactableObjects.length; i++) {
+      this.renderField(i, true, renderer);
+    }
+  }
 
+  /**
+   * Rendert ein einzelnes Feld (Umgebung oder interaktives Objekt) auf das Canvas.
+   * @param x Index des Objekts
+   * @param interactable true für interaktive Objekte, false für Umgebung
+   */
+  renderField(x: number, interactable: boolean, renderer: Rendering) {
+    let Obj;
+    // Wähle das richtige Objekt-Array
+    if (interactable) {
+      Obj = this.interactableObjects[x];
+    } else {
+      Obj = this.environmetObjects[x];
+    }
+    renderer.addRenderObject(Obj);
+  }
+
+
+    /**
+     * Aktualisiert die Maschinen im Spielfeld.
+     * Generiert RenderObjects für alle Maschinen basierend auf ihrem Unlock-Status.
+     * @param machines Array aller Maschinen
+     */
     updateMachines(machines: Machine[])
     {
         this.interactableObjects = [];
@@ -46,6 +93,9 @@ export class Gamefield {
         });
     }
 
+    /**
+     * Generiert die Umgebung (Boden) als ein großes Rechteck.
+     */
     generateEnvironment()
     {
         this.environmetObjects.push(new RenderObject(
@@ -64,6 +114,10 @@ export class Gamefield {
         ))
     }
 
+    /**
+     * Generiert alle interaktiven Objekte (Wände) auf dem Spielfeld.
+     * Erstellt verschiedene Wandsegmente an festen Positionen.
+     */
     generateInteractableObjects()
     {
         

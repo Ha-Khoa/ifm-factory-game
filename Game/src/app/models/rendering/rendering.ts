@@ -1,94 +1,120 @@
 import { RenderObject } from "./render-object"
 
 
+/**
+ * Rendering-Klasse: Verwaltet alle Objekte im Rendering-Buffer und zeichnet sie auf das Canvas.
+ * Sortiert Objekte nach Z-Koordinate, Priorität und Y-Position für korrekte Überlappung.
+ */
 export class Rendering {
 
-    
+    // Buffer mit allen zu rendernden Objekten
     private _renderingBuffer: RenderObject[] = [];
+    // Vorgeladene Bilder für Texturen
     private _images!: { [key: string]: HTMLImageElement };
+    // Canvas-Kontext zum Zeichnen
     private _ctx!: CanvasRenderingContext2D;
+    // Winkel für isometrische Projektion
     private _angle!: number;
-    private height: number = 0;
 
     constructor(ctx: CanvasRenderingContext2D , images: { [key:string]: HTMLImageElement }, angle: number) {
         this._ctx = ctx;
         this._images = images;
         this._angle = angle;
-        
     }
 
+    /**
+     * Fügt ein einzelnes RenderObject zum Buffer hinzu und sortiert neu.
+     * @param renderObject Das hinzuzufügende Objekt
+     */
     addRenderObject(renderObject: RenderObject) {
         this._renderingBuffer.push(renderObject);
         this.sortRenderingBuffer();
     }
 
+    /**
+     * Fügt mehrere RenderObjects zum Buffer hinzu und sortiert neu.
+     * @param renderObjects Array von hinzuzufügenden Objekten
+     */
     addRenderObjects(renderObjects: RenderObject[]) {
-        renderObjects.forEach((obj) =>{
-            this._renderingBuffer.push(obj)
-        })
+        renderObjects.forEach((obj) => {
+            this._renderingBuffer.push(obj);
+        });
         this.sortRenderingBuffer();
     }
 
-    // Sortiert Rendering Buffer erst nach z-Wert, dann nach prirität, dann nach y-Wert
+    /**
+     * Aktualisiert ein bestehendes RenderObject anhand des Namens.
+     * @param name Name des zu aktualisierenden Objekts
+     * @param renderObject Das neue RenderObject
+     */
+    updateRenderingObject(name: string, renderObject: RenderObject)
+    {
+        const index = this._renderingBuffer.findIndex(Obj => Obj.name === name);
+        this._renderingBuffer[index] = renderObject;
+        this.sortRenderingBuffer();
+    }
+
+    // Sortiert Rendering Buffer erst nach z-Wert, dann nach Priorität, dann nach y-Wert
     sortRenderingBuffer() { 
-        let zKoordinates = Array.from(new Set(this._renderingBuffer.map(obj => obj.z)));
-        let prioritys = Array.from(new Set(this._renderingBuffer.map(obj => obj.priority)));
-        zKoordinates.sort((a,b) => a - b)
-        prioritys.sort((a,b) => a - b)
-        console.log(prioritys)
-        let newRenderBuffer : RenderObject[] = []
+        const zCoordinates = Array.from(new Set(this._renderingBuffer.map(obj => obj.z)));
+        const priorities = Array.from(new Set(this._renderingBuffer.map(obj => obj.priority)));
+        zCoordinates.sort((a, b) => a - b);
+        priorities.sort((a, b) => a - b);
+        const newRenderBuffer: RenderObject[] = [];
 
-        zKoordinates.forEach((z) => {
-            let zRenderBuffer = this._renderingBuffer.filter((obj) => obj.z === z)
-            prioritys.forEach((priority) => {
-                let priorityRenderBuffer = zRenderBuffer.filter((obj) => obj.priority === priority)
-                priorityRenderBuffer.sort((a,b) => a.y + a.height - (b.y + b.height))
-                newRenderBuffer.push.apply(newRenderBuffer, priorityRenderBuffer)
-            })
-            
-        })
+        zCoordinates.forEach((z) => {
+            const zRenderBuffer = this._renderingBuffer.filter((obj) => obj.z === z);
+            priorities.forEach((priority) => {
+                const priorityRenderBuffer = zRenderBuffer.filter((obj) => obj.priority === priority);
+                priorityRenderBuffer.sort((a, b) => a.y + a.height - (b.y + b.height));
+                newRenderBuffer.push(...priorityRenderBuffer);
+            });
+        });
 
-        this._renderingBuffer = newRenderBuffer
+        this._renderingBuffer = newRenderBuffer;
+    }
 
-       }
-
+    /**
+     * Sucht ein RenderObject anhand seiner ID.
+     * @param id Die ID des gesuchten Objekts
+     * @returns Das gefundene Objekt oder undefined
+     */
     getRenderingObjektByID(id: number): RenderObject | undefined {
-        {
-
-            const obj = this._renderingBuffer.find((obj) => obj.id === id)
-            if (obj) {
-                return obj;
-            }
-            else {
-            return undefined
-            }
-        }
+        return this._renderingBuffer.find((obj) => obj.id === id);
     }
 
+    /**
+     * Sucht ein RenderObject anhand seines Namens.
+     * @param name Der Name des gesuchten Objekts
+     * @returns Das gefundene Objekt oder undefined
+     */
     getRenderingObjektByName(name: string): RenderObject | undefined {
-        {
-
-            const obj = this._renderingBuffer.find((obj) => obj.name === name)
-            if (obj) {
-                return obj;
-            }
-            else {
-            return undefined
-            }
-        }
-
+        return this._renderingBuffer.find((obj) => obj.name === name);
     }
 
+    /**
+     * Löscht ein RenderObject anhand seiner ID.
+     * @param id Die ID des zu löschenden Objekts
+     */
     deleteRenderingObjektByID(id: number): void {
         this._renderingBuffer = this._renderingBuffer.filter((obj) => obj.id !== id);
     }
 
+    /**
+     * Löscht ein RenderObject anhand seines Namens.
+     * @param name Der Name des zu löschenden Objekts
+     */
     deleteRenderingObjektByName(name: string): void {
         this._renderingBuffer = this._renderingBuffer.filter((obj) => obj.name !== name);
     }
 
+    /**
+     * Rendert alle Objekte im Buffer auf das Canvas.
+     * Wendet isometrische Projektion an und zeichnet Rechtecke mit 3D-Tiefeneffekt oder Bilder.
+     */
     render(): void {
         this._renderingBuffer.forEach((Obj) => {
+            // Berechne isometrische Projektion
             const zTransform = Obj.z * Math.sin(this._angle)
             const yProjection = Obj.y * Math.cos(this._angle) - zTransform
             if(Obj.type === "rect")
@@ -128,7 +154,7 @@ export class Rendering {
                 );
                 if (Obj.imgWall)
                 {
-                this._ctx.drawImage(
+                this._ctx.drawImage( 
                     this._images[Obj.imgWall!],
                     Obj.x,
                     yProjection + Obj.height * Math.cos(this._angle),
@@ -139,6 +165,41 @@ export class Rendering {
             }
     });
     }
+
+
+      /**
+   * Erhöht den Winkel für die Projektion.
+   */
+  async rotateMap()
+  {
+
+    setTimeout(() => {
+      if(this._angle <= 30/360*2*Math.PI)
+      {
+            this._angle += (Math.log(this._angle + 1.01) * 0.003);
+      }
+            }, 1000);
+          
+
+/*
+    if(this.renderer.angle <= 90/360*2*Math.PI && !this.rotationDirection)
+    {
+    this.renderer.angle+=0.003;
+    return;
+    }
+    else{
+      this.rotationDirection = true;
+    }
+    if(this.renderer.angle >= 0/360*2*Math.PI && this.rotationDirection)
+    {
+      this.renderer.angle-=0.003;
+    }
+    else{
+      this.rotationDirection = false;
+    }
+    */
+  }
+
 
     get renderingBuffer()
     {
