@@ -12,7 +12,7 @@ import { ApiService } from '../../services/api.service';
 export class HudComponent implements OnInit {
   money: number = 0;
   score: number = 0;
-  playerName: string = "Selim"; // irgendein Name kann später durch DB geändert werden
+  playerName: string = "Benjamin"; // irgendein Name kann später durch DB geändert werden
 
   constructor(private api: ApiService) {}
 

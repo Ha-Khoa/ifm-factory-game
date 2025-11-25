@@ -2,4 +2,5 @@
   <canvas #game width="2000" height="2000">
   </canvas>
   <app-hud></app-hud>
+  <app-settings *ngIf="isSettingsOpen" (closeSettings)="isSettingsOpen = false"></app-settings>
 </div>
