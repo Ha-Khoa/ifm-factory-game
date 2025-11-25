@@ -12,7 +12,7 @@ import { ApiService } from '../../services/api.service';
 export class HudComponent implements OnInit {
   money: number = 0;
   score: number = 0;
-  playerName: string = "Selim"; // irgendein Name kann später durch DB geändert werden
+  playerName: string = "Benjamin"; // irgendein Name kann später durch DB geändert werden
 
   constructor(private api: ApiService) {}
 
@@ -32,14 +32,15 @@ export class HudComponent implements OnInit {
     this.api.getScore(this.playerName).subscribe(val => this.score = val);
   }
   addScore() {
-  // Lokal erhöhen weil sonst auf db gewartet werden muss
   const newScore = this.score + 1;
   this.score = newScore;
 
-  // An den Server schicken (damit es gespeichert wird)
   this.api.updateScore(this.playerName, newScore).subscribe({
-    next: () => console.log("Score gespeichert"),
+    next: () => {
+      console.log("Score gespeichert");
+      this.loadStats(); // Score aus db holen
+    },
     error: (err) => console.error("Fehler beim Speichern:", err)
   });
-}
+  }
 }

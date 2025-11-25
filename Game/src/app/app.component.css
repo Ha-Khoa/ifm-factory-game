@@ -1,19 +1,24 @@
 .game-container {
-  position: relative;
-  width: fit-content;
-}
-
-canvas {
-  display: block;
+  position: relative;        /* Referenzpunkt für HUD */
+  width: 100%;               /* volle Breite des Containers */
+  height: 100%;              /* volle Höhe */
+  margin: 0 auto;            /* zentriert auf der Seite */
+  overflow: hidden;
+  max-width: 1000px;
 }
 
 app-hud {
-  position: absolute; /* schwebe effekt */
-  top: 10px;
-  left: 10px;
-  z-index: 10; /* liegt so über canvas */
-  pointer-events: all; 
+  position: absolute;        /* innerhalb des Wrappers */
+  top: 5px;
+  right: 335px;
+  gap: 10px;
+  z-index: 10;
 }
 
-
-
+app-settings {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  gap: 10px;
+  z-index: 100;
+}
