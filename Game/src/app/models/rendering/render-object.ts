@@ -1,21 +1,39 @@
 import { Hitbox } from "../../interfaces/hitbox";
 
+/**
+ * RenderObject-Klasse: Repräsentiert ein zu renderndes Objekt mit Position, Größe und Darstellungsinformationen.
+ * Kann entweder als Rechteck (mit 3D-Tiefeneffekt) oder als Bild gerendert werden.
+ */
 export class RenderObject {
 
+    // Statischer Zähler für eindeutige IDs
     private static lastID: number = 0;
+    // Eindeutige ID des Objekts
     private _id!: number;
+    // Name des Objekts (z.B. "player", "wall-1-2")
     private _name!: string;
+    // Typ: "rect" oder "img"
     private _type!: string;
+    // X-Position in Weltkoordinaten
     private _x!: number;
+    // Y-Position in Weltkoordinaten
     private _y!: number;
+    // Z-Position (Höhe) in Weltkoordinaten
     private _z!: number;
+    // Render-Priorität (höher = später gerendert = im Vordergrund)
     private _priority!: number;
+    // Breite in Pixeln
     private _width!: number;
+    // Höhe in Pixeln
     private _height!: number;
+    // Bild-Pfad (für type="img")
     private _img!: string | void;
+    // Wand-Bild-Pfad (für 3D-Effekt bei type="img")
     private _imgWall!: string | void;
+    // Rechteck-Farbe (für type="rect")
     private _rectColor!: string | void;
-    private _rectLayers!: string[] | void; //Nur Farben für jedden Layer
+    // Layer-Farben für 3D-Tiefeneffekt (für type="rect")
+    private _rectLayers!: string[] | void;
 
     constructor(name: string, type: string, x: number, y: number, z: number, width: number, height: number, priority: number, img?: string, imgWall?: string, rectColor?: string, rectLayers?: string[])
     {
