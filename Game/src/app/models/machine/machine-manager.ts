@@ -1,12 +1,14 @@
 import { Gamefield } from "../gamefield/gamefield";
 import { Machine } from "./machine";
 import { Products } from "../product/products";
+import { Product } from "../../interfaces/product";
 import { Hitbox } from "../../interfaces/hitbox";
 import { Collision } from "../collision/collision";
-import { Rendering } from "../rendering/rendering";
+import { RenderingService} from "../../services/rendering.service";
 import { RenderObject } from "../rendering/render-object";
 import { Direction } from "../../enums/direction";
 import { Coordinates } from "../coordinates/coordinates";
+import { Player } from "../player/player";
 
 /**
  * MachineManager-Klasse: Verwaltet alle Maschinen im Spiel.
@@ -15,17 +17,19 @@ import { Coordinates } from "../coordinates/coordinates";
 export class MachineManager {
     // Referenz zum Spielfeld
     private _gamefield: Gamefield;
-    // Referenz zum Renderer
-    private _renderer: Rendering;
+
+    private _inputs: Record<string, boolean> = {};
+
     static machines: Machine[] = [
       // Reihenfolge: x, y, width, height, name, imgUnlocked, imgLocked, accessDirection, outputProduct, inputRequirements
       new Machine(600, 400, 50, 50, "Sensor", "/images/wall.png", "/images/wall.png", Direction.DOWN, Products.getProductByName("Basic Sensor")!, [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Circuit Board")!]),
       new Machine(500, 450, 50, 50, "Plastic Case", "/images/wall.png", "/images/wall.png", Direction.LEFT, Products.getProductByName("Plastic Case")!, [Products.getProductByName("Raw Plastic")!])
     ];
 
-    constructor(_gamefield: Gamefield, renderer: Rendering) {
+    constructor(_gamefield: Gamefield, private _renderer: RenderingService) {
         this._gamefield = _gamefield;
-        this._renderer = renderer;
+        this.updateUnlockedMachine(0);
+        this.updateUnlockedMachine(1);
 
     }
 
@@ -44,11 +48,12 @@ export class MachineManager {
     updateUnlockedMachine(id: number)
     {
         MachineManager.machines[id].unlocked = true;
+        console.log(MachineManager.machines[id].unlocked);
 
     }
 
 
-    addToRenderingBuffer(_renderer: Rendering)
+    addToRenderingBuffer()
     {   
         MachineManager.machines.forEach(machine => {
             const imgMachine = machine.unlocked ? machine.imgUnlocked : machine.imgLocked;
@@ -75,8 +80,9 @@ export class MachineManager {
      * Berechnet Interaktionszonen basierend auf accessDirection und prüft Kollision.
      * @param player Hitbox des Spielers
      */
-    checkForInteraction(player : Hitbox)
+    checkForInteraction(player : Player, inputs: Record<string, boolean>)
   {
+    this._inputs = inputs;
 
     MachineManager.machines.forEach(machine => {
       const accessDirection = machine.accessDirection;
@@ -89,9 +95,9 @@ export class MachineManager {
 
       const interactionHitbox: Hitbox = new Hitbox(new Coordinates(interactionX, interactionY), interactionWidth, interactionHeight);
 
-      const collision = Collision.checkCollision(player, interactionHitbox);
+      const collision = Collision.checkCollision(player.hitbox, interactionHitbox);
       if (collision) {
-        this.updateMachineOnInteraction(machine, interactionHitbox);
+        this.updateMachineOnInteraction(machine, player);
       } else {
         this.resetMachineOnInteraction(machine, interactionHitbox);
       }
@@ -104,12 +110,37 @@ export class MachineManager {
    * @param machine Die Maschine, die interagiert wird
    * @param interactionHitbox Hitbox der Interaktionszone
    */
-  updateMachineOnInteraction(machine: Machine, interactionHitbox: Hitbox)
+  async updateMachineOnInteraction(machine: Machine, player: Player)
   {
-    this._renderer.deleteRenderingObjektByName(machine.name);
+    if (this._inputs["e"] === true && machine.unlocked && player.inventory)
+    {
+      const product = player.dropProduct(false);
+      let result = null;
+      if(product){
+        result = await machine.addProduct(product);
+      }
+      if (result instanceof Object) {
+          const produced = result as Product;
+
+        console.log("Produkt produziert:", produced.name, machine.x, machine.y);
+        Products.addProduct(produced, new Coordinates(machine.x + this._gamefield.fieldsize / 2 - 10, machine.y - this._gamefield.fieldsize / 2 + 10));
+      } else if (result === true) {
+
+        console.log("Zutat hinzugefügt, wartet auf weitere Inputs");
+
+
+      } else if (result === false) {
+
+        if (product && product.position) {
+          Products.addProduct(product, product.position);
+        }
+        console.log("Zutat nicht benötigt zurückgelegt");
+      }
+    }
+    this._renderer.deleteRenderingObjektByName(`machine:${machine.name}`);
 
         this._renderer.addRenderObject(new RenderObject(
-          machine.name,
+          `machine:${machine.name}`,
           "rect",
           machine.x,
           machine.y,
@@ -122,7 +153,11 @@ export class MachineManager {
           "rgba(81, 255, 81, 1)",
           ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"]
         ));
+
+        
   }
+
+
 
   /**
    * Setzt die Darstellung einer Maschine zurück (normale Farbe) und zeigt Interaktionsfeld.
@@ -131,9 +166,9 @@ export class MachineManager {
    */
   resetMachineOnInteraction(machine: Machine, interactionHitbox: Hitbox)
   {
-    this._renderer.deleteRenderingObjektByName(machine.name);
+    this._renderer.deleteRenderingObjektByName(`machine:${machine.name}`);
         this._renderer.addRenderObject(new RenderObject(
-          machine.name,
+          `machine:${machine.name}`,
           "rect",
           machine.x,
           machine.y,

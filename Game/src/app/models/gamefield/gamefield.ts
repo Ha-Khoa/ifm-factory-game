@@ -1,7 +1,7 @@
 
 import { Machine } from "../machine/machine";
 import { RenderObject } from "../rendering/render-object";
-import { Rendering } from "../rendering/rendering";
+import { RenderingService } from "../../services/rendering.service";
 
 /**
  * Gamefield-Klasse: Verwaltet das Spielfeld mit Umgebungsobjekten und interaktiven Objekten.
@@ -34,17 +34,16 @@ export class Gamefield {
 
     /**
      * Fügt alle Spielfeld-Objekte zum Rendering-Buffer hinzu.
-     * @param renderer Der Renderer, dem die Objekte hinzugefügt werden
      */
-    addGameFieldToRenderingBuffer(renderer: Rendering)
+    addGameFieldToRenderingBuffer()
   {
     // Erst Umgebungsobjekte (Böden) hinzufügen
     for (let i = 0; i < this.environmetObjects.length; i++) {
-      this.renderField(i, false, renderer);
+      this.renderField(i, false);
     }
     // Dann interaktive Objekte (Wände, Maschinen) hinzufügen
     for (let i = 0; i < this.interactableObjects.length; i++) {
-      this.renderField(i, true, renderer);
+      this.renderField(i, true);
     }
   }
 
@@ -53,7 +52,7 @@ export class Gamefield {
    * @param x Index des Objekts
    * @param interactable true für interaktive Objekte, false für Umgebung
    */
-  renderField(x: number, interactable: boolean, renderer: Rendering) {
+  renderField(x: number, interactable: boolean) {
     let Obj;
     // Wähle das richtige Objekt-Array
     if (interactable) {
@@ -61,7 +60,7 @@ export class Gamefield {
     } else {
       Obj = this.environmetObjects[x];
     }
-    renderer.addRenderObject(Obj);
+    RenderingService.instance().addRenderObject(Obj);
   }
 
 
@@ -77,7 +76,7 @@ export class Gamefield {
         machines.forEach(machine => {
             const imgMachine = machine.unlocked ? machine.imgUnlocked : machine.imgLocked;
             this.interactableObjects.push(new RenderObject(
-                machine.name,
+                `machine:${machine.name}`,
                 "rect",
                 machine.x,
                 machine.y,
@@ -98,20 +97,27 @@ export class Gamefield {
      */
     generateEnvironment()
     {
-        this.environmetObjects.push(new RenderObject(
-            `floor`,
-            "rect",
-            0,
-            0,
-            0,
-            this.fieldsize * this.cols,
-            this.fieldsize * this.rows,
-            0,
-            undefined,
-            undefined,
-            "#494949ff",
-            []
-        ))
+        for(let i = 0; i < this.rows; i++)
+        {
+            for(let j = 0; j < this.cols; j++)
+            {
+                this.environmetObjects.push(new RenderObject(
+                    `floor-${i}-${j}`,
+                    "rect",
+                    j * this.fieldsize,
+                    i * this.fieldsize,
+                    0,
+                    this.fieldsize,
+                    this.fieldsize,
+                    0,
+                    undefined,
+                    undefined,
+                    "#494949ff",
+                    []
+                ))
+            }
+        }
+            
     }
 
     /**
@@ -194,6 +200,34 @@ export class Gamefield {
             "rect",
             5* this.fieldsize ,
             11 * this.fieldsize,
+            50,
+            this.fieldsize,
+            this.fieldsize,
+            0,
+            undefined,
+            undefined,
+            "#dddddd",
+            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+        ))
+        this.interactableObjects.push(new RenderObject(
+            `wall-a`,
+            "rect",
+            10 * this.fieldsize,
+            11 * this.fieldsize,
+            50,
+            this.fieldsize,
+            this.fieldsize,
+            0,
+            undefined,
+            undefined,
+            "#dddddd",
+            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+        ))
+        this.interactableObjects.push(new RenderObject(
+            `wall-b`,
+            "rect",
+            10 * this.fieldsize,
+            10 * this.fieldsize,
             50,
             this.fieldsize,
             this.fieldsize,

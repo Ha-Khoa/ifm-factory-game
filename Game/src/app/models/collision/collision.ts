@@ -27,6 +27,7 @@ export class Collision {
         return null;
     }
 
+
   /**
    * Prüft ob ein Punkt innerhalb einer Hitbox liegt.
    * @param x X-Koordinate des Punkts
@@ -96,5 +97,26 @@ export class Collision {
      */
     private static calculateNextFrame(hitbox: Hitbox, velocityX: number, velocityY: number): Hitbox {
         return new Hitbox(new Coordinates(hitbox.x + velocityX, hitbox.y + velocityY), hitbox.width, hitbox.height);
+    }
+
+    /**
+     * Prüft Überlappung zwischen zwei projizierten Rechtecken (für Rendering-Sortierung).
+     * Nutzt AABB-Overlap mit optionalem Epsilon für Rundungsfehler.
+     * @param proj1 Erstes projiziertes Rechteck
+     * @param proj2 Zweites projiziertes Rechteck
+     * @returns true wenn Überlappung, sonst false
+     */
+    static checkRenderingCollision(proj1: Hitbox, proj2: Hitbox): boolean {
+        const eps = 0.5; // Toleranz für Floating-Point-Rundungsfehler
+        const p1Right = proj1.x + proj1.width;
+        const p1Bottom = proj1.y + proj1.height;
+        const p2Right = proj2.x + proj2.width;
+        const p2Bottom = proj2.y + proj2.height;
+
+        // AABB-Overlap: true wenn NICHT getrennt
+        return !(p1Right < proj2.x - eps ||
+                 p2Right < proj1.x - eps ||
+                 p1Bottom < proj2.y - eps ||
+                 p2Bottom < proj1.y - eps);
     }
 }

@@ -6,9 +6,9 @@ import { Machine } from '../models/machine/machine';
 import { Player } from '../models/player/player';
 import { MachineManager } from '../models/machine/machine-manager';
 import { Hitbox } from '../interfaces/hitbox';
-import { Rendering } from '../models/rendering/rendering';
-import { RenderObject } from '../models/rendering/render-object';
+import { RenderingService } from './rendering.service';
 import { Coordinates } from '../models/coordinates/coordinates';
+import { Products } from '../models/product/products';
 
 
 @Injectable({
@@ -21,7 +21,7 @@ export class GameService {
   
   // Canvas und Rendering
   private ctx!: CanvasRenderingContext2D;
-  private renderer!: Rendering;
+  private renderer!: RenderingService;
   private angle!: number;
   private playerVelocity!: number; // Pixel pro Sekunde
   
@@ -45,13 +45,14 @@ export class GameService {
   async init(ctx: CanvasRenderingContext2D) {
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 0;
-    this.renderer = new Rendering(this.ctx, this.images, this.angle);
+    this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.renderer = RenderingService.instance();
+    this.renderer.init(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
     
     
     // Initialisiere Eingaben
-    this.inputs = { 'w': false, 'a': false, 's': false, 'd': false };
+    this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
     
     // Lade benötigte Texturen vor
     await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"]);
@@ -70,7 +71,8 @@ export class GameService {
     
     // Füge Spielfeld zum Rendering-Buffer hinzu
     this.gamefield.updateMachines(this.machines);
-    this.gamefield.addGameFieldToRenderingBuffer(this.renderer);
+    this.gamefield.addGameFieldToRenderingBuffer();
+    Products.generateProducts();
   }
 
   /**
@@ -112,13 +114,20 @@ export class GameService {
       // Update-Phase
       this.player.changeVelocity();
       this.player.updatePlayer();
-      this.machineManager.checkForInteraction(this.player.hitbox);
+      
+      this.machineManager.checkForInteraction(this.player, this.inputs);
       this.renderer.rotateMap();
+      // Interaktionslogik: erst aufnehmen, sonst ablegen
+      this.player.pickProduct();
+      this.player.dropProduct(true);
+      
+
 
       // Render-Phase
       this.player.render();
+      this.player.updateProductInHand();
       this.renderer.render();
-
+      
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
