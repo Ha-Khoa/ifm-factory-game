@@ -8,6 +8,7 @@ import { RenderingService} from "../../services/rendering.service";
 import { RenderObject } from "../rendering/render-object";
 import { Direction } from "../../enums/direction";
 import { Coordinates } from "../coordinates/coordinates";
+import { UIService } from "../../services/ui.service";
 import { Player } from "../player/player";
 
 /**
@@ -17,6 +18,8 @@ import { Player } from "../player/player";
 export class MachineManager {
     // Referenz zum Spielfeld
     private _gamefield: Gamefield;
+    // Referenz zur UI
+    private ui: UIService;
 
     private _inputs: Record<string, boolean> = {};
 
@@ -25,66 +28,63 @@ export class MachineManager {
       new Machine(600, 400, 50, 50, "Sensor", "/images/wall.png", "/images/wall.png", Direction.DOWN, Products.getProductByName("Basic Sensor")!, [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Circuit Board")!]),
       new Machine(500, 450, 50, 50, "Plastic Case", "/images/wall.png", "/images/wall.png", Direction.LEFT, Products.getProductByName("Plastic Case")!, [Products.getProductByName("Raw Plastic")!])
     ];
-
-    constructor(_gamefield: Gamefield, private _renderer: RenderingService) {
-        this._gamefield = _gamefield;
-        this.updateUnlockedMachine(0);
-        this.updateUnlockedMachine(1);
-
-    }
-
-    /**
-     * Gibt alle Maschinen zurück.
-     * @returns Array aller Maschinen
-     */
-    getMachines(): Machine[] {
-        return MachineManager.machines;
-    }
-
-    /**
-     * Schaltet eine Maschine frei (unlock).
-     * @param id ID der freizuschaltenden Maschine
-     */
-    updateUnlockedMachine(id: number)
-    {
-        MachineManager.machines[id].unlocked = true;
-        console.log(MachineManager.machines[id].unlocked);
-
-    }
-
-
-    addToRenderingBuffer()
-    {   
-        MachineManager.machines.forEach(machine => {
-            const imgMachine = machine.unlocked ? machine.imgUnlocked : machine.imgLocked;
-                new RenderObject(
-                machine.name,
-                "rect",
-                machine.x,
-                machine.y,
-                50,
-                this._gamefield.fieldsize,
-                this._gamefield.fieldsize,
-                0,
-                undefined,
-                undefined,
-                "rgba(200, 206, 255, 1)",
-                ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
-                )});
-        
-    }
-
-
-    /**
-     * Prüft ob der Spieler mit einer Maschine interagieren kann.
-     * Berechnet Interaktionszonen basierend auf accessDirection und prüft Kollision.
-     * @param player Hitbox des Spielers
-     */
-    checkForInteraction(player : Player, inputs: Record<string, boolean>)
-  {
+  
+  constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>) {
+    this._gamefield = _gamefield;
+    this.ui = ui;
     this._inputs = inputs;
+    this.updateUnlockedMachine(0)
+    this.updateUnlockedMachine(1)
+  }
 
+  /**
+   * Gibt alle Maschinen zurück.
+   * @returns Array aller Maschinen
+   */
+  getMachines(): Machine[] {
+    return MachineManager.machines;
+  }
+
+  /**
+   * Schaltet eine Maschine frei (unlock).
+   * @param id ID der freizuschaltenden Maschine
+   */
+  updateUnlockedMachine(id: number) {
+    MachineManager.machines[id].unlocked = true;
+
+  }
+
+
+  addToRenderingBuffer(){
     MachineManager.machines.forEach(machine => {
+      const imgMachine = machine.unlocked ? machine.imgUnlocked : machine.imgLocked;
+      new RenderObject(
+        machine.name,
+        "rect",
+        machine.x,
+        machine.y,
+        50,
+        this._gamefield.fieldsize,
+        this._gamefield.fieldsize,
+        0,
+        undefined,
+        undefined,
+        "rgba(200, 206, 255, 1)",
+        ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
+      )
+    });
+
+  }
+
+
+  /**
+   * Prüft ob der Spieler mit einer Maschine interagieren kann.
+   * Berechnet Interaktionszonen basierend auf accessDirection und prüft Kollision.
+   * @param player Hitbox des Spielers
+   */
+  checkForInteraction(player: Player) {
+    for (let machine of MachineManager.machines)
+    {
       const accessDirection = machine.accessDirection;
       const interactionX = accessDirection === Direction.RIGHT ? machine.x + this._gamefield.fieldsize :
                            accessDirection === Direction.LEFT ? machine.x - this._gamefield.fieldsize : machine.x;
@@ -98,10 +98,11 @@ export class MachineManager {
       const collision = Collision.checkCollision(player.hitbox, interactionHitbox);
       if (collision) {
         this.updateMachineOnInteraction(machine, player);
-      } else {
-        this.resetMachineOnInteraction(machine, interactionHitbox);
+        return;
       }
-    });
+    }
+    this.resetMachineOnInteraction();
+
   }
 
 
@@ -137,9 +138,9 @@ export class MachineManager {
         console.log("Zutat nicht benötigt zurückgelegt");
       }
     }
-    this._renderer.deleteRenderingObjektByName(`machine:${machine.name}`);
+    RenderingService.instance().deleteRenderingObjektByName(`machine:${machine.name}`);
 
-        this._renderer.addRenderObject(new RenderObject(
+        RenderingService.instance().addRenderObject(new RenderObject(
           `machine:${machine.name}`,
           "rect",
           machine.x,
@@ -153,8 +154,7 @@ export class MachineManager {
           "rgba(81, 255, 81, 1)",
           ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"]
         ));
-
-        
+    this.ui.drawMachinePopUp(machine);
   }
 
 
@@ -164,39 +164,26 @@ export class MachineManager {
    * @param machine Die Maschine
    * @param interactionHitbox Hitbox der Interaktionszone
    */
-  resetMachineOnInteraction(machine: Machine, interactionHitbox: Hitbox)
-  {
-    this._renderer.deleteRenderingObjektByName(`machine:${machine.name}`);
-        this._renderer.addRenderObject(new RenderObject(
-          `machine:${machine.name}`,
-          "rect",
-          machine.x,
-          machine.y,
-          50,
-          machine.width,
-          machine.height,
-          0,
-          undefined,
-          undefined,
-          "rgba(226, 229, 255, 1)",
-          ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
-
-        ));
-    this._renderer.deleteRenderingObjektByName(`interactionField-${machine.id}`)
-
-    this._renderer.addRenderObject(new RenderObject(
-      `interactionField-${machine.id}`,
+  resetMachineOnInteraction() {
+    MachineManager.machines.forEach((machine) => {
+    RenderingService.instance().deleteRenderingObjektByName(machine.name);
+    RenderingService.instance().addRenderObject(new RenderObject(
+      machine.name,
       "rect",
-      interactionHitbox.x,
-      interactionHitbox.y,
+      machine.x,
+      machine.y,
+      50,
+      machine.width,
+      machine.height,
       0,
-      interactionHitbox.width,
-      interactionHitbox.height,
-      2,
       undefined,
       undefined,
-      "#eef114ff",
-      []
+      "rgba(226, 229, 255, 1)",
+      ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
+
     ));
-  }
+    
+    this.ui.clearMachinePopUp()
+  })
+}
 }

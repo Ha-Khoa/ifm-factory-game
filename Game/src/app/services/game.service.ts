@@ -8,6 +8,7 @@ import { MachineManager } from '../models/machine/machine-manager';
 import { Hitbox } from '../interfaces/hitbox';
 import { RenderingService } from './rendering.service';
 import { Coordinates } from '../models/coordinates/coordinates';
+import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 
 
@@ -18,45 +19,48 @@ export class GameService {
 
   // Gibt an, ob das Spiel aktuell läuft
   private GameRunning!: boolean;
-  
+
   // Canvas und Rendering
   private ctx!: CanvasRenderingContext2D;
   private renderer!: RenderingService;
   private angle!: number;
   private playerVelocity!: number; // Pixel pro Sekunde
-  
+
   // Spielobjekte
   private gamefield!: Gamefield;
   private player!: Player;
   private machineManager!: MachineManager;
   private machines: Machine[] = [];
-  
+
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
 
-  constructor() { }
+  constructor(private uiService: UIService) { }
 
 
   /**
    * Initialisiert das Spiel, setzt Startwerte und lädt Bilder vor.
    * @param ctx CanvasRenderingContext2D zum Zeichnen
    */
-  async init(ctx: CanvasRenderingContext2D) {
+  async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
+    // Initialisiere UI Service
+    
+
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     this.renderer = RenderingService.instance();
     this.renderer.init(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
-    
-    
+    this.uiService.init(ctxUI, this.angle);
+
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
     
     // Lade benötigte Texturen vor
     await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"]);
-    
+
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
     this.player = new Player(
@@ -66,9 +70,9 @@ export class GameService {
       this.gamefield,
       this.renderer
     );
-    this.machineManager = new MachineManager(this.gamefield, this.renderer);
+    this.machineManager = new MachineManager(this.gamefield, this.uiService, this.inputs);
     this.machines = this.machineManager.getMachines();
-    
+
     // Füge Spielfeld zum Rendering-Buffer hinzu
     this.gamefield.updateMachines(this.machines);
     this.gamefield.addGameFieldToRenderingBuffer();
@@ -107,7 +111,7 @@ export class GameService {
     this.ctx.imageSmoothingEnabled = true;
     const loop = () => {
       if (!this.GameRunning) return;
-      
+
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
@@ -115,7 +119,7 @@ export class GameService {
       this.player.changeVelocity();
       this.player.updatePlayer();
       
-      this.machineManager.checkForInteraction(this.player, this.inputs);
+      this.machineManager.checkForInteraction(this.player);
       this.renderer.rotateMap();
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
@@ -147,7 +151,7 @@ export class GameService {
 
 
 
-  
+
 
 
   /**
