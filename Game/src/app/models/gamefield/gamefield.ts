@@ -1,13 +1,23 @@
 
 import { Machine } from "../machine/machine";
 import { RenderObject } from "../rendering/render-object";
+import { RenderingService } from "../../services/rendering.service";
 
+/**
+ * Gamefield-Klasse: Verwaltet das Spielfeld mit Umgebungsobjekten und interaktiven Objekten.
+ * Generiert Böden, Wände und Maschinen.
+ */
 export class Gamefield {
     
+    // Umgebungsobjekte (Böden)
     environmetObjects!: RenderObject[];
+    // Interaktive Objekte (Wände, Maschinen)
     interactableObjects!: RenderObject[];
+    // Größe eines einzelnen Feldes in Pixeln
     fieldsize!: number;
+    // Anzahl der Reihen
     rows!: number;
+    // Anzahl der Spalten
     cols!: number;
 
     constructor()
@@ -22,7 +32,43 @@ export class Gamefield {
 
     }
 
+    /**
+     * Fügt alle Spielfeld-Objekte zum Rendering-Buffer hinzu.
+     */
+    addGameFieldToRenderingBuffer()
+  {
+    // Erst Umgebungsobjekte (Böden) hinzufügen
+    for (let i = 0; i < this.environmetObjects.length; i++) {
+      this.renderField(i, false);
+    }
+    // Dann interaktive Objekte (Wände, Maschinen) hinzufügen
+    for (let i = 0; i < this.interactableObjects.length; i++) {
+      this.renderField(i, true);
+    }
+  }
 
+  /**
+   * Rendert ein einzelnes Feld (Umgebung oder interaktives Objekt) auf das Canvas.
+   * @param x Index des Objekts
+   * @param interactable true für interaktive Objekte, false für Umgebung
+   */
+  renderField(x: number, interactable: boolean) {
+    let Obj;
+    // Wähle das richtige Objekt-Array
+    if (interactable) {
+      Obj = this.interactableObjects[x];
+    } else {
+      Obj = this.environmetObjects[x];
+    }
+    RenderingService.instance().addRenderObject(Obj);
+  }
+
+
+    /**
+     * Aktualisiert die Maschinen im Spielfeld.
+     * Generiert RenderObjects für alle Maschinen basierend auf ihrem Unlock-Status.
+     * @param machines Array aller Maschinen
+     */
     updateMachines(machines: Machine[])
     {
         this.interactableObjects = [];
@@ -30,40 +76,54 @@ export class Gamefield {
         machines.forEach(machine => {
             const imgMachine = machine.unlocked ? machine.imgUnlocked : machine.imgLocked;
             this.interactableObjects.push(new RenderObject(
-                machine.name,
-                "img",
+                `machine:${machine.name}`,
+                "rect",
                 machine.x,
                 machine.y,
                 50,
                 this.fieldsize,
                 this.fieldsize,
-                imgMachine,
-                imgMachine
+                0,
+                undefined,
+                undefined,
+                "rgba(200, 206, 255, 1)",
+                ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
             ));
         });
     }
 
+    /**
+     * Generiert die Umgebung (Boden) als ein großes Rechteck.
+     */
     generateEnvironment()
     {
-        for(let i = 0; i < this.cols; i++)
+        for(let i = 0; i < this.rows; i++)
         {
-            for (let j = 0; j < this.rows; j++)
+            for(let j = 0; j < this.cols; j++)
             {
                 this.environmetObjects.push(new RenderObject(
                     `floor-${i}-${j}`,
-                    "img",
-                    i * this.fieldsize,
+                    "rect",
                     j * this.fieldsize,
-                    -1,
+                    i * this.fieldsize,
+                    0,
                     this.fieldsize,
                     this.fieldsize,
-                    "/images/Concrete-Floor-Tile.png"
+                    0,
+                    undefined,
+                    undefined,
+                    "#494949ff",
+                    []
                 ))
-
             }
         }
+            
     }
 
+    /**
+     * Generiert alle interaktiven Objekte (Wände) auf dem Spielfeld.
+     * Erstellt verschiedene Wandsegmente an festen Positionen.
+     */
     generateInteractableObjects()
     {
         
@@ -78,6 +138,7 @@ export class Gamefield {
             50,
             this.fieldsize,
             this.fieldsize,
+            0,
             undefined,
             undefined,
             "#dddddd",
@@ -94,6 +155,7 @@ export class Gamefield {
             50,
             this.fieldsize,
             this.fieldsize,
+            0,
             undefined,
             undefined,
             "#dddddd",
@@ -109,6 +171,7 @@ export class Gamefield {
         50,
         this.fieldsize,
         this.fieldsize,
+        0,
         undefined,
         undefined,
         "#dddddd",
@@ -125,6 +188,7 @@ export class Gamefield {
             50,
             this.fieldsize,
             this.fieldsize,
+            0,
             undefined,
             undefined,
             "#dddddd",
@@ -139,6 +203,35 @@ export class Gamefield {
             50,
             this.fieldsize,
             this.fieldsize,
+            0,
+            undefined,
+            undefined,
+            "#dddddd",
+            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+        ))
+        this.interactableObjects.push(new RenderObject(
+            `wall-a`,
+            "rect",
+            10 * this.fieldsize,
+            11 * this.fieldsize,
+            50,
+            this.fieldsize,
+            this.fieldsize,
+            0,
+            undefined,
+            undefined,
+            "#dddddd",
+            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+        ))
+        this.interactableObjects.push(new RenderObject(
+            `wall-b`,
+            "rect",
+            10 * this.fieldsize,
+            10 * this.fieldsize,
+            50,
+            this.fieldsize,
+            this.fieldsize,
+            0,
             undefined,
             undefined,
             "#dddddd",
