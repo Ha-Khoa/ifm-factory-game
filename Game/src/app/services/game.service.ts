@@ -9,6 +9,7 @@ import { Hitbox } from '../interfaces/hitbox';
 import { Rendering } from '../models/rendering/rendering';
 import { RenderObject } from '../models/rendering/render-object';
 import { Coordinates } from '../models/coordinates/coordinates';
+import { UIService } from './ui.service';
 
 
 @Injectable({
@@ -18,44 +19,47 @@ export class GameService {
 
   // Gibt an, ob das Spiel aktuell läuft
   private GameRunning!: boolean;
-  
+
   // Canvas und Rendering
   private ctx!: CanvasRenderingContext2D;
   private renderer!: Rendering;
   private angle!: number;
   private playerVelocity!: number; // Pixel pro Sekunde
-  
+
   // Spielobjekte
   private gamefield!: Gamefield;
   private player!: Player;
   private machineManager!: MachineManager;
   private machines: Machine[] = [];
-  
+
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
 
-  constructor() { }
+  constructor(private uiService: UIService) { }
 
 
   /**
    * Initialisiert das Spiel, setzt Startwerte und lädt Bilder vor.
    * @param ctx CanvasRenderingContext2D zum Zeichnen
    */
-  async init(ctx: CanvasRenderingContext2D) {
+  async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
+    // Initialisiere UI Service
+    this.uiService.init(ctxUI);
+
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
     this.angle = 0;
     this.renderer = new Rendering(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
-    
-    
+
+
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false };
-    
+
     // Lade benötigte Texturen vor
     await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"]);
-    
+
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
     this.player = new Player(
@@ -65,9 +69,9 @@ export class GameService {
       this.gamefield,
       this.renderer
     );
-    this.machineManager = new MachineManager(this.gamefield, this.renderer);
+    this.machineManager = new MachineManager(this.gamefield, this.renderer, this.uiService);
     this.machines = this.machineManager.getMachines();
-    
+
     // Füge Spielfeld zum Rendering-Buffer hinzu
     this.gamefield.updateMachines(this.machines);
     this.gamefield.addGameFieldToRenderingBuffer(this.renderer);
@@ -105,7 +109,7 @@ export class GameService {
     this.ctx.imageSmoothingEnabled = true;
     const loop = () => {
       if (!this.GameRunning) return;
-      
+
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
@@ -138,7 +142,7 @@ export class GameService {
 
 
 
-  
+
 
 
   /**
