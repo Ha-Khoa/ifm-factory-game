@@ -78,13 +78,14 @@ export class MachineManager {
    * @param player Hitbox des Spielers
    */
   checkForInteraction(player: Hitbox) {
-
-    MachineManager.machines.forEach(machine => {
+    let numberCollisions = 0;
+    for (let machine of MachineManager.machines)
+    {
       const accessDirection = machine.accessDirection;
       const interactionX = accessDirection === Direction.RIGHT ? machine.x + this._gamefield.fieldsize :
-        accessDirection === Direction.LEFT ? machine.x - this._gamefield.fieldsize : machine.x;
+                           accessDirection === Direction.LEFT ? machine.x - this._gamefield.fieldsize : machine.x;
       const interactionY = accessDirection === Direction.DOWN ? machine.y + this._gamefield.fieldsize :
-        accessDirection === Direction.UP ? machine.y - this._gamefield.fieldsize : machine.y;
+                           accessDirection === Direction.UP ? machine.y - this._gamefield.fieldsize : machine.y;
       const interactionWidth = this._gamefield.fieldsize;
       const interactionHeight = this._gamefield.fieldsize;
 
@@ -92,11 +93,13 @@ export class MachineManager {
 
       const collision = Collision.checkCollision(player, interactionHitbox);
       if (collision) {
-        this.updateMachineOnInteraction(machine, interactionHitbox);
-      } else {
-        this.resetMachineOnInteraction(machine, interactionHitbox);
+        numberCollisions++;
+        this.updateMachineOnInteraction(machine);
+        return;
       }
-    });
+    }
+    this.resetMachineOnInteraction();
+
   }
 
 
@@ -105,7 +108,7 @@ export class MachineManager {
    * @param machine Die Maschine, die interagiert wird
    * @param interactionHitbox Hitbox der Interaktionszone
    */
-  updateMachineOnInteraction(machine: Machine, interactionHitbox: Hitbox) {
+  updateMachineOnInteraction(machine: Machine) {
     this._renderer.deleteRenderingObjektByName(machine.name);
 
     this._renderer.addRenderObject(new RenderObject(
@@ -130,7 +133,8 @@ export class MachineManager {
    * @param machine Die Maschine
    * @param interactionHitbox Hitbox der Interaktionszone
    */
-  resetMachineOnInteraction(machine: Machine, interactionHitbox: Hitbox) {
+  resetMachineOnInteraction() {
+    MachineManager.machines.forEach((machine) => {
     this._renderer.deleteRenderingObjektByName(machine.name);
     this._renderer.addRenderObject(new RenderObject(
       machine.name,
@@ -147,22 +151,8 @@ export class MachineManager {
       ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
 
     ));
-    this._renderer.deleteRenderingObjektByName(`interactionField-${machine.id}`)
-
-    this._renderer.addRenderObject(new RenderObject(
-      `interactionField-${machine.id}`,
-      "rect",
-      interactionHitbox.x,
-      interactionHitbox.y,
-      0,
-      interactionHitbox.width,
-      interactionHitbox.height,
-      2,
-      undefined,
-      undefined,
-      "#eef114ff",
-      []
-    ));
-    this.ui.clearMachinePopUp(machine)
-  }
+    
+    this.ui.clearMachinePopUp()
+  })
+}
 }

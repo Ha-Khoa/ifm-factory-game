@@ -45,14 +45,14 @@ export class GameService {
    */
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
     // Initialisiere UI Service
-    this.uiService.init(ctxUI);
+    
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 0;
+    this.angle = 30 / 360 * Math.PI * 2;
     this.renderer = new Rendering(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
-
+    this.uiService.init(ctxUI, this.angle);
 
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false };

@@ -6,12 +6,14 @@ import { Machine } from '../models/machine/machine';
 })
 export class UIService {
   private ctxUI!: CanvasRenderingContext2D;
+  private _angle!: number;
 
   constructor() { }
 
-  async init(ctxUI: CanvasRenderingContext2D) {
+  async init(ctxUI: CanvasRenderingContext2D, angle: number) {
 
     this.ctxUI = ctxUI;
+    this._angle = angle;
 
   }
 
@@ -37,20 +39,22 @@ export class UIService {
     const radius = 20;
 
     // Position des Popups (muss noch richtig berechnet werden)
-    const x = machine.x;
-    const y = machine.y;
+    const x = machine.x - 50;
+    console.log(this._angle)
+    const y = machine.y * Math.cos(this._angle) - 200;
 
     // Test Variabeln: Müssen noch in machine.ts hinzugefügt werden
     const productionProgress = 50;
     const upgradecost = 2000;
 
     // Draw popup background
-
+    this.ctxUI.beginPath()
     this.ctxUI.fillStyle = '#fff';
     this.ctxUI.roundRect(x, y, popupWidth, popupHeight, radius);
     this.ctxUI.stroke()
     this.ctxUI.fill()
 
+    
     // Draw border
     if (machine.upgradable) {
       this.ctxUI.strokeStyle = 'green';
@@ -119,11 +123,11 @@ export class UIService {
     this.ctxUI.fill()
     this.ctxUI.fillStyle = 'black'
     this.ctxUI.fillText(`${upgradecost}`, x + center, currentY)
-
+    
   }
 
-  clearMachinePopUp(machine: Machine) {
-    this.ctxUI.clearRect(machine.x - 5, machine.y - 5, 160, 135)
+  clearMachinePopUp() {
+    this.ctxUI.clearRect(0, 0, this.ctxUI.canvas.width, this.ctxUI.canvas.height)
   }
 
 }
