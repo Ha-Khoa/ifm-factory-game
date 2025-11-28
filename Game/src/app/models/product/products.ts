@@ -5,8 +5,6 @@ import { Hitbox } from '../../interfaces/hitbox';
 import { Coordinates } from '../coordinates/coordinates';
 
 export class Products {
-
-
     //Einfach Produkte Liste für das frühe Spiel, später können wir komplexere Produkte mit mehreren Zutaten hinzufügen
     private static simple_productsList: Product[] =[
         {
