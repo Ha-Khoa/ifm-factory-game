@@ -2,6 +2,7 @@
 import { Machine } from "../machine/machine";
 import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
+import { ConveyorBelt } from "../conveyor-belt/conveyor-belt";
 
 /**
  * Gamefield-Klasse: Verwaltet das Spielfeld mit Umgebungsobjekten und interaktiven Objekten.
@@ -237,5 +238,17 @@ export class Gamefield {
             "#dddddd",
             ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
         ))
+    }
+
+    updateConveyorBelts(conveyorBelts: ConveyorBelt[]): void {
+        //Entfernt alte Förderbänder aus den interaktiven Objekten
+        this.interactableObjects = this.interactableObjects.filter (obj => !obj.name.startsWith('conveyor-'));
+
+        //Fügt die aktuellen Förderbänder hinzu
+        conveyorBelts.forEach(conveyor =>{
+            this.interactableObjects.push(conveyor)
+        });
+        // Aktualisiert den Rendering-Buffer
+        this.addGameFieldToRenderingBuffer();
     }
 }

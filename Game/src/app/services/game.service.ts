@@ -9,6 +9,8 @@ import { Hitbox } from '../interfaces/hitbox';
 import { RenderingService } from './rendering.service';
 import { Coordinates } from '../models/coordinates/coordinates';
 import { Products } from '../models/product/products';
+import { ConveyorBelt } from '../models/conveyor-belt/conveyor-belt';
+import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
 
 
 @Injectable({
@@ -35,6 +37,8 @@ export class GameService {
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
 
+
+  
   constructor() { }
 
 
