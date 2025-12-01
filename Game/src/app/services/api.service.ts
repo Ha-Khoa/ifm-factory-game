@@ -3,6 +3,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import {Player} from '../interfaces/ui/player';
+import {Machine} from '../interfaces/ui/machine';
+import {Factory} from '../interfaces/ui/factory';
 
 @Injectable({
   providedIn: 'root'
@@ -12,22 +15,60 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
-  // Holt den Score für einen Spieler (Name oder ID)
+  // Player Management
+  getPlayers(): Observable<Player[]> {
+    return this.http.get<Player[]>(`${this.baseUrl}/Players`);
+  }
+
+  getPlayer(identifier: string): Observable<Player> {
+    return this.http.get<Player>(`${this.baseUrl}/Player/${identifier}`);
+  }
+
+  createPlayer(username: string): Observable<Player> {
+    return this.http.post<Player>(`${this.baseUrl}/Player/${username}`, {});
+  }
+
+  deletePlayer(identifier: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/Player/${identifier}`);
+  }
+
+  // Score Management
   getScore(identifier: string): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/Score/${identifier}`);
   }
 
-  // Holt das Geld
+  updateScore(identifier: string, newScore: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/Score/${identifier}/${newScore}`, {});
+  }
+
+  // Money Management
   getMoney(identifier: string): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/Money/${identifier}`);
   }
-  
-  // Erstellt einen Spieler (falls noch nicht da)
-  createPlayer(username: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/Player/${username}`, {});
+
+  setMoney(identifier: string, value: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/Money/${identifier}/${value}`, {});
   }
 
-  updateScore(identifier: string, newScore: number): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/Score/${identifier}/${newScore}`, {});
+  addMoney(identifier: string, value: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/Money/${identifier}/Add/${value}`, {});
+  }
+
+  removeMoney(identifier: string, value: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/Money/${identifier}/Remove/${value}`, {});
+  }
+
+  // Machine Management
+  getMachine(factoryId: number, machineId: number): Observable<Machine> {
+    return this.http.get<Machine>(`${this.baseUrl}/Machine/${factoryId}/${machineId}`);
+  }
+
+  upgradeMachine(factoryId: number, machineId: number, level: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/Machine/${factoryId}/${machineId}/${level}`, {});
+  }
+
+  // Factory Management
+  getFactory(factoryId: number): Observable<Factory> {
+    return this.http.get<Factory>(`${this.baseUrl}/Factory/${factoryId}`);
   }
 }
