@@ -1,11 +1,19 @@
-import { RenderObject } from "./render-object"
+import { Hitbox } from "../interfaces/hitbox";
+import { RenderObject } from "../models/rendering/render-object"
+import { Projection } from "../interfaces/projection";
+import { Collision } from "../models/collision/collision";
+import { Coordinates } from "../models/coordinates/coordinates";
+import { Injectable } from "@angular/core";
 
 
 /**
  * Rendering-Klasse: Verwaltet alle Objekte im Rendering-Buffer und zeichnet sie auf das Canvas.
  * Sortiert Objekte nach Z-Koordinate, Priorität und Y-Position für korrekte Überlappung.
  */
-export class Rendering {
+@Injectable({
+  providedIn: 'root'
+})
+export class RenderingService {
 
     // Buffer mit allen zu rendernden Objekten
     private _renderingBuffer: RenderObject[] = [];
@@ -16,7 +24,22 @@ export class Rendering {
     // Winkel für isometrische Projektion
     private _angle!: number;
 
-    constructor(ctx: CanvasRenderingContext2D , images: { [key:string]: HTMLImageElement }, angle: number) {
+    // Singleton support
+    private static _instance: RenderingService | null = null;
+
+
+    static instance(): RenderingService {
+        if (!this._instance) {
+            this._instance = new RenderingService();
+        }
+        return this._instance;
+    }
+
+    
+
+    constructor() {}
+
+    init(ctx: CanvasRenderingContext2D , images: { [key:string]: HTMLImageElement }, angle: number) {
         this._ctx = ctx;
         this._images = images;
         this._angle = angle;
@@ -54,25 +77,11 @@ export class Rendering {
         this.sortRenderingBuffer();
     }
 
-    // Sortiert Rendering Buffer erst nach z-Wert, dann nach Priorität, dann nach y-Wert
-    sortRenderingBuffer() { 
-        const zCoordinates = Array.from(new Set(this._renderingBuffer.map(obj => obj.z)));
-        const priorities = Array.from(new Set(this._renderingBuffer.map(obj => obj.priority)));
-        zCoordinates.sort((a, b) => a - b);
-        priorities.sort((a, b) => a - b);
-        const newRenderBuffer: RenderObject[] = [];
-
-        zCoordinates.forEach((z) => {
-            const zRenderBuffer = this._renderingBuffer.filter((obj) => obj.z === z);
-            priorities.forEach((priority) => {
-                const priorityRenderBuffer = zRenderBuffer.filter((obj) => obj.priority === priority);
-                priorityRenderBuffer.sort((a, b) => a.y + a.height - (b.y + b.height));
-                newRenderBuffer.push(...priorityRenderBuffer);
-            });
-        });
-
-        this._renderingBuffer = newRenderBuffer;
+    sortRenderingBuffer() {
+        this._renderingBuffer.sort((a, b) => (a.y * 10 + a.z * 20 + a.priority * 5) - (b.y * 10 + b.z * 20 + b.priority * 5) );
+        console.log(this._renderingBuffer.length)
     }
+
 
     /**
      * Sucht ein RenderObject anhand seiner ID.
@@ -97,7 +106,9 @@ export class Rendering {
      * @param id Die ID des zu löschenden Objekts
      */
     deleteRenderingObjektByID(id: number): void {
+        console.log(this._renderingBuffer.length);
         this._renderingBuffer = this._renderingBuffer.filter((obj) => obj.id !== id);
+        console.log(this._renderingBuffer.length);
     }
 
     /**
@@ -113,6 +124,7 @@ export class Rendering {
      * Wendet isometrische Projektion an und zeichnet Rechtecke mit 3D-Tiefeneffekt oder Bilder.
      */
     render(): void {
+        if (!this._ctx) return;
         this._renderingBuffer.forEach((Obj) => {
             // Berechne isometrische Projektion
             const zTransform = Obj.z * Math.sin(this._angle)
@@ -176,11 +188,10 @@ export class Rendering {
     setTimeout(() => {
       if(this._angle <= 30/360*2*Math.PI)
       {
-            this._angle += (Math.log(this._angle + 1.01) * 0.003);
+            this._angle += (Math.sqrt(this._angle + 1.01) * 0.0008);
       }
             }, 1000);
-          
-
+        
 /*
     if(this.renderer.angle <= 90/360*2*Math.PI && !this.rotationDirection)
     {

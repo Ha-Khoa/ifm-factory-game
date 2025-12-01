@@ -6,9 +6,10 @@ import { Machine } from '../models/machine/machine';
 import { Player } from '../models/player/player';
 import { MachineManager } from '../models/machine/machine-manager';
 import { Hitbox } from '../interfaces/hitbox';
-import { Rendering } from '../models/rendering/rendering';
-import { RenderObject } from '../models/rendering/render-object';
+import { RenderingService } from './rendering.service';
 import { Coordinates } from '../models/coordinates/coordinates';
+import { UIService } from './ui.service';
+import { Products } from '../models/product/products';
 
 
 @Injectable({
@@ -18,59 +19,63 @@ export class GameService {
 
   // Gibt an, ob das Spiel aktuell läuft
   private GameRunning!: boolean;
-  
+
   // Canvas und Rendering
   private ctx!: CanvasRenderingContext2D;
-  private renderer!: Rendering;
+  private renderer!: RenderingService;
   private angle!: number;
   private playerVelocity!: number; // Pixel pro Sekunde
-  
+
   // Spielobjekte
   private gamefield!: Gamefield;
   private player!: Player;
   private machineManager!: MachineManager;
   private machines: Machine[] = [];
-  
+
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
 
-  constructor() { }
+  constructor(private uiService: UIService) { }
 
 
   /**
    * Initialisiert das Spiel, setzt Startwerte und lädt Bilder vor.
    * @param ctx CanvasRenderingContext2D zum Zeichnen
    */
-  async init(ctx: CanvasRenderingContext2D) {
+  async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
+    // Initialisiere UI Service
+    
+
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 0;
-    this.renderer = new Rendering(this.ctx, this.images, this.angle);
+    this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.renderer = RenderingService.instance();
+    this.renderer.init(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
-    
-    
+    this.uiService.init(ctxUI, this.angle);
+
     // Initialisiere Eingaben
-    this.inputs = { 'w': false, 'a': false, 's': false, 'd': false };
+    this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
     
     // Lade benötigte Texturen vor
     await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"]);
-    
+
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
     this.player = new Player(
       new Hitbox(new Coordinates(50, 50), 40, 40),
       "",
       this.playerVelocity,
-      this.gamefield,
-      this.renderer
+      this.gamefield
     );
-    this.machineManager = new MachineManager(this.gamefield, this.renderer);
+    this.machineManager = new MachineManager(this.gamefield, this.uiService, this.inputs);
     this.machines = this.machineManager.getMachines();
-    
+
     // Füge Spielfeld zum Rendering-Buffer hinzu
-    this.gamefield.updateMachines(this.machines);
-    this.gamefield.addGameFieldToRenderingBuffer(this.renderer);
+    this.machineManager.addToInteractableObjects();
+    this.gamefield.addGameFieldToRenderingBuffer();
+    Products.generateProducts();
   }
 
   /**
@@ -105,20 +110,27 @@ export class GameService {
     this.ctx.imageSmoothingEnabled = true;
     const loop = () => {
       if (!this.GameRunning) return;
-      
+
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
       // Update-Phase
       this.player.changeVelocity();
       this.player.updatePlayer();
-      this.machineManager.checkForInteraction(this.player.hitbox);
+      
+      this.machineManager.checkForInteraction(this.player);
       this.renderer.rotateMap();
+      // Interaktionslogik: erst aufnehmen, sonst ablegen
+      this.player.pickProduct();
+      this.player.dropProduct();
+      
+
 
       // Render-Phase
       this.player.render();
+      this.player.updateProductInHand();
       this.renderer.render();
-
+      
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
@@ -138,7 +150,7 @@ export class GameService {
 
 
 
-  
+
 
 
   /**

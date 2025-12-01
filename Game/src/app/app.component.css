@@ -1,14 +1,15 @@
 .game-container {
-  position: relative;        /* Referenzpunkt für HUD */
-  width: 100%;               /* volle Breite des Containers */
-  height: 100%;              /* volle Höhe */
-  margin: 0 auto;            /* zentriert auf der Seite */
-  overflow: hidden;
-  max-width: 1000px;
+  position: relative;
+  /* Referenzpunkt für HUD */
+  width: 100%;
+  /* volle Breite des Containers */
+  height: 100%;
+  /* volle Höhe */
 }
 
 app-hud {
-  position: absolute;        /* innerhalb des Wrappers */
+  position: absolute;
+  /* innerhalb des Wrappers */
   top: 5px;
   right: 335px;
   gap: 10px;
@@ -21,4 +22,16 @@ app-settings {
   right: 10px;
   gap: 10px;
   z-index: 100;
+}
+
+.game-container canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.game-container canvas .ui {
+  z-index: 10;
 }

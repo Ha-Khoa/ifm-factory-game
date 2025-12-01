@@ -1,9 +1,10 @@
 import { Hitbox } from '../../interfaces/hitbox';
 import { Coordinates } from '../coordinates/coordinates';
-import { Product } from "../../interfaces/product";
+import { Product } from "../product/product";
+import { Products } from '../product/products';
 import { Collision } from "../collision/collision";
 import { Gamefield } from '../gamefield/gamefield';
-import { Rendering } from '../rendering/rendering';
+import { RenderingService } from '../../services/rendering.service';
 import { Direction, KEY_TO_DIRECTION } from '../../enums/direction';
 import { RenderObject } from '../rendering/render-object';
 
@@ -12,6 +13,7 @@ import { RenderObject } from '../rendering/render-object';
  */
 export class Player {
 
+    private _position!: Coordinates;
     // Hitbox des Spielers für Kollisionserkennung
     private _hitbox!: Hitbox;
     // Bild/Sprite des Spielers
@@ -28,35 +30,39 @@ export class Player {
     private _gamefield: Gamefield;
     // Aktuelle Bewegungsrichtung
     private _direction!: Direction | null;
-    // Referenz zum Renderer
-    private _renderer: Rendering
+
+    private _directionPressed!: boolean;
+
     // RenderObject für die Darstellung auf dem Canvas
     private _renderingObject: RenderObject;
-    
-    constructor(hitbox: Hitbox, img: string, velocity: number, gamefield: Gamefield, renderer: Rendering) {
+    private _z!: number;
+    private _input: Record<string, boolean> = {};
+    private _canInteractProduct: boolean = false;
+    private _interacted: boolean = false;
+    constructor(hitbox: Hitbox, img: string, velocity: number, gamefield: Gamefield) {
         this._hitbox = hitbox;
+        this._position = hitbox.position
         this._img = img;
         this._velocity = velocity;
         this._gamefield = gamefield;
-        this._renderer = renderer;
         this._direction = null;
-
+        this._z = 50;
         this._renderingObject = new RenderObject(
             "player",
             "rect",
-            this._hitbox.x,
-            this._hitbox.y,
-            0,
+            this._position.x,
+            this._position.y,
+            this._z,
             this._hitbox.width,
             this._hitbox.height,
-            3,
+            (this._z - 50) * -4,
             undefined,
             undefined,
             "red",
-            []
+            ["red"]
         );
 
-        renderer.addRenderObject(this._renderingObject);
+        RenderingService.instance().addRenderObject(this._renderingObject);
     }
 
 
@@ -64,25 +70,49 @@ export class Player {
      * Aktualisiert die Position des RenderObjects basierend auf der aktuellen Hitbox.
      */
     render() {
-        this._renderingObject.x = this.hitbox.x;
-        this._renderingObject.y = this.hitbox.y;
-        this._renderer.updateRenderingObject("player", this._renderingObject);
+        this._renderingObject.x = this._position.x;
+        this._renderingObject.y = this._position.y;
+        RenderingService.instance().updateRenderingObject("player", this._renderingObject);
     }
 
+    updateProductInHand() {
+       if(this._direction === null) { return }
+        const newPositionX = this._direction === Direction.RIGHT ? this._position.x + this._hitbox.width -  Products.size / 2 :
+                     this._direction === Direction.LEFT ? this._position.x - Products.size / 2 :
+                     this._direction === Direction.UP ? this._position.x + this._hitbox.width / 2 - Products.size / 2 :
+                     this._direction === Direction.DOWN ? this._position.x + this._hitbox.width / 2 - Products.size / 2 :
+                     this._position.x;
+        const newPositionY = this._direction === Direction.DOWN ? this._position.y + this._hitbox.height - Products.size / 2 :
+                     this._direction === Direction.UP ? this._position.y - Products.size / 2 :
+                     this._direction === Direction.LEFT ? this._position.y + this._hitbox.height / 2 - Products.size / 2 :
+                     this._direction === Direction.RIGHT ? this._position.y + this._hitbox.height / 2 - Products.size / 2 :
+                     this._position.y;
+        if(this._inventory !== null) {
+            // Position setzen aktualisiert automatisch das RenderObject in der Product-Klasse
+            this._inventory.position = new Coordinates(newPositionX, newPositionY);
+        }
+    }
+
+    
     /**
      * Setzt die Eingabe-Richtung basierend auf gedrückten Tasten.
      * @param input Record mit Tastenstatus (z.B. {'w': true, 'a': false})
      */
     setInput(input: Record<string, boolean>) {
+        this._input  = input;
         let numPressed = 0;
         for (const [key, pressed] of Object.entries(input)) {
-            if (pressed) {
+            if (pressed && key in KEY_TO_DIRECTION) {
                 this._direction = KEY_TO_DIRECTION[key];
                 numPressed++;
             }
         }
         if (numPressed === 0) {
-            this._direction = null;
+            this._directionPressed = false;
+        }
+        else
+        {
+            this._directionPressed = true;
         }
     }
 
@@ -114,25 +144,26 @@ export class Player {
                         : this._direction === Direction.LEFT ? -this._frameVelocity : 0;
         const velocityY = this._direction === Direction.DOWN ? this._frameVelocity
                         : this._direction === Direction.UP ? -this._frameVelocity : 0;
-        
+        if(this._directionPressed)
+            {
         for (const obj of this._gamefield.interactableObjects) {
             const objHitbox = new Hitbox(new Coordinates(obj.x, obj.y), obj.width, obj.height);
             const collision = Collision.checkCollisionNextFrame(this._hitbox, objHitbox, velocityX, velocityY);
             const borderCollision = Collision.checkObjectOutBoarder(this._hitbox, velocityX, velocityY, this._gamefield);
-
+            
             if (collision) {
                 switch (this._direction) {
                     case Direction.UP:
-                        this._hitbox.y = collision.y + collision.height;
+                        this._position.y = collision.y + collision.height;
                         break;
                     case Direction.DOWN:
-                        this._hitbox.y = collision.y - this._hitbox.height;
+                        this._position.y = collision.y - this._hitbox.height;
                         break;
                     case Direction.LEFT:
-                        this._hitbox.x = collision.x + collision.width;
+                        this._position.x = collision.x + collision.width;
                         break;
                     case Direction.RIGHT:
-                        this._hitbox.x = collision.x - this._hitbox.width;
+                        this._position.x = collision.x - this._hitbox.width;
                         break;
                 }
                 return;
@@ -141,16 +172,16 @@ export class Player {
             if (borderCollision) {
                 switch (this._direction) {
                     case Direction.UP:
-                        this._hitbox.y = 0;
+                        this._position.y = 0;
                         break;
                     case Direction.DOWN:
-                        this._hitbox.y = this._gamefield.fieldsize * this._gamefield.rows - this.hitbox.height;
+                        this._position.y = this._gamefield.fieldsize * this._gamefield.rows - this.hitbox.height;
                         break;
                     case Direction.LEFT:
-                        this._hitbox.x = 0;
+                        this._position.x = 0;
                         break;
                     case Direction.RIGHT:
-                        this._hitbox.x = this._gamefield.fieldsize * this._gamefield.cols - this.hitbox.width;
+                        this._position.x = this._gamefield.fieldsize * this._gamefield.cols - this.hitbox.width;
                         break;
                 }
                 return;
@@ -158,29 +189,56 @@ export class Player {
 
         }
         // Keine Kollision, bewege den Spieler
-        this._hitbox.x += velocityX;
-        this._hitbox.y += velocityY;
+        this._position.x += velocityX;
+        this._position.y += velocityY;
     } 
+}
 
 
     /**
-     * Nimmt ein Produkt auf und legt es ins Inventar.
-     * @param product Das aufzunehmende Produkt
+     * Versucht ein Produkt aufzunehmen, wenn E gedrückt wurde und kein Produkt getragen wird.
      */
-    pickUpProduct(product: Product) {
-        this._inventory = product;
+    pickProduct(): Product | null {
+        if (this._input['e']) {
+            if (!this._interacted) {
+                this._canInteractProduct = true;
+                this._interacted = true;
+            }
+        } else {
+            this._interacted = false;
+        }
+        if (this._canInteractProduct && this._inventory === null) {
+            this._inventory = Products.checkForInteraction(this._hitbox);
+            console.log("Produkt aufgenommen:", this._inventory);
+            this._canInteractProduct = false;
+            return this._inventory;
+        }
+        return null;
     }
-    
+
     /**
-     * Lässt das Produkt aus dem Inventar fallen.
-     * @returns Das gefallene Produkt oder null, wenn Inventar leer
+     * Versucht ein getragenes Produkt abzulegen, wenn E gedrückt wurde.
+     * addToMap: true → Produkt in Weltliste aufnehmen, false → nur aus Hand entfernen
      */
     dropProduct(): Product | null {
-        const droppedProduct = this._inventory;
-        this._inventory = null;
-        return droppedProduct;
+        if (this._input['e']) {
+            if (!this._interacted) {
+                this._canInteractProduct = true;
+                this._interacted = true;
+            }
+        } else {
+            this._interacted = false;
+        }
+        if (this._canInteractProduct && this._inventory !== null) {
+            console.log("Produkt abgelegt:", this._inventory);
+            const droppedProduct = this._inventory;
+            this._inventory = null;
+            this._canInteractProduct = false;
+            return droppedProduct;
+        }
+        return null;
     }
-
+    
     // Getters / Setters
     get hitbox(): Hitbox { return this._hitbox; }
     set hitbox(v: Hitbox) { this._hitbox = v; }
@@ -193,4 +251,5 @@ export class Player {
 
     get inventory(): Product | null { return this._inventory; }
     set inventory(v: Product | null) { this._inventory = v; }
+
 }

@@ -20,7 +20,7 @@ export class RenderObject {
     private _y!: number;
     // Z-Position (Höhe) in Weltkoordinaten
     private _z!: number;
-    // Render-Priorität (höher = später gerendert = im Vordergrund)
+    // Render-Priorität NUR ÄNDERN BEI RENDERFEHLERN
     private _priority!: number;
     // Breite in Pixeln
     private _width!: number;
@@ -90,4 +90,21 @@ export class RenderObject {
 
     get priority(): number { return this._priority }
     set priority(v: number) { this._priority = v; }
+    
+    get copy(): RenderObject {
+        return new RenderObject(
+            this._name,
+            this._type,
+            this._x,
+            this._y,
+            this._z,
+            this._width,
+            this._height,
+            this._priority,
+            this._img!,
+            this._imgWall!,
+            this._rectColor!,
+            this._rectLayers!
+        );
+    }
 }

@@ -1,154 +1,233 @@
-import { timeInterval } from "rxjs/internal/operators/timeInterval";
-import { Product } from "../../interfaces/product";
-import { input } from "@angular/core";
+import { Product } from "../product/product";
 import { Direction } from "../../enums/direction";
+import { RenderObject } from "../rendering/render-object";
+import { RenderingService } from "../../services/rendering.service";
+import { Products } from "../product/products";
 
 /**
  * Machine-Klasse: Repräsentiert eine Produktionsmaschine im Spiel.
- * Verarbeitet Input-Produkte und produziert Output-Produkte nach festgelegter Zeit.
+ * Verarbeitet Input-Produkte und produziert nach einer festgelegten Zeit ein Output-Produkt.
  */
 export class Machine {
 
-    // Statisches Array aller Maschinen
-    public static Machines: Machine[] = [
+  // Statische Eigenschaften
+  public static Machines: Machine[] = [];
+  static lastID: number = 0;
 
-    ];
+  // Identifikation & Status
+  private _id: number;
+  private _name!: string;
+  private _unlocked: boolean = false;
+  private _level: number = 1;
+  private _upgradable: boolean = true;
 
-    // Statischer Zähler für eindeutige IDs
-    static lastID: number = 0;
-    // Eindeutige ID der Maschine
-    private _id: number;
-    // Ist die Maschine freigeschaltet?
-    private _unlocked: boolean = false;
-    // Bild für freigeschaltete Maschine
-    private _imgUnlocked!: string;
-    // Bild für gesperrte Maschine
-    private _imgLocked!: string;
-    // Level der Maschine (für Upgrades)
-    private _level: number = 1;
-    // X-Position in Weltkoordinaten
-    private _x: number;
-    // Y-Position in Weltkoordinaten
-    private _y: number;
-    // Breite in Pixeln
-    private _width!: number;
-    // Höhe in Pixeln
-    private _height!: number;
-    // Name der Maschine
-    private _name!: string;
-    // Produktionsrate in Millisekunden
-    private _productionRate!: number;
-    // Richtung von der aus Interaktion möglich ist
-    private _accessDirection!: Direction;
-    // Aktuelles Inventar der Maschine
-    private _inventory: Product[] = [];
-    // Benötigte Input-Produkte für Produktion
-    private _inputRequirements: Product[] = [];
-    // Output-Produkt das produziert wird
-    private _outputProduct!: Product;
+  // Visuelle Darstellung
+  private _imgUnlocked!: string;
+  private _imgLocked!: string;
+  private _renderObject!: RenderObject;
 
-    constructor(x: number, y: number, width: number, height: number, name: string, imgUnlocked: string, imgLocked: string, accessDirection: Direction, outputProduct: Product, inputRequirements: Product[])
-    {
-        this._x = x;
-        this._y = y;
-        this._width = width;
-        this._height = height;
-        this._id = Machine.lastID++;
-        this._name = name;
-        this._accessDirection = accessDirection;
-        this._inputRequirements = inputRequirements;
-        this._outputProduct = outputProduct;
-        this._productionRate = 5000; 
-        this._imgLocked = imgLocked;
-        this._imgUnlocked = imgUnlocked;
-    }
+  // Position & Größe
+  private _x: number;
+  private _y: number;
+  private _width!: number;
+  private _height!: number;
 
-  
+  // Produktionslogik
+  private _productionRate!: number;
+  private _productionTimer: number;
+  private _accessDirection!: Direction;
+  private _inventory: Product[] = [];
+  private _inputRequirements: Product[] = [];
+  private _outputProduct!: Product;
 
-
-    /**
-     * Produziert ein Produkt nach der festgelegten Produktionszeit.
-     * @returns Promise mit dem produzierten Produkt
-     */
-    private async produce(): Promise<Product> {
-       return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(this._outputProduct);
-            }, this._productionRate);
-    });
-    }
-
-    /**
-     * Fügt ein Produkt zur Maschine hinzu und startet Produktion wenn alle Inputs vorhanden.
-     * @param Product Das hinzuzufügende Produkt
-     * @returns Promise mit true (erfolgreich hinzugefügt), false (nicht benötigt) oder produziertem Produkt
-     */
-    async addProduct(Product: Product): Promise<boolean | Product> {
-        return new Promise((resolve) => {
-        if (this._inputRequirements.find(req => req.name === Product.name) 
-            && this._inventory.find(inv => inv.name === Product.name) === undefined) {
-            this._inventory.push(Product);
-            if(this._inventory.length === this._inputRequirements.length) {
-            resolve(this.produce());
-            }
-            else
-            {
-                resolve(true);
-            }
-        } 
-        else {
-            resolve(false);
-        }
-        
-        });
-    }
-
+  /**
+   * Erstellt eine neue Maschine
+   * 
+   * @param x X-Position in Weltkoordinaten
+   * @param y Y-Position in Weltkoordinaten
+   * @param width Breite der Maschine in Pixeln
+   * @param height Höhe der Maschine in Pixeln
+   * @param name Name/Typ der Maschine
+   * @param imgUnlocked Bild-Pfad für freigeschalteten Zustand
+   * @param imgLocked Bild-Pfad für gesperrten Zustand
+   * @param accessDirection Richtung für Spieler-Interaktion
+   * @param outputProduct Das zu produzierende Endprodukt
+   * @param inputRequirements Liste der benötigten Input-Produkte
+   */
+  constructor(
+    x: number, 
+    y: number, 
+    width: number, 
+    height: number, 
+    name: string, 
+    imgUnlocked: string, 
+    imgLocked: string, 
+    accessDirection: Direction, 
+    outputProduct: Product, 
+    inputRequirements: Product[]
+  ) {
+    // Position und Größe setzen
+    this._x = x;
+    this._y = y;
+    this._width = width;
+    this._height = height;
     
+    // ID und Grundeinstellungen
+    this._id = Machine.lastID++;
+    this._name = name;
+    this._accessDirection = accessDirection;
+    
+    // Produktionslogik initialisieren
+    this._inputRequirements = inputRequirements;
+    this._outputProduct = outputProduct;
+    this._productionRate = 5000; // 5 Sekunden Standard-Produktionszeit
+    this._productionTimer = this._productionRate / 1000; // Timer in Sekunden
+    
+    // Bilder setzen
+    this._imgLocked = imgLocked;
+    this._imgUnlocked = imgUnlocked;
 
-    /**
-     * Schaltet die Maschine frei.
-     */
-    unlockMachine() {
-        this._unlocked = true;
+    // RenderObject erstellen und zum RenderingService hinzufügen
+    this._renderObject = new RenderObject(
+      this._name,                           // Eindeutiger Name
+      "rect",                               // Typ: Rechteck
+      this._x,                              // X-Position
+      this._y,                              // Y-Position
+      50,                                   // Z-Position
+      this._width,                          // Breite
+      this._height,                         // Höhe
+      0,                                    // Priorität
+      undefined,                            // Kein Bild (noch)
+      undefined,                            // Keine zusätzlichen Optionen
+      "rgba(200, 206, 255, 1)",            // Basis-Farbe (helles Blau)
+      ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"] // Farbverlauf
+    );
+
+    // Maschine zum RenderingService hinzufügen
+    RenderingService.instance().addRenderObject(this._renderObject);
+  }
+
+
+
+
+  /**
+   * Startet die Produktion und gibt das fertige Produkt nach Ablauf der Zeit zurück.
+   * Zählt jede Sekunde den Timer herunter und leert danach das Inventar.
+   */
+  private async produce(): Promise<Product> {
+    return new Promise(async (resolve) => {
+      const interval = setInterval(() => {
+        this._productionTimer -= 1;
+        console.log(`${this._name} Produktion: ${this._productionTimer}s verbleibend`);
+
+        if (this._productionTimer <= 0) {
+          clearInterval(interval);
+          this._productionTimer = this._productionRate / 1000;
+          this._inventory = [];
+          resolve(this._outputProduct);
+        }
+      }, 1000);
+    });
+  }
+  /**
+   * Fügt ein Produkt zur Maschine hinzu. Wenn alle benötigten Inputs vorhanden sind,
+   * startet die Produktion automatisch.
+   * 
+   * @returns true = Produkt hinzugefügt, false = nicht benötigt, Product = Produktion abgeschlossen
+   */
+  async addProduct(Product: Product): Promise<boolean | Product> {
+    return new Promise((resolve) => {
+      const isRequired = this._inputRequirements.find(req => req.id === Product.id);
+      const alreadyInInventory = this._inventory.find(inv => inv.id === Product.id);
+
+      if (isRequired && alreadyInInventory === undefined) {
+        this._inventory.push(Product);
+        
+        // Alle Inputs vorhanden? Starte Produktion
+        if (this._inventory.length === this._inputRequirements.length) {
+          //Product.destroy();
+          this._inventory.forEach(prod => prod.destroy());
+          resolve(this.produce());
+        } else {
+          resolve(true);
+        }
+      } else {
+        resolve(false);
+      }
+    });
+  }
+
+  /**
+   * Upgradet die Maschine: Erhöht das Level und verringert die Produktionszeit um 1 Sekunde.
+   */
+  upgrade(): void {
+    if (this._upgradable) {
+      this._level += 1;
+      this._productionRate -= 1000;
+      console.log(`${this._name} upgraded auf Level ${this._level}!`);
     }
+  }
 
-    // Getters / Setters
-    get id(): number { return this._id; }
+  // Getters & Setters
+  
+  /** Eindeutige ID der Maschine (read-only) */
+  get id(): number { return this._id; }
 
-    get unlocked(): boolean { return this._unlocked; }
-    set unlocked(v: boolean) { this._unlocked = v; }
+  /** Ist die Maschine freigeschaltet? */
+  get unlocked(): boolean { return this._unlocked; }
+  set unlocked(v: boolean) { this._unlocked = v; }
 
-    get imgUnlocked(): string { return this._imgUnlocked; }
-    set imgUnlocked(v: string) { this._imgUnlocked = v; }
+  /** Bild für freigeschalteten Zustand */
+  get imgUnlocked(): string { return this._imgUnlocked; }
+  set imgUnlocked(v: string) { this._imgUnlocked = v; }
 
-    get imgLocked(): string { return this._imgLocked; }
-    set imgLocked(v: string) { this._imgLocked = v; }
+  /** Bild für gesperrten Zustand */
+  get imgLocked(): string { return this._imgLocked; }
+  set imgLocked(v: string) { this._imgLocked = v; }
 
-    get level(): number { return this._level; }
-    set level(v: number) { this._level = v; }
+  /** Aktuelles Level der Maschine */
+  get level(): number { return this._level; }
+  set level(v: number) { this._level = v; }
 
-    get x(): number { return this._x; }
-    set x(v: number) { this._x = v; }
+  /** Kann die Maschine upgegradet werden? */
+  get upgradable(): boolean { return this._upgradable; }
+  set upgradable(b: boolean) { this._upgradable = b; }
 
-    get y(): number { return this._y; }
-    set y(v: number) { this._y = v; }
+  /** X-Position in Weltkoordinaten */
+  get x(): number { return this._x; }
+  set x(v: number) { this._x = v; }
 
-    // width/height are usually fixed for a machine; expose read-only getters
-    get width(): number { return this._width; }
+  /** Y-Position in Weltkoordinaten */
+  get y(): number { return this._y; }
+  set y(v: number) { this._y = v; }
 
-    get height(): number { return this._height; }
+  /** Breite der Maschine (read-only, Maschinen ändern ihre Größe nicht) */
+  get width(): number { return this._width; }
 
-    get name(): string { return this._name; }
+  /** Höhe der Maschine (read-only, Maschinen ändern ihre Größe nicht) */
+  get height(): number { return this._height; }
 
-    get productionRate(): number { return this._productionRate; }
-    set productionRate(v: number) { this._productionRate = v; }
+  /** Name/Typ der Maschine (read-only) */
+  get name(): string { return this._name; }
 
-    get accessDirection(): Direction { return this._accessDirection; }
+  /** Produktionsrate in Millisekunden */
+  get productionRate(): number { return this._productionRate; }
+  set productionRate(v: number) { this._productionRate = v; }
 
-    get inventory(): Product[] { return this._inventory; }
+  /** Richtung für Spieler-Interaktion (read-only) */
+  get accessDirection(): Direction { return this._accessDirection; }
 
-    get inputRequirements(): Product[] { return this._inputRequirements; }
+  /** Aktuelles Inventar der Maschine (read-only) */
+  get inventory(): Product[] { return this._inventory; }
 
-    get outputProduct(): Product { return this._outputProduct; }
-    set outputProduct(v: Product) { this._outputProduct = v; }
+  /** Benötigte Input-Produkte (read-only) */
+  get inputRequirements(): Product[] { return this._inputRequirements; }
+
+  /** Das zu produzierende Output-Produkt */
+  get outputProduct(): Product { return this._outputProduct; }
+  set outputProduct(v: Product) { this._outputProduct = v; }
+
+  /** RenderObject für die visuelle Darstellung */
+  get renderObject(): RenderObject { return this._renderObject; }
+  set renderObject(v: RenderObject) { this._renderObject = v; }
 }
