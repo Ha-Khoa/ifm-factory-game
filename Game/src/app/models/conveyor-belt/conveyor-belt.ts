@@ -83,7 +83,7 @@ export class ConveyorBelt extends RenderObject{
                 maxAllowedProgress = frontProduct.progress - minDistance;
             }
             
-            let newProgress = productData.progress + this._speed * deltaTime;
+            let newProgress = productData.progress + this._speed * (deltaTime / 1000);
             if (newProgress > maxAllowedProgress){
                 newProgress = maxAllowedProgress;
             }

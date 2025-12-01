@@ -52,7 +52,6 @@ export class RenderingService {
     addRenderObject(renderObject: RenderObject) {
         this._renderingBuffer.push(renderObject);
         this.sortRenderingBuffer();
-        console.log(this._renderingBuffer[this._renderingBuffer.length - 1].name, 1)
     }
 
     /**
@@ -75,8 +74,13 @@ export class RenderingService {
     updateRenderingObject(name: string, renderObject: RenderObject)
     {
         const index = this._renderingBuffer.findIndex(Obj => Obj.name === name);
-        this._renderingBuffer[index] = renderObject;
-        this.sortRenderingBuffer();
+        if (index === -1) {
+            // Fallback: wenn Objekt nicht existiert, füge es hinzu statt den Buffer zu korrupten
+            this.addRenderObject(renderObject);
+        } else {
+            this._renderingBuffer[index] = renderObject;
+            this.sortRenderingBuffer();
+        }
     }
 
     sortRenderingBuffer() {
@@ -186,13 +190,12 @@ export class RenderingService {
    */
   async rotateMap()
   {
-
-    setTimeout(() => {
-      if(this._angle <= 30/360*2*Math.PI)
-      {
-            this._angle += (Math.sqrt(this._angle + 1.01) * 0.0008);
-      }
-            }, 1000);
+        // Incrementiere den Winkel leicht pro Frame ohne Timer-Flut
+        const max = 30/360*2*Math.PI;
+        if (this._angle < max) {
+            this._angle += 0.0005;
+            if (this._angle > max) this._angle = max;
+        }
         
 /*
     if(this.renderer.angle <= 90/360*2*Math.PI && !this.rotationDirection)

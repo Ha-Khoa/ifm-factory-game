@@ -219,6 +219,10 @@ export class Gamefield {
         //Fügt die aktuellen Förderbänder hinzu
         conveyorBelts.forEach(conveyor =>{
             this.interactableObjects.push(conveyor)
+            // Stelle sicher, dass neue Förderbänder auch im Renderer landen
+            if (!RenderingService.instance().getRenderingObjektByName(conveyor.name)) {
+                RenderingService.instance().addRenderObject(conveyor);
+            }
         });
     }
 }

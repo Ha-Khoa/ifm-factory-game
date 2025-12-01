@@ -31,6 +31,7 @@ export class GameService {
   private gamefield!: Gamefield;
   private player!: Player;
   private machineManager!: MachineManager;
+  private conveyorBeltManager!: ConveyorBeltManager;
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
@@ -53,7 +54,7 @@ export class GameService {
     this.renderer.init(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
     this.uiService.init(ctxUI, this.angle);
-
+    
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
 
@@ -73,6 +74,7 @@ export class GameService {
     this.machineManager.addToInteractableObjects();
     this.gamefield.addGameFieldToRenderingBuffer();
     this.gamefield.updateConveyorBelts(ConveyorBeltManager.getConveyorBelts());
+    this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
     Products.generateProducts();
   }
 
@@ -124,7 +126,8 @@ export class GameService {
       this.player.pickProduct();
       this.player.dropProduct();
 
-
+      this.conveyorBeltManager.update();
+      this.conveyorBeltManager.refreshGamefield();
 
       // Render-Phase
       this.player.render();
