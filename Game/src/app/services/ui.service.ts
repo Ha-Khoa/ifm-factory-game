@@ -54,7 +54,7 @@ export class UIService {
     this.ctxUI.stroke()
     this.ctxUI.fill()
 
-    
+
     // Draw border
     if (machine.upgradable) {
       this.ctxUI.strokeStyle = 'green';
@@ -79,7 +79,7 @@ export class UIService {
     currentY += lineHeight;
 
     this.ctxUI.font = 'italic 16px Arial';
-    this.ctxUI.fillText(`${name}`, x + center, currentY);
+    this.ctxUI.fillText(`${machine.name}`, x + center, currentY);
 
     currentY += lineHeight;
 
@@ -123,7 +123,7 @@ export class UIService {
     this.ctxUI.fill()
     this.ctxUI.fillStyle = 'black'
     this.ctxUI.fillText(`${upgradecost}`, x + center, currentY)
-    
+
   }
 
   clearMachinePopUp() {
