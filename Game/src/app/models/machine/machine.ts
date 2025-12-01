@@ -42,7 +42,7 @@ export class Machine {
 
   /**
    * Erstellt eine neue Maschine
-   * 
+   *
    * @param x X-Position in Weltkoordinaten
    * @param y Y-Position in Weltkoordinaten
    * @param width Breite der Maschine in Pixeln
@@ -55,15 +55,15 @@ export class Machine {
    * @param inputRequirements Liste der benötigten Input-Produkte
    */
   constructor(
-    x: number, 
-    y: number, 
-    width: number, 
-    height: number, 
-    name: string, 
-    imgUnlocked: string, 
-    imgLocked: string, 
-    accessDirection: Direction, 
-    outputProduct: Product, 
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    name: string,
+    imgUnlocked: string,
+    imgLocked: string,
+    accessDirection: Direction,
+    outputProduct: Product,
     inputRequirements: Product[]
   ) {
     // Position und Größe setzen
@@ -71,18 +71,18 @@ export class Machine {
     this._y = y;
     this._width = width;
     this._height = height;
-    
+
     // ID und Grundeinstellungen
     this._id = Machine.lastID++;
     this._name = name;
     this._accessDirection = accessDirection;
-    
+
     // Produktionslogik initialisieren
     this._inputRequirements = inputRequirements;
     this._outputProduct = outputProduct;
     this._productionRate = 5000; // 5 Sekunden Standard-Produktionszeit
     this._productionTimer = this._productionRate / 1000; // Timer in Sekunden
-    
+
     // Bilder setzen
     this._imgLocked = imgLocked;
     this._imgUnlocked = imgUnlocked;
@@ -132,7 +132,7 @@ export class Machine {
   /**
    * Fügt ein Produkt zur Maschine hinzu. Wenn alle benötigten Inputs vorhanden sind,
    * startet die Produktion automatisch.
-   * 
+   *
    * @returns true = Produkt hinzugefügt, false = nicht benötigt, Product = Produktion abgeschlossen
    */
   async addProduct(Product: Product): Promise<boolean | Product> {
@@ -142,7 +142,7 @@ export class Machine {
 
       if (isRequired && alreadyInInventory === undefined) {
         this._inventory.push(Product);
-        
+
         // Alle Inputs vorhanden? Starte Produktion
         if (this._inventory.length === this._inputRequirements.length) {
           //Product.destroy();
@@ -169,7 +169,7 @@ export class Machine {
   }
 
   // Getters & Setters
-  
+
   /** Eindeutige ID der Maschine (read-only) */
   get id(): number { return this._id; }
 
@@ -230,4 +230,8 @@ export class Machine {
   /** RenderObject für die visuelle Darstellung */
   get renderObject(): RenderObject { return this._renderObject; }
   set renderObject(v: RenderObject) { this._renderObject = v; }
+
+  /** Produktions Timer */
+  get productionTimer(): number { return this._productionTimer; }
+  set productionTimer(v: number) { this._productionTimer = v; }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Machine } from '../models/machine/machine';
+import { Product } from '../models/product/product';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,7 @@ export class UIService {
     // name: string,
     // level: number,
     // productionTime: string,
-    // productionProgress: string,
+    // machine.productionTimer: string,
     // upgradecost: number,
     // upgradable: boolean
     machine: Machine
@@ -44,7 +45,7 @@ export class UIService {
     const y = machine.y * Math.cos(this._angle) - 200;
 
     // Test Variabeln: Müssen noch in machine.ts hinzugefügt werden
-    const productionProgress = 50;
+    // const productionProgress = machine.productionTimer;
     const upgradecost = 2000;
 
     // Draw popup background
@@ -88,8 +89,10 @@ export class UIService {
 
     currentY += lineHeight;
 
-    // Parse productionProgress to a number (assuming it's a percentage string like "75%")
-    const progressValue = productionProgress || 0;
+    // Calculate progress percentage
+    const progressPercentage = (1 - (machine.productionTimer * 1000 / machine.productionRate)) * 100;
+    const progressValue = progressPercentage;
+
     const progressBarWidth = 100;
     const progressBarHeight = 15;
     const progressBarX = x + (popupWidth - progressBarWidth) / 2;
@@ -112,7 +115,7 @@ export class UIService {
     // Draw the progress text on top of the bar
     this.ctxUI.fillStyle = 'black';
     this.ctxUI.font = '12px Arial';
-    this.ctxUI.fillText(`${productionProgress}`, x + center, currentY);
+    this.ctxUI.fillText(`${Math.round(progressValue)}%`, x + center, currentY);
 
     currentY += lineHeight;
     this.ctxUI.beginPath()
@@ -123,11 +126,14 @@ export class UIService {
     this.ctxUI.fill()
     this.ctxUI.fillStyle = 'black'
     this.ctxUI.fillText(`${upgradecost}`, x + center, currentY)
-
   }
 
   clearMachinePopUp() {
     this.ctxUI.clearRect(0, 0, this.ctxUI.canvas.width, this.ctxUI.canvas.height)
+  }
+
+  debugProduct(product: Product) {
+    this.ctxUI.fillText(`${product.name}`, 0, 0)
   }
 
 }
