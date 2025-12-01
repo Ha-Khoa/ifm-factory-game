@@ -8,4 +8,5 @@ export interface Product {
     ingredients: string[];
     productionTime: number;
     price: number;
+    //machine:  (von welche Maschine produziert wird) ?
 }

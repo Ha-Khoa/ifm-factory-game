@@ -9,6 +9,8 @@ import { RenderingService } from './rendering.service';
 import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
+import { ConveyorBelt } from '../models/conveyor-belt/conveyor-belt';
+import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
 
 
 @Injectable({
@@ -29,11 +31,17 @@ export class GameService {
   private gamefield!: Gamefield;
   private player!: Player;
   private machineManager!: MachineManager;
+<<<<<<< HEAD
 
+=======
+  private machines: Machine[] = [];
+  private conveyorBeltManager!: ConveyorBeltManager;
+  
+>>>>>>> David
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
-
+  
   constructor(private uiService: UIService) { }
 
 
@@ -68,10 +76,17 @@ export class GameService {
       this.gamefield
     );
     this.machineManager = new MachineManager(this.gamefield, this.uiService, this.inputs);
+<<<<<<< HEAD
 
+=======
+    this.machines = this.machineManager.getMachines();
+    this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
+    
+>>>>>>> David
     // Füge Spielfeld zum Rendering-Buffer hinzu
     this.machineManager.addToInteractableObjects();
     this.gamefield.addGameFieldToRenderingBuffer();
+    this.gamefield.updateConveyorBelts(ConveyorBeltManager.getConveyorBelts());
     Products.generateProducts();
   }
 
@@ -115,8 +130,15 @@ export class GameService {
       this.player.changeVelocity();
       this.player.updatePlayer();
 
+<<<<<<< HEAD
+=======
+      this.conveyorBeltManager.update();
+      
+>>>>>>> David
       this.machineManager.checkForInteraction(this.player);
       this.renderer.rotateMap();
+
+
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
       this.player.dropProduct();
@@ -135,7 +157,6 @@ export class GameService {
     };
     requestAnimationFrame(loop);
   }
-
 
   /**
    * Stoppt die Hauptspielschleife.
