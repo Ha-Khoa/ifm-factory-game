@@ -6,7 +6,7 @@
   <div class="separator"></div>
 
   <div class="stat-item">
-    <span class="money-val">{{ money | number }}</span>
+    <span class="money-val">{{ playerMoney | number }}</span>
     <span class="money-val">$</span>
   </div>
 
@@ -14,6 +14,9 @@
 
   <div class="stat-item">
     <span>🏆</span>
-    <span class="score-val">{{ score }}</span>
+    <span class="score-val">{{ playerScore }}</span>
   </div>
+
+  <div class="separator"></div>
+  <img (click)="addPlayerScore(1)" src="images/settings.png" alt="Settings" class="settings-btn">
 </div>

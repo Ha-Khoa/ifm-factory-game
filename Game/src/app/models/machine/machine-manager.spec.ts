@@ -1,7 +1,7 @@
-import { MachineManager } from './machine-manager';
+import { this } from './machine-manager';
 
 describe('MachineManager', () => {
   it('should create an instance', () => {
-    expect(new MachineManager()).toBeTruthy();
+    expect(new this()).toBeTruthy();
   });
 });

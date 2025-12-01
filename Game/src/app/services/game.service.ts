@@ -8,6 +8,7 @@ import { MachineManager } from '../models/machine/machine-manager';
 import { Hitbox } from '../interfaces/hitbox';
 import { RenderingService } from './rendering.service';
 import { Coordinates } from '../models/coordinates/coordinates';
+import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBelt } from '../models/conveyor-belt/conveyor-belt';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
@@ -20,13 +21,13 @@ export class GameService {
 
   // Gibt an, ob das Spiel aktuell läuft
   private GameRunning!: boolean;
-  
+
   // Canvas und Rendering
   private ctx!: CanvasRenderingContext2D;
   private renderer!: RenderingService;
   private angle!: number;
   private playerVelocity!: number; // Pixel pro Sekunde
-  
+
   // Spielobjekte
   private gamefield!: Gamefield;
   private player!: Player;
@@ -45,36 +46,38 @@ export class GameService {
    * Initialisiert das Spiel, setzt Startwerte und lädt Bilder vor.
    * @param ctx CanvasRenderingContext2D zum Zeichnen
    */
-  async init(ctx: CanvasRenderingContext2D) {
+  async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
+    // Initialisiere UI Service
+    
+
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     this.renderer = RenderingService.instance();
     this.renderer.init(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
-    
-    
+    this.uiService.init(ctxUI, this.angle);
+
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
     
     // Lade benötigte Texturen vor
     await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"]);
-    
+
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
     this.player = new Player(
       new Hitbox(new Coordinates(50, 50), 40, 40),
       "",
       this.playerVelocity,
-      this.gamefield,
-      this.renderer
+      this.gamefield
     );
-    this.machineManager = new MachineManager(this.gamefield, this.renderer);
+    this.machineManager = new MachineManager(this.gamefield, this.uiService, this.inputs);
     this.machines = this.machineManager.getMachines();
     this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
     
     // Füge Spielfeld zum Rendering-Buffer hinzu
-    this.gamefield.updateMachines(this.machines);
+    this.machineManager.addToInteractableObjects();
     this.gamefield.addGameFieldToRenderingBuffer();
     this.gamefield.updateConveyorBelts(ConveyorBeltManager.getConveyorBelts());
     Products.generateProducts();
@@ -112,7 +115,7 @@ export class GameService {
     this.ctx.imageSmoothingEnabled = true;
     const loop = () => {
       if (!this.GameRunning) return;
-      
+
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
@@ -128,7 +131,7 @@ export class GameService {
 
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
-      this.player.dropProduct(true);
+      this.player.dropProduct();
       
 
 
@@ -155,7 +158,7 @@ export class GameService {
 
 
 
-  
+
 
 
   /**
