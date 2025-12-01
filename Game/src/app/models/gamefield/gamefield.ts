@@ -65,34 +65,6 @@ export class Gamefield {
 
 
     /**
-     * Aktualisiert die Maschinen im Spielfeld.
-     * Generiert RenderObjects für alle Maschinen basierend auf ihrem Unlock-Status.
-     * @param machines Array aller Maschinen
-     */
-    updateMachines(machines: Machine[])
-    {
-        this.interactableObjects = [];
-        this.generateInteractableObjects();
-        machines.forEach(machine => {
-            const imgMachine = machine.unlocked ? machine.imgUnlocked : machine.imgLocked;
-            this.interactableObjects.push(new RenderObject(
-                `machine:${machine.name}`,
-                "rect",
-                machine.x,
-                machine.y,
-                50,
-                this.fieldsize,
-                this.fieldsize,
-                0,
-                undefined,
-                undefined,
-                "rgba(200, 206, 255, 1)",
-                ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
-            ));
-        });
-    }
-
-    /**
      * Generiert die Umgebung (Boden) als ein großes Rechteck.
      */
     generateEnvironment()

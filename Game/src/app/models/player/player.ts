@@ -1,6 +1,6 @@
 import { Hitbox } from '../../interfaces/hitbox';
 import { Coordinates } from '../coordinates/coordinates';
-import { Product } from "../../interfaces/product";
+import { Product } from "../product/product";
 import { Products } from '../product/products';
 import { Collision } from "../collision/collision";
 import { Gamefield } from '../gamefield/gamefield';
@@ -31,13 +31,15 @@ export class Player {
     // Aktuelle Bewegungsrichtung
     private _direction!: Direction | null;
 
+    private _directionPressed!: boolean;
+
     // RenderObject für die Darstellung auf dem Canvas
     private _renderingObject: RenderObject;
     private _z!: number;
     private _input: Record<string, boolean> = {};
     private _canInteractProduct: boolean = false;
     private _interacted: boolean = false;
-    constructor(hitbox: Hitbox, img: string, velocity: number, gamefield: Gamefield, private _renderer: RenderingService) {
+    constructor(hitbox: Hitbox, img: string, velocity: number, gamefield: Gamefield) {
         this._hitbox = hitbox;
         this._position = hitbox.position
         this._img = img;
@@ -60,7 +62,7 @@ export class Player {
             ["red"]
         );
 
-        this._renderer.addRenderObject(this._renderingObject);
+        RenderingService.instance().addRenderObject(this._renderingObject);
     }
 
 
@@ -70,12 +72,11 @@ export class Player {
     render() {
         this._renderingObject.x = this._position.x;
         this._renderingObject.y = this._position.y;
-        this._renderer.updateRenderingObject("player", this._renderingObject);
+        RenderingService.instance().updateRenderingObject("player", this._renderingObject);
     }
 
     updateProductInHand() {
-        const direction = this._direction;
-        if(direction === null) { return; }
+       if(this._direction === null) { return }
         const newPositionX = this._direction === Direction.RIGHT ? this._position.x + this._hitbox.width -  Products.size / 2 :
                      this._direction === Direction.LEFT ? this._position.x - Products.size / 2 :
                      this._direction === Direction.UP ? this._position.x + this._hitbox.width / 2 - Products.size / 2 :
@@ -87,30 +88,11 @@ export class Player {
                      this._direction === Direction.RIGHT ? this._position.y + this._hitbox.height / 2 - Products.size / 2 :
                      this._position.y;
         if(this._inventory !== null) {
-            const renderName = `product:${this._inventory.name}`;
-            const productRenderObject = new RenderObject(
-                renderName,
-                "rect",
-                newPositionX,
-                newPositionY,
-                40,
-                20,
-                20,
-                1000,
-                undefined,
-                undefined,
-                "blue",
-                []
-            );
-            const existing = this._renderer.getRenderingObjektByName(renderName);
-            if (!existing) {
-                this._renderer.addRenderObject(productRenderObject);
-            } else {
-                this._renderer.updateRenderingObject(renderName, productRenderObject);
-            }
+            // Position setzen aktualisiert automatisch das RenderObject in der Product-Klasse
             this._inventory.position = new Coordinates(newPositionX, newPositionY);
-    
-        }}
+        }
+    }
+
     
     /**
      * Setzt die Eingabe-Richtung basierend auf gedrückten Tasten.
@@ -126,7 +108,11 @@ export class Player {
             }
         }
         if (numPressed === 0) {
-            this._direction = null;
+            this._directionPressed = false;
+        }
+        else
+        {
+            this._directionPressed = true;
         }
     }
 
@@ -158,12 +144,13 @@ export class Player {
                         : this._direction === Direction.LEFT ? -this._frameVelocity : 0;
         const velocityY = this._direction === Direction.DOWN ? this._frameVelocity
                         : this._direction === Direction.UP ? -this._frameVelocity : 0;
-        
+        if(this._directionPressed)
+            {
         for (const obj of this._gamefield.interactableObjects) {
             const objHitbox = new Hitbox(new Coordinates(obj.x, obj.y), obj.width, obj.height);
             const collision = Collision.checkCollisionNextFrame(this._hitbox, objHitbox, velocityX, velocityY);
             const borderCollision = Collision.checkObjectOutBoarder(this._hitbox, velocityX, velocityY, this._gamefield);
-
+            
             if (collision) {
                 switch (this._direction) {
                     case Direction.UP:
@@ -205,6 +192,7 @@ export class Player {
         this._position.x += velocityX;
         this._position.y += velocityY;
     } 
+}
 
 
     /**
@@ -232,7 +220,7 @@ export class Player {
      * Versucht ein getragenes Produkt abzulegen, wenn E gedrückt wurde.
      * addToMap: true → Produkt in Weltliste aufnehmen, false → nur aus Hand entfernen
      */
-    dropProduct(addToMap: boolean): Product | null {
+    dropProduct(): Product | null {
         if (this._input['e']) {
             if (!this._interacted) {
                 this._canInteractProduct = true;
@@ -244,9 +232,6 @@ export class Player {
         if (this._canInteractProduct && this._inventory !== null) {
             console.log("Produkt abgelegt:", this._inventory);
             const droppedProduct = this._inventory;
-            if (!addToMap) {
-                Products.deleteGeneratedProduct(this._inventory);
-            }
             this._inventory = null;
             this._canInteractProduct = false;
             return droppedProduct;
@@ -266,4 +251,5 @@ export class Player {
 
     get inventory(): Product | null { return this._inventory; }
     set inventory(v: Product | null) { this._inventory = v; }
+
 }

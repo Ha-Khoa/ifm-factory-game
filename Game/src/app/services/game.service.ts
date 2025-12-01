@@ -67,14 +67,13 @@ export class GameService {
       new Hitbox(new Coordinates(50, 50), 40, 40),
       "",
       this.playerVelocity,
-      this.gamefield,
-      this.renderer
+      this.gamefield
     );
     this.machineManager = new MachineManager(this.gamefield, this.uiService, this.inputs);
     this.machines = this.machineManager.getMachines();
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
-    this.gamefield.updateMachines(this.machines);
+    this.machineManager.addToInteractableObjects();
     this.gamefield.addGameFieldToRenderingBuffer();
     Products.generateProducts();
   }
@@ -123,7 +122,7 @@ export class GameService {
       this.renderer.rotateMap();
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
-      this.player.dropProduct(true);
+      this.player.dropProduct();
       
 
 
