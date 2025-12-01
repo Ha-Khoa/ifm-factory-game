@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Machine } from '../models/machine/machine';
-import { Product } from '../models/product/product';
+import { Player } from '../models/player/player';
 
 @Injectable({
   providedIn: 'root'
@@ -132,8 +132,9 @@ export class UIService {
     this.ctxUI.clearRect(0, 0, this.ctxUI.canvas.width, this.ctxUI.canvas.height)
   }
 
-  debugProduct(product: Product) {
-    this.ctxUI.fillText(`${product.name}`, 0, 0)
+  debugProduct(player: Player) {
+    this.ctxUI.fillStyle = 'black';
+    this.ctxUI.font = '20px Arial';
+    this.ctxUI.fillText(`${player.inventory?.name}`, 20, 20)
   }
-
 }

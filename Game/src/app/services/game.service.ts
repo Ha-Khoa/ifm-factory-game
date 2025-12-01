@@ -2,7 +2,6 @@
 // Importiere notwendige Angular- und Projektmodule
 import { Injectable } from '@angular/core';
 import { Gamefield } from '../models/gamefield/gamefield';
-import { Machine } from '../models/machine/machine';
 import { Player } from '../models/player/player';
 import { MachineManager } from '../models/machine/machine-manager';
 import { Hitbox } from '../interfaces/hitbox';
@@ -30,7 +29,6 @@ export class GameService {
   private gamefield!: Gamefield;
   private player!: Player;
   private machineManager!: MachineManager;
-  private machines: Machine[] = [];
 
   // Input und Assets
   private inputs: Record<string, boolean> = {};
@@ -45,7 +43,7 @@ export class GameService {
    */
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
     // Initialisiere UI Service
-    
+
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
@@ -57,7 +55,7 @@ export class GameService {
 
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
-    
+
     // Lade benötigte Texturen vor
     await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"]);
 
@@ -70,7 +68,6 @@ export class GameService {
       this.gamefield
     );
     this.machineManager = new MachineManager(this.gamefield, this.uiService, this.inputs);
-    this.machines = this.machineManager.getMachines();
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
     this.machineManager.addToInteractableObjects();
@@ -117,20 +114,23 @@ export class GameService {
       // Update-Phase
       this.player.changeVelocity();
       this.player.updatePlayer();
-      
+
       this.machineManager.checkForInteraction(this.player);
       this.renderer.rotateMap();
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
       this.player.dropProduct();
-      
+
 
 
       // Render-Phase
       this.player.render();
       this.player.updateProductInHand();
       this.renderer.render();
-      
+
+      // Debug UI
+      this.uiService.debugProduct(this.player)
+
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
