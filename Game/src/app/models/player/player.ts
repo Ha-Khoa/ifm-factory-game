@@ -7,6 +7,7 @@ import { Gamefield } from '../gamefield/gamefield';
 import { RenderingService } from '../../services/rendering.service';
 import { Direction, KEY_TO_DIRECTION } from '../../enums/direction';
 import { RenderObject } from '../rendering/render-object';
+import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
 
 /**
  * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
@@ -37,6 +38,7 @@ export class Player {
     private _input: Record<string, boolean> = {};
     private _canInteractProduct: boolean = false;
     private _interacted: boolean = false;
+
     constructor(hitbox: Hitbox, img: string, velocity: number, gamefield: Gamefield, private _renderer: RenderingService) {
         this._hitbox = hitbox;
         this._position = hitbox.position
@@ -250,6 +252,21 @@ export class Player {
             this._inventory = null;
             this._canInteractProduct = false;
             return droppedProduct;
+        }
+        return null;
+    }
+
+    private takeProductFromConveyor(): Product | null {
+        const playerPos = this._hitbox.position;
+
+        const conveyor = ConveyorBeltManager.getConveyorAt(playerPos.x, playerPos.y);
+        if (conveyor){
+            const product = conveyor.takeProduct();
+            if (product) {
+
+                console.log(`Produkt ${product.name} vom Förderband ${conveyor.getConveyorId()} aufgenommen.`);
+                return product;
+            }
         }
         return null;
     }

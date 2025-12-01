@@ -32,12 +32,11 @@ export class GameService {
   private player!: Player;
   private machineManager!: MachineManager;
   private machines: Machine[] = [];
+  private conveyorBeltManager!: ConveyorBeltManager;
   
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
-
-
   
   constructor() { }
 
@@ -72,10 +71,12 @@ export class GameService {
     );
     this.machineManager = new MachineManager(this.gamefield, this.renderer);
     this.machines = this.machineManager.getMachines();
+    this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
     
     // Füge Spielfeld zum Rendering-Buffer hinzu
     this.gamefield.updateMachines(this.machines);
     this.gamefield.addGameFieldToRenderingBuffer();
+    this.gamefield.updateConveyorBelts(ConveyorBeltManager.getConveyorBelts());
     Products.generateProducts();
   }
 
@@ -118,9 +119,13 @@ export class GameService {
       // Update-Phase
       this.player.changeVelocity();
       this.player.updatePlayer();
+
+      this.conveyorBeltManager.update();
       
       this.machineManager.checkForInteraction(this.player, this.inputs);
       this.renderer.rotateMap();
+
+
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
       this.player.dropProduct(true);
@@ -136,7 +141,6 @@ export class GameService {
     };
     requestAnimationFrame(loop);
   }
-
 
   /**
    * Stoppt die Hauptspielschleife.

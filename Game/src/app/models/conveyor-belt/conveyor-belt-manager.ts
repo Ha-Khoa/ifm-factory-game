@@ -16,39 +16,15 @@ export class ConveyorBeltManager {
     private initializeConveyorBelts(): void {
         //Rohr Materialien wird hier erstellt
         ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-            2*50,
-            2*50,
-            4*50,
+            12*50,
+            12*50,
+            5*50,
             50,
             'right',
-            0.03,
+            0.1,
             true,
             2000,
-            3
-        ));
-        //Transportband  zwischen Maschinen
-        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-            8*50,
-            4*50,
-            3*50,
-            50,
-            'right',
-            0.02,
-            false,
-            0,
-            4
-        ));
-        // Output für Endprodukte
-        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-            15*50,
-            10*50,
-            3*50,
-            50,
-            'right',
-            0.025,
-            false,
-            0,
-            5
+            10
         ));
 
         this.updateGamefield();
