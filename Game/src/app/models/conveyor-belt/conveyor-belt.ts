@@ -1,4 +1,4 @@
-import {Product} from "../../interfaces/product";
+import { Product } from "../product/product";
 import {Coordinates} from "../coordinates/coordinates";
 import {RenderObject} from "../rendering/render-object";
 import {Products} from "../product/products";
@@ -154,13 +154,12 @@ export class ConveyorBelt extends RenderObject{
                 startingProgress = 0;
             }
         }
-        const productCopy: Product = {...newProduct, position: this.getProductPosition(startingProgress)};
+        const startPos = this.getProductPosition(startingProgress);
+        newProduct.init(startPos);
         const renderId = `conveyor-product-${this.conveyorId}-product-${this._productsCounter++}`;
-        this._products.push({product: productCopy, progress: startingProgress, renderId: renderId});
+        this._products.push({product: newProduct, progress: startingProgress, renderId: renderId});
         this._products.sort((a, b) => b.progress - a.progress);
 
-        //Products.addProduct(productCopy, productCopy.position!);
-        this.createProductRenderObject(productCopy, productCopy.position!, renderId);
         console.log(`Produkt ${newProduct.name} auf Förderband ${this.conveyorId} gespawnt.`);
         return true;
     }
@@ -170,10 +169,9 @@ export class ConveyorBelt extends RenderObject{
             Products.getProductByName("Raw Plastic"),
             Products.getProductByName("Raw Silicon"),
             Products.getProductByName("Copper wire")
-        ].filter(p => p !== undefined) as Product[];
-
-        const randomProduct = rawMaterials[Math.floor(Math.random() * rawMaterials.length)];
-        return randomProduct;
+        ].filter(p => p !== undefined);
+        const base = rawMaterials[Math.floor(Math.random() * rawMaterials.length)]!;
+        return new Product(base.id, base.name);
     }
 
     getProductPosition(progress: number): Coordinates{
@@ -208,45 +206,15 @@ export class ConveyorBelt extends RenderObject{
         this._products.forEach(productData => {
             const newPosition = this.getProductPosition(productData.progress);
             productData.product.position = newPosition;
-            this.updateRenderedProductPosition(productData.product, newPosition, productData.renderId);
         });
     }
 
-    private updateRenderedProductPosition(product: Product, position: Coordinates, renderId:string): void{
-        //const renderObjName = this.getProductRenderName(product);
-        const existingRenderObj = RenderingService.instance().getRenderingObjektByName(renderId);
-        if(existingRenderObj){
-            existingRenderObj.x = position.x;
-            existingRenderObj.y = position.y;
-        } else{
-            this.createProductRenderObject(product, position, renderId);
-        }
-    }
 
     private getProductRenderName(product: Product): string{
         return `conveyor-product-${this.conveyorId}-product-${this._productsCounter++}`;
     }
 
-    private createProductRenderObject(product: Product, position: Coordinates, renderId: string): void{
-        //const renderObjName = this.getProductRenderName(product);
-        const productColor = this.getProductColor(product.name);
-
-        const renderObj = new RenderObject(
-            renderId,
-            "rect",
-            position.x,
-            position.y,
-            15,
-            20,
-            20,
-            1000,
-            undefined,
-            undefined,
-            productColor,
-            []
-        );
-        RenderingService.instance().addRenderObject(renderObj);
-    }
+    // Rendering wird durch Products.addProduct erzeugt; das Förderband aktualisiert nur die Position.
     private getProductColor(productName: string): string{
         const colorMap: {[key: string]: string}= {
             "Raw Plastic": "#FF6B6B",
@@ -279,7 +247,7 @@ export class ConveyorBelt extends RenderObject{
 
            // Products.deleteGeneratedProduct(productData.product);
            //const renderObjName = this.getProductRenderName(productData.product);
-           RenderingService.instance().deleteRenderingObjektByName(productData.renderId);
+           productData.product.destroy();
            console.log(`Produkt ${productData.product.name} von Förderband ${this.conveyorId} entnommen.`);
             return productData.product;
         }
@@ -290,11 +258,10 @@ export class ConveyorBelt extends RenderObject{
         if (this._products.length >= this._maxProducts){
             return false;
         }
-        const productCopy: Product = {...product, position: this.getProductPosition(0)};
+        const pos = this.getProductPosition(0);
+        product.init(pos);
         const renderId = `conveyor-product-${this.conveyorId}-product-${this._productsCounter++}`;
-        this._products.push({product: productCopy, progress: 0, renderId: renderId});
-        //Products.addProduct(productCopy, productCopy.position!);
-        this.createProductRenderObject(productCopy, productCopy.position!, renderId);
+        this._products.push({product: product, progress: 0, renderId: renderId});
         console.log(`Produkt ${product.name} zu Förderband ${this.conveyorId} hinzugefügt.`);
         return true;
     }

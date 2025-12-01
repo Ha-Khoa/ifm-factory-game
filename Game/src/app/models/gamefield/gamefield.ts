@@ -220,7 +220,5 @@ export class Gamefield {
         conveyorBelts.forEach(conveyor =>{
             this.interactableObjects.push(conveyor)
         });
-        // Aktualisiert den Rendering-Buffer
-        this.addGameFieldToRenderingBuffer();
     }
 }

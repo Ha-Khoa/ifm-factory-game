@@ -39,7 +39,7 @@ export class GameService {
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
   
-  constructor() { }
+  constructor(private uiService: UIService) { }
 
 
   /**
@@ -125,7 +125,7 @@ export class GameService {
 
       this.conveyorBeltManager.update();
       
-      this.machineManager.checkForInteraction(this.player, this.inputs);
+      this.machineManager.checkForInteraction(this.player);
       this.renderer.rotateMap();
 
 

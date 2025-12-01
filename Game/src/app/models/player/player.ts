@@ -41,7 +41,7 @@ export class Player {
     private _canInteractProduct: boolean = false;
     private _interacted: boolean = false;
 
-    constructor(hitbox: Hitbox, img: string, velocity: number, gamefield: Gamefield, private _renderer: RenderingService) {
+    constructor(hitbox: Hitbox, img: string, velocity: number, gamefield: Gamefield) {
         this._hitbox = hitbox;
         this._position = hitbox.position
         this._img = img;

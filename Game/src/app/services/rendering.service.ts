@@ -52,6 +52,7 @@ export class RenderingService {
     addRenderObject(renderObject: RenderObject) {
         this._renderingBuffer.push(renderObject);
         this.sortRenderingBuffer();
+        console.log(this._renderingBuffer[this._renderingBuffer.length - 1].name, 1)
     }
 
     /**
@@ -63,6 +64,7 @@ export class RenderingService {
             this._renderingBuffer.push(obj);
         });
         this.sortRenderingBuffer();
+        
     }
 
     /**
@@ -79,7 +81,7 @@ export class RenderingService {
 
     sortRenderingBuffer() {
         this._renderingBuffer.sort((a, b) => (a.y * 10 + a.z * 20 + a.priority * 5) - (b.y * 10 + b.z * 20 + b.priority * 5) );
-        console.log(this._renderingBuffer.length)
+
     }
 
 
