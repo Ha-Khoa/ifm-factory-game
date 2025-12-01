@@ -135,6 +135,7 @@ export class UIService {
   debugProduct(player: Player) {
     this.ctxUI.fillStyle = 'black';
     this.ctxUI.font = '20px Arial';
+    this.ctxUI.textAlign = 'start';
     this.ctxUI.fillText(`${player.inventory?.name}`, 20, 20)
   }
 }
