@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Machine } from '../models/machine/machine';
 import { Player } from '../models/player/player';
+import { MachineManager } from '../models/machine/machine-manager';
+
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -8,134 +17,198 @@ import { Player } from '../models/player/player';
 export class UIService {
   private ctxUI!: CanvasRenderingContext2D;
   private _angle!: number;
+  private lastMachinePopupRect: Rect | null = null; // Für das Löschen des Popups
 
   constructor() { }
 
   async init(ctxUI: CanvasRenderingContext2D, angle: number) {
-
     this.ctxUI = ctxUI;
     this._angle = angle;
-
   }
 
-  drawMachinePopUp(
-    // x: number,
-    // y: number,
-    // name: string,
-    // level: number,
-    // productionTime: string,
-    // machine.productionTimer: string,
-    // upgradecost: number,
-    // upgradable: boolean
-    machine: Machine
+  drawMachinePopUp(machine: Machine) {
+    this.ctxUI.save();
 
-  ) {
+    // --- Allgemeine Variabeln ---
+    const popupConfig = {
+      width: 150,
+      height: 125,
+      radius: 20,
+      borderWidth: 5,
+      lineHeight: 20,
+      yOffset: -200,
+      xOffset: -50
+    };
+    const center = popupConfig.width / 2;
+    const x = machine.x + popupConfig.xOffset;
+    const y = machine.y * Math.cos(this._angle) + popupConfig.yOffset;
 
-    const popupWidth = 150;
-    const popupHeight = 125;
+    // Speichere die Bounding Box, um sie später zu löschen
+    this.lastMachinePopupRect = { x: x - 5, y: y - 5, width: popupConfig.width + 10, height: popupConfig.height + 10 };
 
-    // Variabeln zur Position der einzelnen Elementen
-    const center = 75;
-    const lineHeight = 20;
-    const radius = 20;
+    // --- Zeichne PopUp ---
+    this._drawPopupBackground(x, y, popupConfig, machine.upgradable);
 
-    // Position des Popups (muss noch richtig berechnet werden)
-    const x = machine.x - 50;
-    console.log(this._angle)
-    const y = machine.y * Math.cos(this._angle) - 200;
-
-    // Test Variabeln: Müssen noch in machine.ts hinzugefügt werden
-    // const productionProgress = machine.productionTimer;
-    const upgradecost = 2000;
-
-    // Draw popup background
-    this.ctxUI.beginPath()
-    this.ctxUI.fillStyle = '#fff';
-    this.ctxUI.roundRect(x, y, popupWidth, popupHeight, radius);
-    this.ctxUI.stroke()
-    this.ctxUI.fill()
-
-
-    // Draw border
-    if (machine.upgradable) {
-      this.ctxUI.strokeStyle = 'green';
-    }
-    else {
-      this.ctxUI.strokeStyle = 'red'
-    }
-    this.ctxUI.lineWidth = 5;
-
-    this.ctxUI.roundRect(x, y, popupWidth, popupHeight, radius);
-    this.ctxUI.stroke()
-
-
-    this.ctxUI.fillStyle = 'black';
+    let currentY = y + popupConfig.lineHeight + 10;
     this.ctxUI.textAlign = 'center';
+    this.ctxUI.fillStyle = 'black';
 
-    let currentY = y + lineHeight + 10;
+    currentY = this._drawInfoText(x + center, currentY, machine, popupConfig.lineHeight);
+    currentY = this._drawProgressBar(x, currentY, machine, popupConfig);
+    this._drawUpgradeButton(x, currentY, machine, popupConfig);
+
+
+    this.ctxUI.restore();
+  }
+
+  private _drawPopupBackground(x: number, y: number, config: any, upgradable: boolean) {
+    const borderColor = upgradable ? 'green' : 'red';
+
+    // Zeichne Rand
+    this.ctxUI.fillStyle = borderColor;
+    this.ctxUI.beginPath();
+    this.ctxUI.roundRect(x, y, config.width, config.height, config.radius);
+    this.ctxUI.fill();
+
+    // Zeichen inneren Hintergrund
+    this.ctxUI.fillStyle = '#fff';
+    this.ctxUI.beginPath();
+    this.ctxUI.roundRect(
+      x + config.borderWidth,
+      y + config.borderWidth,
+      config.width - (2 * config.borderWidth),
+      config.height - (2 * config.borderWidth),
+      config.radius - config.borderWidth
+    );
+    this.ctxUI.fill();
+  }
+
+  private _drawInfoText(x: number, y: number, machine: Machine, lineHeight: number): number {
+    let currentY = y;
 
     this.ctxUI.font = 'bold 16px Arial';
-    this.ctxUI.fillText(`Level: ${machine.level}`, x + center, currentY);
-
+    this.ctxUI.fillText(`Level: ${machine.level}`, x, currentY);
     currentY += lineHeight;
 
     this.ctxUI.font = 'italic 16px Arial';
-    this.ctxUI.fillText(`${machine.name}`, x + center, currentY);
-
+    this.ctxUI.fillText(`${machine.name}`, x, currentY);
     currentY += lineHeight;
 
     this.ctxUI.font = '16px Arial';
-    this.ctxUI.fillText(`Zeit: ${machine.productionRate}`, x + center, currentY);
-
+    this.ctxUI.fillText(`Zeit: ${machine.productionRate}`, x, currentY);
     currentY += lineHeight;
 
-    // Calculate progress percentage
+    return currentY;
+  }
+
+  private _drawProgressBar(x: number, y: number, machine: Machine, config: any): number {
+    let currentY = y;
+    const center = config.width / 2;
+
     const progressPercentage = (1 - (machine.productionTimer * 1000 / machine.productionRate)) * 100;
-    const progressValue = progressPercentage;
+    const progressValue = Math.max(0, Math.min(100, progressPercentage)); // Clamp between 0 and 100
 
-    const progressBarWidth = 100;
-    const progressBarHeight = 15;
-    const progressBarX = x + (popupWidth - progressBarWidth) / 2;
-    const progressBarY = currentY - (lineHeight / 2) - 2; // Adjust position to center it a bit better
+    const progressBarConfig = {
+      width: 100,
+      height: 15,
+      bgColor: '#e0e0e0',
+      fillColor: '#4CAF50',
+      borderColor: '#a0a0a0'
+    };
 
-    // Draw progress bar background
-    this.ctxUI.fillStyle = '#e0e0e0'; // Light gray background
-    this.ctxUI.fillRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
+    const progressBarX = x + (config.width - progressBarConfig.width) / 2;
+    const progressBarY = currentY - (config.lineHeight / 2) - 2;
 
-    // Draw filled part of the progress bar
-    this.ctxUI.fillStyle = '#4CAF50'; // Green progress
-    const filledWidth = (progressBarWidth * progressValue) / 100;
-    this.ctxUI.fillRect(progressBarX, progressBarY, filledWidth, progressBarHeight);
+    // Zeichne Hintergrund vom Fortschrittsbalken
+    this.ctxUI.fillStyle = progressBarConfig.bgColor;
+    this.ctxUI.fillRect(progressBarX, progressBarY, progressBarConfig.width, progressBarConfig.height);
 
-    // Draw progress bar border
-    this.ctxUI.strokeStyle = '#a0a0a0';
+    // Zeichne gefüllten Teil
+    const filledWidth = (progressBarConfig.width * progressValue) / 100;
+    this.ctxUI.fillStyle = progressBarConfig.fillColor;
+    this.ctxUI.fillRect(progressBarX, progressBarY, filledWidth, progressBarConfig.height);
+
+    // Zeichne Fortschrittsbalken Rand
+    this.ctxUI.strokeStyle = progressBarConfig.borderColor;
     this.ctxUI.lineWidth = 1;
-    this.ctxUI.strokeRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
+    this.ctxUI.strokeRect(progressBarX, progressBarY, progressBarConfig.width, progressBarConfig.height);
 
-    // Draw the progress text on top of the bar
+    // Zeichne Fortschritts Text
     this.ctxUI.fillStyle = 'black';
     this.ctxUI.font = '12px Arial';
     this.ctxUI.fillText(`${Math.round(progressValue)}%`, x + center, currentY);
+    currentY += config.lineHeight;
 
-    currentY += lineHeight;
-    this.ctxUI.beginPath()
-
-    this.ctxUI.fillStyle = 'green'
-    this.ctxUI.roundRect(x + (popupWidth - 80) / 2, currentY - 15, 80, lineHeight, radius);
-    this.ctxUI.stroke()
-    this.ctxUI.fill()
-    this.ctxUI.fillStyle = 'black'
-    this.ctxUI.fillText(`${upgradecost}`, x + center, currentY)
+    return currentY;
   }
 
+  private _drawUpgradeButton(x: number, y: number, machine: Machine, config: any) {
+    // TODO: Upgrade Kosten von Machinen Klasse
+    const upgradeCost = 2000;
+    const center = config.width / 2;
+
+    const buttonConfig = {
+      width: 80,
+      height: config.lineHeight,
+      yOffset: -15,
+      bgColor: 'green',
+      textColor: 'black'
+    };
+
+    const buttonX = x + (config.width - buttonConfig.width) / 2;
+    const buttonY = y + buttonConfig.yOffset;
+
+    this.ctxUI.fillStyle = buttonConfig.bgColor;
+    this.ctxUI.beginPath();
+    this.ctxUI.roundRect(buttonX, buttonY, buttonConfig.width, buttonConfig.height, config.radius);
+    this.ctxUI.fill();
+
+    this.ctxUI.fillStyle = buttonConfig.textColor;
+    this.ctxUI.font = '12px Arial';
+    this.ctxUI.fillText(`${upgradeCost}`, x + center, y);
+  }
+
+
   clearMachinePopUp() {
-    this.ctxUI.clearRect(0, 0, this.ctxUI.canvas.width, this.ctxUI.canvas.height)
+    if (this.lastMachinePopupRect) {
+      const rect = this.lastMachinePopupRect;
+      this.ctxUI.clearRect(rect.x, rect.y, rect.width, rect.height);
+      this.lastMachinePopupRect = null; // Setze es zurück, nachdem es gelöscht wurde
+    }
   }
 
   debugProduct(player: Player) {
+    this.ctxUI.clearRect(10, 0, 250, 50)
     this.ctxUI.fillStyle = 'black';
     this.ctxUI.font = '20px Arial';
     this.ctxUI.textAlign = 'start';
-    this.ctxUI.fillText(`${player.inventory?.name}`, 20, 20)
+    this.ctxUI.fillText(`${player.inventory?.name}`, 20, 20);
   }
+
+  drawOrderPopUp() {
+
+  }
+
+  updateIndicator(machineManager: MachineManager) {
+    for (const machine of machineManager.getMachines()) {
+      if (machine.upgradable) {
+        this.ctxUI.save();
+
+        const indicatorConfig = {
+          width: 10,
+          height: 50,
+          xOffset: 20,
+          yOffset: -100,
+        };
+
+        const x = machine.x + indicatorConfig.xOffset;
+        const y = machine.y * Math.cos(this._angle) + indicatorConfig.yOffset;
+        this.ctxUI.fillStyle = 'green';
+        this.ctxUI.fillRect(x, y, indicatorConfig.width, indicatorConfig.height);
+
+        this.ctxUI.restore();
+      }
+    }
+  }
+
 }
