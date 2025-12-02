@@ -32,10 +32,11 @@ export class GameService {
   private player!: Player;
   private machineManager!: MachineManager;
   private conveyorBeltManager!: ConveyorBeltManager;
+
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
-  
+
   constructor(private uiService: UIService) { }
 
 
@@ -54,12 +55,9 @@ export class GameService {
     this.renderer.init(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
     this.uiService.init(ctxUI, this.angle);
-    
+
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
-
-    // Lade benötigte Texturen vor
-    await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"]);
 
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
@@ -70,6 +68,14 @@ export class GameService {
       this.gamefield
     );
     this.machineManager = new MachineManager(this.gamefield, this.uiService, this.inputs);
+
+    // Lade benötigte Texturen vor
+    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"];
+    const machineImages = this.machineManager.getMachines().map(m => m.imgUnlocked);
+    const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
+    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages])];
+    await this.preloadImages(allImages);
+
     // Füge Spielfeld zum Rendering-Buffer hinzu
     this.machineManager.addToInteractableObjects();
     this.gamefield.addGameFieldToRenderingBuffer();
