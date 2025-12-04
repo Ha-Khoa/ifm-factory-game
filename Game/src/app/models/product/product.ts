@@ -1,6 +1,7 @@
 import { Coordinates } from "../coordinates/coordinates";
 import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
+import { Products } from "./products";
 
 export class Product {
 
@@ -51,6 +52,7 @@ export class Product {
 
   destroy() {
     RenderingService.instance().deleteRenderingObjektByName(this._renderObject.name);
+    Products.deleteGeneratedProduct(this);
   }
 
   // Getters / Setters

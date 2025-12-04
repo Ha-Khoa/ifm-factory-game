@@ -3,12 +3,15 @@ import { Direction } from "../../enums/direction";
 import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
 import { Products } from "../product/products";
+import { Player } from "../player/player";
+import { InteractableObject } from "../interactableObject/interactable-object";
+import { Coordinates } from "../coordinates/coordinates";
 
 /**
  * Machine-Klasse: Repräsentiert eine Produktionsmaschine im Spiel.
  * Verarbeitet Input-Produkte und produziert nach einer festgelegten Zeit ein Output-Produkt.
  */
-export class Machine {
+export class Machine extends InteractableObject {
 
   // Statische Eigenschaften
   public static Machines: Machine[] = [];
@@ -24,18 +27,14 @@ export class Machine {
   // Visuelle Darstellung
   private _imgUnlocked!: string;
   private _imgLocked!: string;
-  private _renderObject!: RenderObject;
+  // RenderObject now inherited from InteractableObject
 
-  // Position & Größe
-  private _x: number;
-  private _y: number;
-  private _width!: number;
-  private _height!: number;
+  // Position & Größe via InteractableObject (_position, _width, _height)
 
   // Produktionslogik
   private _productionRate!: number;
   private _productionTimer: number;
-  private _accessDirection!: Direction;
+  // accessDirection handled via InteractableObject directions (first entry)
   private _inventory: Product[] = [];
   private _inputRequirements: Product[] = [];
   private _outputProduct!: Product;
@@ -62,20 +61,30 @@ export class Machine {
     name: string,
     imgUnlocked: string,
     imgLocked: string,
-    accessDirection: Direction,
+    accessDirection: Direction[],
     outputProduct: Product,
     inputRequirements: Product[]
   ) {
-    // Position und Größe setzen
-    this._x = x;
-    this._y = y;
-    this._width = width;
-    this._height = height;
+    // Initialize InteractableObject: position, size, z, img, allowed directions
+    super(
+      name,
+      new Coordinates(x, y),
+      width,
+      height,
+      50,
+      accessDirection,
+      "rect",
+      undefined,
+      undefined,
+      "rgba(200, 206, 255, 1)",
+      ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
+    );
 
     // ID und Grundeinstellungen
     this._id = Machine.lastID++;
     this._name = name;
-    this._accessDirection = accessDirection;
+    this._width = width;
+    this._height = height;
 
     // Produktionslogik initialisieren
     this._inputRequirements = inputRequirements;
@@ -87,21 +96,6 @@ export class Machine {
     this._imgLocked = imgLocked;
     this._imgUnlocked = imgUnlocked;
 
-    // RenderObject erstellen und zum RenderingService hinzufügen
-    this._renderObject = new RenderObject(
-      this._name,                           // Eindeutiger Name
-      "rect",                               // Typ: Rechteck
-      this._x,                              // X-Position
-      this._y,                              // Y-Position
-      50,                                   // Z-Position
-      this._width,                          // Breite
-      this._height,                         // Höhe
-      0,                                    // Priorität
-      undefined,                            // Kein Bild (noch)
-      undefined,                            // Keine zusätzlichen Optionen
-      "rgba(200, 206, 255, 1)",            // Basis-Farbe (helles Blau)
-      ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"] // Farbverlauf
-    );
 
     // Maschine zum RenderingService hinzufügen
     RenderingService.instance().addRenderObject(this._renderObject);
@@ -145,12 +139,14 @@ export class Machine {
 
         // Alle Inputs vorhanden? Starte Produktion
         if (this._inventory.length === this._inputRequirements.length) {
-          //Product.destroy();
+
           this._inventory.forEach(prod => prod.destroy());
           resolve(this.produce());
         } else {
           resolve(true);
         }
+        Product.destroy();
+        
       } else {
         resolve(false);
       }
@@ -194,18 +190,12 @@ export class Machine {
   set upgradable(b: boolean) { this._upgradable = b; }
 
   /** X-Position in Weltkoordinaten */
-  get x(): number { return this._x; }
-  set x(v: number) { this._x = v; }
+  get x(): number { return this.position.x; }
+  set x(v: number) { this.position = new Coordinates(v, this.position.y); }
 
   /** Y-Position in Weltkoordinaten */
-  get y(): number { return this._y; }
-  set y(v: number) { this._y = v; }
-
-  /** Breite der Maschine (read-only, Maschinen ändern ihre Größe nicht) */
-  get width(): number { return this._width; }
-
-  /** Höhe der Maschine (read-only, Maschinen ändern ihre Größe nicht) */
-  get height(): number { return this._height; }
+  get y(): number { return this.position.y; }
+  set y(v: number) { this.position = new Coordinates(this.position.x, v); }
 
   /** Name/Typ der Maschine (read-only) */
   get name(): string { return this._name; }
@@ -215,21 +205,9 @@ export class Machine {
   set productionRate(v: number) { this._productionRate = v; }
 
   /** Richtung für Spieler-Interaktion (read-only) */
-  get accessDirection(): Direction { return this._accessDirection; }
+  get accessDirection(): Direction { return this._directions[0]; }
 
-  /** Aktuelles Inventar der Maschine (read-only) */
-  get inventory(): Product[] { return this._inventory; }
 
-  /** Benötigte Input-Produkte (read-only) */
-  get inputRequirements(): Product[] { return this._inputRequirements; }
-
-  /** Das zu produzierende Output-Produkt */
-  get outputProduct(): Product { return this._outputProduct; }
-  set outputProduct(v: Product) { this._outputProduct = v; }
-
-  /** RenderObject für die visuelle Darstellung */
-  get renderObject(): RenderObject { return this._renderObject; }
-  set renderObject(v: RenderObject) { this._renderObject = v; }
 
   /** Produktions Timer */
   get productionTimer(): number { return this._productionTimer; }

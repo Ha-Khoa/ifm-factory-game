@@ -64,6 +64,10 @@ export class Gamefield {
     RenderingService.instance().addRenderObject(Obj);
   }
 
+  addToInteractableObjects(obj: RenderObject)
+  {
+    this.interactableObjects.push(obj);
+  }
 
     /**
      * Generiert die Umgebung (Boden) als ein großes Rechteck.
