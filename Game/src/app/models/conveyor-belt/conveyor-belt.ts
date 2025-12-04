@@ -42,7 +42,7 @@ export class ConveyorBelt extends RenderObject{
             "rect",
             x,
             y,
-            10,
+            50,
             width,
             height,
             0,
@@ -248,6 +248,8 @@ export class ConveyorBelt extends RenderObject{
            // Products.deleteGeneratedProduct(productData.product);
            //const renderObjName = this.getProductRenderName(productData.product);
            productData.product.destroy();
+           // Ensure product is removed from global list when taken
+           Products.deleteGeneratedProduct(productData.product);
            console.log(`Produkt ${productData.product.name} von Förderband ${this.conveyorId} entnommen.`);
             return productData.product;
         }

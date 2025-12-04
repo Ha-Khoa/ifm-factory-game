@@ -8,6 +8,7 @@ import { RenderingService } from '../../services/rendering.service';
 import { Direction, KEY_TO_DIRECTION } from '../../enums/direction';
 import { RenderObject } from '../rendering/render-object';
 import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
+import { Package } from '../package/package';
 
 /**
  * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
@@ -24,7 +25,7 @@ export class Player {
     // Basis-Geschwindigkeit in Pixel pro Sekunde
     private _velocity: number;
     // Inventar des Spielers (kann ein Produkt halten)
-    private _inventory: Product | null = null;
+    private _inventory: Product | Package | null = null;
     // Zeitpunkt des letzten Frames für deltaTime-Berechnung
     private _lastFrameTime = performance.now();
     // Referenz zum Spielfeld für Kollisionsprüfung
@@ -78,21 +79,22 @@ export class Player {
     }
 
     updateProductInHand() {
-       if(this._direction === null) { return }
-        const newPositionX = this._direction === Direction.RIGHT ? this._position.x + this._hitbox.width -  Products.size / 2 :
-                     this._direction === Direction.LEFT ? this._position.x - Products.size / 2 :
-                     this._direction === Direction.UP ? this._position.x + this._hitbox.width / 2 - Products.size / 2 :
-                     this._direction === Direction.DOWN ? this._position.x + this._hitbox.width / 2 - Products.size / 2 :
+       if (this._direction === null || this._inventory === null) { return }
+        // Stabilize narrowed properties in locals so TS knows they won't change within this method
+        const dir = this._direction;
+        const inv = this._inventory;
+        const newPositionX = dir === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2 :
+                     dir === Direction.LEFT ? this._position.x - inv.size / 2 :
+                     dir === Direction.UP ? this._position.x + this._hitbox.width / 2 - inv.size / 2 :
+                     dir === Direction.DOWN ? this._position.x + this._hitbox.width / 2 - inv.size / 2 :
                      this._position.x;
-        const newPositionY = this._direction === Direction.DOWN ? this._position.y + this._hitbox.height - Products.size / 2 :
-                     this._direction === Direction.UP ? this._position.y - Products.size / 2 :
-                     this._direction === Direction.LEFT ? this._position.y + this._hitbox.height / 2 - Products.size / 2 :
-                     this._direction === Direction.RIGHT ? this._position.y + this._hitbox.height / 2 - Products.size / 2 :
+        const newPositionY = dir === Direction.DOWN ? this._position.y + this._hitbox.height - inv.size / 2 :
+                     dir === Direction.UP ? this._position.y - inv.size / 2 :
+                     dir === Direction.LEFT ? this._position.y + this._hitbox.height / 2 - inv.size / 2 :
+                     dir === Direction.RIGHT ? this._position.y + this._hitbox.height / 2 - inv.size / 2 :
                      this._position.y;
-        if(this._inventory !== null) {
-            // Position setzen aktualisiert automatisch das RenderObject in der Product-Klasse
-            this._inventory.position = new Coordinates(newPositionX, newPositionY);
-        }
+        // Position setzen aktualisiert automatisch das RenderObject in der Product-/Package-Klasse
+        inv.position = new Coordinates(newPositionX, newPositionY);
     }
 
     
@@ -200,7 +202,7 @@ export class Player {
     /**
      * Versucht ein Produkt aufzunehmen, wenn E gedrückt wurde und kein Produkt getragen wird.
      */
-    pickProduct(): Product | null {
+    pickProduct(): Product | Package | null {
         if (this._input['e']) {
             if (!this._interacted) {
                 this._canInteractProduct = true;
@@ -208,11 +210,25 @@ export class Player {
             }
         } else {
             this._interacted = false;
+            this._canInteractProduct = false;
         }
-        if (this._canInteractProduct && this._inventory === null) {
-            this._inventory = Products.checkForInteraction(this._hitbox);
+        let nearestObj = Products.checkForInteraction(this._hitbox);
+        if (this._canInteractProduct && this._inventory === null && nearestObj) {
+            this._inventory = nearestObj;
             console.log("Produkt aufgenommen:", this._inventory);
             this._canInteractProduct = false;
+            if (nearestObj instanceof Package) {
+                Products.deleteGeneratedProduct(nearestObj);
+            }
+            return this._inventory;
+        }
+        else if (this._canInteractProduct && this._inventory instanceof Package && nearestObj && nearestObj instanceof Product)
+        {
+            this._inventory.products.push(nearestObj);
+            this._canInteractProduct = false;
+            nearestObj.destroy();
+            Products.deleteGeneratedProduct(nearestObj);
+            console.log(this._inventory)
             return this._inventory;
         }
         return null;
@@ -222,7 +238,9 @@ export class Player {
      * Versucht ein getragenes Produkt abzulegen, wenn E gedrückt wurde.
      * addToMap: true → Produkt in Weltliste aufnehmen, false → nur aus Hand entfernen
      */
-    dropProduct(): Product | null {
+    dropProduct(): Product | Package | null{
+        if (this._inventory instanceof Package && Products.checkForInteraction(this._hitbox)) {return null;}
+        //else if(this._inventory instanceof Package) { Products.addPackage(this._inventory);}
         if (this._input['e']) {
             if (!this._interacted) {
                 this._canInteractProduct = true;
@@ -236,8 +254,12 @@ export class Player {
             const droppedProduct = this._inventory;
             this._inventory = null;
             this._canInteractProduct = false;
+            if (droppedProduct instanceof Package) {
+               Products.addPackage(droppedProduct);
+            }
             return droppedProduct;
         }
+
         return null;
     }
 
@@ -266,7 +288,7 @@ export class Player {
     get velocity(): number { return this._velocity; }
     set velocity(v: number) { this._velocity = v; }
 
-    get inventory(): Product | null { return this._inventory; }
-    set inventory(v: Product | null) { this._inventory = v; }
+    get inventory(): Product | Package | null { return this._inventory; }
+    set inventory(v: Product | Package | null) { this._inventory = v; }
 
 }

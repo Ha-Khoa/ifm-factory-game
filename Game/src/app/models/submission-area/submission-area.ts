@@ -1,9 +1,9 @@
 import { Coordinates } from "../coordinates/coordinates";
 import { Orders } from "../orders/orders";
-import { RenderObject } from "../rendering/render-object";
-import { RenderingService } from "../../services/rendering.service";
+import { Product } from "../product/product";
 import { InteractableObject } from "../interactableObject/interactable-object";
 import { Direction } from "../../enums/direction";
+import { Package } from "../package/package";
 
 export class SubmissionArea extends InteractableObject {
 
@@ -23,8 +23,17 @@ export class SubmissionArea extends InteractableObject {
             ["rgba(255, 92, 236, 1)", "rgba(255, 58, 232, 1)", "rgba(255, 22, 228, 1)", "rgba(255, 0, 225, 1)"]
         );
 
-
     }
+
+    addPackage(packObj: Package): boolean
+    {
+        for (let order of Orders.getActiveOrders()) {
+            for (let product of order.items) {
+                console.log("items")
+            }
+    }
+    return true
+}
 
 
 }

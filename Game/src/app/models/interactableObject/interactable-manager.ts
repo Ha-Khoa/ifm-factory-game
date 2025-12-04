@@ -13,6 +13,7 @@ import { UIService } from "../../services/ui.service";
 import { Player } from "../player/player";
 import { SubmissionArea } from "../submission-area/submission-area";
 import { InteractableObject } from "./interactable-object";
+import { Package } from "../package/package";
 
 /**
  * MachineManager-Klasse: Verwaltet alle Maschinen im Spiel.
@@ -127,8 +128,8 @@ export class InteractableManager {
    */
   async updateMachineOnInteraction(machine: Machine, player: Player) {
     // Produkt-Eingabe nur wenn E gedrückt, Maschine freigeschaltet und Spieler trägt was
-    if (this._inputs["e"] === true && machine.unlocked && player.inventory) {
-      const product: Product | null = player.inventory;
+    if (this._inputs["e"] === true && machine.unlocked && player.inventory instanceof Product) {
+      const product: Product = player.inventory;
       let result;
       
       if (product) {
@@ -143,7 +144,10 @@ export class InteractableManager {
       } 
       // Zutat erfolgreich hinzugefügt, warte auf weitere
       else if (result === true) {
+        // Remove product visuals and from global pool
         product.destroy();
+        Products.deleteGeneratedProduct(product);
+        player.inventory = null;
         console.log("Zutat hinzugefügt, wartet auf weitere Inputs");
       } 
       // Zutat nicht benötigt, zurücklegen
@@ -173,6 +177,24 @@ export class InteractableManager {
 
   updateSubmissionAreaOnInteraction(player: Player) {
       this.submissionArea.renderObject.rectColor = "rgba(81, 255, 81, 1)";
+      if (this._inputs["e"] === true && player.inventory instanceof Package) {
+      const packObj : Package = player.inventory;
+      let result;
+      
+      result = this.submissionArea.addPackage(packObj);
+
+      packObj.destroy();
+      player.inventory = null;
+      
+      // Zutat erfolgreich hinzugefügt, warte auf weitere
+      if (result === true) {
+        console.log("abgegeben");
+      } 
+      // Zutat nicht benötigt, zurücklegen
+      else if (result === false) {
+        console.log("falsches Bestellung");
+      }
+    }
   }
 
   resetSubmissionAreaOnInteraction() {

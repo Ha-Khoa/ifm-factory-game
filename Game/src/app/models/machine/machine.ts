@@ -140,12 +140,15 @@ export class Machine extends InteractableObject {
         // Alle Inputs vorhanden? Starte Produktion
         if (this._inventory.length === this._inputRequirements.length) {
 
-          this._inventory.forEach(prod => prod.destroy());
+          this._inventory.forEach(prod => {
+            prod.destroy();
+            Products.deleteGeneratedProduct(prod);
+          });
           resolve(this.produce());
         } else {
           resolve(true);
         }
-        Product.destroy();
+        // Removed stray destroy call on parameter
         
       } else {
         resolve(false);
@@ -206,6 +209,7 @@ export class Machine extends InteractableObject {
 
   /** Richtung für Spieler-Interaktion (read-only) */
   get accessDirection(): Direction { return this._directions[0]; }
+
 
 
 

@@ -134,7 +134,7 @@ export class RenderingService {
       // Berechne isometrische Projektion
       const zTransform = Obj.z * Math.sin(this._angle)
       const yProjection = Obj.y * Math.cos(this._angle) - zTransform
-      if (Obj.type === "rect" || !Obj.img || !this._images[Obj.img!]) {
+      if ((Obj.type === "rect" || !Obj.img || !this._images[Obj.img!]) && Obj.rectColor) {
         const layers = Obj.rectLayers!.length;
         for (let i = 0; i < layers; i++) {
           this._ctx.beginPath();
