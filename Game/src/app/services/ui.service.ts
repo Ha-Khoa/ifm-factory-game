@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Machine } from '../models/machine/machine';
 import { Player } from '../models/player/player';
 import { InteractableManager } from '../models/interactableObject/interactable-manager';
+import { Orders } from '../models/orders/orders';
 
 interface Rect {
   x: number;
@@ -61,8 +62,18 @@ export class UIService {
     this.ctxUI.restore();
   }
 
-  private _drawPopupBackground(x: number, y: number, config: any, upgradable: boolean) {
-    const borderColor = upgradable ? 'green' : 'red';
+  private _drawPopupBackground(x: number, y: number, config: any, upgradable?: boolean) {
+    let borderColor: string;
+    switch (upgradable) {
+      case true:
+        borderColor = 'green';
+        break;
+      case false:
+        borderColor = 'red';
+        break;
+      default:
+        borderColor = '#ff6f00'
+    }
 
     // Zeichne Rand
     this.ctxUI.fillStyle = borderColor;
@@ -185,10 +196,6 @@ export class UIService {
     this.ctxUI.fillText(`${player.inventory?.name}`, 20, 20);
   }
 
-  drawOrderPopUp() {
-
-  }
-
   updateIndicator(machineManager: InteractableManager) {
     for (const machine of machineManager.getMachines()) {
       if (machine.upgradable) {
@@ -210,4 +217,94 @@ export class UIService {
     }
   }
 
+  drawOrderPopUp(orders: Orders) {
+    this.ctxUI.save();
+
+    // --- Allgemeine Variabeln ---
+    const activeOrders = Orders.getActiveOrders();
+    const titleHeight = 50; // Höhe für die Überschrift
+    const paddingBetweenOrders = 10; // Padding zwischen den Aufträgen
+    const orderBoxBaseHeight = 40; // Höhe für die Auftragsboxen
+    const orderItemLineHeight = 15; // Line height für die Auftragsboxen
+
+    let totalOrdersHeight = 0;
+    for (const order of activeOrders) {
+      totalOrdersHeight += orderBoxBaseHeight + (order.items.length * orderItemLineHeight) + paddingBetweenOrders;
+    }
+
+    const popupConfig = {
+      width: 200,
+      height: titleHeight + totalOrdersHeight + 20, // Mit extra Padding unten
+      radius: 20,
+      borderWidth: 5,
+      lineHeight: 10,
+      xOffset: 0,
+      yOffset: 0,
+    };
+
+    const x = 1000 + popupConfig.xOffset;
+    const y = 20 * Math.cos(this._angle) + popupConfig.yOffset;
+    const centerX = x + popupConfig.width / 2;
+
+    // --- Zeichne PopUp ---
+    this._drawPopupBackground(x, y, popupConfig);
+
+    let currentY = y + popupConfig.lineHeight + 20; // Nach dem Rand starten
+    this.ctxUI.textAlign = 'center';
+    this.ctxUI.fillStyle = 'black';
+
+    this.ctxUI.font = 'bold 20px Arial';
+    this.ctxUI.fillText("Aufgaben", centerX, currentY)
+    currentY += popupConfig.lineHeight + 10;
+
+    for (const order of activeOrders) {
+      currentY = this._drawOrderBox(x, currentY, order);
+      currentY += paddingBetweenOrders;
+    }
+
+    this.ctxUI.restore();
+  }
+
+  private _drawOrderBox(x: number, y: number, order: any): number {
+    let currentY = y;
+    const itemLineHeight = 15;
+    const baseBoxHeight = 40;
+    const dynamicBoxHeight = baseBoxHeight + (order.items.length * itemLineHeight);
+
+    const config = {
+      width: 150,
+      height: dynamicBoxHeight,
+      radius: 20,
+      borderWidth: 5,
+      xOffset: 25,
+    }
+
+    x += config.xOffset;
+
+    this._drawPopupBackground(x, currentY, config);
+
+    this.ctxUI.textAlign = 'start';
+    this.ctxUI.fillStyle = 'black';
+
+    // Order ID
+    this.ctxUI.font = 'italic 12px Arial';
+    this.ctxUI.fillText(`Order ID: ${order.id}`, x + 15, currentY);
+    currentY += 20;
+
+    // Items
+    this.ctxUI.font = '12px Arial';
+    for (const item of order.items) {
+      this.ctxUI.fillText(`${item.product.name}: ${item.quantity}x`, x + 20, currentY);
+      currentY += itemLineHeight;
+    }
+
+    // Reward
+    this.ctxUI.font = 'bold 14px Arial';
+    this.ctxUI.fillText(`Reward: ${order.reward}$`, x + 20, currentY + 5);
+    currentY += 25;
+
+    return currentY;
+  }
+
 }
+

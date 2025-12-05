@@ -147,6 +147,7 @@ export class GameService {
 
       // Debug UI
       this.uiService.debugProduct(this.player)
+      this.uiService.drawOrderPopUp(this.orders)
 
       requestAnimationFrame(loop);
     };
