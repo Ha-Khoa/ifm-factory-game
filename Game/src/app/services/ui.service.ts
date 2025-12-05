@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Machine } from '../models/machine/machine';
 import { Player } from '../models/player/player';
-import { MachineManager } from '../models/machine/machine-manager';
+import { InteractableManager } from '../models/interactableObject/interactable-manager';
 
 interface Rect {
   x: number;
@@ -189,11 +189,10 @@ export class UIService {
 
   }
 
-  updateIndicator(machineManager: MachineManager) {
+  updateIndicator(machineManager: InteractableManager) {
     for (const machine of machineManager.getMachines()) {
       if (machine.upgradable) {
         this.ctxUI.save();
-
         const indicatorConfig = {
           width: 10,
           height: 50,
