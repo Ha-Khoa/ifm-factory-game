@@ -3,14 +3,16 @@
 import { Injectable } from '@angular/core';
 import { Gamefield } from '../models/gamefield/gamefield';
 import { Player } from '../models/player/player';
-import { MachineManager } from '../models/machine/machine-manager';
+import { InteractableManager } from '../models/interactableObject/interactable-manager';
 import { Hitbox } from '../interfaces/hitbox';
 import { RenderingService } from './rendering.service';
 import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
-import { ConveyorBelt } from '../models/conveyor-belt/conveyor-belt';
+import { SubmissionArea } from '../models/submission-area/submission-area';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
+import { Orders } from '../models/orders/orders';
+
 
 
 @Injectable({
@@ -26,11 +28,12 @@ export class GameService {
   private renderer!: RenderingService;
   private angle!: number;
   private playerVelocity!: number; // Pixel pro Sekunde
+  private orders!: Orders;
 
   // Spielobjekte
   private gamefield!: Gamefield;
   private player!: Player;
-  private machineManager!: MachineManager;
+  private interactableManager!: InteractableManager;
   private conveyorBeltManager!: ConveyorBeltManager;
 
   // Input und Assets
@@ -67,17 +70,19 @@ export class GameService {
       this.playerVelocity,
       this.gamefield
     );
-    this.machineManager = new MachineManager(this.gamefield, this.uiService, this.inputs);
+    this.orders = new Orders();
+    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs);
+
 
     // Lade benötigte Texturen vor
     const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"];
-    const machineImages = this.machineManager.getMachines().map(m => m.imgUnlocked);
+    const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
     const allImages = [...new Set([...baseImages, ...machineImages, ...productImages])];
     await this.preloadImages(allImages);
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
-    this.machineManager.addToInteractableObjects();
+    this.interactableManager.addToInteractableObjects();
     this.gamefield.addGameFieldToRenderingBuffer();
     this.gamefield.updateConveyorBelts(ConveyorBeltManager.getConveyorBelts());
     this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
@@ -124,7 +129,7 @@ export class GameService {
       this.player.changeVelocity();
       this.player.updatePlayer();
 
-      this.machineManager.checkForInteraction(this.player);
+      this.interactableManager.checkForInteraction(this.player);
       this.renderer.rotateMap();
 
 

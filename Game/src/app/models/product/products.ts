@@ -4,6 +4,7 @@ import { RenderObject } from '../rendering/render-object';
 import { Hitbox } from '../../interfaces/hitbox';
 import { Coordinates } from '../coordinates/coordinates';
 import { Product } from './product';
+import { Package } from '../package/package';
 
 /**
  * Products-Klasse: Verwaltet alle Produkte im Spiel (statisch).
@@ -22,7 +23,7 @@ export class Products {
   ]
 
   // Aktuell im Spiel existierende Produkt-Instanzen
-  public static generatedProducts: Product[] = [];
+  public static generatedProducts: (Product | Package)[] = [];
 
   // Standard-Größe für Produkt-Rendering
   // Standard-Größe für Produkt-Rendering
@@ -47,7 +48,7 @@ export class Products {
    * Prüft ob der Spieler nahe genug an einem Produkt ist, um es aufzunehmen.
    * @returns Das nächste Produkt wenn in Reichweite (55px), sonst null
    */
-  public static checkForInteraction(player: Hitbox): Product | null {
+  public static checkForInteraction(player: Hitbox): Product | Package | null {
     const productToInteract = this.shortestProductDistance(player);
     if (productToInteract && productToInteract.distance <= 55) {
       return productToInteract.product;
@@ -56,7 +57,7 @@ export class Products {
   }
 
   /** Entfernt ein Produkt aus der Welt (z.B. nach Aufnahme durch Spieler) */
-  public static deleteGeneratedProduct(product: Product) {
+  public static deleteGeneratedProduct(product: Product | Package) {
     this.generatedProducts = this.generatedProducts.filter(p => p != product);
   }
 
@@ -68,6 +69,10 @@ export class Products {
     let copy = product.copy();
     copy.init(position);
     this.generatedProducts.push(copy);
+  }
+
+  public static addPackage(packageObj: Package) {
+    this.generatedProducts.push(packageObj);
   }
 
   /**
@@ -98,14 +103,16 @@ export class Products {
       copy5.init(new Coordinates(600, 300));
       this.generatedProducts.push(copy5);
     }
+    let pack = new Package(new Coordinates(800, 100))
+    this.generatedProducts.push(pack);
   }
 
   /**
    * Findet das nächstgelegene Produkt zum Spieler.
    * @returns Objekt mit Distanz und Produkt, oder undefined wenn keine Produkte vorhanden
    */
-  private static shortestProductDistance(player: Hitbox): { distance: number, product: Product } | undefined {
-    let productsDistances: { distance: number, product: Product }[] = [];
+  private static shortestProductDistance(player: Hitbox): { distance: number, product: Product | Package } | undefined {
+    let productsDistances: { distance: number, product: Product | Package }[] = [];
 
     this.generatedProducts.forEach(generatedProduct => {
       // Distanz vom Spieler-Zentrum zum Produkt berechnen

@@ -1,6 +1,7 @@
 import { Coordinates } from "../coordinates/coordinates";
 import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
+// Removed import of Products to avoid circular dependency with products.ts
 
 export class Product {
 
@@ -51,6 +52,9 @@ export class Product {
 
   destroy() {
     RenderingService.instance().deleteRenderingObjektByName(this._renderObject.name);
+    // Product no longer directly removes itself from Products to prevent circular imports.
+    // Callers should remove this instance from Products.generatedProducts via
+    // Products.deleteGeneratedProduct(product) after invoking destroy().
   }
 
   // Getters / Setters
