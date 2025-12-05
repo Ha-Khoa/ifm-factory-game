@@ -215,7 +215,6 @@ export class Player {
         let nearestObj = Products.checkForInteraction(this._hitbox);
         if (this._canInteractProduct && this._inventory === null && nearestObj) {
             this._inventory = nearestObj;
-            console.log("Produkt aufgenommen:", this._inventory);
             this._canInteractProduct = false;
             if (nearestObj instanceof Package) {
                 Products.deleteGeneratedProduct(nearestObj);
@@ -228,7 +227,6 @@ export class Player {
             this._canInteractProduct = false;
             nearestObj.destroy();
             Products.deleteGeneratedProduct(nearestObj);
-            console.log(this._inventory)
             return this._inventory;
         }
         return null;
@@ -239,7 +237,7 @@ export class Player {
      * addToMap: true → Produkt in Weltliste aufnehmen, false → nur aus Hand entfernen
      */
     dropProduct(): Product | Package | null{
-        if (this._inventory instanceof Package && Products.checkForInteraction(this._hitbox)) {return null;}
+        if (this._inventory instanceof Package && Products.checkForInteraction(this._hitbox) instanceof Product) {return null;}
         //else if(this._inventory instanceof Package) { Products.addPackage(this._inventory);}
         if (this._input['e']) {
             if (!this._interacted) {
@@ -250,7 +248,6 @@ export class Player {
             this._interacted = false;
         }
         if (this._canInteractProduct && this._inventory !== null) {
-            console.log("Produkt abgelegt:", this._inventory);
             const droppedProduct = this._inventory;
             this._inventory = null;
             this._canInteractProduct = false;
