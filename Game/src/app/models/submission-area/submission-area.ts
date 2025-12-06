@@ -10,17 +10,18 @@ export class SubmissionArea extends InteractableObject {
     constructor(position: Coordinates, width: number, height: number) {
         // Initialize InteractableObject with all directions allowed
         super(
-            "submission-area",
-            position,
-            width,
-            height,
-            50,
-            [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT],
-            "rect",
-            undefined,
-            undefined,
-            "rgba(255, 122, 240, 1)",
-            ["rgba(255, 92, 236, 1)", "rgba(255, 58, 232, 1)", "rgba(255, 22, 228, 1)", "rgba(255, 0, 225, 1)"]
+        "submission-area",
+        position,
+        width,
+        height,
+        50,
+        [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT],
+        "rect",
+        undefined,
+        undefined,
+        "rgba(0, 255, 157, 0.4)", // Halbtransparenter Cyan-Glow
+        // Schichten für den "Hologramm"-Effekt an der Seite
+        ["rgba(0, 255, 157, 0.8)", "rgba(0, 200, 150, 0.6)", "rgba(0, 150, 100, 0.4)", "rgba(0, 100, 80, 0.2)"]
         );
 
     }

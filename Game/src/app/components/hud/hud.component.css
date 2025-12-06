@@ -1,93 +1,60 @@
-/* Der Container: Schwebt oben rechts */
 .stats-box {
   display: flex;
   align-items: center;
-  gap: 10px; 
+  gap: 15px;
 
-  background-color: #f0eada; /* Das helle Beige */
-  border: 5px solid #d4bda5;  /* Der braune Rand */
-  border-radius: 15px;        /* Gleiche Rundung wie Settings */
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Schatten */
+  /* Modern Glassmorphism Look */
+  background: rgba(16, 20, 30, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 3px solid #00d2ff; /* Neon Akzent */
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+  padding: 12px 25px;
   
-  padding: 10px 20px;
-  
-  color: #5c4b3f; 
-  font-family: 'Arial Rounded MT Bold', sans-serif;
-  font-size: 1.2em; /* Etwas größer passend zum Font */
+  color: #e0e0e0;
+  font-family: 'Exo 2', sans-serif;
+  font-size: 1.1em;
   font-weight: bold;
   
-  position: relative;
-  top: 10px;
-  left: 300px;
-  right: 0px;
-  pointer-events: auto;
-  white-space: nowrap;
-  z-index: 10; /* Sicherstellen, dass es über dem Canvas liegt */
-}
-
-/* Icons und Werte stylen */
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Farben angepasst für hellen Hintergrund */
-/* Grün für Geld, aber etwas dunkler/natürlicher als das Neon */
-.money-val { 
-  color: #2e7d32; 
-} 
-
-/* Orange für Score (passend zu den Buttons) */
-.score-val { 
-  color: #ff8c00; 
-} 
-
-/* Name in dem Standard-Braun der Settings */
-.player-name { 
-  color: #af5e23; 
-  text-transform: uppercase; 
-  letter-spacing: 1px;
-}
-
-/* Vertikaler Strich als Trenner */
-.separator {
-  width: 2px;
-  height: 24px;
-  background-color: #d4bda5; /* Gleiche Farbe wie der Rand */
-  border-radius: 2px;
-}
-
-/* Settings Icon Button */
-.image {
-  width: 45px; /* Tick größer */
-  height: 45px;
-  cursor: pointer;
-  
   position: absolute;
-  left: 20px; /* Ggf. anpassen, wenn das HUD breiter wird! */
-  top: 0;
-  
-  /* Optional: Kleiner Hover-Effekt wie bei den Buttons */
-  transition: transform 0.2s;
+  top: 20px;
+  right: 20px; /* Besser positioniert */
+  pointer-events: auto;
+  z-index: 100;
+  transition: all 0.3s ease;
 }
 
-.image:hover {
-  transform: scale(1.1);
+.stats-box:hover {
+  transform: translateY(2px);
+  box-shadow: 0 4px 15px 0 rgba(0, 210, 255, 0.2);
+}
+
+.player-name {
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.money-val { color: #00ff9d; } /* Neon Grün */
+.score-val { color: #ff9e00; } /* Neon Orange */
+
+.separator {
+  width: 1px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .settings-btn {
-  width: 35px;  /* Angenehme Größe */
-  height: 35px;
+  width: 32px;
+  height: 32px;
   cursor: pointer;
-  transition: transform 0.2s;
-
+  transition: transform 0.3s ease, filter 0.3s;
+  filter: invert(1); /* Macht schwarze Icons weiß */
 }
 
 .settings-btn:hover {
-  transform: scale(1.1);
-}
-
-.settings-btn:active {
-  transform: scale(0.9);
+  transform: rotate(90deg) scale(1.1);
 }

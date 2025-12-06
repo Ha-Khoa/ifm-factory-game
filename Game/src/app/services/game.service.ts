@@ -150,6 +150,17 @@ export class GameService {
 
       requestAnimationFrame(loop);
     };
+    RenderingService.instance().render();
+
+    // Vignette Effekt (Dunkle Ecken für Fokus)
+    const gradient = this.ctx.createRadialGradient(
+      this.ctx.canvas.width / 2, this.ctx.canvas.height / 2, this.ctx.canvas.height / 3,
+      this.ctx.canvas.width / 2, this.ctx.canvas.height / 2, this.ctx.canvas.height
+    );
+    gradient.addColorStop(0, "rgba(0,0,0,0)");
+    gradient.addColorStop(1, "rgba(0,0,0,0.6)"); // 60% Dunkelheit am Rand
+    this.ctx.fillStyle = gradient;
+    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     requestAnimationFrame(loop);
   }
 

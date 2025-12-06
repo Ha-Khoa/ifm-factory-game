@@ -79,19 +79,19 @@ export class Gamefield {
             for(let j = 0; j < this.cols; j++)
             {
                 this.environmetObjects.push(new RenderObject(
-                    `floor-${i}-${j}`,
-                    "rect",
-                    j * this.fieldsize,
-                    i * this.fieldsize,
-                    0,
-                    this.fieldsize,
-                    this.fieldsize,
-                    0,
-                    undefined,
-                    undefined,
-                    "#494949ff",
-                    []
-                ))
+                `floor-${i}-${j}`,
+                "rect",
+                j * this.fieldsize,
+                i * this.fieldsize,
+                0,
+                this.fieldsize,
+                this.fieldsize,
+                0,
+                undefined,
+                undefined,
+                "#2c3e50", // Cooler dunkler Slate-Ton
+                []
+            ))
             }
         }
             
@@ -118,8 +118,8 @@ export class Gamefield {
             0,
             undefined,
             undefined,
-            "#dddddd",
-            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+            "#bdc3c7",
+            ["#95a5a6", "#7f8c8d", "#34495e", "#2c3e50", "#1a252f"]
         ))
     }
     for (let i = 0; i < 5; i++)
