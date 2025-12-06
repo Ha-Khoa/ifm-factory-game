@@ -2,16 +2,17 @@
 // Importiere notwendige Angular- und Projektmodule
 import { Injectable } from '@angular/core';
 import { Gamefield } from '../models/gamefield/gamefield';
-import { Machine } from '../models/machine/machine';
 import { Player } from '../models/player/player';
-import { MachineManager } from '../models/machine/machine-manager';
+import { InteractableManager } from '../models/interactableObject/interactable-manager';
 import { Hitbox } from '../interfaces/hitbox';
 import { RenderingService } from './rendering.service';
 import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
-import { ConveyorBelt } from '../models/conveyor-belt/conveyor-belt';
+import { SubmissionArea } from '../models/submission-area/submission-area';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
+import { Orders } from '../models/orders/orders';
+
 
 
 @Injectable({
@@ -24,22 +25,23 @@ export class GameService {
 
   // Canvas und Rendering
   private ctx!: CanvasRenderingContext2D;
-  private renderer!: RenderingService;
   private angle!: number;
   private playerVelocity!: number; // Pixel pro Sekunde
 
   // Spielobjekte
   private gamefield!: Gamefield;
   private player!: Player;
-  private machineManager!: MachineManager;
-  private machines: Machine[] = [];
+  private interactableManager!: InteractableManager;
   private conveyorBeltManager!: ConveyorBeltManager;
-  
+
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
-  
-  constructor() { }
+
+  // Für Order PopUp Funktion
+  private orders!: Orders;
+
+  constructor(private uiService: UIService) { }
 
 
   /**
@@ -48,21 +50,17 @@ export class GameService {
    */
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
     // Initialisiere UI Service
-    
+
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
     this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
-    this.renderer = RenderingService.instance();
-    this.renderer.init(this.ctx, this.images, this.angle);
+    RenderingService.instance().init(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
     this.uiService.init(ctxUI, this.angle);
 
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
-    
-    // Lade benötigte Texturen vor
-    await this.preloadImages(["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"]);
 
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
@@ -72,14 +70,21 @@ export class GameService {
       this.playerVelocity,
       this.gamefield
     );
-    this.machineManager = new MachineManager(this.gamefield, this.uiService, this.inputs);
-    this.machines = this.machineManager.getMachines();
-    this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
-    
+    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs);
+
+
+    // Lade benötigte Texturen vor
+    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"];
+    const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
+    const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
+    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages])];
+    await this.preloadImages(allImages);
+
     // Füge Spielfeld zum Rendering-Buffer hinzu
-    this.machineManager.addToInteractableObjects();
+    this.interactableManager.addToInteractableObjects();
     this.gamefield.addGameFieldToRenderingBuffer();
     this.gamefield.updateConveyorBelts(ConveyorBeltManager.getConveyorBelts());
+    this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
     Products.generateProducts();
   }
 
@@ -123,23 +128,26 @@ export class GameService {
       this.player.changeVelocity();
       this.player.updatePlayer();
 
-      this.conveyorBeltManager.update();
-      
-      this.machineManager.checkForInteraction(this.player, this.inputs);
-      this.renderer.rotateMap();
+      this.interactableManager.checkForInteraction(this.player);
+      //this.renderer.rotateMap();
 
 
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
       this.player.dropProduct();
-      
 
+      this.conveyorBeltManager.update();
+      this.conveyorBeltManager.refreshGamefield();
 
       // Render-Phase
       this.player.render();
       this.player.updateProductInHand();
-      this.renderer.render();
-      
+      RenderingService.instance().render();
+
+      // Debug UI
+      this.uiService.debugProduct(this.player)
+      this.uiService.drawOrderPopUp(this.orders)
+
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);

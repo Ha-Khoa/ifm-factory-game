@@ -64,6 +64,10 @@ export class Gamefield {
     RenderingService.instance().addRenderObject(Obj);
   }
 
+  addToInteractableObjects(obj: RenderObject)
+  {
+    this.interactableObjects.push(obj);
+  }
 
     /**
      * Generiert die Umgebung (Boden) als ein großes Rechteck.
@@ -219,8 +223,10 @@ export class Gamefield {
         //Fügt die aktuellen Förderbänder hinzu
         conveyorBelts.forEach(conveyor =>{
             this.interactableObjects.push(conveyor)
+            // Stelle sicher, dass neue Förderbänder auch im Renderer landen
+            if (!RenderingService.instance().getRenderingObjektByName(conveyor.name)) {
+                RenderingService.instance().addRenderObject(conveyor);
+            }
         });
-        // Aktualisiert den Rendering-Buffer
-        this.addGameFieldToRenderingBuffer();
     }
 }

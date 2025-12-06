@@ -38,7 +38,6 @@ export class ConveyorBeltManager {
         ConveyorBeltManager.conveyorBelts.forEach(conveyor => {
             conveyor.update(deltaTime);
         });
-        this.updateGamefield();
     }
 
     private updateGamefield(): void {
@@ -91,7 +90,7 @@ export class ConveyorBeltManager {
         return this.conveyorBelts.map(conveyor => conveyor as RenderObject);
     }
 
-    refreshGamefield(gamefield: Gamefield): void {
+    refreshGamefield(): void {
         this.updateGamefield();
     }
 

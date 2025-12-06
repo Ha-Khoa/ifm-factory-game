@@ -1,4 +1,4 @@
-import { Product } from './product';
+import { Product } from '../models/product/product';
 
 export interface OrderItem{
     product: Product;

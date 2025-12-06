@@ -30,13 +30,28 @@ export class Orders {
             ],
             reward: 70,
             status: false
+        },
+        {
+            id: 4,
+            items: [
+                {product: Products.getProductById(1)!, quantity: 1}],
+                reward: 30,
+                status: false
+        },
+        {
+            id: 5,
+            items: [
+                {product: Products.getProductById(6)!, quantity: 1}
+            ],
+            reward: 60,
+            status: false
         }
     ]
     static getActiveOrders(): Order[] {
         return this.ordersList.filter(order => order.status === false);
     }
-    static completeOrder(productId: number): boolean {
-        const order =  this.ordersList.find(order => order.status === false && order.items.some(item => item.product.id === productId));
+    static completeOrder(orderId: number): boolean {
+        const order =  this.ordersList.find(order => order.status === false && order.id === orderId);
 
         if (order) {
             order.status = true;
