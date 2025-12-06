@@ -331,7 +331,8 @@ export class ConveyorBelt extends RenderObject{
                
                 if (distance <= 50){
                     this._products.splice(i, 1);
-                    productData.product.destroy();
+                    //productData.product.destroy();
+                    RenderingService.instance().deleteRenderingObjektByName(productData.renderId);
                     console.log(`Produkt ${productData.product.name} von Förderband ${this.conveyorId} entfernt (Distanz: ${distance.toFixed(2)}px).`);
                     return productData.product;
                 }
