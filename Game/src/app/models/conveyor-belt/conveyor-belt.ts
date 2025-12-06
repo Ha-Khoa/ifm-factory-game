@@ -3,6 +3,7 @@ import {Coordinates} from "../coordinates/coordinates";
 import {RenderObject} from "../rendering/render-object";
 import {Products} from "../product/products";
 import {RenderingService} from "../../services/rendering.service";
+import { last } from "rxjs";
 
 export class ConveyorBelt extends RenderObject{
     private static lastId = 0;
@@ -70,14 +71,14 @@ export class ConveyorBelt extends RenderObject{
 
         this.updateProductPositions();
     }
-
+    //Wie sich die Produkte auf dem Förderband nach dem Spawn bewegen
     private moveProducts(deltaTime: number): void{
         this._products.sort((a, b) => b.progress - a.progress);
 
-        let minDistance = 0.15; 
+        let minDistance = 0.15;                 
         for (let i = 0; i < this._products.length; i++) {
             const productData = this._products[i];
-            let maxAllowedProgress = 1.0;
+            let maxAllowedProgress = 1.0 - 0.05;     
             if (i > 0){
                 const frontProduct = this._products[i - 1];
                 maxAllowedProgress = frontProduct.progress - minDistance;
@@ -121,37 +122,45 @@ export class ConveyorBelt extends RenderObject{
 
         this._products.sort((a,b) => b.progress - a.progress);
 
-        const frontProductProgress = this._products[this._products.length - 1].progress;
+        const lastProduct = this._products[this._products.length - 1];
 
-        return frontProductProgress >= 0.2;
+        return lastProduct.progress >= 0.15;
     }
     // Spawnt ein Produkt auf dem Förderband
     spawnProduct(product?: Product): boolean{
         if(this._products.length >= this._maxProducts){
             return false;
         }
-        const newProduct = product || this.createRandomProduct();
-       // const productCopy: Product = {...newProduct, position: this.getProductPosition(0)};
+        const newProduct = product || this.createRandomProduct()
 
         let startingProgress = 0;
         if (this._products.length > 0){
             this._products.sort((a,b) => b.progress - a.progress);
-            const highestProgress = this._products[0].progress;
+            const lastProductProgress = this._products[0].progress;
 
-            startingProgress = highestProgress  - 0.15;  
+            //startingProgress = lastProductProgress  - 0.15;  
 
-            if (startingProgress < 0) {
-                startingProgress = 0;
-            }
-            if (startingProgress < 0.1) {
+            // if (startingProgress < 0) {
+            //     const pushAmount = Math.abs(startingProgress) + 0.1;
+            //     this._products.forEach(p => {
+            //         p.progress += 0.1;
+            //         if (p.progress > 1.0){
+            //             p.progress = 1.0;
+            //         }
+            //     });
+            //     startingProgress = 0;
+            // }
+
+            startingProgress = 0;
+
+            if (lastProductProgress < 0.15){
+                const pushAmount = 0.15 - lastProductProgress;
                 this._products.forEach(p => {
-                    p.progress += 0.1;
+                    p.progress += pushAmount;
                     if (p.progress > 1.0){
                         p.progress = 1.0;
                     }
-
-                });
-                startingProgress = 0;
+                })
             }
         }
         const startPos = this.getProductPosition(startingProgress);
@@ -270,7 +279,35 @@ export class ConveyorBelt extends RenderObject{
     getReadyProducts(): Product[]{
         return this._products
             .filter(productData => productData.progress >= 0.8)
+            .sort((a,b) => b.progress - a.progress)
             .map(productData => productData.product);
+    }
+
+    removeProductAtPosition(position: Coordinates): Product | null{
+        console.log(`Checking ${this._products.length} products on conveyor ${this.conveyorId} for pickup at (${position.x.toFixed(1)}, ${position.y.toFixed(1)})`);
+        for (let i = 0; i < this._products.length; i++){
+            const productData = this._products[i];
+            const productPos = productData.product.position;
+            if (productPos){
+                
+                const productCenterX = productPos.x + 10; 
+                const productCenterY = productPos.y + 10; 
+                const dx = productCenterX - position.x;
+                const dy = productCenterY - position.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                console.log(`  Product ${i}: pos(${productPos.x.toFixed(1)}, ${productPos.y.toFixed(1)}), center(${productCenterX.toFixed(1)}, ${productCenterY.toFixed(1)}), dist: ${distance.toFixed(2)}px`);
+               
+                if (distance <= 50){
+                    this._products.splice(i, 1);
+                    //productData.product.destroy();
+                    RenderingService.instance().deleteRenderingObjektByName(productData.renderId);
+                    console.log(`Produkt ${productData.product.name} von Förderband ${this.conveyorId} entfernt (Distanz: ${distance.toFixed(2)}px).`);
+                    return productData.product;
+                }
+            }
+        }
+        console.log(' Keine Produkte innerhalb von 50px Abholreichweite');
+        return null;
     }
 
     getConveyorId(): number{return this.conveyorId;}

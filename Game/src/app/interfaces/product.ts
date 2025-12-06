@@ -5,8 +5,8 @@ export interface Product {
     name: string;
     position?: Coordinates;
     img?: string;
-    ingredients: string[];
-    productionTime: number;
-    price: number;
+    ingredients?: string[];
+    productionTime?: number;
+    price?: number;
     //machine:  (von welche Maschine produziert wird) ?
 }

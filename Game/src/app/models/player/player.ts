@@ -260,20 +260,33 @@ export class Player {
         return null;
     }
 
-    private takeProductFromConveyor(): Product | null {
-        const playerPos = this._hitbox.position;
-
-        const conveyor = ConveyorBeltManager.getConveyorAt(playerPos.x, playerPos.y);
-        if (conveyor){
-            const product = conveyor.takeProduct();
+    takeProductFromConveyor(): Product | null {
+        //console.log('Checking for conveyor at player position:', this._hitbox.x, this._hitbox.y, 'size:', this._hitbox.width, this._hitbox.height);
+        const conveyor = ConveyorBeltManager.getConveyorAt(
+            this._hitbox.x, 
+            this._hitbox.y,
+            this._hitbox.width,
+            this._hitbox.height
+        );
+        if (conveyor) {
+            console.log('Found conveyor!', conveyor.getConveyorId(), 'at', conveyor.x, conveyor.y, 'products:', conveyor.getProducts().length);
+            const playerCenterX = this._hitbox.x + this._hitbox.width / 2;
+            const playerCenterY = this._hitbox.y + this._hitbox.height / 2;
+            const playerCenter = new Coordinates(playerCenterX, playerCenterY);
+            
+            const product = conveyor.removeProductAtPosition(playerCenter);
             if (product) {
-
                 console.log(`Produkt ${product.name} vom Förderband ${conveyor.getConveyorId()} aufgenommen.`);
                 return product;
+            } else {
+                console.log('kein Produkt zum Aufnehmen gefunden auf dem Förderband');
             }
+        } else {
+            console.log('kein Förderband an der Spielerposition gefunden');
         }
         return null;
     }
+
     
     // Getters / Setters
     get hitbox(): Hitbox { return this._hitbox; }

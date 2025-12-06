@@ -1,6 +1,7 @@
 import { Order, OrderItem } from '../../interfaces/order';
 import {Products} from '../product/products';
 
+
 export class Orders {
     //einfach Bestellliste für das frühe Spiel, später können wir komplexere Bestellungen hinzufügen
     private static ordersList: Order[] = [
