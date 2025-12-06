@@ -74,10 +74,12 @@ export class ConveyorBeltManager {
         return this.conveyorBelts.find(conv => conv.getConveyorId() === id);
     }
 
-    static getConveyorAt(x: number, y: number): ConveyorBelt | null {
+    static getConveyorAt(x: number, y: number, width: number, height: number): ConveyorBelt | null {
         return this.conveyorBelts.find(conveyor =>
-            x >= conveyor.x && x<= conveyor.x + conveyor.width &&
-            y >= conveyor.y && y <= conveyor.y + conveyor.height
+            x <= conveyor.x + conveyor.width &&
+            x + width >= conveyor.x &&
+            y <= conveyor.y + conveyor.height &&
+            y + height >= conveyor.y
         ) || null;
     }
 
