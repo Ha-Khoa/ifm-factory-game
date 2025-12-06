@@ -25,9 +25,6 @@ export class Products {
   // Aktuell im Spiel existierende Produkt-Instanzen
   public static generatedProducts: (Product | Package)[] = [];
 
-  // Standard-Größe für Produkt-Rendering
-  // Standard-Größe für Produkt-Rendering
-  public static size: number = 20;
 
   /** Gibt ein Produkt anhand seiner ID zurück */
   public static getProductById(id: number): Product | undefined {
@@ -105,6 +102,8 @@ export class Products {
     }
     let pack = new Package(new Coordinates(800, 100))
     this.generatedProducts.push(pack);
+    let pack2 = new Package(new Coordinates(850, 150))
+    this.generatedProducts.push(pack2);
   }
 
   /**

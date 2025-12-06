@@ -189,7 +189,7 @@ export class UIService {
   }
 
   debugProduct(player: Player) {
-    this.ctxUI.clearRect(10, 0, 250, 50)
+    this.ctxUI.clearRect(0, 0, 200, 400)
     this.ctxUI.fillStyle = 'black';
     this.ctxUI.font = '20px Arial';
     this.ctxUI.textAlign = 'start';

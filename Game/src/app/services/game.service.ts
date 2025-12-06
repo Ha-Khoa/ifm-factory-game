@@ -25,10 +25,8 @@ export class GameService {
 
   // Canvas und Rendering
   private ctx!: CanvasRenderingContext2D;
-  private renderer!: RenderingService;
   private angle!: number;
   private playerVelocity!: number; // Pixel pro Sekunde
-  private orders!: Orders;
 
   // Spielobjekte
   private gamefield!: Gamefield;
@@ -54,8 +52,7 @@ export class GameService {
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
     this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
-    this.renderer = RenderingService.instance();
-    this.renderer.init(this.ctx, this.images, this.angle);
+   RenderingService.instance().init(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
     this.uiService.init(ctxUI, this.angle);
 
@@ -70,7 +67,6 @@ export class GameService {
       this.playerVelocity,
       this.gamefield
     );
-    this.orders = new Orders();
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs);
 
 
@@ -130,7 +126,7 @@ export class GameService {
       this.player.updatePlayer();
 
       this.interactableManager.checkForInteraction(this.player);
-      this.renderer.rotateMap();
+      //this.renderer.rotateMap();
 
 
       // Interaktionslogik: erst aufnehmen, sonst ablegen
@@ -143,7 +139,7 @@ export class GameService {
       // Render-Phase
       this.player.render();
       this.player.updateProductInHand();
-      this.renderer.render();
+      RenderingService.instance().render();
 
       // Debug UI
       this.uiService.debugProduct(this.player)

@@ -27,13 +27,39 @@ export class SubmissionArea extends InteractableObject {
 
     addPackage(packObj: Package): boolean
     {
-        for (let order of Orders.getActiveOrders()) {
-            for (let product of order.items) {
-                console.log("items")
+        const packageIdsSet = new Set<number>();
+        for (const prod of packObj.products) {
+            packageIdsSet.add(prod.id);
+        }
+        for (const order of Orders.getActiveOrders()) {
+            const orderIdsSet = new Set<number>();
+            let rightOrder = true;
+            for (const item of order.items) {
+                orderIdsSet.add(item.product.id);
+                if (!(packageIdsSet.has(item.product.id))) {
+                    rightOrder = false;
+                    break;
+                }
             }
+            if(orderIdsSet.size !== packageIdsSet.size) {
+                rightOrder = false;
+                continue;
+            }
+            for (let id of packageIdsSet) {
+                if(rightOrder && order.items.filter(item => item.product.id === id)[0].quantity ===
+                   packObj.products.filter(prod => prod.id === id).length) {
+                    continue;
+                } else {
+                    rightOrder = false;
+                }
+            }
+            if (rightOrder) {
+                Orders.completeOrder(order.id);
+                return true;
+            }
+        }
+        return false;
     }
-    return true
-}
 
 
 }

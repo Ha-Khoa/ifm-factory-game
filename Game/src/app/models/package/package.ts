@@ -44,6 +44,8 @@ export class Package {
 
     destroy() {
         RenderingService.instance().deleteRenderingObjektByName(this._renderObject.name);
+        this._products.forEach(product => product.destroy());
+        Products.deleteGeneratedProduct(this);
     }
 
     get id(): number { return this._id; }

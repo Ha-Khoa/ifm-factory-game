@@ -179,11 +179,11 @@ export class InteractableManager {
       this.submissionArea.renderObject.rectColor = "rgba(81, 255, 81, 1)";
       if (this._inputs["e"] === true && player.inventory instanceof Package) {
       const packObj : Package = player.inventory;
-      let result;
-      
-      result = this.submissionArea.addPackage(packObj);
+
+      let result = this.submissionArea.addPackage(packObj);
 
       packObj.destroy();
+      
       player.inventory = null;
       
       // Zutat erfolgreich hinzugefügt, warte auf weitere

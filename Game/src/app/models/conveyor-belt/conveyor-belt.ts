@@ -160,7 +160,6 @@ export class ConveyorBelt extends RenderObject{
         this._products.push({product: newProduct, progress: startingProgress, renderId: renderId});
         this._products.sort((a, b) => b.progress - a.progress);
 
-        console.log(`Produkt ${newProduct.name} auf Förderband ${this.conveyorId} gespawnt.`);
         return true;
     }
 
