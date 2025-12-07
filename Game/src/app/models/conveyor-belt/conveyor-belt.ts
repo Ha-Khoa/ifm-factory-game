@@ -44,7 +44,7 @@ export class ConveyorBelt extends RenderObject{
            "rect",
            x,
            y,
-           10,
+           50,
            width,
            height,
            0,
@@ -206,8 +206,9 @@ export class ConveyorBelt extends RenderObject{
            Products.getProductByName("Raw Silicon"),
            Products.getProductByName("Copper wire")
        ].filter(p => p !== undefined);
-       const base = rawMaterials[Math.floor(Math.random() * rawMaterials.length)]!;
-       return new Product(base.id, base.name);
+       const base = rawMaterials[Math.floor(Math.random() * rawMaterials.length)]!.copy();
+       base.init(new Coordinates(base.position.x, base.position.y))
+    return base;
    }
 
 
@@ -293,7 +294,7 @@ export class ConveyorBelt extends RenderObject{
 
           // Products.deleteGeneratedProduct(productData.product);
           //const renderObjName = this.getProductRenderName(productData.product);
-          productData.product.destroy();
+          //productData.product.destroy();
           console.log(`Produkt ${productData.product.name} von Förderband ${this.conveyorId} entnommen.`);
            return productData.product;
        }

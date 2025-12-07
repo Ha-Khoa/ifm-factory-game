@@ -235,6 +235,7 @@ export class Player {
                this._inventory = productFromConveyor;
                this._canInteractProduct = false;
                console.log("Produkt vom Förderband aufgenommen:", this._inventory);
+               Products.generatedProducts.push(productFromConveyor);
                return this._inventory;
            }
        }
@@ -278,13 +279,12 @@ export class Player {
            const droppedProduct = this._inventory;
            this._inventory = null;
            this._canInteractProduct = false;
+          
            if (droppedProduct instanceof Package) {
               Products.addPackage(droppedProduct);
            }
            return droppedProduct;
        }
-
-
        return null;
    }
 
