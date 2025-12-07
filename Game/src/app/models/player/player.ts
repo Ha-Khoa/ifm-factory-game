@@ -236,6 +236,7 @@ export class Player {
                this._canInteractProduct = false;
                console.log("Produkt vom Förderband aufgenommen:", this._inventory);
                Products.generatedProducts.push(productFromConveyor);
+               this._inventory!.z = 50
                return this._inventory;
            }
        }
@@ -246,6 +247,7 @@ export class Player {
            if (nearestObj instanceof Package) {
                Products.deleteGeneratedProduct(nearestObj);
            }
+           this._inventory!.z = 50
            return this._inventory;
        }
        else if (this._canInteractProduct && this._inventory instanceof Package && nearestObj && nearestObj instanceof Product)
@@ -277,11 +279,19 @@ export class Player {
        }
        if (this._canInteractProduct && this._inventory !== null) {
            const droppedProduct = this._inventory;
+           this._inventory!.z = 0;
            this._inventory = null;
            this._canInteractProduct = false;
           
            if (droppedProduct instanceof Package) {
               Products.addPackage(droppedProduct);
+           }
+           let itemState = Products.checkOnTable(droppedProduct, this._gamefield.interactableObjects);
+           if(itemState === 1)
+           {
+               this._inventory = droppedProduct;
+               this._inventory!.z = 50;
+               return null;
            }
            return droppedProduct;
        }

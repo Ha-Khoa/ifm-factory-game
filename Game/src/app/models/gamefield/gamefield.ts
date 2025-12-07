@@ -21,6 +21,7 @@ export class Gamefield {
     // Anzahl der Spalten
     cols!: number;
 
+    
     constructor()
     {
         this.environmetObjects = [];

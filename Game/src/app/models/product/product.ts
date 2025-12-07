@@ -26,7 +26,7 @@ export class Product {
       "img",
       this._position.x,
       this._position.y,
-      50,
+      20,
       this._size,
       this._size,
       1000,
@@ -79,6 +79,13 @@ export class Product {
   get z(): number { return this._renderObject.z; }
   set z(v: number) {
     this._renderObject.z = v;
-    RenderingService.instance().updateRenderingObject(this._renderObject.name, this._renderObject);
+  }
+  set x(v: number){
+    this._renderObject.x = v;
+    this._position.x = v;
+  }
+  set y(v: number){
+    this._renderObject.y = v;
+    this._position.y = v;
   }
 }

@@ -14,18 +14,20 @@ export class Package {
     private _img: string;
     private _products: Product[] = [];
     private _renderObject: RenderObject;
+    private _z: number;
 
     constructor(position: Coordinates) {
         this._id = Package._lastId++;
         this._position = position;
         this._size = 30;
         this._img = '';
+        this._z = 50;
         this._renderObject = new RenderObject(
             `package-${this._id}`,
             'rect',
             this._position.x,
             this._position.y,
-            50,
+            this._z,
             this._size,
             this._size,
             1000,
@@ -67,4 +69,16 @@ export class Package {
     get img(): string { return this._img; }
     get products(): Product[] { return this._products; }
     get renderObject(): RenderObject { return this._renderObject; }
+    set z(v: number) { 
+        this._renderObject.z = v;
+        this._z = v;
+     }
+    set x(v: number){
+        this._renderObject.x = v;
+        this._position.x = v;
+    }
+    set y(v: number){
+        this._renderObject.y = v;
+        this._position.y = v;
+    }
 }

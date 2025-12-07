@@ -208,6 +208,7 @@ export class ConveyorBelt extends RenderObject{
        ].filter(p => p !== undefined);
        const base = rawMaterials[Math.floor(Math.random() * rawMaterials.length)]!.copy();
        base.init(new Coordinates(base.position.x, base.position.y))
+       base.z = 50
     return base;
    }
 

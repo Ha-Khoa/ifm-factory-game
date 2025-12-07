@@ -5,6 +5,9 @@ import { Hitbox } from '../../interfaces/hitbox';
 import { Coordinates } from '../coordinates/coordinates';
 import { Product } from './product';
 import { Package } from '../package/package';
+import { Collision } from '../collision/collision';
+import { Gamefield } from '../gamefield/gamefield';
+import { producerUpdateValueVersion } from '@angular/core/primitives/signals';
 
 /**
  * Products-Klasse: Verwaltet alle Produkte im Spiel (statisch).
@@ -41,6 +44,52 @@ export class Products {
     return this.simple_productsList;
   }
 
+
+
+  /**
+   * Prüft ob ein Produkt auf einem Tisch/Objekt platziert werden kann
+   * @param product Das zu platzierende Produkt
+   * @param objects Liste der RenderObjects in der Welt
+   * @returns 0 wenn platzierbar, 1 wenn Tisch belegt, 2 wenn kein Objekt getroffen  
+   */
+  public static checkOnTable(product: Product | Package, objects: RenderObject[]): number
+  {
+    let collision;
+    for (let interactionObject of objects)
+    {
+      product.renderObject.priority = 30
+      collision = Collision.checkCollision(new Hitbox(product.position, product.size, product.size), new Hitbox(new Coordinates(interactionObject.x, interactionObject.y), interactionObject.width, interactionObject.height))
+      if(collision && !interactionObject.name.startsWith("conveyor"))
+      {
+      if(!this.checkItemOnTable(interactionObject, product))
+      {
+      
+        
+        product.z = interactionObject.z;
+        product.x = interactionObject.x + interactionObject.width / 2 - product.size / 2;
+        product.y = interactionObject.y + interactionObject.height / 2 - product.size / 2;
+        product.renderObject.priority = 100;
+        return 0;
+        
+      }
+      return 1;
+      }
+    }
+    return 2;
+  }
+
+  private static checkItemOnTable(object: RenderObject, excludeProduct?: Product | Package): boolean
+  {
+    for(let obj of this.generatedProducts){
+      if(excludeProduct && obj == excludeProduct) continue; 
+      if(Collision.checkCollision(new Hitbox(obj.position, obj.size, obj.size), new Hitbox(new Coordinates(object.x, object.y), object.width, object.height)))
+      {
+        return true;
+      }
+      
+    }
+    return false;
+  }
   /**
    * Prüft ob der Spieler nahe genug an einem Produkt ist, um es aufzunehmen.
    * @returns Das nächste Produkt wenn in Reichweite (55px), sonst null
