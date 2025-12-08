@@ -132,15 +132,20 @@ export class InteractableManager {
       const product: Product = player.inventory;
       let result;
       
-      if (product) {
+      if (product && !Products.checkItemOnTable(machine.renderObject, product) && !machine.isProducing && !player.hasPicked()) {
         result = await machine.addProduct(product);
+                Products.deleteGeneratedProduct(product);
       }
-
+      else {
+        result = false;
+      }
       // Produktion abgeschlossen
-      if (result instanceof Object) {
+      if (result instanceof Object ) {
         const produced = result as Product;
+        product.destroy();
         console.log("Produkt produziert:", produced.name);
-        Products.addProduct(produced, new Coordinates(machine.x + this._gamefield.fieldsize / 2 - 10, machine.y + this._gamefield.fieldsize / 2 - 10  ));
+        produced.z = 50;
+        Products.addProduct(produced, new Coordinates(machine.x + this._gamefield.fieldsize / 2 - produced.size / 2, machine.y + this._gamefield.fieldsize / 2 - produced.size / 2 ));
       } 
       // Zutat erfolgreich hinzugefügt, warte auf weitere
       else if (result === true) {

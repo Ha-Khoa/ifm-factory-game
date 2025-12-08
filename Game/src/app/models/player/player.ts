@@ -35,6 +35,8 @@ export class Player {
    // Aktuelle Bewegungsrichtung
    private _direction!: Direction | null;
 
+   private _hasPicked!: boolean;
+
 
    private _directionPressed!: boolean;
 
@@ -48,6 +50,8 @@ export class Player {
 
 
    constructor(hitbox: Hitbox, img: string, velocity: number, gamefield: Gamefield) {
+       this._img = img;
+       this._hasPicked = false;
        this._hitbox = hitbox;
        this._position = hitbox.position
        this._img = img;
@@ -227,6 +231,7 @@ export class Player {
        } else {
            this._interacted = false;
            this._canInteractProduct = false;
+           this._hasPicked = false;
        }
        if (this._canInteractProduct && this._inventory === null) {
            //versuche zuerst ein Produkt vom Förderband aufzunehmen
@@ -234,6 +239,7 @@ export class Player {
            if (productFromConveyor) {
                this._inventory = productFromConveyor;
                this._canInteractProduct = false;
+               this._hasPicked = true;
                console.log("Produkt vom Förderband aufgenommen:", this._inventory);
                Products.generatedProducts.push(productFromConveyor);
                this._inventory!.z = 50
@@ -244,6 +250,7 @@ export class Player {
        if (this._canInteractProduct && this._inventory === null && nearestObj) {
            this._inventory = nearestObj;
            this._canInteractProduct = false;
+           this._hasPicked = true;
            if (nearestObj instanceof Package) {
                Products.deleteGeneratedProduct(nearestObj);
            }
@@ -268,20 +275,12 @@ export class Player {
     */
    dropProduct(): Product | Package | null{
        if (this._inventory instanceof Package && Products.checkForInteraction(this._hitbox) instanceof Product) {return null;}
-       //else if(this._inventory instanceof Package) { Products.addPackage(this._inventory);}
-       if (this._input['e']) {
-           if (!this._interacted) {
-               this._canInteractProduct = true;
-               this._interacted = true;
-           }
-       } else {
-           this._interacted = false;
-       }
        if (this._canInteractProduct && this._inventory !== null) {
            const droppedProduct = this._inventory;
            this._inventory!.z = 0;
            this._inventory = null;
            this._canInteractProduct = false;
+           this._hasPicked = false;
           
            if (droppedProduct instanceof Package) {
               Products.addPackage(droppedProduct);
@@ -332,6 +331,9 @@ export class Player {
        return null;
    }
 
+   hasPicked(): boolean {
+       return this._hasPicked;
+   }
 
    // Getters / Setters
    get hitbox(): Hitbox { return this._hitbox; }
@@ -348,6 +350,8 @@ export class Player {
 
    get inventory(): Product | Package | null { return this._inventory; }
    set inventory(v: Product | Package | null) { this._inventory = v; }
+
+   get canInteractProduct(): boolean { return this._canInteractProduct; }
 
 
 }

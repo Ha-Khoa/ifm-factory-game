@@ -103,7 +103,7 @@ export class Products {
     return distances.find(d => d.distance === min);
   }
 
-  private static checkItemOnTable(object: RenderObject, excludeProduct?: Product | Package): boolean
+  public static checkItemOnTable(object: RenderObject, excludeProduct?: Product | Package): boolean
   {
     for(let obj of this.generatedProducts){
       if(excludeProduct && obj == excludeProduct) continue; 

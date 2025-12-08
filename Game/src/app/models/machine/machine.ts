@@ -38,6 +38,7 @@ export class Machine extends InteractableObject {
   private _inventory: Product[] = [];
   private _inputRequirements: Product[] = [];
   private _outputProduct!: Product;
+  private _producting: boolean = false;
 
   /**
    * Erstellt eine neue Maschine
@@ -109,6 +110,7 @@ export class Machine extends InteractableObject {
    * Zählt jede Sekunde den Timer herunter und leert danach das Inventar.
    */
   private async produce(): Promise<Product> {
+    this._producting = true;
     return new Promise(async (resolve) => {
       const interval = setInterval(() => {
         this._productionTimer -= 1;
@@ -118,6 +120,7 @@ export class Machine extends InteractableObject {
           clearInterval(interval);
           this._productionTimer = this._productionRate / 1000;
           this._inventory = [];
+          this._producting = false;
           resolve(this._outputProduct);
         }
       }, 1000);
@@ -167,6 +170,9 @@ export class Machine extends InteractableObject {
     }
   }
 
+  get isProducing(): boolean {
+    return this._producting;
+  }
   // Getters & Setters
 
   /** Eindeutige ID der Maschine (read-only) */
