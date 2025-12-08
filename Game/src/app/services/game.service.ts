@@ -38,9 +38,6 @@ export class GameService {
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
 
-  // Für Order PopUp Funktion
-  private orders!: Orders;
-
   constructor(private uiService: UIService) { }
 
 
@@ -55,7 +52,7 @@ export class GameService {
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
     this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
-    RenderingService.instance().init(this.ctx, this.images, this.angle);
+   RenderingService.instance().init(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
     this.uiService.init(ctxUI, this.angle);
 
@@ -146,7 +143,6 @@ export class GameService {
 
       // Debug UI
       this.uiService.debugProduct(this.player)
-      this.uiService.drawOrderPopUp(this.orders)
 
       requestAnimationFrame(loop);
     };
