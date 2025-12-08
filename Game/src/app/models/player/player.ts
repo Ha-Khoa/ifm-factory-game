@@ -289,7 +289,7 @@ export class Player {
    }
 
 
-   takeProductFromConveyor(): Product | null {
+   takeProductFromConveyor(): Product | Package |null {
        //console.log('Checking for conveyor at player position:', this._hitbox.x, this._hitbox.y, 'size:', this._hitbox.width, this._hitbox.height);
        const conveyor = ConveyorBeltManager.getConveyorAt(
            this._hitbox.x,
@@ -307,7 +307,7 @@ export class Player {
           
            // If no product nearby, try taking the furthest product
            if (!product) {
-               product = conveyor.takeProduct();
+               product = conveyor.takeItem();
            }
           
            if (product) {
