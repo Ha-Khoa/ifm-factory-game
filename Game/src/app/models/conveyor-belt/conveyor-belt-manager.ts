@@ -1,7 +1,7 @@
 import { ConveyorBelt } from './conveyor-belt';
 import {Gamefield} from "../gamefield/gamefield";
 import { RenderObject } from "../rendering/render-object";
-
+import { ConveyorType } from './conveyor-belt';
 
 export class ConveyorBeltManager {
    private gamefield: Gamefield;
@@ -28,10 +28,27 @@ export class ConveyorBeltManager {
            0.1,
            true,
            2000,
-           10
+           10,
+           ConveyorType.RAW_MATERIALS
+
        ));
 
+       
 
+
+       //Package Förderband
+       ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
+              11*50,
+              5*50,
+              5*50,
+              50,
+              'left',
+              0.1,
+              true,
+              2000,
+              5,
+            ConveyorType.PACKAGES
+       ));
        this.updateGamefield();
    }
 
@@ -112,7 +129,7 @@ export class ConveyorBeltManager {
 
    static reset(gamefield?: Gamefield): void {
        this.conveyorBelts.forEach(conveyor => {
-           while (conveyor.takeProduct() !== null) {
+           while (conveyor.takeItem() !== null) {
            }
        });
        this.conveyorBelts = [];
