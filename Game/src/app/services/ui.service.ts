@@ -3,6 +3,7 @@ import { Machine } from '../models/machine/machine';
 import { Player } from '../models/player/player';
 import { InteractableManager } from '../models/interactableObject/interactable-manager';
 import { Orders } from '../models/orders/orders';
+import { Package } from '../models/package/package';
 
 interface Rect {
   x: number;
@@ -193,7 +194,20 @@ export class UIService {
     this.ctxUI.fillStyle = 'black';
     this.ctxUI.font = '20px Arial';
     this.ctxUI.textAlign = 'start';
-    this.ctxUI.fillText(`${player.inventory?.name}`, 20, 20);
+
+    const lineHeight = 20;
+    let currentY = 20;
+    if (player.inventory instanceof Package) {
+      const packageProducts = player.inventory.products
+      for (const products of packageProducts) {
+        this.ctxUI.fillText(`${products.name}`, 20, currentY);
+        currentY += lineHeight;
+      }
+    }
+    else {
+      this.ctxUI.fillText(`${player.inventory?.name}`, 20, currentY);
+    }
+
   }
 
   updateIndicator(machineManager: InteractableManager) {
@@ -218,6 +232,7 @@ export class UIService {
   }
 
   drawOrderPopUp() {
+    this.ctxUI.clearRect(1000, 20, 500, 1000)
     this.ctxUI.save();
 
     // --- Allgemeine Variabeln ---
