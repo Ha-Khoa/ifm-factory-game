@@ -217,7 +217,7 @@ export class UIService {
     }
   }
 
-  drawOrderPopUp(orders: Orders) {
+  drawOrderPopUp() {
     this.ctxUI.save();
 
     // --- Allgemeine Variabeln ---

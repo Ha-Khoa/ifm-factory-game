@@ -29,7 +29,7 @@ export class Product {
       20,
       this._size,
       this._size,
-      1000,
+      100,
       this._img,
       undefined,
       "blue",

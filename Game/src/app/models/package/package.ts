@@ -19,12 +19,12 @@ export class Package {
     constructor(position: Coordinates) {
         this._id = Package._lastId++;
         this._position = position;
-        this._size = 30;
-        this._img = '';
+        this._size = 40;
+        this._img = '/images/package.png';
         this._z = 50;
         this._renderObject = new RenderObject(
             `package-${this._id}`,
-            'rect',
+            'img',
             this._position.x,
             this._position.y,
             this._z,

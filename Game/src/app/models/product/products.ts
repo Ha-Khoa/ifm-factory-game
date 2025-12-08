@@ -7,6 +7,7 @@ import { Product } from './product';
 import { Package } from '../package/package';
 import { Collision } from '../collision/collision';
 import { Gamefield } from '../gamefield/gamefield';
+import { Direction } from '../../enums/direction';
 import { producerUpdateValueVersion } from '@angular/core/primitives/signals';
 
 /**
@@ -55,27 +56,51 @@ export class Products {
   public static checkOnTable(product: Product | Package, objects: RenderObject[]): number
   {
     let collision;
+    let collisions = [];
+    let returnvalue = 2;
     for (let interactionObject of objects)
     {
-      product.renderObject.priority = 30
+      
       collision = Collision.checkCollision(new Hitbox(product.position, product.size, product.size), new Hitbox(new Coordinates(interactionObject.x, interactionObject.y), interactionObject.width, interactionObject.height))
       if(collision && !interactionObject.name.startsWith("conveyor"))
       {
+        
       if(!this.checkItemOnTable(interactionObject, product))
       {
-      
-        
-        product.z = interactionObject.z;
-        product.x = interactionObject.x + interactionObject.width / 2 - product.size / 2;
-        product.y = interactionObject.y + interactionObject.height / 2 - product.size / 2;
-        product.renderObject.priority = 100;
-        return 0;
+        collisions.push(interactionObject)
+        continue;
         
       }
-      return 1;
+      returnvalue = 1;
       }
     }
-    return 2;
+    if(collisions.length > 0)
+    {
+    const shortestTable = this.findShortestDistanceTable(collisions, product);
+    if(shortestTable)
+    {
+      returnvalue = 0
+      product.z = shortestTable.object.z;
+      product.x = shortestTable.object.x + shortestTable.object.width / 2 - product.size / 2;
+      product.y = shortestTable.object.y + shortestTable.object.height / 2 - product.size / 2;
+    }
+    }
+    return returnvalue;
+  }
+
+  private static findShortestDistanceTable(objects: RenderObject[], product: Product | Package)
+  {
+    let distances: {distance: number, object: RenderObject}[] = [];
+    for (let interactionObject of objects)
+    {
+      const distance = Math.sqrt(
+        Math.pow((product.position.x + product.size / 2 - (interactionObject.x + interactionObject.width / 2)), 2) +
+        Math.pow((product.position.y + product.size / 2 - (interactionObject.y + interactionObject.height / 2)), 2)
+      );
+      distances.push({distance: distance, object: interactionObject});
+    }
+    const min = Math.min(...distances.map(d => d.distance));
+    return distances.find(d => d.distance === min);
   }
 
   private static checkItemOnTable(object: RenderObject, excludeProduct?: Product | Package): boolean
@@ -153,6 +178,8 @@ export class Products {
     this.generatedProducts.push(pack);
     let pack2 = new Package(new Coordinates(850, 150))
     this.generatedProducts.push(pack2);
+    let pack3 = new Package(new Coordinates(750, 150))
+    this.generatedProducts.push(pack3);
   }
 
   /**

@@ -71,7 +71,7 @@ export class GameService {
 
 
     // Lade benötigte Texturen vor
-    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"];
+    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png"];
     const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
     const allImages = [...new Set([...baseImages, ...machineImages, ...productImages])];
@@ -143,6 +143,7 @@ export class GameService {
 
       // Debug UI
       this.uiService.debugProduct(this.player)
+      this.uiService.drawOrderPopUp();
 
       requestAnimationFrame(loop);
     };
