@@ -44,6 +44,8 @@ export class Player {
     private _timerManagerService: TimerManagerService = new TimerManagerService();
     private _controller = new AbortController();
 
+    private _lastDirection : Direction;
+
 
    // RenderObject für die Darstellung auf dem Canvas
    private _z!: number;
@@ -51,10 +53,15 @@ export class Player {
    private _canInteractProduct: boolean = false;
    private _interacted: boolean = false;
    private _renderingObject: RenderObject;
+   private _walkingAnimation: string[];
+   private _holdingAnimation: string[];
 
 
    constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield, imgHeight: number) {
+        this._lastDirection = Direction.RIGHT;
        this._img = "/images/fox/fox.png";
+       this._walkingAnimation = ["/images/fox/walking_5.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png"]
+       this._holdingAnimation = ["/images/fox/4-fox-holding.png", "/images/fox/3-fox-holding.png", "/images/fox/2-fox-holding.png", "/images/fox/1-fox-holding.png"]
        this._hasPicked = false;
        this._hitbox = hitbox;
        this._position = hitbox.position
@@ -75,8 +82,8 @@ export class Player {
            undefined,
            "red",
            ["red"],
-           ["/images/fox/walking_1.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png"],
-           10,
+           this._walkingAnimation,
+           this._velocity / 20,
            this._hitbox.height
        );
 
@@ -98,22 +105,32 @@ export class Player {
 
 
    updateProductInHand() {
+        if(!this._directionPressed && this._inventory)
+         {
+            let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2
+            let newPositionY = this._position.y + 25
+            this._inventory.position = new Coordinates(newPositionX, newPositionY);
+            return
+         }
+        
       if (this._direction === null || this._inventory === null) { return }
        // Stabilize narrowed properties in locals so TS knows they won't change within this method
        const dir = this._direction;
        const inv = this._inventory;
-       const newPositionX = dir === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2 :
-                    dir === Direction.LEFT ? this._position.x - inv.size / 2 :
-                    dir === Direction.UP ? this._position.x + this._hitbox.width / 2 - inv.size / 2 :
-                    dir === Direction.DOWN ? this._position.x + this._hitbox.width / 2 - inv.size / 2 :
-                    this._position.x;
-       const newPositionY = dir === Direction.DOWN ? this._position.y + this._hitbox.height - inv.size / 2 :
-                    dir === Direction.UP ? this._position.y - inv.size / 2 :
-                    dir === Direction.LEFT ? this._position.y + this._hitbox.height / 2 - inv.size / 2 :
-                    dir === Direction.RIGHT ? this._position.y + this._hitbox.height / 2 - inv.size / 2 :
-                    this._position.y;
+       let newPositionX = dir === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2 :
+                            dir === Direction.LEFT ? this._position.x - inv.size / 2 :
+                            this._lastDirection === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2:
+                            this._lastDirection === Direction.LEFT ? this._position.x - inv.size / 2:
+                            this._position.x;
+       let newPositionY = dir === Direction.LEFT ? this._position.y + this._hitbox.height / 2 - inv.size / 2 :
+                            dir === Direction.RIGHT ? this._position.y + this._hitbox.height / 2 - inv.size / 2 :
+                            this._lastDirection === Direction.RIGHT ? this._position.y + this._hitbox.height / 2 - inv.size / 2:
+                            this._lastDirection === Direction.LEFT ? this._position.y + this._hitbox.height / 2 - inv.size / 2:
+                            this._position.y
        // Position setzen aktualisiert automatisch das RenderObject in der Product-/Package-Klasse
+       
        inv.position = new Coordinates(newPositionX, newPositionY);
+
    }
 
 
@@ -176,6 +193,10 @@ export class Player {
   * Bewegt den Spieler, solange kein Objekt oder Rand im Weg ist.
   */
    updatePlayer() {
+        if(this._direction === Direction.RIGHT || this._direction === Direction.LEFT)
+       {
+        this._lastDirection = this._direction
+       }
        const velocityX = this._direction === Direction.RIGHT ? this._frameVelocity
                        : this._direction === Direction.LEFT ? -this._frameVelocity : 0;
        const velocityY = this._direction === Direction.DOWN ? this._frameVelocity
@@ -238,6 +259,13 @@ export class Player {
         {
             this._renderingObject.type = "gif"
             this._renderingObject.img = this._img;
+            if(this._inventory !== null)
+            {
+                this._renderingObject.frames = this._holdingAnimation;
+            }
+            else{
+                this._renderingObject.frames = this._walkingAnimation;
+            }
             if (this._timerManagerService.isRunning()) {
                 this._timerManagerService.cancel();
             }
