@@ -196,7 +196,7 @@ export class UIService {
     this.ctxUI.textAlign = 'start';
 
     const lineHeight = 20;
-    let currentY = 20;
+    let currentY = 40;
     if (player.inventory instanceof Package) {
       const packageProducts = player.inventory.products
       for (const products of packageProducts) {
@@ -204,7 +204,7 @@ export class UIService {
         currentY += lineHeight;
       }
     }
-    else {
+    else if (player.inventory?.name != undefined) {
       this.ctxUI.fillText(`${player.inventory?.name}`, 20, currentY);
     }
 
