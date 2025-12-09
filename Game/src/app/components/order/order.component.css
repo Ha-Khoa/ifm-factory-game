@@ -1,14 +1,15 @@
-:root {
+.orders {
   --primary: #ffcf78;
   --secondary: #ff6f00;
-
-}
-
-.orders {
   width: fit-content;
   display: flex;
   flex-direction: row;
   gap: 32px;
+}
+
+.hidden {
+  position: absolute;
+  top: -20%;
 }
 
 .orders .order * .icon {
@@ -22,8 +23,9 @@
   border-radius: 60px;
   font-family: Arial;
   corner-shape: squircle;
+  /* Kein Error (nicht ändern) */
   overflow: hidden;
-  filter: drop-shadow(0px 5px 5px black)
+  filter: drop-shadow(0px 5px 5px black);
 }
 
 .orders .order div {
@@ -36,6 +38,7 @@
   background: var(--primary);
   padding: 16px;
   corner-shape: squircle squircle scoop scoop;
+  /* Kein Error (nicht ändern) */
   border-radius: 10px;
   border-bottom: 1px dashed rgba(0 0 0 / .2);
   font-weight: bold;
@@ -45,11 +48,13 @@
 
 .orders .order .elements {
   corner-shape: scoop scoop round round;
+  /* Kein Error (nicht ändern) */
   border-radius: 10px 10px 0 0;
   background: var(--primary);
   display: flex;
   flex-direction: column;
   padding: 16px;
+  flex-grow: 1;
 }
 
 .orders .order .elements .element {
