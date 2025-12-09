@@ -42,7 +42,6 @@ export class Player {
    private _directionPressed!: boolean;
 
     private _timerManagerService: TimerManagerService = new TimerManagerService();
-    private _controller = new AbortController();
 
     private _lastDirection : Direction;
 
@@ -57,7 +56,7 @@ export class Player {
    private _holdingAnimation: string[];
 
 
-   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield, imgHeight: number) {
+   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield) {
         this._lastDirection = Direction.RIGHT;
        this._img = "/images/fox/fox.png";
        this._walkingAnimation = ["/images/fox/walking_5.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png"]
@@ -68,7 +67,7 @@ export class Player {
        this._velocity = velocity;
        this._gamefield = gamefield;
        this._direction = null;
-       this._z = 65;
+       this._z = 100;
        this._renderingObject = new RenderObject(
            "player",
            "gif",
@@ -76,15 +75,14 @@ export class Player {
            this._position.y,
            this._z,
            this._hitbox.width,
-           imgHeight,
+           this._hitbox.height,
            (this._z - 50) * -4,
            this.img,
            undefined,
-           "red",
-           ["red"],
+           undefined,
+           undefined,
            this._walkingAnimation,
-           this._velocity / 20,
-           this._hitbox.height
+           8
        );
 
   
@@ -107,7 +105,7 @@ export class Player {
    updateProductInHand() {
         if(!this._directionPressed && this._inventory)
          {
-            let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2
+            let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3
             let newPositionY = this._position.y + 25
             this._inventory.position = new Coordinates(newPositionX, newPositionY);
             return
@@ -181,10 +179,7 @@ export class Player {
            deltaTime = 1; // Vermeidet Division durch 0 bei sehr schnellen Frames
        }
        this._frameVelocity = this._velocity * deltaTime / 1000; // Umrechnung: Pixel/Frame → Pixel/Sekunde
-      
-       // Debug FPS
-       // const fps = 1000 / deltaTime;
-       // console.log('FPS:', fps);
+
    }  
 
 
@@ -193,6 +188,7 @@ export class Player {
   * Bewegt den Spieler, solange kein Objekt oder Rand im Weg ist.
   */
    updatePlayer() {
+    this.updatePlayerAnimation();
         if(this._direction === Direction.RIGHT || this._direction === Direction.LEFT)
        {
         this._lastDirection = this._direction
@@ -250,7 +246,7 @@ export class Player {
        this._position.x += velocityX;
        this._position.y += velocityY;
    }
-   this.updatePlayerAnimation();
+   
 }
 
     updatePlayerAnimation()

@@ -63,8 +63,7 @@ export class RenderObject {
                 rectColor?: string,
                 rectLayers?: string[],
                 frames?: string[],
-                framesPerSecons?: number,
-                hitboxY?: number)
+                framesPerSecons?: number)
     {
         this._id = RenderObject.lastID++;
         this._frameNumber = 0;
@@ -82,8 +81,7 @@ export class RenderObject {
         this._priority = priority;
         this._frames = frames;
         this._framesPerSecond = framesPerSecons;
-        this._nextFrame = this._frames ? this._frames[0] : undefined;
-        this._hitboxY = hitboxY ? hitboxY : 0;
+        this._nextFrame = this._frames ? this._frames[0] : undefined
     }
 
     // get / set Methoden
@@ -159,7 +157,4 @@ export class RenderObject {
 
     get animationDirection(): Direction { return this._animationDirection }
     set animationDirection(v: Direction) {this._animationDirection = v}
-
-    get hitboxY(): number{ return this._hitboxY }
-    set hitboxY(v: number) {this._hitboxY = v}
 }

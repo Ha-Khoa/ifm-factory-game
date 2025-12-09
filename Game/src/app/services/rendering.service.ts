@@ -188,9 +188,9 @@ export class RenderingService {
           this._ctx.drawImage(
             this._images[Obj.img!],
             Obj.x,
-            yProjection - (Math.cos(this._angle) * Obj.hitboxY) / 2,
+            yProjection + Obj.height * Math.cos(this._angle) / 2,
             Obj.width,
-            Obj.z
+            Obj.z * Math.sin(this._angle)
           );
         }
       }
@@ -215,9 +215,9 @@ export class RenderingService {
           this._ctx.drawImage(
             this._images[Obj.nextFrame],
             mirror * Obj.x,
-            yProjection - (Math.cos(this._angle) * Obj.hitboxY) / 2,
+            yProjection + Obj.height * Math.cos(this._angle) / 2,
             Obj.width * mirror,
-            Obj.z
+            Obj.z * Math.sin(this._angle)
             )
             this._ctx.restore();
 
@@ -232,7 +232,6 @@ export class RenderingService {
 * Erhöht den Winkel für die Projektion.
 */
   async rotateMap() {
-    // Incrementiere den Winkel leicht pro Frame ohne Timer-Flut
     const max = 30 / 360 * 2 * Math.PI;
     if (this._angle < max) {
       this._angle += 0.0005;
