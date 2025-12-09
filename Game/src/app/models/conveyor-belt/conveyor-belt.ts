@@ -257,14 +257,9 @@ export class ConveyorBelt extends RenderObject{
 
     private createRandomPackage(): Package {
         const productCount = Math.floor(Math.random() * 3) + 1;
-        const pack: Product[] = [];
-        for (let i = 0; i < productCount; i++){
-            const randomProduct = this.createRandomRawMaterial();
-            pack.push(randomProduct);
-        }
 
         const newPackage = new Package(new Coordinates(0,0));
-        pack.forEach(p => newPackage.addProduct(p));
+
         return newPackage;
 
     }

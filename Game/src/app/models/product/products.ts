@@ -150,6 +150,7 @@ export class Products {
    * Generiert Test-Produkte für die Spielwelt (Entwicklungs-/Debug-Funktion).
    */
   public static generateProducts(): void {
+    /*
     let newProduct = Products.getProductByName("Raw Plastic");
     if (newProduct) {
       let copy1 = newProduct.copy();
@@ -179,7 +180,7 @@ export class Products {
     let pack2 = new Package(new Coordinates(850, 150))
     this.generatedProducts.push(pack2);
     let pack3 = new Package(new Coordinates(750, 150))
-    this.generatedProducts.push(pack3);
+    this.generatedProducts.push(pack3);*/
   }
 
   /**
