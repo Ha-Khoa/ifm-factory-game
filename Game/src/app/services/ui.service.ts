@@ -230,7 +230,7 @@ export class UIService {
       }
     }
   }
-
+  /*
   drawOrderPopUp() {
     this.ctxUI.clearRect(1000, 20, 500, 1000)
     this.ctxUI.save();
@@ -320,6 +320,6 @@ export class UIService {
 
     return currentY;
   }
-
+  */
 }
 

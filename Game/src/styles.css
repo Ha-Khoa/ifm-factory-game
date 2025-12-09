@@ -6,3 +6,14 @@ body {
   padding: 0;
   overflow: hidden;
 }
+
+:root {
+  /* region Gaps */
+  --gap-none: 0;
+  --gap-extra-small: 4px;
+  --gap-small: 8px;
+  --gap-medium: 12px;
+  --gap-large: 16px;
+  --gap-extra-large: 20px;
+  /* endregion */
+}

@@ -4,10 +4,11 @@ import { UIService } from './services/ui.service';
 import { HudComponent } from './components/hud/hud.component';
 import { CommonModule } from '@angular/common';
 import { SettingsComponent } from './components/settings/settings.component';
+import { OrderComponent } from "./components/order/order.component";
 
 @Component({
   selector: 'app-root',
-  imports: [HudComponent, SettingsComponent, CommonModule],
+  imports: [HudComponent, SettingsComponent, CommonModule, OrderComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
