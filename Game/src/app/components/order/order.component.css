@@ -6,11 +6,14 @@
   display: flex;
   flex-direction: row;
   gap: 32px;
+  margin-left: var(--gap-large);
+  transition: 0.5s ease-out, transform 0.5s ease-out;
+  opacity: 1;
+  transform: translateY(5%);
 }
 
-.hidden {
-  position: absolute;
-  top: -20%;
+.orders.hidden {
+  transform: translateY(-95%);
 }
 
 .orders .order * .icon {
@@ -27,7 +30,7 @@
   corner-shape: squircle;
   /* Kein Error (nicht ändern) */
   overflow: hidden;
-  filter: drop-shadow(0px 5px 5px black);
+  filter: drop_shadow(0px 5px 5px black);
 }
 
 .orders .order div {
