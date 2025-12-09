@@ -1,6 +1,8 @@
-import { Component, HostListener } from '@angular/core'
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core'
 import { Orders } from '../../models/orders/orders';
 import { NgClass } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { Order } from '../../interfaces/order';
 
 @Component({
   selector: 'app-order',
@@ -8,11 +10,24 @@ import { NgClass } from '@angular/common';
   templateUrl: './order.component.html',
   styleUrl: './order.component.css'
 })
-export class OrderComponent {
-  activeOrders = Orders.getActiveOrders();
+export class OrderComponent implements OnInit, OnDestroy {
+  activeOrders: Order[] = [];
   state = '';
+  private ordersSubscription!: Subscription;
 
-  @HostListener('window:keydown', ['$event']) // später durch richtige taste ersetzen
+  ngOnInit(): void {
+    this.ordersSubscription = Orders.activeOrders$.subscribe(orders => {
+      this.activeOrders = orders;
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.ordersSubscription) {
+      this.ordersSubscription.unsubscribe();
+    }
+  }
+
+  @HostListener('window:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'o') {
       if (this.state == '') {
