@@ -9,6 +9,7 @@ import { Direction, KEY_TO_DIRECTION } from '../../enums/direction';
 import { RenderObject } from '../rendering/render-object';
 import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
 import { Package } from '../package/package';
+import { TimerManagerService } from '../../services/timer-manager.service';
 
 
 /**
@@ -40,41 +41,46 @@ export class Player {
 
    private _directionPressed!: boolean;
 
+    private _timerManagerService: TimerManagerService = new TimerManagerService();
+    private _controller = new AbortController();
+
 
    // RenderObject für die Darstellung auf dem Canvas
-   private _renderingObject: RenderObject;
    private _z!: number;
    private _input: Record<string, boolean> = {};
    private _canInteractProduct: boolean = false;
    private _interacted: boolean = false;
+   private _renderingObject: RenderObject;
 
 
-   constructor(hitbox: Hitbox, img: string, velocity: number, gamefield: Gamefield) {
-       this._img = img;
+   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield, imgHeight: number) {
+       this._img = "/images/fox/fox.png";
        this._hasPicked = false;
        this._hitbox = hitbox;
        this._position = hitbox.position
-       this._img = img;
        this._velocity = velocity;
        this._gamefield = gamefield;
        this._direction = null;
-       this._z = 50;
+       this._z = 65;
        this._renderingObject = new RenderObject(
            "player",
-           "rect",
+           "gif",
            this._position.x,
            this._position.y,
            this._z,
            this._hitbox.width,
-           this._hitbox.height,
+           imgHeight,
            (this._z - 50) * -4,
-           undefined,
+           this.img,
            undefined,
            "red",
-           ["red"]
+           ["red"],
+           ["/images/fox/walking_1.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png"],
+           10,
+           this._hitbox.height
        );
 
-
+  
        RenderingService.instance().addRenderObject(this._renderingObject);
    }
 
@@ -132,6 +138,15 @@ export class Player {
        {
            this._directionPressed = true;
        }
+       if(this._direction === Direction.RIGHT)
+       {
+        this._renderingObject.animationDirection = Direction.RIGHT;
+       }
+       else if (this._direction === Direction.LEFT)
+        {
+            this._renderingObject.animationDirection = Direction.LEFT;
+        }
+       
    }
 
 
@@ -214,8 +229,33 @@ export class Player {
        this._position.x += velocityX;
        this._position.y += velocityY;
    }
+   this.updatePlayerAnimation();
 }
 
+    updatePlayerAnimation()
+    {
+        if(this._directionPressed)
+        {
+            this._renderingObject.type = "gif"
+            this._renderingObject.img = this._img;
+            if (this._timerManagerService.isRunning()) {
+                this._timerManagerService.cancel();
+            }
+        }
+        else
+        {
+            this._renderingObject.type = "static Img"
+            this.sitPlayer();
+        }
+    }
+
+        async sitPlayer() {
+            // Starte den Timer nur, wenn keiner läuft (sonst wird er ständig neu gestartet)
+            if (!this._timerManagerService.isRunning()) {
+                await this._timerManagerService.start(3000); 
+                this._renderingObject.img = "/images/fox/sitting.png";
+            }
+        }
 
 
 

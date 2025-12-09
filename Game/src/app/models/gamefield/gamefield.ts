@@ -120,7 +120,7 @@ export class Gamefield {
             undefined,
             undefined,
             "#dddddd",
-            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+            ["#b0b0b0","gray"]
         ))
     }
     for (let i = 0; i < 5; i++)

@@ -62,10 +62,10 @@ export class GameService {
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
     this.player = new Player(
-      new Hitbox(new Coordinates(50, 50), 40, 40),
-      "",
+      new Hitbox(new Coordinates(50, 50), 45, 20),
       this.playerVelocity,
-      this.gamefield
+      this.gamefield,
+      50
     );
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs);
 
@@ -74,7 +74,8 @@ export class GameService {
     const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png"];
     const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
-    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages])];
+    const foxImages = ["/images/fox/walking_1.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png", "/images/fox/fox.png", "/images/fox/sitting.png"]
+    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages])];
     await this.preloadImages(allImages);
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
@@ -122,6 +123,7 @@ export class GameService {
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
       // Update-Phase
+      RenderingService.instance().updateFPS()
       this.player.changeVelocity();
       this.player.updatePlayer();
 
@@ -140,6 +142,7 @@ export class GameService {
       this.player.render();
       this.player.updateProductInHand();
       RenderingService.instance().render();
+      
 
       // Debug UI
       this.uiService.debugProduct(this.player)

@@ -134,7 +134,6 @@ export class InteractableManager {
       
       if (product && !Products.checkItemOnTable(machine.renderObject, product) && !machine.isProducing && !player.hasPicked()) {
         result = await machine.addProduct(product);
-                Products.deleteGeneratedProduct(product);
       }
       else {
         result = false;
