@@ -148,7 +148,7 @@ export class RenderingService {
             Obj.x,
             (Obj.y + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle),
             Obj.width,
-            (Obj.z / layers) * Math.sin(this._angle) + 1 
+            (Obj.z / layers) * Math.sin(this._angle) + 1
           );
           this._ctx.fill();
         }

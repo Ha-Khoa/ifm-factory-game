@@ -19,8 +19,8 @@ export class SubmissionArea extends InteractableObject {
             "rect",
             undefined,
             undefined,
-            "rgba(255, 122, 240, 1)",
-            ["rgba(255, 92, 236, 1)", "rgba(255, 58, 232, 1)", "rgba(255, 22, 228, 1)", "rgba(255, 0, 225, 1)"]
+            "#7D0A0A",
+            ["#BF3131","#EAD196"]
         );
 
     }

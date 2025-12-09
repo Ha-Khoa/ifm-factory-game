@@ -88,14 +88,54 @@ export class Gamefield {
                     this.fieldsize,
                     this.fieldsize,
                     0,
+                    "/images/Metal_16-512x512.png",
                     undefined,
-                    undefined,
-                    "#494949ff",
+                    "#000000aa",
                     []
                 ))
             }
         }
-            
+        for(let i = 0; i < this.rows * 8; i++)
+        {
+            for(let j = 0; j < this.cols; j++)
+            {
+                this.environmetObjects.push(new RenderObject(
+                    `floor2-${i}-${j}`,
+                    "rect",
+                    j * this.fieldsize,
+                    i * this.fieldsize / 8,
+                    0,
+                    this.fieldsize,
+                    0.1,
+                    0,
+                    "/images/Metal_16-512x512.png",
+                    undefined,
+                    "#686767aa",
+                    []
+                ))
+            }
+        }
+        /*
+        for(let i = 0; i < this.rows; i+=2)
+        {
+            for(let j = 0; j < this.cols; j++)
+            {
+                this.environmetObjects.push(new RenderObject(
+                    `floor3-${i}-${j}`,
+                    "rect",
+                    j * this.fieldsize,
+                    i * this.fieldsize,
+                    0,
+                    this.fieldsize,
+                    this.fieldsize,
+                    0,
+                    "/images/Metal_16-512x512.png",
+                    undefined,
+                    "#494949aa",
+                    []
+                ))
+            }
+        }*/
     }
 
     /**
@@ -104,7 +144,9 @@ export class Gamefield {
      */
     generateInteractableObjects()
     {
-        
+    const rectColor = "#FFE797";
+    const layerColors = ["#FCB53B","#aa6a17ff"]
+            
         
     for (let i = 0; i < 4; i++)
         {
@@ -119,8 +161,8 @@ export class Gamefield {
             0,
             undefined,
             undefined,
-            "#dddddd",
-            ["#b0b0b0","gray"]
+            rectColor,
+            layerColors
         ))
     }
     for (let i = 0; i < 5; i++)
@@ -136,8 +178,8 @@ export class Gamefield {
             0,
             undefined,
             undefined,
-            "#dddddd",
-            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+            rectColor,
+            layerColors
         ))
     }
     
@@ -152,8 +194,8 @@ export class Gamefield {
         0,
         undefined,
         undefined,
-        "#dddddd",
-        ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+        rectColor,
+            layerColors
     ))
   
     for (let i = 0; i < 8; i++)
@@ -169,8 +211,8 @@ export class Gamefield {
             0,
             undefined,
             undefined,
-            "#dddddd",
-            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+            rectColor,
+            layerColors
         ))
         }
         this.interactableObjects.push(new RenderObject(
@@ -184,8 +226,8 @@ export class Gamefield {
             0,
             undefined,
             undefined,
-            "#dddddd",
-            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+           rectColor,
+            layerColors
         ))
         this.interactableObjects.push(new RenderObject(
             `wall-a`,
@@ -198,8 +240,8 @@ export class Gamefield {
             0,
             undefined,
             undefined,
-            "#dddddd",
-            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+            rectColor,
+            layerColors
         ))
         this.interactableObjects.push(new RenderObject(
             `wall-b`,
@@ -212,8 +254,8 @@ export class Gamefield {
             0,
             undefined,
             undefined,
-            "#dddddd",
-            ["#b0b0b0","gray","#555555", "#3f3f3fff","#000000"]
+            rectColor,
+            layerColors
         ))
     }
 

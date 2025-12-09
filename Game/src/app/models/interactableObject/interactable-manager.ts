@@ -14,6 +14,7 @@ import { Player } from "../player/player";
 import { SubmissionArea } from "../submission-area/submission-area";
 import { InteractableObject } from "./interactable-object";
 import { Package } from "../package/package";
+import { NgSwitchCase } from "@angular/common";
 
 /**
  * MachineManager-Klasse: Verwaltet alle Maschinen im Spiel.
@@ -47,6 +48,10 @@ export class InteractableManager {
     // Standard-Maschinen freischalten
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
+    this.machines.forEach((machine) => {
+      this.generateInteractionField(machine)
+    })
+    this.generateInteractionField(this.submissionArea)
   }
 
   /** Gibt alle Maschinen zurück */
@@ -76,12 +81,14 @@ export class InteractableManager {
     let collision = false;
     // Kiollision mit Maschinen prüfen
     for (let machine of this.machines) {
+
       collision = this.interactionObject(machine, player);
       if (collision) {
         this.updateMachineOnInteraction(machine, player);
         break;
       }
     }
+
     if (!collision) {
       this.resetMachineOnInteraction();
     }
@@ -90,6 +97,7 @@ export class InteractableManager {
     if (this.interactionObject(this.submissionArea, player))
     {
       this.updateSubmissionAreaOnInteraction(player);
+      
     }
     else
     {
@@ -179,9 +187,49 @@ export class InteractableManager {
     this.ui.clearMachinePopUp();
   }
 
+  generateInteractionField(interactionObject: InteractableObject)
+  {
+    const size = this._gamefield.fieldsize;
+    const base = interactionObject.position;
+
+    interactionObject.directions.forEach((direction, idx) => {
+      const x = direction === Direction.RIGHT
+        ? base.x + interactionObject.width
+        : direction === Direction.LEFT
+        ? base.x - size
+        : base.x;
+
+      const y = direction === Direction.DOWN
+        ? base.y + interactionObject.height
+        : direction === Direction.UP
+        ? base.y - size
+        : base.y;
+
+      const interactionHeight = direction === Direction.DOWN || direction === Direction.UP ? size : interactionObject.height;
+      const interactionWidth = direction === Direction.RIGHT || direction === Direction.LEFT ? size : interactionObject.width;
+      const name = `interaction-${interactionObject.renderObject.name}-${Direction[direction]}-${idx}`;
+      const ro = new RenderObject(
+        name,
+        "img",
+        x,
+        y  ,
+        0,
+        interactionWidth,
+        interactionHeight,
+        150,
+        "/images/interaction-field.png",
+        undefined,
+        undefined,
+        undefined
+      );
+
+      RenderingService.instance().addRenderObject(ro);
+    });
+  }
+
   updateSubmissionAreaOnInteraction(player: Player) {
-      this.submissionArea.renderObject.rectColor = "rgba(81, 255, 81, 1)";
-      if (this._inputs["e"] === true && player.inventory instanceof Package) {
+      this.submissionArea.renderObject.rectColor = "#9c0e0eff";
+      if (this._inputs["e"] === true && player.inventory instanceof Package && !player.hasPicked()) {
       const packObj : Package = player.inventory;
 
       let result = this.submissionArea.addPackage(packObj);
@@ -202,7 +250,7 @@ export class InteractableManager {
   }
 
   resetSubmissionAreaOnInteraction() {
-    this.submissionArea.renderObject.rectColor = "rgba(255, 122, 240, 1)";
+    this.submissionArea.renderObject.rectColor = "#7D0A0A"
   }
 
 
