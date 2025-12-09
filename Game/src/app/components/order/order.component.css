@@ -1,6 +1,7 @@
 .orders {
   --primary: #ffcf78;
   --secondary: #ff6f00;
+  --tertiary: #2a353e;
   width: fit-content;
   display: flex;
   flex-direction: row;
@@ -69,7 +70,8 @@
 }
 
 .orders .order .rewards {
-  background: var(--primary);
+  background: var(--tertiary);
+  color: var(--secondary);
   padding: 16px;
   border-radius: 0;
   border-top: 1px solid rgba(0 0 0 / .2);

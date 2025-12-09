@@ -12,7 +12,7 @@ import { Order } from '../../interfaces/order';
 })
 export class OrderComponent implements OnInit, OnDestroy {
   activeOrders: Order[] = [];
-  state = '';
+  state = 'hidden';
   private ordersSubscription!: Subscription;
 
   ngOnInit(): void {
@@ -30,14 +30,15 @@ export class OrderComponent implements OnInit, OnDestroy {
   @HostListener('window:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'o') {
-      if (this.state == '') {
-        this.state = 'hidden';
-        return;
-      }
-      else {
-        this.state = '';
-        return;
-      }
+      this.state = ''
     }
   }
+
+  @HostListener('window:keyup', ['$event'])
+  onKeyUp(event: KeyboardEvent): void {
+    if (event.key === 'o') {
+      this.state = 'hidden'
+    }
+  }
+
 }
