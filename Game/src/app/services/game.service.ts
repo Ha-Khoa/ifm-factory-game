@@ -12,6 +12,8 @@ import { Products } from '../models/product/products';
 import { SubmissionArea } from '../models/submission-area/submission-area';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
 import { Orders } from '../models/orders/orders';
+import { Particle } from '../models/particle/particle';
+import { ParticleRenderObject } from '../models/rendering/particle-render-object';
 
 
 
@@ -51,7 +53,7 @@ export class GameService {
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 1 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
     this.playerVelocity = 200; // in Pixel pro Sekunde
     this.uiService.init(ctxUI, this.angle);
@@ -85,6 +87,33 @@ export class GameService {
     this.gamefield.updateConveyorBelts(ConveyorBeltManager.getConveyorBelts());
     this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
     Products.generateProducts();
+
+    const particleRenderObject2 = new ParticleRenderObject(
+      "particle_02",
+      950,
+      200,
+      50,
+      50,
+      100,
+      10,
+      "straightUp",
+      "rect",
+      ["#9b1414ff"]
+    );
+    RenderingService.instance().addRenderObject(particleRenderObject2);
+    const particleRenderObject3 = new ParticleRenderObject(
+      "particle_03",
+      450,
+      450,
+      0,
+      50,
+      50,
+      50,
+      "straightUp",
+      "rect",
+      ["#ffffffff", "#d8d876ff", "#f1f1f1ff", "#FFFF00"]
+    );
+    RenderingService.instance().addRenderObject(particleRenderObject3);
   }
 
   /**
@@ -130,7 +159,6 @@ export class GameService {
 
       this.interactableManager.checkForInteraction(this.player);
       RenderingService.instance().rotateMap();
-
 
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
