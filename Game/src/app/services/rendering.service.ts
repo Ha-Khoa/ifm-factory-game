@@ -188,7 +188,7 @@ export class RenderingService {
           this._ctx.drawImage(
             this._images[Obj.img!],
             Obj.x,
-            yProjection + Obj.height * Math.cos(this._angle) / 2,
+            yProjection + Obj.height * Math.cos(this._angle),
             Obj.width,
             Obj.z * Math.sin(this._angle)
           );
@@ -215,7 +215,7 @@ export class RenderingService {
           this._ctx.drawImage(
             this._images[Obj.nextFrame],
             mirror * Obj.x,
-            yProjection + Obj.height * Math.cos(this._angle) / 2,
+            yProjection + Obj.height * Math.cos(this._angle),
             Obj.width * mirror,
             Obj.z * Math.sin(this._angle)
             )

@@ -4,9 +4,13 @@ import {RenderObject} from "../rendering/render-object";
 import {Products} from "../product/products";
 import {RenderingService} from "../../services/rendering.service";
 import {Package} from "../package/package";
+import { TypeofExpr } from "@angular/compiler";
 
 export enum ConveyorType {
     RAW_MATERIALS = "raw_materials",
+    COPPER_WIRE = "copper_wire",
+    RAW_PLASTIC = "raw_plastic",
+    RAW_SILICON = "raw_silicon",
     PACKAGES = 'packages'
 }
 
@@ -53,14 +57,14 @@ export class ConveyorBelt extends RenderObject{
            "rect",
            x,
            y,
-           50,
+           30,
            width,
            height,
            0,
            undefined,
            undefined,
-           '#8B4513FF',
-           ["#A0522D", "#8B4513", "#654321", "#3D2B1F"]
+           '#5a5a5aff',
+           ["#3f3f3fff", "#252525ff"]
        );
        this.conveyorId = ConveyorBelt.lastId++;
        this._direction = direction;
@@ -121,6 +125,14 @@ export class ConveyorBelt extends RenderObject{
 
    private trySpawnItem(): void {
        const currentTime = Date.now();
+       let typeProduct = this._conveyorType === ConveyorType.COPPER_WIRE ? Products.getProductByName("Copper wire") :
+                         this._conveyorType === ConveyorType.RAW_PLASTIC ? Products.getProductByName("Raw Plastic") :  
+                         this._conveyorType === ConveyorType.RAW_SILICON ? Products.getProductByName("Raw Silicon") :
+                         undefined;
+        if(typeProduct)
+        {
+            typeProduct = typeProduct.copy();
+        }
 
 
        if (this._items.length < this._maxItems &&currentTime - this._lastSpawnTime >= this._spawnRate){
@@ -131,7 +143,7 @@ export class ConveyorBelt extends RenderObject{
                     this.spawnPackage();
                 }
                 else {
-                    this.spawnProduct();
+                    this.spawnProduct(typeProduct);
                 }
                 if (spawnSuccess) {
                     this._lastSpawnTime = currentTime;
@@ -192,7 +204,7 @@ export class ConveyorBelt extends RenderObject{
        this._items.sort((a, b) => b.progress - a.progress);
 
 
-       console.log(`Produkt ${newProduct.name} auf Förderband ${this.conveyorId} gespawnt.`);
+       //console.log(`Produkt ${newProduct.name} auf Förderband ${this.conveyorId} gespawnt.`);
        return true;
    }
 
@@ -315,18 +327,7 @@ export class ConveyorBelt extends RenderObject{
    }
 
 
-   // Rendering wird durch Products.addProduct erzeugt; das Förderband aktualisiert nur die Position.
-   private getProductColor(productName: string): string{
-       const colorMap: {[key: string]: string}= {
-           "Raw Plastic": "#FF6B6B",
-           "Raw Silicon": "#4ECDC4",
-           "Copper wire": "#FFE66D",
-           "Plastic Case": "#6A0572",
-           "Circuit Board": "#1A936F",
-           "Basic Sensor": "#114B5F"
-       }
-       return colorMap[productName] || "#CCCCCC";
-   }
+
 
 
    takeItem(): Product | Package | null{
@@ -350,7 +351,7 @@ export class ConveyorBelt extends RenderObject{
            this._items.splice(productIndex, 1);
 
 
-          console.log(`Produkt ${productData.items.name} von Förderband ${this.conveyorId} entnommen.`);
+          //console.log(`Produkt ${productData.items.name} von Förderband ${this.conveyorId} entnommen.`);
            return productData.items;
        }
        return null;
@@ -372,7 +373,7 @@ export class ConveyorBelt extends RenderObject{
 
        const renderId = `conveyor-product-${this.conveyorId}-product-${this._itemsCounter++}`;
        this._items.push({items: item, progress: 0, renderId: renderId, type: type});
-       console.log(`Produkt ${item.name} zu Förderband ${this.conveyorId} hinzugefügt.`);
+       //console.log(`Produkt ${item.name} zu Förderband ${this.conveyorId} hinzugefügt.`);
        return true;
    }
 
@@ -399,28 +400,28 @@ export class ConveyorBelt extends RenderObject{
    }
 
    removeProductAtPosition(position: Coordinates): Product | Package | null{
-       console.log(`Checking ${this._items.length} products on conveyor ${this.conveyorId} for pickup at (${position.x.toFixed(1)}, ${position.y.toFixed(1)})`);
+       //console.log(`Checking ${this._items.length} products on conveyor ${this.conveyorId} for pickup at (${position.x.toFixed(1)}, ${position.y.toFixed(1)})`);
        for (let i = 0; i < this._items.length; i++){
            const productData = this._items[i];
            const productPos = productData.items.position;
            if (productPos){
               
-               const productCenterX = productPos.x + 10;
-               const productCenterY = productPos.y + 10;
+               const productCenterX = productPos.x + productData.items.size / 2;
+               const productCenterY = productPos.y + productData.items.size / 2;
                const dx = productCenterX - position.x;
                const dy = productCenterY - position.y;
                const distance = Math.sqrt(dx * dx + dy * dy);
-               console.log(`  Product ${i}: pos(${productPos.x.toFixed(1)}, ${productPos.y.toFixed(1)}), center(${productCenterX.toFixed(1)}, ${productCenterY.toFixed(1)}), dist: ${distance.toFixed(2)}px`);
+               //console.log(`  Product ${i}: pos(${productPos.x.toFixed(1)}, ${productPos.y.toFixed(1)}), center(${productCenterX.toFixed(1)}, ${productCenterY.toFixed(1)}), dist: ${distance.toFixed(2)}px`);
              
-               if (distance <= 50){
+               if (distance <= Products.reachDistance){
                    this._items.splice(i, 1);
                    //productData.items.destroy();
-                   console.log(`✓ Produkt ${productData.items.name} von Förderband ${this.conveyorId} entfernt (Distanz: ${distance.toFixed(2)}px).`);
+                   //console.log(`✓ Produkt ${productData.items.name} von Förderband ${this.conveyorId} entfernt (Distanz: ${distance.toFixed(2)}px).`);
                    return productData.items;
                }
            }
        }
-       console.log('  No products within 50px pickup range');
+       //sconsole.log('  No products within 50px pickup range');
        return null;
    }
 

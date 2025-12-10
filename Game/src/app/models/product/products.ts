@@ -29,6 +29,7 @@ export class Products {
   // Aktuell im Spiel existierende Produkt-Instanzen
   public static generatedProducts: (Product | Package)[] = [];
 
+  public static reachDistance: number = 80; // Reichweite für Interaktionen in Pixel
 
   /** Gibt ein Produkt anhand seiner ID zurück */
   public static getProductById(id: number): Product | undefined {
@@ -62,7 +63,7 @@ export class Products {
     {
       
       collision = Collision.checkCollision(new Hitbox(product.position, product.size, product.size), new Hitbox(new Coordinates(interactionObject.x, interactionObject.y), interactionObject.width, interactionObject.height))
-      if(collision && !interactionObject.name.startsWith("conveyor"))
+      if(collision && !interactionObject.name.startsWith("conveyor") && !interactionObject.name.startsWith("Machine"))
       {
         
       if(!this.checkItemOnTable(interactionObject, product))
@@ -121,7 +122,7 @@ export class Products {
    */
   public static checkForInteraction(player: Hitbox): Product | Package | null {
     const productToInteract = this.shortestProductDistance(player);
-    if (productToInteract && productToInteract.distance <= 55) {
+    if (productToInteract && productToInteract.distance <= Products.reachDistance) {
       return productToInteract.product;
     }
     return null;

@@ -21,7 +21,7 @@ export class Product {
     this._name = name;
     this._img = img;
     this._position = new Coordinates(0, 0);
-    this._size = 20; // Standardgröße für Produkte
+    this._size = 30; // Standardgröße für Produkte
     this._z = z !== undefined ? z : 0;  
     this._renderObject = new RenderObject(
       `product:${this._name}:${this._instanceId}`,
@@ -31,7 +31,7 @@ export class Product {
       this._z,
       this._size,
       this._size,
-      300,
+      100,
       this._img,
       undefined,
       "blue",
@@ -54,9 +54,7 @@ export class Product {
 
   destroy() {
     RenderingService.instance().deleteRenderingObjektByName(this._renderObject.name);
-    // Product no longer directly removes itself from Products to prevent circular imports.
-    // Callers should remove this instance from Products.generatedProducts via
-    // Products.deleteGeneratedProduct(product) after invoking destroy().
+
   }
 
   // Getters / Setters

@@ -51,9 +51,9 @@ export class GameService {
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 1 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
-    this.playerVelocity = 200; // in Pixel pro Sekunde
+    this.playerVelocity = 300; // in Pixel pro Sekunde
     this.uiService.init(ctxUI, this.angle);
 
     // Initialisiere Eingaben
@@ -62,7 +62,7 @@ export class GameService {
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
     this.player = new Player(
-      new Hitbox(new Coordinates(50, 50), 40, 20),
+      new Hitbox(new Coordinates(50, 50), 60, 30),
       this.playerVelocity,
       this.gamefield
     );

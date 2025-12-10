@@ -67,7 +67,7 @@ export class Player {
        this._velocity = velocity;
        this._gamefield = gamefield;
        this._direction = null;
-       this._z = 100;
+       this._z = 150;
        this._renderingObject = new RenderObject(
            "player",
            "gif",
@@ -106,7 +106,7 @@ export class Player {
         if(!this._directionPressed && this._inventory)
          {
             let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3
-            let newPositionY = this._position.y + 25
+            let newPositionY = this._position.y + this._hitbox.height / 2 - 5
             this._inventory.position = new Coordinates(newPositionX, newPositionY);
             return
          }
@@ -120,10 +120,10 @@ export class Player {
                             this._lastDirection === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2:
                             this._lastDirection === Direction.LEFT ? this._position.x - inv.size / 2:
                             this._position.x;
-       let newPositionY = dir === Direction.LEFT ? this._position.y + this._hitbox.height / 2 - inv.size / 2 :
-                            dir === Direction.RIGHT ? this._position.y + this._hitbox.height / 2 - inv.size / 2 :
-                            this._lastDirection === Direction.RIGHT ? this._position.y + this._hitbox.height / 2 - inv.size / 2:
-                            this._lastDirection === Direction.LEFT ? this._position.y + this._hitbox.height / 2 - inv.size / 2:
+       let newPositionY = dir === Direction.LEFT ? this._position.y - inv.size / 2 :
+                            dir === Direction.RIGHT ? this._position.y - inv.size / 2 :
+                            this._lastDirection === Direction.RIGHT ? this._position.y - inv.size / 2:
+                            this._lastDirection === Direction.LEFT ? this._position.y - inv.size / 2:
                             this._position.y
        // Position setzen aktualisiert automatisch das RenderObject in der Product-/Package-Klasse
        
@@ -379,18 +379,18 @@ export class Player {
            let product = conveyor.removeProductAtPosition(playerCenter);
           
            // If no product nearby, try taking the furthest product
-           if (!product) {
+           /*if (!product) {
                product = conveyor.takeItem();
-           }
+           }*/
           
            if (product) {
-               console.log(`Produkt ${product.name} vom Förderband ${conveyor.getConveyorId()} aufgenommen.`);
+           //console.log(`Produkt ${product.name} vom Förderband ${conveyor.getConveyorId()} aufgenommen.`);
                return product;
            } else {
-               console.log('kein Produkt zum Aufnehmen gefunden auf dem Förderband');
+               //console.log('kein Produkt zum Aufnehmen gefunden auf dem Förderband');
            }
        } else {
-           console.log('kein Förderband an der Spielerposition gefunden');
+           //console.log('kein Förderband an der Spielerposition gefunden');
        }
        return null;
    }

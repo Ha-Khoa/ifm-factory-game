@@ -26,19 +26,22 @@ export class InteractableManager {
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       // Sensor-Maschine (benötigt Raw Silicon + Circuit Board)
-      new Machine(600, 400, 50, 50, "Sensor", "/images/wall.png", "/images/wall.png", 
-                  [Direction.DOWN, Direction.UP], Products.getProductByName("Basic Sensor")!, 
+      new Machine(75 * 4, 75 * 4, 75, 75, "Basic Sensor", "/images/wall.png", "/images/wall.png", 
+                  [Direction.DOWN], Products.getProductByName("Basic Sensor")!, 
                   [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Circuit Board")!]),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(500, 450, 50, 50, "Plastic Case", "/images/wall.png", "/images/wall.png", 
-                  [Direction.LEFT], Products.getProductByName("Plastic Case")!, 
-                  [Products.getProductByName("Raw Plastic")!])
+      new Machine(75 * 4, 75 * 8, 75, 75, "Plastic Case", "/images/wall.png", "/images/wall.png", 
+                  [Direction.UP], Products.getProductByName("Plastic Case")!, 
+                  [Products.getProductByName("Raw Plastic")!]),
+      new Machine(75 * 8, 75 * 4, 75, 75, "Circuit Board", "/images/wall.png", "/images/wall.png", 
+                  [Direction.DOWN], Products.getProductByName("Circuit Board")!, 
+                  [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper wire")!])
     ];
 
     private submissionArea: SubmissionArea = new SubmissionArea(
-      new Coordinates(950, 200),
-      50,
-      100
+      new Coordinates(1875, 300),
+      75,
+      150
     );
   
   constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>) {
@@ -48,10 +51,12 @@ export class InteractableManager {
     // Standard-Maschinen freischalten
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
+    this.updateUnlockedMachine(2);
     this.machines.forEach((machine) => {
       this.generateInteractionField(machine)
     })
     this.generateInteractionField(this.submissionArea)
+    console.log(this.machines)
   }
 
   /** Gibt alle Maschinen zurück */
@@ -81,7 +86,6 @@ export class InteractableManager {
     let collision = false;
     // Kiollision mit Maschinen prüfen
     for (let machine of this.machines) {
-
       collision = this.interactionObject(machine, player);
       if (collision) {
         this.updateMachineOnInteraction(machine, player);
@@ -216,7 +220,7 @@ export class InteractableManager {
         0,
         interactionWidth,
         interactionHeight,
-        150,
+        100,
         "/images/interaction-field.png",
         undefined,
         undefined,
