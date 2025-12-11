@@ -176,8 +176,10 @@ export class UIService {
     };
 
     const center = popupConfig.width / 2;
-    const x = machine.x + popupConfig.xOffset;
-    const y = machine.y * Math.cos(this._angle) + popupConfig.yOffset;
+    // const x = machine.x + popupConfig.xOffset;
+    // const y = machine.y * Math.cos(this._angle) + popupConfig.yOffset;
+    const x = 50;
+    const y = 650
 
     this.lastMachinePopupRect = {
       x: x - 10, y: y - 10, width: popupConfig.width + 20, height: popupConfig.height + 20
