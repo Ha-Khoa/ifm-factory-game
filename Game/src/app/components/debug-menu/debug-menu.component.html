@@ -1,0 +1,48 @@
+<div class="debug-menu-container">
+  <h1>Debug Menu</h1>
+  <div class="two-column">
+    <div class="column">
+      <div class="debug-section">
+        <h4>Spieler Stats</h4>
+        <div class="form-group">
+          <label for="money">Geld:</label>
+          <input type="number" id="money" [(ngModel)]="playerMoney">
+          <button (click)="setMoney()">Geld festlegen</button>
+        </div>
+        <div class="form-group">
+          <label for="score">Score:</label>
+          <input type="number" id="score" [(ngModel)]="playerScore">
+          <button (click)="setScore()">Score festlegen</button>
+        </div>
+      </div>
+
+      <div class="debug-section">
+        <h4>Aufgaben</h4>
+        <button (click)="createRandomOrder()">Erstelle zufällige Aufgaben</button>
+        <button (click)="completeAllOrders()">Alle Aufgaben abhaken</button>
+      </div>
+    </div>
+    <div class="column">
+      <div class="debug-section">
+        <h4>Eigene Aufgabe erstellen</h4>
+        <div class="form-group">
+          <label for="product">Produkt:</label>
+          <select id="product" [(ngModel)]="selectedProductId">
+            <option *ngFor="let product of products" [value]="product.id">
+              {{ product.name }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="quantity">Anzahl:</label>
+          <input type="number" id="quantity" [(ngModel)]="quantity">
+        </div>
+        <div class="form-group">
+          <label for="reward">Belohnung:</label>
+          <input type="number" id="reward" [(ngModel)]="reward">
+        </div>
+        <button (click)="createCustomOrder()">Eigene Aufgabe erstellen</button>
+      </div>
+    </div>
+  </div>
+</div>

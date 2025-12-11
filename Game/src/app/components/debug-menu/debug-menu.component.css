@@ -1,45 +1,57 @@
-.settings-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.menus-container {
-  display: flex;
-  gap: 20px;
-}
-
-.settings-panel {
+.debug-menu-container {
   background-color: #f0eada;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  width: 300px;
+  width: 600px;
   text-align: center;
   border: 5px solid #d4bda5;
+  color: #5c4b3f;
+  font-family: 'Arial Rounded MT Bold', sans-serif;
+}
+
+.two-column {
+  display: flex;
+  gap: 20px;
+}
+
+.column {
+  flex: 1;
 }
 
 h1 {
-  color: #5c4b3f;
-  font-family: 'Arial Rounded MT Bold', sans-serif;
   font-size: 2em;
   margin-bottom: 20px;
 }
 
-.settings-options {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+h4 {
+  margin: 10px;
 }
 
-.btn {
+.form-group {
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+label {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+input,
+select {
+  padding: 10px;
+  border-radius: 5px;
+  border: 2px solid #d4bda5;
+  background-color: #fff;
+  font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+button {
   background-color: #ff8c00;
   color: white;
   border: none;
@@ -50,13 +62,15 @@ h1 {
   cursor: pointer;
   transition: background-color 0.3s;
   border-bottom: 5px solid #d97400;
+  margin-top: 10px;
+  width: 100%;
 }
 
-.btn:hover {
+button:hover {
   background-color: #ff9d26;
 }
 
-.btn:active {
+button:active {
   border-bottom-width: 2px;
   margin-top: 3px;
 }
