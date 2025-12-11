@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
@@ -14,6 +14,9 @@ import { Product } from '../../models/product/product';
   styleUrls: ['./../settings/settings-general.component.css','./debug-menu.component.css']
 })
 export class DebugMenuComponent implements OnInit {
+  @Output() closeDebugMenuRequest = new EventEmitter<void>();
+  isClosing = false;
+
   playerMoney = 0;
   playerScore = 0;
   playerName = 'Benjamin'; // Hardcoded player name
@@ -28,6 +31,15 @@ export class DebugMenuComponent implements OnInit {
 
   ngOnInit() {
     this.products = Products.getAllProducts();
+  }
+
+  closeDebugMenu() {
+    this.isClosing = true;
+
+    // Zeit warten, damit CSS Animation ablaufen kann
+    setTimeout(() => {
+      this.closeDebugMenuRequest.emit();
+    }, 300);
   }
 
   setMoney() {
