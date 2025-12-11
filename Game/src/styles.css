@@ -1,14 +1,23 @@
-/* You can add global styles to this file, and also import other style files */
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  font-family: 'Arial Rounded MT Bold', sans-serif;
-}
-
 :root {
+  --primary: #ffcf78;
+  --secondary: #ff6f00;
+  --tertiary: #2a353e;
+
+  --font-family: "Arial Rounded MT Bold", "Segoe UI", Arial, sans-serif;
+  --font-family-alt: Arial;
+
+  --text-color: var(--tertiary);
+  --background-color: #f4e1c1;
+  --border-color: #5d4037;
+  --highlight-color: var(--secondary);
+
+  --locked-color: #d32f2f;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+
+  --progress-bg: #d7ccc8;
+  --progress-fill: #7cb342;
+  --progress-border: var(--border-color);
+
   /* region Gaps */
   --gap-none: 0;
   --gap-extra-small: 4px;
@@ -17,4 +26,14 @@ body {
   --gap-large: 16px;
   --gap-extra-large: 20px;
   /* endregion */
+}
+
+/* You can add global styles to this file, and also import other style files */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: var(--font-family);
 }

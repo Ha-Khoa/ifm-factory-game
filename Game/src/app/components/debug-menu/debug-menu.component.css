@@ -1,13 +1,13 @@
 .debug-menu-container {
-  background-color: #f0eada;
+  background-color: var(--primary);
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   width: 600px;
   text-align: center;
-  border: 5px solid #d4bda5;
-  color: #5c4b3f;
-  font-family: 'Arial Rounded MT Bold', sans-serif;
+  border: 5px solid var(--tertiary);
+  color: var(--text-color);
+  font-family: var(--font-family);
 }
 
 .two-column {
@@ -44,7 +44,7 @@ input,
 select {
   padding: 10px;
   border-radius: 5px;
-  border: 2px solid #d4bda5;
+  border: 2px solid var(--border-color);
   background-color: #fff;
   font-size: 1em;
   width: 100%;
@@ -52,8 +52,8 @@ select {
 }
 
 button {
-  background-color: #ff8c00;
-  color: white;
+  background-color: var(--tertiary);
+  color: var(--secondary);
   border: none;
   padding: 15px;
   border-radius: 10px;
@@ -61,13 +61,13 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s;
-  border-bottom: 5px solid #d97400;
+  border-bottom: 5px solid black;
   margin-top: 10px;
   width: 100%;
 }
 
 button:hover {
-  background-color: #ff9d26;
+  background-color: #4a555e;
 }
 
 button:active {

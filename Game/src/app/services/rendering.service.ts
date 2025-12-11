@@ -92,51 +92,11 @@ export class RenderingService {
 
   /**
    * Rendert alle Objekte im Buffer auf das Canvas.
-   * Jetzt mit Schatten-Logik! 🌑
+   * Wendet isometrische Projektion an und zeichnet Rechtecke mit 3D-Tiefeneffekt oder Bilder
    */
   render(): void {
     if (!this._ctx) return;
     this._renderingBuffer.forEach((Obj) => {
-      /*
-      // Zeichnet einen Schatten unter alles, was eine Höhe hat (z > 0)
-      // --- NEU: Verbesserte Schatten-Logik (Smart Shadows 🧠) ---
-      if (Obj.z > 0) {
-        this._ctx.save();
-        
-        // Position am Boden berechnen (Basis-Y projiziert)
-        const shadowBaseY = (Obj.y + Obj.height) * Math.cos(this._angle);
-        
-        this._ctx.fillStyle = "rgba(0, 0, 0, 0.3)"; // Schattenfarbe (etwas dunkler für besseren Kontrast)
-
-        if (Obj.type === 'rect') {
-            // --- Rechteckiger Schatten für Blöcke/Maschinen ---
-            // Zeichnet exakt die Grundfläche des Blocks am Boden nach
-            this._ctx.fillRect(
-                Obj.x, 
-                shadowBaseY, 
-                Obj.width, 
-                Obj.height * Math.cos(this._angle) // Perspektivisch korrekte Tiefe
-            );
-        } else {
-            // --- Runder Schatten für Spieler & Items ---
-            const centerX = Obj.x + Obj.width / 2;
-            
-            this._ctx.translate(centerX, shadowBaseY);
-            this._ctx.beginPath();
-            this._ctx.ellipse(
-                0, 0,
-                Obj.width / 1.6,   // Breite Ellipse
-                Obj.width / 3.5,   // Flache Ellipse (wegen Perspektive)
-                0, 0, 2 * Math.PI
-            );
-            this._ctx.fill();
-        }
-        
-        this._ctx.restore();
-      }*/
-      // ---------------------------------------------------------
-
-
       // Berechne isometrische Projektion
       const zTransform = Obj.z * Math.sin(this._angle)
       const yProjection = Obj.y * Math.cos(this._angle) - zTransform
@@ -182,8 +142,7 @@ export class RenderingService {
           );
         }
       }
-      else if (Obj.type === "static Img")
-      {
+      else if (Obj.type === "static Img") {
         if (Obj.img) {
           this._ctx.drawImage(
             this._images[Obj.img!],
@@ -194,19 +153,16 @@ export class RenderingService {
           );
         }
       }
-      else if (Obj.type === "gif"){
-        if(Obj.frames && Obj.framesPerSecond && Obj.nextFrame)
-        { 
+      else if (Obj.type === "gif") {
+        if (Obj.frames && Obj.framesPerSecond && Obj.nextFrame) {
           let mirror = 1;
           this._ctx.save();
-          if(Obj.animationDirection === Direction.LEFT)
-          {
+          if (Obj.animationDirection === Direction.LEFT) {
             mirror = -1;
-            this._ctx.scale(-1,1);
+            this._ctx.scale(-1, 1);
           }
           const maxOneFrame = Math.round(this._fps / Obj.framesPerSecond)
-          if(maxOneFrame < Obj.singleFrameCount)
-          {
+          if (maxOneFrame < Obj.singleFrameCount) {
             Obj.nextFrame = Obj.frames[(Obj.frameNumber + 1) % Obj.frames.length]
             Obj.frameNumber++;
             Obj.singleFrameCount = 0;
@@ -218,8 +174,8 @@ export class RenderingService {
             yProjection + Obj.height * Math.cos(this._angle),
             Obj.width * mirror,
             Obj.z * Math.sin(this._angle)
-            )
-            this._ctx.restore();
+          )
+          this._ctx.restore();
 
         }
       }
@@ -253,15 +209,14 @@ export class RenderingService {
         */
   }
 
-  updateFPS()
-  {
+  updateFPS() {
     const now = performance.now();
-       let deltaTime = now - this._lastFrameTime;
-       this._lastFrameTime = now;
-       if (deltaTime === 0) {
-           deltaTime = 1; // Vermeidet Division durch 0 bei sehr schnellen Frames
-       }
-       this._fps = 1000 / deltaTime;
+    let deltaTime = now - this._lastFrameTime;
+    this._lastFrameTime = now;
+    if (deltaTime === 0) {
+      deltaTime = 1; // Vermeidet Division durch 0 bei sehr schnellen Frames
+    }
+    this._fps = 1000 / deltaTime;
   }
 
 
