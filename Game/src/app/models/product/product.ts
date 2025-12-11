@@ -11,7 +11,7 @@ export class Product {
   private _id: number;
   private _name: string;
   private _position!: Coordinates;
-  private _img?: string;
+  _img?: string;
   private _renderObject!: RenderObject;
   private _size: number;
   private _z : number;

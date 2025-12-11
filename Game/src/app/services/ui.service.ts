@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Machine } from '../models/machine/machine';
-import { Player } from '../models/player/player';
-import { InteractableManager } from '../models/interactableObject/interactable-manager';
 import { Package } from '../models/package/package';
 import { Product } from '../models/product/product';
 
@@ -40,12 +38,15 @@ export class UIService {
   private lastMachinePopupRect: Rect | null = null;
   private lastItemPopupRect: Rect | null = null;
 
+  private images : { [key: string]: HTMLImageElement } = {}
+
   constructor() { }
 
-  async init(ctxUI: CanvasRenderingContext2D, angle: number) {
+  async init(ctxUI: CanvasRenderingContext2D, angle: number, images: { [key: string]: HTMLImageElement }) {
     this.ctxUI = ctxUI;
     this._angle = angle;
     this._loadTheme();
+    this.images = images;
   }
 
   private _loadTheme() {
@@ -76,7 +77,7 @@ export class UIService {
     this.ctxUI.save();
 
     // 2. Inhalt bestimmen
-    let title = '';
+    let title;
     let contentLines: string[] = [];
 
     if (item instanceof Package) {
@@ -260,8 +261,12 @@ export class UIService {
     this.ctxUI.fillText(`Level ${machine.level}`, x, currentY - 5);
     this.ctxUI.fillStyle = UI_THEME.textColor;
     currentY += lineHeight - 5;
+
+    let img = this.images[machine.outputProduct._img!];
+    this.ctxUI.drawImage(img, x-70, currentY - 15, 20, 20);
+
     this.ctxUI.font = `italic 14px ${UI_THEME.fontFamily}`;
-    this.ctxUI.fillText(`Erzeugt: ${machine.outputProduct.name}`, x, currentY);
+    this.ctxUI.fillText(`${machine.outputProduct.name}`, x, currentY);
     currentY += lineHeight;
     this.ctxUI.font = `14px ${UI_THEME.fontFamily}`;
     this.ctxUI.fillText(`Dauer: ${machine.productionRate / 1000}s`, x, currentY);
@@ -282,7 +287,9 @@ export class UIService {
       currentY += lineHeight;
     } else {
       for (const req of machine.inputRequirements) {
-        this.ctxUI.fillText(`• ${req.name}`, x, currentY);
+        let img = this.images[req._img!];
+        this.ctxUI.drawImage(img, x-70, currentY - 15, 20, 20);
+        this.ctxUI.fillText(`${req.name}`, x, currentY);
         currentY += lineHeight;
       }
     }
@@ -350,4 +357,3 @@ export class UIService {
     this.ctxUI.restore();
   }
 }
-
