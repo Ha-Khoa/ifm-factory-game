@@ -97,7 +97,7 @@ export class RenderingService {
   render(): void {
     if (!this._ctx) return;
     this._renderingBuffer.forEach((Obj) => {
-      
+      /*
       // Zeichnet einen Schatten unter alles, was eine Höhe hat (z > 0)
       // --- NEU: Verbesserte Schatten-Logik (Smart Shadows 🧠) ---
       if (Obj.z > 0) {
@@ -133,7 +133,7 @@ export class RenderingService {
         }
         
         this._ctx.restore();
-      }
+      }*/
       // ---------------------------------------------------------
 
 

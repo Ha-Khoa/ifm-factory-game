@@ -21,7 +21,7 @@ export class Product {
     this._name = name;
     this._img = img;
     this._position = new Coordinates(0, 0);
-    this._size = 30; // Standardgröße für Produkte
+    this._size = 2/5 * 64; // Standardgröße für Produkte
     this._z = z !== undefined ? z : 0;  
     this._renderObject = new RenderObject(
       `product:${this._name}:${this._instanceId}`,
@@ -67,7 +67,6 @@ export class Product {
     if (this._renderObject) {
       this._renderObject.x = v.x;
       this._renderObject.y = v.y;
-      RenderingService.instance().updateRenderingObject(this._renderObject.name, this._renderObject);
     }
   }
   get img(): string | undefined { return this._img; }
