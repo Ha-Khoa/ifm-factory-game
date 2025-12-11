@@ -77,10 +77,10 @@ export class Particles {
     particleBehaviorStraightUP(deltaTime: number) {
         for (let particle of this._particles) {
             particle.z -= particle.vz * deltaTime / 1000;
-            particle.x += (Math.random() - 0.5) * 100 * deltaTime / 1000;
+            //particle.x += (Math.random() - 0.5) * 100 * deltaTime / 1000;
             particle.age += deltaTime / 1000;
             let speed = 10;
-            /*
+            
             if((particle.x - this.x) - (particle.y - this.y) < 0 && (particle.x - this.x) + (particle.y - this.y) < this._width)
             {
                 particle.y += speed * deltaTime / 1000;
@@ -96,7 +96,7 @@ export class Particles {
             else
             {
                 particle.x -= speed * deltaTime / 1000;
-            }*/
+            }
         }
         this._particles = this._particles.filter(p => p.age < p.lifeTime);
     }
