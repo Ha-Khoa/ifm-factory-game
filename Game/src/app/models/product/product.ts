@@ -13,23 +13,25 @@ export class Product {
   private _img?: string;
   private _renderObject!: RenderObject;
   private _size: number;
+  private _z : number;
 
-  constructor(id: number, name: string, img?: string) {
+  constructor(id: number, name: string, img?: string, z?: number) {
     this._instanceId = Product.lastInstanceId++;
     this._id = id;
     this._name = name;
     this._img = img;
     this._position = new Coordinates(0, 0);
-    this._size = 20; // Standardgröße für Produkte
+    this._size = 30; // Standardgröße für Produkte
+    this._z = z !== undefined ? z : 0;  
     this._renderObject = new RenderObject(
       `product:${this._name}:${this._instanceId}`,
       "img",
       this._position.x,
       this._position.y,
-      50,
+      this._z,
       this._size,
       this._size,
-      1000,
+      100,
       this._img,
       undefined,
       "blue",
@@ -46,15 +48,13 @@ export class Product {
   }
 
   copy(): Product {
-    return new Product(this._id, this._name, this._img);
+    return new Product(this._id, this._name, this._img, this._z);
   }
 
 
   destroy() {
     RenderingService.instance().deleteRenderingObjektByName(this._renderObject.name);
-    // Product no longer directly removes itself from Products to prevent circular imports.
-    // Callers should remove this instance from Products.generatedProducts via
-    // Products.deleteGeneratedProduct(product) after invoking destroy().
+
   }
 
   // Getters / Setters
@@ -79,6 +79,14 @@ export class Product {
   get z(): number { return this._renderObject.z; }
   set z(v: number) {
     this._renderObject.z = v;
-    RenderingService.instance().updateRenderingObject(this._renderObject.name, this._renderObject);
+    this._z = v;
+  }
+  set x(v: number){
+    this._renderObject.x = v;
+    this._position.x = v;
+  }
+  set y(v: number){
+    this._renderObject.y = v;
+    this._position.y = v;
   }
 }

@@ -1,0 +1,28 @@
+<div class="orders" [ngClass]="state">
+  @for (order of activeOrders; track order.id) {
+  <div class="order">
+    <div class="title">
+      Peter Clarkson
+    </div>
+    <div class="elements">
+      @for (item of order.items; track item.product) {
+      <div class="element">
+        <img src="{{ item.product.img }}" class="icon" />
+        <span class="counter">{{`${item.quantity}x`}}</span>
+        <span>{{ item.product.name }}</span>
+      </div>
+      }
+    </div>
+    <div class="rewards">
+      <div class="money">
+        <img src="/images/fox/fox-coin.png" class="icon" />
+        <span class="value">{{ order.reward }}</span>
+      </div>
+      <div class="points">
+        <img src="/images/fox/fox-trophy.png" class="icon" />
+        <span class="value">{{ order.reward }}</span>
+      </div>
+    </div>
+  </div>
+  }
+</div>

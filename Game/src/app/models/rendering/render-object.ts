@@ -1,4 +1,5 @@
 import { Hitbox } from "../../interfaces/hitbox";
+import { Direction } from "../../enums/direction";
 
 /**
  * RenderObject-Klasse: Repräsentiert ein zu renderndes Objekt mit Position, Größe und Darstellungsinformationen.
@@ -35,9 +36,37 @@ export class RenderObject {
     // Layer-Farben für 3D-Tiefeneffekt (für type="rect")
     private _rectLayers!: string[] | void;
 
-    constructor(name: string, type: string, x: number, y: number, z: number, width: number, height: number, priority: number, img?: string, imgWall?: string, rectColor?: string, rectLayers?: string[])
+    private _frames!: string[] | void;
+
+    private _nextFrame!: string | void;
+
+    private _framesPerSecond!: number | void;
+
+    private _singleFrameCount: number = 1;
+
+    private _frameNumber!: number;
+
+    private _animationDirection: Direction = Direction.RIGHT;
+
+    private _hitboxY!: number;
+
+    constructor(name: string,
+                type: string,
+                x: number,
+                y: number,
+                z: number,
+                width: number,
+                height: number,
+                priority: number,
+                img?: string,
+                imgWall?: string,
+                rectColor?: string,
+                rectLayers?: string[],
+                frames?: string[],
+                framesPerSecons?: number)
     {
         this._id = RenderObject.lastID++;
+        this._frameNumber = 0;
         this._name = name;
         this._type = type;
         this._x = x;
@@ -50,6 +79,9 @@ export class RenderObject {
         this._rectColor = rectColor;
         this._rectLayers = rectLayers;
         this._priority = priority;
+        this._frames = frames;
+        this._framesPerSecond = framesPerSecons;
+        this._nextFrame = this._frames ? this._frames[0] : undefined
     }
 
     // get / set Methoden
@@ -107,4 +139,22 @@ export class RenderObject {
             this._rectLayers!
         );
     }
+
+    get nextFrame(): string | void { return this._nextFrame }
+    set nextFrame(v: string) {this._nextFrame = v}
+
+    get framesPerSecond(): number | void { return this._framesPerSecond }
+    set framesPerSecond(v: number) { this._framesPerSecond = v }
+
+    get frames(): string[] | void { return this._frames }
+    set frames(v: string[]) { this._frames = v }
+
+    get singleFrameCount(): number { return this._singleFrameCount }
+    set singleFrameCount(v: number ) { this._singleFrameCount = v }
+
+    get frameNumber(): number { return this._frameNumber }
+    set frameNumber(v : number) { this._frameNumber = v }
+
+    get animationDirection(): Direction { return this._animationDirection }
+    set animationDirection(v: Direction) {this._animationDirection = v}
 }

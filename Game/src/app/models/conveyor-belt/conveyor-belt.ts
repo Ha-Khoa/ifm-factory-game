@@ -3,285 +3,443 @@ import {Coordinates} from "../coordinates/coordinates";
 import {RenderObject} from "../rendering/render-object";
 import {Products} from "../product/products";
 import {RenderingService} from "../../services/rendering.service";
+import {Package} from "../package/package";
+import { TypeofExpr } from "@angular/compiler";
+
+export enum ConveyorType {
+    RAW_MATERIALS = "raw_materials",
+    COPPER_WIRE = "copper_wire",
+    RAW_PLASTIC = "raw_plastic",
+    RAW_SILICON = "raw_silicon",
+    PACKAGES = 'packages'
+}
+
 
 export class ConveyorBelt extends RenderObject{
     private static lastId = 0;
     private conveyorId: number;
     private _direction: 'left' | 'right' | 'up' | 'down';
     private _speed: number;
-    private _products: Array<{product: Product, progress: number, renderId: string}> = [];
-    private _canSpawnProducts: boolean = true;
+    private _items: Array<{items: Product | Package, progress: number, renderId: string, type: 'product' | 'package'}> = [];
+    private _canSpawnItems: boolean = true;
     private _spawnRate: number;
     private _lastSpawnTime: number = 0;
-    private _maxProducts: number;
+    private _maxItems: number;
     private _isActive: boolean = true;
-    private _productsCounter: number = 0;
+    private _itemsCounter: number = 0;
 
-    constructor(
-        //Position x
-        x: number,
-        //Position y
-        y: number,
-        //Breite von dem Förderband
-        width: number,
-        //Höhe von dem Förderband
-        height: number,
-        //Richtung des Förderbands
-        direction: 'left' | 'right' | 'up' | 'down' = 'right',
-        //Geschwindigkeit des Förderbands
-        speed: number = 0.02,
-        //Ob das Förderband Produkte spawnen kann
-        canSpawnProducts: boolean = false,
-        //Spawn Rate in ms
-        spawnRate: number = 3000,
-        //Maximale Anzahl an Produkten auf dem Förderband
-        maxProducts: number = 5
-    ){
-        super(
-            `conveyor-${ConveyorBelt.lastId}`,
-            "rect",
-            x,
-            y,
-            50,
-            width,
-            height,
-            0,
-            undefined,
-            undefined,
-            '#8B4513FF',
-            ["#A0522D", "#8B4513", "#654321", "#3D2B1F"]
-        );
-        this.conveyorId = ConveyorBelt.lastId++;
-        this._direction = direction;
-        this._speed = speed;
-        this._canSpawnProducts = canSpawnProducts;
-        this._spawnRate = spawnRate;
-        this._maxProducts = maxProducts;
-    }
+    private _conveyorType: ConveyorType;
 
-    update(deltaTime: number): void{
-        if(!this._isActive) 
-            return;
-        this.moveProducts(deltaTime);
+   constructor(
+       //Position x
+       x: number,
+       //Position y
+       y: number,
+       //Breite von dem Förderband
+       width: number,
+       //Höhe von dem Förderband
+       height: number,
+       //Richtung des Förderbands
+       direction: 'left' | 'right' | 'up' | 'down' = 'right',
+       //Geschwindigkeit des Förderbands
+       speed: number = 0.02,
+       //Ob das Förderband Produkte spawnen kann
+       canSpawnItems: boolean = false,
+       //Spawn Rate in ms
+       spawnRate: number = 3000,
+       //Maximale Anzahl an Produkten auf dem Förderband
+       maxItems: number = 5,
+       //Förderband Typ
+       conveyorType: ConveyorType = ConveyorType.RAW_MATERIALS
+   ){
+       super(
+           `conveyor-${ConveyorBelt.lastId}`,
+           "rect",
+           x,
+           y,
+           30,
+           width,
+           height,
+           0,
+           undefined,
+           undefined,
+           '#5a5a5aff',
+           ["#3f3f3fff", "#252525ff"]
+       );
+       this.conveyorId = ConveyorBelt.lastId++;
+       this._direction = direction;
+       this._speed = speed;
+       this._canSpawnItems = canSpawnItems;
+       this._spawnRate = spawnRate;
+       this._maxItems = maxItems;
+       this._conveyorType = conveyorType;
+   }
 
-        if(this._canSpawnProducts){
-            this.trySpawnProduct();
+
+   update(deltaTime: number): void{
+       if(!this._isActive)
+           return;
+       this.moveItems(deltaTime);
+
+
+       if(this._canSpawnItems){
+           this.trySpawnItem();
+       }
+
+
+       this.updateItemPositions();
+   }
+
+
+   //Wie sich die Produkte auf dem Förderband nach dem Spawn bewegen
+   private moveItems(deltaTime: number): void{
+       this._items.sort((a, b) => b.progress - a.progress);
+
+
+       let minDistance = 0.15;
+       for (let i = 0; i < this._items.length; i++) {
+           const productData = this._items[i];
+           let maxAllowedProgress = 1.0 - 0.01;
+           if (i > 0){
+               const frontProduct = this._items[i - 1];
+               maxAllowedProgress = frontProduct.progress - minDistance;
+           }
+          
+           let newProgress = productData.progress + this._speed * (deltaTime / 1000);
+           if (newProgress > maxAllowedProgress){
+               newProgress = maxAllowedProgress;
+           }
+           if (newProgress > 1.0){
+               newProgress = 1.0;
+           }
+           if (newProgress < 0){
+               newProgress = 0;
+           }
+           productData.progress = newProgress;
+       }
+      
+
+
+   }
+
+
+   private trySpawnItem(): void {
+       const currentTime = Date.now();
+       let typeProduct = this._conveyorType === ConveyorType.COPPER_WIRE ? Products.getProductByName("Copper wire") :
+                         this._conveyorType === ConveyorType.RAW_PLASTIC ? Products.getProductByName("Raw Plastic") :  
+                         this._conveyorType === ConveyorType.RAW_SILICON ? Products.getProductByName("Raw Silicon") :
+                         undefined;
+        if(typeProduct)
+        {
+            typeProduct = typeProduct.copy();
         }
 
-        this.updateProductPositions();
-    }
 
-    private moveProducts(deltaTime: number): void{
-        this._products.sort((a, b) => b.progress - a.progress);
-
-        let minDistance = 0.15; 
-        for (let i = 0; i < this._products.length; i++) {
-            const productData = this._products[i];
-            let maxAllowedProgress = 1.0;
-            if (i > 0){
-                const frontProduct = this._products[i - 1];
-                maxAllowedProgress = frontProduct.progress - minDistance;
-            }
-            
-            let newProgress = productData.progress + this._speed * (deltaTime / 1000);
-            if (newProgress > maxAllowedProgress){
-                newProgress = maxAllowedProgress;
-            }
-            if (newProgress > 1.0){
-                newProgress = 1.0;
-            }
-            if (newProgress < 0){
-                newProgress = 0;
-            }
-            productData.progress = newProgress;
-        }
-        
-
-    }
-
-    private trySpawnProduct(): void {
-        const currentTime = Date.now();
-
-        if (this._products.length < this._maxProducts &&currentTime - this._lastSpawnTime >= this._spawnRate){
-            const canSpawn = this.canSpawnAtStart();
-            if (canSpawn && this.spawnProduct()){
-                this._lastSpawnTime = currentTime;
-
-            }
-            else{
-                this._lastSpawnTime = currentTime - this._spawnRate + 500; // Versuche es in 500ms erneut
-            }
-        }
-    }
-
-    private canSpawnAtStart(): boolean {
-        if (this._products.length === 0){
-            return true;
-        }
-
-        this._products.sort((a,b) => b.progress - a.progress);
-
-        const frontProductProgress = this._products[this._products.length - 1].progress;
-
-        return frontProductProgress >= 0.2;
-    }
-    // Spawnt ein Produkt auf dem Förderband
-    spawnProduct(product?: Product): boolean{
-        if(this._products.length >= this._maxProducts){
-            return false;
-        }
-        const newProduct = product || this.createRandomProduct();
-       // const productCopy: Product = {...newProduct, position: this.getProductPosition(0)};
-
-        let startingProgress = 0;
-        if (this._products.length > 0){
-            this._products.sort((a,b) => b.progress - a.progress);
-            const highestProgress = this._products[0].progress;
-
-            startingProgress = highestProgress  - 0.15;  
-
-            if (startingProgress < 0) {
-                startingProgress = 0;
-            }
-            if (startingProgress < 0.1) {
-                this._products.forEach(p => {
-                    p.progress += 0.1;
-                    if (p.progress > 1.0){
-                        p.progress = 1.0;
-                    }
-
-                });
-                startingProgress = 0;
-            }
-        }
-        const startPos = this.getProductPosition(startingProgress);
-        newProduct.init(startPos);
-        const renderId = `conveyor-product-${this.conveyorId}-product-${this._productsCounter++}`;
-        this._products.push({product: newProduct, progress: startingProgress, renderId: renderId});
-        this._products.sort((a, b) => b.progress - a.progress);
-
-        return true;
-    }
-
-    private createRandomProduct(): Product {
-        const rawMaterials = [
-            Products.getProductByName("Raw Plastic"),
-            Products.getProductByName("Raw Silicon"),
-            Products.getProductByName("Copper wire")
-        ].filter(p => p !== undefined);
-        const base = rawMaterials[Math.floor(Math.random() * rawMaterials.length)]!;
-        return new Product(base.id, base.name);
-    }
-
-    getProductPosition(progress: number): Coordinates{
-        let x = this.x;
-        let y = this.y;
-
-        const productWidth = 20;
-        const productHeight = 20;
-        
-        switch(this._direction){
-            case 'right':
-                x += progress * (this.width -  productWidth);
-                y += (this.height - productHeight) / 2;
-                break;
-            case 'left':
-                x += (1 - progress)  * (this.width - productWidth);
-                y += (this.height - productHeight) / 2;
-                break;
-            case 'down':
-                x += (this.width - productWidth) / 2;
-                y += progress * (this.height - productHeight);
-                break;
-            case 'up':
-                x += (this.width - productWidth) / 2;
-                y += (1 - progress) * (this.height - productHeight);
-                break;
-        }
-        return new Coordinates(x, y);
-    }
-
-    private updateProductPositions(): void{
-        this._products.forEach(productData => {
-            const newPosition = this.getProductPosition(productData.progress);
-            productData.product.position = newPosition;
-        });
-    }
-
-
-    private getProductRenderName(product: Product): string{
-        return `conveyor-product-${this.conveyorId}-product-${this._productsCounter++}`;
-    }
-
-    // Rendering wird durch Products.addProduct erzeugt; das Förderband aktualisiert nur die Position.
-    private getProductColor(productName: string): string{
-        const colorMap: {[key: string]: string}= {
-            "Raw Plastic": "#FF6B6B",
-            "Raw Silicon": "#4ECDC4", 
-            "Copper wire": "#FFE66D",
-            "Plastic Case": "#6A0572",
-            "Circuit Board": "#1A936F",
-            "Basic Sensor": "#114B5F"
-        }
-        return colorMap[productName] || "#CCCCCC";
-    }
-
-    takeProduct(): Product | null{
-        if (this._products.length === 0)return null;
-
-        let highestProgress = -1;
-        let productIndex = -1;
-
-        this._products.forEach((productData, index) => {
-            if(productData.progress >= 0.8){
-                if(productData.progress > highestProgress){
-                    highestProgress = productData.progress;
-                    productIndex = index;
+       if (this._items.length < this._maxItems &&currentTime - this._lastSpawnTime >= this._spawnRate){
+           const canSpawn = this.canSpawnAtStart();
+           if (canSpawn){
+                let spawnSuccess = false;
+                if (this._conveyorType === ConveyorType.PACKAGES){
+                    this.spawnPackage();
                 }
-            }
-        });
-        if (productIndex !== -1){
-            const productData = this._products[productIndex];
-            this._products.splice(productIndex, 1);
+                else {
+                    this.spawnProduct(typeProduct);
+                }
+                if (spawnSuccess) {
+                    this._lastSpawnTime = currentTime;
+                }
+                else {
+                    this._lastSpawnTime = currentTime - this._spawnRate + 500; 
+                }
+               
+           }
+           else{
+               this._lastSpawnTime = currentTime - this._spawnRate + 500; // Versuche es in 500ms erneut
+           }
+       }
+   }
 
-           // Products.deleteGeneratedProduct(productData.product);
-           //const renderObjName = this.getProductRenderName(productData.product);
-           productData.product.destroy();
-           // Ensure product is removed from global list when taken
-           Products.deleteGeneratedProduct(productData.product);
-           console.log(`Produkt ${productData.product.name} von Förderband ${this.conveyorId} entnommen.`);
-            return productData.product;
-        }
-        return null;
-    }
 
-    addProduct(product: Product): boolean{
-        if (this._products.length >= this._maxProducts){
+   private canSpawnAtStart(): boolean {
+       if (this._items.length === 0){
+           return true;
+       }
+
+       this._items.sort((a,b) => b.progress - a.progress);
+       const lastItem = this._items[this._items.length - 1];
+
+       return lastItem.progress >= 0.15;
+   }
+   // Spawnt ein Produkt auf dem Förderband
+   spawnProduct(product?: Product): boolean{
+       if(this._items.length >= this._maxItems){
+           return false;
+       }
+       const newProduct = product || this.createRandomRawMaterial();
+      // const productCopy: Product = {...newProduct, position: this.getProductPosition(0)};
+
+
+       let startingProgress = 0;
+       if (this._items.length > 0){
+           this._items.sort((a,b) => b.progress - a.progress);
+           const lastItemProgress = this._items[0].progress;
+
+           startingProgress = 0;
+           if (lastItemProgress < 0.15){
+               const pushAmount = 0.15 - lastItemProgress;
+               this._items.forEach(p => {
+                   p.progress += pushAmount;
+                   if (p.progress > 1.0){
+                       p.progress = 1.0;
+                   }
+               })
+
+           }
+       }
+       const startPos = this.getProductPosition(startingProgress, newProduct);
+       newProduct.init(startPos);
+       newProduct.z = this.z;
+       const renderId = `conveyor-product-${this.conveyorId}-product-${this._itemsCounter++}`;
+       this._items.push({items: newProduct, progress: startingProgress, renderId: renderId, type: 'product'});
+       this._items.sort((a, b) => b.progress - a.progress);
+
+
+       //console.log(`Produkt ${newProduct.name} auf Förderband ${this.conveyorId} gespawnt.`);
+       return true;
+   }
+
+   spawnPackage(pkg?: Package): boolean {
+        if(this._items.length >= this._maxItems){
             return false;
         }
-        const pos = this.getProductPosition(0);
-        product.init(pos);
-        const renderId = `conveyor-product-${this.conveyorId}-product-${this._productsCounter++}`;
-        this._products.push({product: product, progress: 0, renderId: renderId});
-        console.log(`Produkt ${product.name} zu Förderband ${this.conveyorId} hinzugefügt.`);
+        const newPackage = pkg || this.createRandomPackage();
+        let startingProgress = 0;
+        if (this._items.length > 0){
+            this._items.sort((a,b) => b.progress - a.progress);
+           const lastItemProgress = this._items[0].progress;
+
+           startingProgress = 0;
+           if (lastItemProgress < 0.15){
+               const pushAmount = 0.15 - lastItemProgress;
+               this._items.forEach(p => {
+                   p.progress += pushAmount;
+                   if (p.progress > 1.0){
+                       p.progress = 1.0;
+                   }
+               });
+           }
+        }
+        const startPos = this.getProductPosition(startingProgress, newPackage);
+        newPackage.position = startPos;
+        newPackage.z = this.z;
+
+        const renderId = `conveyor-product-${this.conveyorId}-product-${this._itemsCounter++}`;
+        this._items.push({items: newPackage, progress: startingProgress, renderId: renderId, type: 'package'});
+        this._items.sort((a, b) => b.progress - a.progress);    
         return true;
+   }
+
+//    private createRandomProduct(): Product {
+//         if (this._conveyorType === ConveyorType.RAW_MATERIALS){
+//             const rawMaterials = [
+//                 Products.getProductByName("Raw Plastic"),
+//                 Products.getProductByName("Raw Silicon"),
+//                 Products.getProductByName("Copper wire")
+//             ].filter(p => p !== undefined);
+//             const base = rawMaterials[Math.floor(Math.random() * rawMaterials.length)]!.copy();
+//             base.init(new Coordinates(base.position.x, base.position.y))
+//         }
+//         else if (this._conveyorType === ConveyorType.PACKAGES){
+//             const newPackage = this.createRandomPackage();
+//             return this.createRandomRawMaterial();
+//         }
+//         return this.createRandomRawMaterial();
+//    }
+
+    private createRandomRawMaterial(): Product {
+        const rawMaterials = [
+                Products.getProductByName("Raw Plastic"),
+                Products.getProductByName("Raw Silicon"),
+                Products.getProductByName("Copper wire")
+            ].filter(p => p !== undefined);
+            const base = rawMaterials[Math.floor(Math.random() * rawMaterials.length)]!.copy();
+            base.init(new Coordinates(base.position.x, base.position.y))
+            return base
     }
 
-    getReadyProducts(): Product[]{
-        return this._products
-            .filter(productData => productData.progress >= 0.8)
-            .map(productData => productData.product);
+    private createRandomPackage(): Package {
+        const productCount = Math.floor(Math.random() * 3) + 1;
+
+        const newPackage = new Package(new Coordinates(0,0));
+
+        return newPackage;
+
     }
+   getItemPosition(progress: number, product: Product | Package): Coordinates{
+       let x = this.x;
+       let y = this.y;
 
-    getConveyorId(): number{return this.conveyorId;}
-    getDirection(): string{return this._direction;}
-    getSpeed(): number{return this._speed;}
-    getProducts(): Array<{product: Product, progress: number}>{return this._products;}
-    getCanSpawnProducts(): boolean{return this._canSpawnProducts;}
-    getIsActive(): boolean{return this._isActive;}
 
-    setSpeed(v: number): void{this._speed = v;}
-    setCanSpawnProducts(v: boolean): void{this._canSpawnProducts = v;}
-    setIsActive(v: boolean): void{this._isActive = v;}
-    setSpawnRate(v: number): void{this._spawnRate = v;}
+       const productWidth = product.size;
+       const productHeight = product.size;
+      
+       switch(this._direction){
+           case 'right':
+               x += progress * (this.width -  productWidth);
+               y += (this.height - productHeight) / 2;
+               break;
+           case 'left':
+               x += (1 - progress)  * (this.width - productWidth);
+               y += (this.height - productHeight) / 2;
+               break;
+           case 'down':
+               x += (this.width - productWidth) / 2;
+               y += progress * (this.height - productHeight);
+               break;
+           case 'up':
+               x += (this.width - productWidth) / 2;
+               y += (1 - progress) * (this.height - productHeight);
+               break;
+       }
+       return new Coordinates(x, y);
+   }
+
+   getProductPosition(progress: number, product: Product | Package): Coordinates{
+         return this.getItemPosition(progress, product);
+   }
+   private updateItemPositions(): void{
+       this._items.forEach(itemData => {
+           const newPosition = this.getItemPosition(itemData.progress, itemData.items);
+           if (itemData.type === 'product'){
+                (itemData.items as Product).position = newPosition;
+           }
+           else {
+              (itemData.items as Package).position = newPosition;
+           }
+       });
+   }
+
+
+
+
+   private getProductRenderName(product: Product): string{
+       return `conveyor-product-${this.conveyorId}-product-${this._itemsCounter++}`;
+   }
+
+
+
+
+
+   takeItem(): Product | Package | null{
+       if (this._items.length === 0)return null;
+
+
+       let highestProgress = -1;
+       let productIndex = -1;
+
+
+       this._items.forEach((itemData, index) => {
+           if(itemData.progress >= 0.8){
+               if(itemData.progress > highestProgress){
+                   highestProgress = itemData.progress;
+                   productIndex = index;
+               }
+           }
+       });
+       if (productIndex !== -1){
+           const productData = this._items[productIndex];
+           this._items.splice(productIndex, 1);
+
+
+          //console.log(`Produkt ${productData.items.name} von Förderband ${this.conveyorId} entnommen.`);
+           return productData.items;
+       }
+       return null;
+   }
+
+
+   addItem(item: Product | Package): boolean{
+       if (this._items.length >= this._maxItems){
+           return false;
+       }
+       const pos = this.getItemPosition(0, item);
+       const type = item instanceof Package ? 'package' : 'product';
+       if(type === 'product'){
+            (item as Product).init(pos);
+       }
+       else {
+            (item as Package).position = pos;
+       }
+
+       const renderId = `conveyor-product-${this.conveyorId}-product-${this._itemsCounter++}`;
+       this._items.push({items: item, progress: 0, renderId: renderId, type: type});
+       //console.log(`Produkt ${item.name} zu Förderband ${this.conveyorId} hinzugefügt.`);
+       return true;
+   }
+
+   addProduct(product: Product): boolean{
+        return this.addItem(product);
+   }
+
+   getReadyItems(): (Product | Package)[] {
+       return this._items
+           .filter(productData => productData.progress >= 0.8)
+           .sort((a, b) => b.progress - a.progress)
+           .map(productData => productData.items);
+   }
+
+   getReadyProducts(): Product[] {
+        return this.getReadyItems()
+           .filter(item => item instanceof Product)
+           .map(item => item as Product);
+   }
+   getReadyPackages(): Package[] {
+       return this.getReadyItems()
+           .filter(item => item instanceof Package)
+           .map(item => item as Package);
+   }
+
+   removeProductAtPosition(position: Coordinates): Product | Package | null{
+       //console.log(`Checking ${this._items.length} products on conveyor ${this.conveyorId} for pickup at (${position.x.toFixed(1)}, ${position.y.toFixed(1)})`);
+       for (let i = 0; i < this._items.length; i++){
+           const productData = this._items[i];
+           const productPos = productData.items.position;
+           if (productPos){
+              
+               const productCenterX = productPos.x + productData.items.size / 2;
+               const productCenterY = productPos.y + productData.items.size / 2;
+               const dx = productCenterX - position.x;
+               const dy = productCenterY - position.y;
+               const distance = Math.sqrt(dx * dx + dy * dy);
+               //console.log(`  Product ${i}: pos(${productPos.x.toFixed(1)}, ${productPos.y.toFixed(1)}), center(${productCenterX.toFixed(1)}, ${productCenterY.toFixed(1)}), dist: ${distance.toFixed(2)}px`);
+             
+               if (distance <= Products.reachDistance){
+                   this._items.splice(i, 1);
+                   //productData.items.destroy();
+                   //console.log(`✓ Produkt ${productData.items.name} von Förderband ${this.conveyorId} entfernt (Distanz: ${distance.toFixed(2)}px).`);
+                   return productData.items;
+               }
+           }
+       }
+       //sconsole.log('  No products within 50px pickup range');
+       return null;
+   }
+
+
+   getConveyorId(): number{return this.conveyorId;}
+   getDirection(): string{return this._direction;}
+   getSpeed(): number{return this._speed;}
+   getItems(): Array<{items: Product | Package, progress: number, renderId: string, type: string}>{return this._items;}
+   getCanSpawnItems(): boolean{return this._canSpawnItems;}
+   getIsActive(): boolean{return this._isActive;}
+   getConveyorType(): ConveyorType {return this._conveyorType;}
+
+
+   setSpeed(v: number): void{this._speed = v;}
+   setCanSpawnItems(v: boolean): void{this._canSpawnItems = v;}
+   setIsActive(v: boolean): void{this._isActive = v;}
+   setSpawnRate(v: number): void{this._spawnRate = v;}
+   setConveyorType(v: ConveyorType): void {this._conveyorType = v;}
 }
+
+

@@ -4,6 +4,8 @@ import { Projection } from "../interfaces/projection";
 import { Collision } from "../models/collision/collision";
 import { Coordinates } from "../models/coordinates/coordinates";
 import { Injectable } from "@angular/core";
+import { Direction } from "../enums/direction";
+
 
 /**
  * Rendering-Klasse: Verwaltet alle Objekte im Rendering-Buffer und zeichnet sie auf das Canvas.
@@ -22,6 +24,10 @@ export class RenderingService {
   private _ctx!: CanvasRenderingContext2D;
   // Winkel für isometrische Projektion
   private _angle!: number;
+
+  private _fps!: number;
+
+  private _lastFrameTime!: number;
 
   // Singleton support
   private static _instance: RenderingService | null = null;
@@ -134,8 +140,7 @@ export class RenderingService {
       // Berechne isometrische Projektion
       const zTransform = Obj.z * Math.sin(this._angle)
       const yProjection = Obj.y * Math.cos(this._angle) - zTransform
-
-      if ((Obj.type === "rect" || !Obj.img || !this._images[Obj.img!]) && Obj.rectColor) {
+      if ((Obj.type === "rect")) {
         const layers = Obj.rectLayers!.length;
         for (let i = 0; i < layers; i++) {
           this._ctx.beginPath();
@@ -177,7 +182,49 @@ export class RenderingService {
           );
         }
       }
-    });
+      else if (Obj.type === "static Img")
+      {
+        if (Obj.img) {
+          this._ctx.drawImage(
+            this._images[Obj.img!],
+            Obj.x,
+            yProjection + Obj.height * Math.cos(this._angle),
+            Obj.width,
+            Obj.z * Math.sin(this._angle)
+          );
+        }
+      }
+      else if (Obj.type === "gif"){
+        if(Obj.frames && Obj.framesPerSecond && Obj.nextFrame)
+        { 
+          let mirror = 1;
+          this._ctx.save();
+          if(Obj.animationDirection === Direction.LEFT)
+          {
+            mirror = -1;
+            this._ctx.scale(-1,1);
+          }
+          const maxOneFrame = Math.round(this._fps / Obj.framesPerSecond)
+          if(maxOneFrame < Obj.singleFrameCount)
+          {
+            Obj.nextFrame = Obj.frames[(Obj.frameNumber + 1) % Obj.frames.length]
+            Obj.frameNumber++;
+            Obj.singleFrameCount = 0;
+          }
+          Obj.singleFrameCount++;
+          this._ctx.drawImage(
+            this._images[Obj.nextFrame],
+            mirror * Obj.x,
+            yProjection + Obj.height * Math.cos(this._angle),
+            Obj.width * mirror,
+            Obj.z * Math.sin(this._angle)
+            )
+            this._ctx.restore();
+
+        }
+      }
+    }
+    );
   }
 
   async rotateMap() {
@@ -186,9 +233,47 @@ export class RenderingService {
       this._angle += 0.0005;
       if (this._angle > max) this._angle = max;
     }
+
+    /*
+        if(this.renderer.angle <= 90/360*2*Math.PI && !this.rotationDirection)
+        {
+        this.renderer.angle+=0.003;
+        return;
+        }
+        else{
+          this.rotationDirection = true;
+        }
+        if(this.renderer.angle >= 0/360*2*Math.PI && this.rotationDirection)
+        {
+          this.renderer.angle-=0.003;
+        }
+        else{
+          this.rotationDirection = false;
+        }
+        */
   }
 
-  get renderingBuffer() { return this._renderingBuffer; }
-  set angle(value: number) { this._angle = value; }
-  get angle(): number { return this._angle; }
+  updateFPS()
+  {
+    const now = performance.now();
+       let deltaTime = now - this._lastFrameTime;
+       this._lastFrameTime = now;
+       if (deltaTime === 0) {
+           deltaTime = 1; // Vermeidet Division durch 0 bei sehr schnellen Frames
+       }
+       this._fps = 1000 / deltaTime;
+  }
+
+
+  get renderingBuffer() {
+    return this._renderingBuffer;
+  }
+
+  set angle(value: number) {
+    this._angle = value;
+  }
+
+  get angle(): number {
+    return this._angle;
+  }
 }

@@ -14,6 +14,7 @@ import { Player } from "../player/player";
 import { SubmissionArea } from "../submission-area/submission-area";
 import { InteractableObject } from "./interactable-object";
 import { Package } from "../package/package";
+import { NgSwitchCase } from "@angular/common";
 
 /**
  * MachineManager-Klasse: Verwaltet alle Maschinen im Spiel.
@@ -25,19 +26,22 @@ export class InteractableManager {
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       // Sensor-Maschine (benötigt Raw Silicon + Circuit Board)
-      new Machine(600, 400, 50, 50, "Sensor", "/images/wall.png", "/images/wall.png", 
-                  [Direction.DOWN, Direction.UP], Products.getProductByName("Basic Sensor")!, 
+      new Machine(75 * 4, 75 * 4, 75, 75, "Basic Sensor", "/images/wall.png", "/images/wall.png", 
+                  [Direction.DOWN], Products.getProductByName("Basic Sensor")!, 
                   [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Circuit Board")!]),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(500, 450, 50, 50, "Plastic Case", "/images/wall.png", "/images/wall.png", 
-                  [Direction.LEFT], Products.getProductByName("Plastic Case")!, 
-                  [Products.getProductByName("Raw Plastic")!])
+      new Machine(75 * 4, 75 * 8, 75, 75, "Plastic Case", "/images/wall.png", "/images/wall.png", 
+                  [Direction.UP], Products.getProductByName("Plastic Case")!, 
+                  [Products.getProductByName("Raw Plastic")!]),
+      new Machine(75 * 8, 75 * 4, 75, 75, "Circuit Board", "/images/wall.png", "/images/wall.png", 
+                  [Direction.DOWN], Products.getProductByName("Circuit Board")!, 
+                  [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper wire")!])
     ];
 
     private submissionArea: SubmissionArea = new SubmissionArea(
-      new Coordinates(950, 200),
-      50,
-      100
+      new Coordinates(1875, 300),
+      75,
+      150
     );
   
   constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>) {
@@ -47,6 +51,12 @@ export class InteractableManager {
     // Standard-Maschinen freischalten
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
+    this.updateUnlockedMachine(2);
+    this.machines.forEach((machine) => {
+      this.generateInteractionField(machine)
+    })
+    this.generateInteractionField(this.submissionArea)
+    console.log(this.machines)
   }
 
   /** Gibt alle Maschinen zurück */
@@ -82,6 +92,7 @@ export class InteractableManager {
         break;
       }
     }
+
     if (!collision) {
       this.resetMachineOnInteraction();
     }
@@ -90,6 +101,7 @@ export class InteractableManager {
     if (this.interactionObject(this.submissionArea, player))
     {
       this.updateSubmissionAreaOnInteraction(player);
+      
     }
     else
     {
@@ -132,15 +144,19 @@ export class InteractableManager {
       const product: Product = player.inventory;
       let result;
       
-      if (product) {
+      if (product && !Products.checkItemOnTable(machine.renderObject, product) && !machine.isProducing && !player.hasPicked()) {
         result = await machine.addProduct(product);
       }
-
+      else {
+        result = false;
+      }
       // Produktion abgeschlossen
-      if (result instanceof Object) {
+      if (result instanceof Object ) {
         const produced = result as Product;
+        product.destroy();
         console.log("Produkt produziert:", produced.name);
-        Products.addProduct(produced, new Coordinates(machine.x + this._gamefield.fieldsize / 2 - 10, machine.y + this._gamefield.fieldsize / 2 - 10  ));
+        produced.z = 50;
+        Products.addProduct(produced, new Coordinates(machine.x + this._gamefield.fieldsize / 2 - produced.size / 2, machine.y + this._gamefield.fieldsize / 2 - produced.size / 2 ));
       } 
       // Zutat erfolgreich hinzugefügt, warte auf weitere
       else if (result === true) {
@@ -175,9 +191,49 @@ export class InteractableManager {
     this.ui.clearMachinePopUp();
   }
 
+  generateInteractionField(interactionObject: InteractableObject)
+  {
+    const size = this._gamefield.fieldsize;
+    const base = interactionObject.position;
+
+    interactionObject.directions.forEach((direction, idx) => {
+      const x = direction === Direction.RIGHT
+        ? base.x + interactionObject.width
+        : direction === Direction.LEFT
+        ? base.x - size
+        : base.x;
+
+      const y = direction === Direction.DOWN
+        ? base.y + interactionObject.height
+        : direction === Direction.UP
+        ? base.y - size
+        : base.y;
+
+      const interactionHeight = direction === Direction.DOWN || direction === Direction.UP ? size : interactionObject.height;
+      const interactionWidth = direction === Direction.RIGHT || direction === Direction.LEFT ? size : interactionObject.width;
+      const name = `interaction-${interactionObject.renderObject.name}-${Direction[direction]}-${idx}`;
+      const ro = new RenderObject(
+        name,
+        "img",
+        x,
+        y  ,
+        0,
+        interactionWidth,
+        interactionHeight,
+        100,
+        "/images/interaction-field.png",
+        undefined,
+        undefined,
+        undefined
+      );
+
+      RenderingService.instance().addRenderObject(ro);
+    });
+  }
+
   updateSubmissionAreaOnInteraction(player: Player) {
-      this.submissionArea.renderObject.rectColor = "rgba(81, 255, 81, 1)";
-      if (this._inputs["e"] === true && player.inventory instanceof Package) {
+      this.submissionArea.renderObject.rectColor = "#9c0e0eff";
+      if (this._inputs["e"] === true && player.inventory instanceof Package && !player.hasPicked()) {
       const packObj : Package = player.inventory;
 
       let result = this.submissionArea.addPackage(packObj);
@@ -198,7 +254,7 @@ export class InteractableManager {
   }
 
   resetSubmissionAreaOnInteraction() {
-    this.submissionArea.renderObject.rectColor = "rgba(255, 122, 240, 1)";
+    this.submissionArea.renderObject.rectColor = "#7D0A0A"
   }
 
 

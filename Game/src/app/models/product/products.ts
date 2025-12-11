@@ -5,6 +5,10 @@ import { Hitbox } from '../../interfaces/hitbox';
 import { Coordinates } from '../coordinates/coordinates';
 import { Product } from './product';
 import { Package } from '../package/package';
+import { Collision } from '../collision/collision';
+import { Gamefield } from '../gamefield/gamefield';
+import { Direction } from '../../enums/direction';
+import { producerUpdateValueVersion } from '@angular/core/primitives/signals';
 
 /**
  * Products-Klasse: Verwaltet alle Produkte im Spiel (statisch).
@@ -14,17 +18,18 @@ export class Products {
 
   // Master-Liste aller verfügbaren Produkttypen
   private static simple_productsList: Product[] = [
-    new Product(1, "Raw Plastic", "/images/Previews/box-small.png"),
-    new Product(2, "Raw Silicon", "/images/Previews/box-small.png"),
-    new Product(3, "Copper wire", "/images/Previews/box-small.png"),
-    new Product(4, "Plastic Case", "/images/Previews/box-small.png"),
-    new Product(5, "Circuit Board", "/images/Previews/box-small.png"),
-    new Product(6, "Basic Sensor", "/images/Previews/box-small.png")
+    new Product(1, "Raw Plastic", "/images/Products/raw-plastic.png"),
+    new Product(2, "Raw Silicon", "/images/Products/raw-silicon.png"),
+    new Product(3, "Copper wire", "/images/Products/copper-wire.png"),
+    new Product(4, "Plastic Case", "/images/Products/plastic-case.png"),
+    new Product(5, "Circuit Board", "/images/Products/circuit-board.png"),
+    new Product(6, "Basic Sensor", "/images/Products/basic-sensor.png")
   ]
 
   // Aktuell im Spiel existierende Produkt-Instanzen
   public static generatedProducts: (Product | Package)[] = [];
 
+  public static reachDistance: number = 80; // Reichweite für Interaktionen in Pixel
 
   /** Gibt ein Produkt anhand seiner ID zurück */
   public static getProductById(id: number): Product | undefined {
@@ -41,13 +46,73 @@ export class Products {
     return this.simple_productsList;
   }
 
+
+
+  /**
+   * Prüft ob ein Produkt auf einem Tisch/Objekt platziert werden kann
+   * @param product Das zu platzierende Produkt
+   * @param objects Liste der RenderObjects in der Welt
+   * @returns 0 wenn platzierbar, 1 wenn Tisch belegt, 2 wenn kein Objekt getroffen
+   */
+  public static checkOnTable(product: Product | Package, objects: RenderObject[]): number {
+    let collision;
+    let collisions = [];
+    let returnvalue = 2;
+    for (let interactionObject of objects) {
+
+      collision = Collision.checkCollision(new Hitbox(product.position, product.size, product.size), new Hitbox(new Coordinates(interactionObject.x, interactionObject.y), interactionObject.width, interactionObject.height))
+      if (collision && !interactionObject.name.startsWith("conveyor") && !interactionObject.name.startsWith("Machine")) {
+
+        if (!this.checkItemOnTable(interactionObject, product)) {
+          collisions.push(interactionObject)
+          continue;
+
+        }
+        returnvalue = 1;
+      }
+    }
+    if (collisions.length > 0) {
+      const shortestTable = this.findShortestDistanceTable(collisions, product);
+      if (shortestTable) {
+        returnvalue = 0
+        product.z = shortestTable.object.z;
+        product.x = shortestTable.object.x + shortestTable.object.width / 2 - product.size / 2;
+        product.y = shortestTable.object.y + shortestTable.object.height / 2 - product.size / 2;
+      }
+    }
+    return returnvalue;
+  }
+
+  private static findShortestDistanceTable(objects: RenderObject[], product: Product | Package) {
+    let distances: { distance: number, object: RenderObject }[] = [];
+    for (let interactionObject of objects) {
+      const distance = Math.sqrt(
+        Math.pow((product.position.x + product.size / 2 - (interactionObject.x + interactionObject.width / 2)), 2) +
+        Math.pow((product.position.y + product.size / 2 - (interactionObject.y + interactionObject.height / 2)), 2)
+      );
+      distances.push({ distance: distance, object: interactionObject });
+    }
+    const min = Math.min(...distances.map(d => d.distance));
+    return distances.find(d => d.distance === min);
+  }
+
+  public static checkItemOnTable(object: RenderObject, excludeProduct?: Product | Package): boolean {
+    for (let obj of this.generatedProducts) {
+      if (excludeProduct && obj == excludeProduct) continue;
+      if (Collision.checkCollision(new Hitbox(obj.position, obj.size, obj.size), new Hitbox(new Coordinates(object.x, object.y), object.width, object.height))) {
+        return true;
+      }
+
+    }
+    return false;
+  }
   /**
    * Prüft ob der Spieler nahe genug an einem Produkt ist, um es aufzunehmen.
    * @returns Das nächste Produkt wenn in Reichweite (55px), sonst null
    */
   public static checkForInteraction(player: Hitbox): Product | Package | null {
     const productToInteract = this.shortestProductDistance(player);
-    if (productToInteract && productToInteract.distance <= 55) {
+    if (productToInteract && productToInteract.distance <= Products.reachDistance) {
       return productToInteract.product;
     }
     return null;
@@ -76,6 +141,7 @@ export class Products {
    * Generiert Test-Produkte für die Spielwelt (Entwicklungs-/Debug-Funktion).
    */
   public static generateProducts(): void {
+    /*
     let newProduct = Products.getProductByName("Raw Plastic");
     if (newProduct) {
       let copy1 = newProduct.copy();
@@ -104,6 +170,8 @@ export class Products {
     this.generatedProducts.push(pack);
     let pack2 = new Package(new Coordinates(850, 150))
     this.generatedProducts.push(pack2);
+    let pack3 = new Package(new Coordinates(750, 150))
+    this.generatedProducts.push(pack3);*/
   }
 
   /**

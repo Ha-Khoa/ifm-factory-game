@@ -1,5 +1,8 @@
 import { Order, OrderItem } from '../../interfaces/order';
 import {Products} from '../product/products';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
 
 export class Orders {
     //einfach Bestellliste für das frühe Spiel, später können wir komplexere Bestellungen hinzufügen
@@ -46,22 +49,39 @@ export class Orders {
             status: false
         }
     ]
+
+    private static ordersList$ = new BehaviorSubject<Order[]>(this.ordersList);
+    public static activeOrders$: Observable<Order[]> = this.ordersList$.pipe(
+        map(orders => orders.filter(order => order.status === false))
+    );
+
     static getActiveOrders(): Order[] {
-        return this.ordersList.filter(order => order.status === false);
+        return this.ordersList$.getValue().filter(order => order.status === false);
     }
     static completeOrder(orderId: number): boolean {
-        const order =  this.ordersList.find(order => order.status === false && order.id === orderId);
+        const order =  this.ordersList$.getValue().find(order => order.status === false && order.id === orderId);
 
         if (order) {
             order.status = true;
+            this.ordersList$.next([...this.ordersList$.getValue()]);
             return true;
         }
 
         return false;
     }
 
+    static completeAllOrders(): void {
+      const currentOrders = this.ordersList$.getValue();
+      currentOrders.forEach(order => {
+        if (order.status === false) {
+          order.status = true;
+        }
+      });
+      this.ordersList$.next([...currentOrders]);
+    }
+
     static getOrderById(id: number): Order | undefined {
-        return this.ordersList.find(order => order.id === id);
+        return this.ordersList$.getValue().find(order => order.id === id);
     }
 
     static addOrder(items: {productId: number, quantity: number}[], reward: number): Order {
@@ -75,14 +95,14 @@ export class Orders {
             newOrderItems.push({product: product, quantity: item.quantity});
         }
         const newOrder: Order = {
-            id: this.ordersList.length + 1,
+            id: this.ordersList$.getValue().length + 1,
             items: newOrderItems,
             reward: reward,
             status: false
         };
-        this.ordersList.push(newOrder);
+        this.ordersList$.next([...this.ordersList$.getValue(), newOrder]);
         return newOrder;
-    } 
+    }
 
 
     //Generiere eine zufällige Bestellung basierend auf dem aktuellen Spielfortschritt (je höher das Level, desto komplexer die Bestellung)
@@ -133,3 +153,4 @@ export class Orders {
     //maybe using generateRandomOrders to create progressive orders based on player level
 
 }
+

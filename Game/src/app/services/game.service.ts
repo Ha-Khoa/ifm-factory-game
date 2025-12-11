@@ -38,9 +38,6 @@ export class GameService {
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
 
-  // Für Order PopUp Funktion
-  private orders!: Orders;
-
   constructor(private uiService: UIService) { }
 
 
@@ -56,7 +53,7 @@ export class GameService {
     this.ctx = ctx;
     this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
-    this.playerVelocity = 200; // in Pixel pro Sekunde
+    this.playerVelocity = 300; // in Pixel pro Sekunde
     this.uiService.init(ctxUI, this.angle);
 
     // Initialisiere Eingaben
@@ -65,8 +62,7 @@ export class GameService {
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
     this.player = new Player(
-      new Hitbox(new Coordinates(50, 50), 40, 40),
-      "",
+      new Hitbox(new Coordinates(50, 50), 60, 30),
       this.playerVelocity,
       this.gamefield
     );
@@ -74,10 +70,13 @@ export class GameService {
 
 
     // Lade benötigte Texturen vor
-    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png"];
+    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png", "/images/Brick_01-512x512.png", "/images/interaction-field.png"];
     const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
-    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages])];
+    const foxImages = ["/images/fox/walking_1.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png", "/images/fox/fox.png", "/images/fox/sitting.png",
+      "/images/fox/1-fox-holding.png", "/images/fox/2-fox-holding.png", "/images/fox/3-fox-holding.png", "/images/fox/4-fox-holding.png", "/images/fox/walking_5.png"
+    ]
+    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages])];
     await this.preloadImages(allImages);
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
@@ -125,11 +124,12 @@ export class GameService {
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
       // Update-Phase
+      RenderingService.instance().updateFPS()
       this.player.changeVelocity();
       this.player.updatePlayer();
 
       this.interactableManager.checkForInteraction(this.player);
-      //this.renderer.rotateMap();
+      RenderingService.instance().rotateMap();
 
 
       // Interaktionslogik: erst aufnehmen, sonst ablegen
@@ -143,10 +143,10 @@ export class GameService {
       this.player.render();
       this.player.updateProductInHand();
       RenderingService.instance().render();
+      
 
       // Debug UI
       this.uiService.debugProduct(this.player)
-      this.uiService.drawOrderPopUp(this.orders)
 
       requestAnimationFrame(loop);
     };

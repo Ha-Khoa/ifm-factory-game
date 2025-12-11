@@ -1,0 +1,83 @@
+.orders {
+  --primary: #ffcf78;
+  --secondary: #ff6f00;
+  --tertiary: #2a353e;
+  width: fit-content;
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  margin-left: var(--gap-large);
+  transition: 0.5s ease-out, transform 0.5s ease-out;
+  opacity: 1;
+  transform: translateY(5%);
+}
+
+.orders.hidden {
+  transform: translateY(-95%);
+}
+
+.orders .order * .icon {
+  width: 24px;
+  aspect-ratio: 1/1;
+  filter: drop-shadow(0px 0px 3px rgba(0 0 0 / 0.15));
+}
+
+.orders .order {
+  display: flex;
+  flex-direction: column;
+  border-radius: 60px;
+  font-family: Arial;
+  corner-shape: squircle;
+  /* Kein Error (nicht ändern) */
+  overflow: hidden;
+  filter: drop_shadow(0px 5px 5px black);
+}
+
+.orders .order div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.orders .order .title {
+  background: var(--primary);
+  padding: 16px;
+  corner-shape: squircle squircle scoop scoop;
+  /* Kein Error (nicht ändern) */
+  border-radius: 10px;
+  border-bottom: 1px dashed rgba(0 0 0 / .2);
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+}
+
+.orders .order .elements {
+  corner-shape: scoop scoop round round;
+  /* Kein Error (nicht ändern) */
+  border-radius: 10px 10px 0 0;
+  background: var(--primary);
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  flex-grow: 1;
+}
+
+.orders .order .elements .element {
+  border-bottom: 1px solid rgba(0 0 0 / 0.1);
+  padding-bottom: 8px;
+}
+
+.orders .order .elements .element:last-of-type {
+  border: none;
+  padding-bottom: 0;
+}
+
+.orders .order .rewards {
+  background: var(--tertiary);
+  color: var(--secondary);
+  padding: 16px;
+  border-radius: 0;
+  border-top: 1px solid rgba(0 0 0 / .2);
+  display: flex;
+  justify-content: space-around
+}
