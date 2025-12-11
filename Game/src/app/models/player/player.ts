@@ -67,7 +67,7 @@ export class Player {
        this._velocity = velocity;
        this._gamefield = gamefield;
        this._direction = null;
-       this._z = 140;
+       this._z = this._hitbox.x * 4; // Bildverhältnis der Spielertextur
        this._renderingObject = new RenderObject(
            "player",
            "gif",
@@ -108,7 +108,7 @@ export class Player {
         if(!this._directionPressed)
          {
             let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3
-            this._inventory.z = 0;
+            this._inventory.z = 20;
             this._inventory.x = newPositionX
             this._inventory.y = this._position.y;
             return
@@ -123,10 +123,10 @@ export class Player {
                             this._lastDirection === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2:
                             this._lastDirection === Direction.LEFT ? this._position.x - inv.size / 2:
                             this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3;
-       let newZ = ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Product) ? 50 :
-                  ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Package) ? 70 :
-                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Product) ? 50 :
-                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Package) ? 70 : 0;
+       let newZ = ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Product) ? 70 :
+                  ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Package) ? 120 :
+                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Product) ? 70 :
+                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Package) ? 120 : 0;
        inv.x= newPositionX
        inv.y = this._position.y
        inv.z = newZ;
@@ -229,13 +229,13 @@ export class Player {
                        this._position.y = 0;
                        break;
                    case Direction.DOWN:
-                       this._position.y = this._gamefield.fieldsize * this._gamefield.rows - this.hitbox.height;
+                       this._position.y = Gamefield.fieldsize * this._gamefield.rows - this.hitbox.height;
                        break;
                    case Direction.LEFT:
                        this._position.x = 0;
                        break;
                    case Direction.RIGHT:
-                       this._position.x = this._gamefield.fieldsize * this._gamefield.cols - this.hitbox.width;
+                       this._position.x = Gamefield.fieldsize * this._gamefield.cols - this.hitbox.width;
                        break;
                }
                return;
@@ -420,6 +420,12 @@ export class Player {
    set inventory(v: Product | Package | null) { this._inventory = v; }
 
    get canInteractProduct(): boolean { return this._canInteractProduct; }
+
+   get z(): number {return this._z}
+   set z(v: number) { 
+        this._z = v;
+        this._renderingObject.z = v;
+    }
 
 
 }

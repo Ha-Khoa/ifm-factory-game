@@ -84,8 +84,8 @@ export class Collision {
    * @returns true wenn außerhalb, sonst false
    */
     static checkPointOutOfBoarder(x: number, y: number): boolean {
-        const { rows, cols, fieldsize } = this._gamefield;
-        return x < 0 || x > fieldsize * cols || y < 0 || y > fieldsize * rows;
+        const { rows, cols } = this._gamefield;
+        return x < 0 || x > Gamefield.fieldsize * cols || y < 0 || y > Gamefield.fieldsize * rows;
     }
 
     /**

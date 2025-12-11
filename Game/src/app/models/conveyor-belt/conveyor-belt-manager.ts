@@ -20,10 +20,10 @@ export class ConveyorBeltManager {
    private initializeConveyorBelts(): void {
     //Package Förderband
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              12*64,
-              -2*64,
-              1*64,
-              4*64,
+              12*Gamefield.fieldsize,
+              -2*Gamefield.fieldsize,
+              1*Gamefield.fieldsize,
+              4*Gamefield.fieldsize,
               'down',
               0.1,
               true,
@@ -33,10 +33,10 @@ export class ConveyorBeltManager {
        ));
        //Rohr Materialien wird hier erstellt
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-           10*64,
-           -2*64,
-           1*64,
-           4*64,
+           10*Gamefield.fieldsize,
+           -2*Gamefield.fieldsize,
+           1*Gamefield.fieldsize,
+           4*Gamefield.fieldsize,
            'down',
            0.1,
            true,
@@ -45,10 +45,10 @@ export class ConveyorBeltManager {
            ConveyorType.COPPER_WIRE
        ));
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              8*64,
-              -2*64,
-              1*64,
-              4*64,
+              8*Gamefield.fieldsize,
+              -2*Gamefield.fieldsize,
+              1*Gamefield.fieldsize,
+              4*Gamefield.fieldsize,
               'down',
               0.1,
               true,
@@ -57,10 +57,10 @@ export class ConveyorBeltManager {
             ConveyorType.RAW_PLASTIC
        ));
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              6*64,
-              -2*64,
-              1*64,
-              4*64,
+              6*Gamefield.fieldsize,
+              -2*Gamefield.fieldsize,
+              1*Gamefield.fieldsize,
+              4*Gamefield.fieldsize,
               'down',
               0.1,
               true,

@@ -3,6 +3,7 @@ import { Coordinates } from "../coordinates/coordinates";
 import { Product } from "../product/product";
 import { RenderObject } from "../rendering/render-object";
 import { Products } from "../product/products";
+import { Gamefield } from "../gamefield/gamefield";
 
 export class Package {
 
@@ -19,7 +20,7 @@ export class Package {
     constructor(position: Coordinates) {
         this._id = Package._lastId++;
         this._position = position;
-        this._size = 4/5 * 64;
+        this._size = 4/5 * Gamefield.fieldsize;
         this._img = '/images/package.png';
         this._z = 50;
         this._renderObject = new RenderObject(

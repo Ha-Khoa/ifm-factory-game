@@ -10,6 +10,11 @@ import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
+import { Orders } from '../models/orders/orders';
+import { Particle } from '../models/particle/particle';
+import { ParticleRenderObject } from '../models/rendering/particle-render-object';
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -47,9 +52,9 @@ export class GameService {
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
-    this.playerVelocity = 300; // in Pixel pro Sekunde
+
     this.uiService.init(ctxUI, this.angle);
 
     // Initialisiere Eingaben
@@ -57,8 +62,9 @@ export class GameService {
 
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
+    this.playerVelocity = Gamefield.fieldsize * 4; // in Pixel pro Sekunde
     this.player = new Player(
-      new Hitbox(new Coordinates(50, 50), 50, 30),
+      new Hitbox(new Coordinates(50, 50), Gamefield.fieldsize * 4/5 , 30),
       this.playerVelocity,
       this.gamefield
     );
@@ -81,6 +87,60 @@ export class GameService {
     this.gamefield.updateConveyorBelts(ConveyorBeltManager.getConveyorBelts());
     this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
     Products.generateProducts();
+    
+    const particleRenderObject2 = new ParticleRenderObject(
+      "particle_02",
+      Gamefield.fieldsize * 28,
+      Gamefield.fieldsize * 5,
+      0,
+      Gamefield.fieldsize,
+      Gamefield.fieldsize * 2,
+      200,
+      "straightUp",
+      "rect",
+      ["#9b1414ff"]
+    );
+    RenderingService.instance().addRenderObject(particleRenderObject2);
+    const particleRenderObject3 = new ParticleRenderObject(
+      "particle_03",
+      Gamefield.fieldsize * 4,
+      Gamefield.fieldsize * 7,
+      0,
+      Gamefield.fieldsize,
+      Gamefield.fieldsize,
+      100,
+      "straightUp",
+      "rect",
+      ["#ffffffff", "#d8d876ff", "#f1f1f1ff", "#FFFF00"]
+    );
+        RenderingService.instance().addRenderObject(particleRenderObject3);
+    const particleRenderObject1 = new ParticleRenderObject(
+      "particle_01",
+      Gamefield.fieldsize * 8,
+      Gamefield.fieldsize * 5,
+      0,
+      Gamefield.fieldsize,
+      Gamefield.fieldsize,
+      100,
+      "straightUp",
+      "rect",
+      ["#ffffffff", "#d8d876ff", "#f1f1f1ff", "#FFFF00"]
+    );
+        RenderingService.instance().addRenderObject(particleRenderObject1);
+    const particleRenderObject4 = new ParticleRenderObject(
+      "particle_04",
+      Gamefield.fieldsize * 4,
+      Gamefield.fieldsize * 5,
+      0,
+      Gamefield.fieldsize,
+      Gamefield.fieldsize,
+      100,
+      "straightUp",
+      "rect",
+      ["#ffffffff", "#d8d876ff", "#f1f1f1ff", "#FFFF00"]
+    );
+
+    RenderingService.instance().addRenderObject(particleRenderObject4);
   }
 
   /**
@@ -126,7 +186,6 @@ export class GameService {
 
       this.interactableManager.checkForInteraction(this.player);
       RenderingService.instance().rotateMap();
-
 
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();

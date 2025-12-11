@@ -15,7 +15,7 @@ export class Gamefield {
     // Interaktive Objekte (Wände, Maschinen)
     interactableObjects!: RenderObject[];
     // Größe eines einzelnen Feldes in Pixeln
-    fieldsize!: number;
+    static fieldsize: number;
     // Anzahl der Reihen
     rows!: number;
     // Anzahl der Spalten
@@ -24,11 +24,12 @@ export class Gamefield {
     
     constructor()
     {
+      console.log(window.innerHeight)
         this.environmetObjects = [];
         this.interactableObjects = [];
-        this.fieldsize = 64;
         this.cols = 30;
         this.rows = 19;
+        Gamefield.fieldsize = Math.round(window.innerWidth / this.cols);
         this.generateEnvironment();
         this.generateInteractableObjects();
 
@@ -82,11 +83,11 @@ export class Gamefield {
                 this.environmetObjects.push(new RenderObject(
                     `floor-${i}-${j}`,
                     "rect",
-                    j * this.fieldsize,
-                    i * this.fieldsize,
+                    j * Gamefield.fieldsize,
+                    i * Gamefield.fieldsize,
                     0,
-                    this.fieldsize,
-                    this.fieldsize,
+                    Gamefield.fieldsize,
+                    Gamefield.fieldsize,
                     -1000,
                     "/images/Metal_16-512x512.png",
                     undefined,
@@ -102,10 +103,10 @@ export class Gamefield {
                 this.environmetObjects.push(new RenderObject(
                     `floor2-${i}-${j}`,
                     "rect",
-                    j * this.fieldsize,
-                    i * this.fieldsize / 8,
+                    j * Gamefield.fieldsize,
+                    i * Gamefield.fieldsize / 8,
                     0,
-                    this.fieldsize,
+                    Gamefield.fieldsize,
                     0.1,
                     -1000,
                     "/images/Metal_16-512x512.png",
@@ -132,11 +133,11 @@ export class Gamefield {
         this.interactableObjects.push(new RenderObject(
             `table-${i}`,
             "rect",
-            i * this.fieldsize,
-            10 * this.fieldsize,
+            i * Gamefield.fieldsize,
+            10 * Gamefield.fieldsize,
             50,
-            this.fieldsize,
-            this.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
             0,
             undefined,
             undefined,
@@ -149,11 +150,11 @@ export class Gamefield {
         this.interactableObjects.push(new RenderObject(
             `table-${i}-2`,
             "rect",
-            10 * this.fieldsize,
-            (i + 4) * this.fieldsize,
+            10 * Gamefield.fieldsize,
+            (i + 4) * Gamefield.fieldsize,
             50,
-            this.fieldsize,
-            this.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
             0,
             undefined,
             undefined,
