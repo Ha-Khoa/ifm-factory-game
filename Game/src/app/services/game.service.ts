@@ -142,7 +142,7 @@ export class GameService {
       
 
       if (this.player.inventory === null) {
-        
+
         // Prüfen, ob ein Item in der Nähe ist
         const itemInRange = Products.checkForInteraction(this.player.hitbox);
 

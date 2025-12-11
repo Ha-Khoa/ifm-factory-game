@@ -67,7 +67,6 @@ export class Product {
     if (this._renderObject) {
       this._renderObject.x = v.x;
       this._renderObject.y = v.y;
-      RenderingService.instance().updateRenderingObject(this._renderObject.name, this._renderObject);
     }
   }
   get img(): string | undefined { return this._img; }

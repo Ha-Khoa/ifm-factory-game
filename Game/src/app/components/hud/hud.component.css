@@ -1,36 +1,23 @@
 .stats-box {
   display: flex;
   align-items: center;
-  gap: 10px;
-
-  background-color: #f0eada;
-  /* Das helle Beige */
-  border: 5px solid #d4bda5;
-  /* Der braune Rand */
+  gap: 16px;
+  background-color: var(--tertiary);
+  color: var(--primary);
   border-radius: 15px;
-  /* Gleiche Rundung wie Settings */
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  /* Schatten */
-
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   padding: 10px 20px;
-
-  color: #5c4b3f;
-  font-family: 'Arial Rounded MT Bold', sans-serif;
-  font-size: 1.2em;
-  /* Etwas größer passend zum Font */
+  font-family: var(--font-family);
+  font-size: 1.1em;
   font-weight: bold;
-
-  position: relative;
-  top: 10px;
-  left: 300px;
-  right: 0px;
+  position: fixed; /* Positioniert relativ zum Viewport */
+  top: 20px; /* Abstand vom oberen Rand */
+  right: 20px; /* Abstand vom rechten Rand */
   pointer-events: auto;
   white-space: nowrap;
   z-index: 10;
-  /* Sicherstellen, dass es über dem Canvas liegt */
 }
 
-/* Icons und Werte stylen */
 .stat-item {
   display: flex;
   align-items: center;
@@ -40,65 +27,33 @@
 .icon {
   width: 24px;
   aspect-ratio: 1/1;
-  filter: drop-shadow(0px 0px 3px rgba(0 0 0 / 0.15));
+  filter: drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.4));
 }
 
-/* Farben angepasst für hellen Hintergrund */
-/* Grün für Geld, aber etwas dunkler/natürlicher als das Neon */
-.money-val {
-  color: #2e7d32;
+.money-val, .score-val {
+  color: var(--secondary);
+  font-weight: bold;
 }
 
-/* Orange für Score (passend zu den Buttons) */
-.score-val {
-  color: #ff8c00;
-}
-
-/* Name in dem Standard-Braun der Settings */
 .player-name {
-  color: #af5e23;
+  color: var(--primary);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-.money-val { color: #00ff9d; } /* Neon Grün */
-.score-val { color: #ff9e00; } /* Neon Orange */
-
 .separator {
   width: 2px;
   height: 24px;
-  background-color: #d4bda5;
-  /* Gleiche Farbe wie der Rand */
+  background-color: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
 }
 
-/* Settings Icon Button */
-.image {
-  width: 45px;
-  /* Tick größer */
-  height: 45px;
-  cursor: pointer;
-
-  position: absolute;
-  left: 20px;
-  /* Ggf. anpassen, wenn das HUD breiter wird! */
-  top: 0;
-
-  /* Optional: Kleiner Hover-Effekt wie bei den Buttons */
-  transition: transform 0.2s;
-}
-
-.image:hover {
-  transform: scale(1.1);
-}
-
 .settings-btn {
-  width: 35px;
-  /* Angenehme Größe */
-  height: 35px;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
-  transition: transform 0.3s ease, filter 0.3s;
-  filter: invert(1); /* Macht schwarze Icons weiß */
+  transition: transform 0.3s ease;
+  /* `filter` wird nicht mehr benötigt, wenn das Icon eine passende Farbe hat */
 }
 
 .settings-btn:hover {
