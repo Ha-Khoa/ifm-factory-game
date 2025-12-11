@@ -129,7 +129,7 @@ export class UIService {
     currentY += 5;
 
     // Linie
-    this._drawSeparator(centerX, currentY, width * 1.2);
+    this._drawSeparator(centerX, currentY, width);
     currentY += 15;
 
     // Inhalt
