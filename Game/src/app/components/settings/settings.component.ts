@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import {Component, Output, EventEmitter, ViewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DebugMenuComponent } from '../debug-menu/debug-menu.component';
 
@@ -10,10 +10,26 @@ import { DebugMenuComponent } from '../debug-menu/debug-menu.component';
   styleUrls: ['./../settings/settings-general.component.css','./settings.component.css']
 })
 export class SettingsComponent {
-  @Output() closeSettings = new EventEmitter<void>();
+  @Output() closeSettingsRequest = new EventEmitter<void>();
+  isClosing = false;
+
+  @ViewChild(DebugMenuComponent) debugMenu?: DebugMenuComponent;
   showDebugMenu = false;
 
-  close(): void {
-    this.closeSettings.emit();
+  handleDebugMenu(): void {
+    if(this.showDebugMenu) this.debugMenu?.closeDebugMenu();
+    else this.showDebugMenu = true;
+  }
+
+  closeSettingsMenu(): void {
+    this.isClosing = true;
+
+    console.log("Closing settings menu");
+    // Zeit warten, damit CSS Animation ablaufen kann
+    setTimeout(() => {
+      console.log("Closing settings menu done");
+
+      this.closeSettingsRequest.emit();
+    }, 300);
   }
 }

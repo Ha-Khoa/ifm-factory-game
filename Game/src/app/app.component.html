@@ -2,6 +2,7 @@
   <canvas #game width="{{ cwidth }}" height="{{ cheight }}"></canvas>
   <canvas #ui width="{{ cwidth }}" height="{{ cheight }}" class="ui"></canvas>
   <app-hud></app-hud>
-  <app-settings *ngIf="isSettingsOpen" (closeSettings)="isSettingsOpen = false"></app-settings>
+  <app-settings *ngIf="isSettingsOpen"
+                (closeSettingsRequest)="isSettingsOpen = false"></app-settings>
   <app-order></app-order>
 </div>

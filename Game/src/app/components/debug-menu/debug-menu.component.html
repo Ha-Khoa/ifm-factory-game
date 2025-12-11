@@ -1,4 +1,4 @@
-<div class="debug-menu-container">
+<div class="debug-menu-container" [ngClass]="{ 'closing': isClosing }">
   <h1 class="menu-title">Debug Menu</h1>
   <div class="container">
     <div class="row-container">
@@ -21,7 +21,7 @@
           <div class="section">
             <label for="product">Produkt:</label>
             <select id="product" [(ngModel)]="selectedProductId">
-              <option *ngFor="let product of products" [value]="product.id">
+              <option *ngFor="let product of products" [value]sd="product.id">
                 {{ product.name }}
               </option>
             </select>
