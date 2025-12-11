@@ -73,13 +73,16 @@ export class Package {
     set z(v: number) { 
         this._renderObject.z = v;
         this._z = v;
+        RenderingService.instance().sortRenderingBuffer()
      }
     set x(v: number){
         this._renderObject.x = v;
         this._position.x = v;
+        RenderingService.instance().sortRenderingBuffer()
     }
     set y(v: number){
         this._renderObject.y = v;
         this._position.y = v;
+        RenderingService.instance().sortRenderingBuffer()
     }
 }

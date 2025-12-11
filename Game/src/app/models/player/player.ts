@@ -109,6 +109,7 @@ export class Player {
          {
             let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3
             this._inventory.z = Gamefield.fieldsize * 1/5;
+            this._inventory.renderObject.priority = 400;
             this._inventory.x = newPositionX
             this._inventory.y = this._position.y;
             return
