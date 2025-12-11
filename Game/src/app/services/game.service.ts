@@ -121,11 +121,11 @@ export class GameService {
       this.player.render();
       this.player.updateProductInHand();
       RenderingService.instance().render();
-      
+
       // --- UPDATE: Popup Logik ---
       // Wir zeigen das Popup NUR, wenn der Spieler NICHTS in der Hand hat
       if (this.player.inventory === null) {
-        
+
         // Prüfen, ob ein Item in der Nähe ist
         const itemInRange = Products.checkForInteraction(this.player.hitbox);
 
@@ -143,17 +143,6 @@ export class GameService {
 
       requestAnimationFrame(loop);
     };
-    RenderingService.instance().render();
-
-    // Vignette Effekt
-    const gradient = this.ctx.createRadialGradient(
-      this.ctx.canvas.width / 2, this.ctx.canvas.height / 2, this.ctx.canvas.height / 3,
-      this.ctx.canvas.width / 2, this.ctx.canvas.height / 2, this.ctx.canvas.height
-    );
-    gradient.addColorStop(0, "rgba(0,0,0,0)");
-    gradient.addColorStop(1, "rgba(0,0,0,0.6)"); 
-    this.ctx.fillStyle = gradient;
-    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     requestAnimationFrame(loop);
   }
 
