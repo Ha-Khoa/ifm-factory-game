@@ -1,5 +1,5 @@
+// app/services/game.service.ts
 
-// Importiere notwendige Angular- und Projektmodule
 import { Injectable } from '@angular/core';
 import { Gamefield } from '../models/gamefield/gamefield';
 import { Player } from '../models/player/player';
@@ -9,11 +9,7 @@ import { RenderingService } from './rendering.service';
 import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
-import { SubmissionArea } from '../models/submission-area/submission-area';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
-import { Orders } from '../models/orders/orders';
-
-
 
 @Injectable({
   providedIn: 'root'
@@ -40,16 +36,10 @@ export class GameService {
 
   constructor(private uiService: UIService) { }
 
-
   /**
    * Initialisiert das Spiel, setzt Startwerte und lädt Bilder vor.
-   * @param ctx CanvasRenderingContext2D zum Zeichnen
    */
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
-    // Initialisiere UI Service
-
-
-    // Initialisiere Canvas und Rendering
     this.ctx = ctx;
     this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
@@ -67,7 +57,6 @@ export class GameService {
       this.gamefield
     );
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs);
-
 
     // Lade benötigte Texturen vor
     const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png", "/images/Brick_01-512x512.png", "/images/interaction-field.png"];
@@ -87,20 +76,11 @@ export class GameService {
     Products.generateProducts();
   }
 
-  /**
-   * Lädt mehrere Bilder asynchron vor und speichert sie im images-Objekt.
-   * @param srcs Array mit Bildpfaden
-   */
   async preloadImages(srcs: string[]) {
     const promises = srcs.map(src => this.loadImage(src).then(img => this.images[src] = img));
     await Promise.all(promises);
   }
 
-  /**
-   * Lädt ein einzelnes Bild asynchron.
-   * @param src Bildpfad
-   * @returns Promise mit geladenem HTMLImageElement
-   */
   loadImage(src: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -112,7 +92,6 @@ export class GameService {
 
   /**
    * Startet die Hauptspielschleife (Game Loop).
-   * Zeichnet und aktualisiert das Spiel solange GameRunning true ist.
    */
   startGame() {
     this.GameRunning = true;
@@ -131,7 +110,6 @@ export class GameService {
       this.interactableManager.checkForInteraction(this.player);
       RenderingService.instance().rotateMap();
 
-
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
       this.player.dropProduct();
@@ -144,47 +122,45 @@ export class GameService {
       this.player.updateProductInHand();
       RenderingService.instance().render();
       
+      // --- UPDATE: Popup Logik ---
+      // Wir zeigen das Popup NUR, wenn der Spieler NICHTS in der Hand hat
+      if (this.player.inventory === null) {
+        
+        // Prüfen, ob ein Item in der Nähe ist
+        const itemInRange = Products.checkForInteraction(this.player.hitbox);
 
-      // Debug UI
-      this.uiService.debugProduct(this.player)
+        if (itemInRange) {
+          this.uiService.drawItemPopup(itemInRange);
+        } else {
+          this.uiService.clearItemPopup();
+        }
+
+      } else {
+        // Wenn wir was tragen: Sicherstellen, dass das Popup weg ist!
+        this.uiService.clearItemPopup();
+      }
+      // ---------------------------
 
       requestAnimationFrame(loop);
     };
     RenderingService.instance().render();
 
-    // Vignette Effekt (Dunkle Ecken für Fokus)
+    // Vignette Effekt
     const gradient = this.ctx.createRadialGradient(
       this.ctx.canvas.width / 2, this.ctx.canvas.height / 2, this.ctx.canvas.height / 3,
       this.ctx.canvas.width / 2, this.ctx.canvas.height / 2, this.ctx.canvas.height
     );
     gradient.addColorStop(0, "rgba(0,0,0,0)");
-    gradient.addColorStop(1, "rgba(0,0,0,0.6)"); // 60% Dunkelheit am Rand
+    gradient.addColorStop(1, "rgba(0,0,0,0.6)"); 
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     requestAnimationFrame(loop);
   }
 
-  /**
-   * Stoppt die Hauptspielschleife.
-   */
   stopGame() {
     this.GameRunning = false;
   }
 
-
-
-
-
-
-
-
-
-
-  /**
-   * Setzt den Status einer Taste (gedrückt/losgelassen).
-   * @param key Taste (z.B. 'w', 'a', 's', 'd')
-   * @param pressed true, wenn gedrückt
-   */
   setInput(key: string, pressed: boolean) {
     this.inputs[key] = pressed;
     this.player.setInput(this.inputs)

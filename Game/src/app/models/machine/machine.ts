@@ -225,4 +225,6 @@ export class Machine extends InteractableObject {
 
   get inputRequirements(): Product[] { return this._inputRequirements; }
   set inputRequirements(v: Product[]) { this._inputRequirements = v; }
+
+  get outputProduct(): Product { return this._outputProduct; } 
 }
