@@ -124,9 +124,9 @@ export class Player {
                             this._lastDirection === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2:
                             this._lastDirection === Direction.LEFT ? this._position.x - inv.size / 2:
                             this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3;
-       let newZ = ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Product) ? Gamefield.fieldsize :
+       let newZ = ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Product) ? Gamefield.fieldsize * 0.9:
                   ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Package) ? Gamefield.fieldsize * 1.5 :
-                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Product) ? Gamefield.fieldsize :
+                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Product) ? Gamefield.fieldsize * 0.9:
                   ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Package) ? Gamefield.fieldsize * 1.5 : 0;
        inv.x= newPositionX
        inv.y = this._position.y
