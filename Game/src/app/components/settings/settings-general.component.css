@@ -1,0 +1,61 @@
+﻿
+
+.menus-container {
+  display: flex;
+  gap: var(--gap-small);
+}
+
+.settings-options{
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-small);
+}
+
+.menu-title{
+  display: flex;
+  justify-content: center;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+/* General HTML Elements*/
+label {
+  font-size: var(--font-size-large);
+  font-weight: bold;
+}
+
+button {
+  background-color: var(--tertiary);
+  color: var(--secondary);
+  border: none;
+  padding: var(--gap-large);
+  border-radius: var(--border-radius-small);
+  font-size: var(--font-size-large);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.1s linear;
+  box-shadow: var(--box-shadow-level-1);
+  width: 100%;
+}
+
+button:hover {
+  color: #FF8F38;
+  background-color: #1E2226;
+}
+
+button:active {
+  box-shadow: var(--box-shadow-level-0);
+  transform: translateY(1px);
+}
+
+input,
+select {
+  padding: var(--gap-small);
+  border-radius: var(--border-radius-small);
+  border: 2px solid var(--border-color);
+  background-color: var(--md-sys-color-white);
+  font-size: var(--font-size-p);
+  width: 100%;
+  box-sizing: border-box;
+}
+
