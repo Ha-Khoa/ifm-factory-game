@@ -10,7 +10,7 @@ export class Product {
   private _id: number;
   private _name: string;
   private _position!: Coordinates;
-  private _img?: string;
+  _img?: string;
   private _renderObject!: RenderObject;
   private _size: number;
   private _z : number;
@@ -22,7 +22,7 @@ export class Product {
     this._img = img;
     this._position = new Coordinates(0, 0);
     this._size = 2/5 * 64; // Standardgröße für Produkte
-    this._z = z !== undefined ? z : 0;  
+    this._z = z !== undefined ? z : 0;
     this._renderObject = new RenderObject(
       `product:${this._name}:${this._instanceId}`,
       "img",

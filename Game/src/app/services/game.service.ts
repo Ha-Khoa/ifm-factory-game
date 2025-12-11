@@ -40,6 +40,7 @@ export class GameService {
   /**
    * Initialisiert das Spiel, setzt Startwerte und lädt Bilder vor.
    * @param ctx CanvasRenderingContext2D zum Zeichnen
+   * @param ctxUI
    */
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
     // Initialisiere UI Service
@@ -50,7 +51,7 @@ export class GameService {
     this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
     this.playerVelocity = 300; // in Pixel pro Sekunde
-    this.uiService.init(ctxUI, this.angle);
+    this.uiService.init(ctxUI, this.angle, this.images);
 
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
@@ -139,7 +140,7 @@ export class GameService {
       this.player.render();
       this.player.updateProductInHand();
       RenderingService.instance().render();
-      
+
 
       if (this.player.inventory === null) {
 
