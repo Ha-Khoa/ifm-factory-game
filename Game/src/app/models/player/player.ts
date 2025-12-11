@@ -67,7 +67,7 @@ export class Player {
        this._velocity = velocity;
        this._gamefield = gamefield;
        this._direction = null;
-       this._z = this._hitbox.x * 4; // Bildverhältnis der Spielertextur
+       this._z = hitbox.x * 2 / Math.sin(RenderingService.instance().angle); // Bildverhältnis der Spielertextur
        this._renderingObject = new RenderObject(
            "player",
            "gif",
