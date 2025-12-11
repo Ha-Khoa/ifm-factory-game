@@ -108,10 +108,10 @@ export class UIService {
 
     // 4. Löschbereich speichern (WICHTIG: Großzügiger Puffer gegen Schattenreste!)
     this.lastItemPopupRect = {
-      x: x - 50,
-      y: y - 50,
-      width: width + 100,
-      height: height + 100
+      x: x - 10,
+      y: y - 10,
+      width: width + 20,
+      height: height + 20
     };
 
     // 5. Zeichnen
@@ -180,7 +180,7 @@ export class UIService {
     const y = machine.y * Math.cos(this._angle) + popupConfig.yOffset;
 
     this.lastMachinePopupRect = {
-      x: x - 40, y: y - 40, width: popupConfig.width + 80, height: popupConfig.height + 80
+      x: x - 10, y: y - 10, width: popupConfig.width + 20, height: popupConfig.height + 20
     };
 
     this._drawStyledPopupBackground(x, y, popupConfig, machine.unlocked);
