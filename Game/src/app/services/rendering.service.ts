@@ -191,7 +191,7 @@ export class RenderingService {
 
         }
       }
-      else if (Obj.type === "particle")
+      else if (Obj instanceof ParticleRenderObject && Obj.type === "particle" && Obj.render)
       {
         this._particleRenderingService.render((Obj as ParticleRenderObject).particles, this._deltaTime);
       }

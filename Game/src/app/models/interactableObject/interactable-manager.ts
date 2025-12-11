@@ -14,7 +14,8 @@ import { Player } from "../player/player";
 import { SubmissionArea } from "../submission-area/submission-area";
 import { InteractableObject } from "./interactable-object";
 import { Package } from "../package/package";
-import { NgSwitchCase } from "@angular/common";
+import { ParticleRenderObject } from "../rendering/particle-render-object";
+import { ParticleRenderingService } from "../../services/particle-rendering.service";
 
 /**
  * MachineManager-Klasse: Verwaltet alle Maschinen im Spiel.
@@ -54,6 +55,7 @@ export class InteractableManager {
     this.updateUnlockedMachine(2);
     this.machines.forEach((machine) => {
       this.generateInteractionField(machine)
+      this.addParticleField(machine)
     })
     this.generateInteractionField(this.submissionArea)
     console.log(this.machines)
@@ -78,6 +80,60 @@ export class InteractableManager {
   }
 
 
+  checkMachineNeedsProduct(player: Player)
+  {
+    if(!player.inventory || !(player.inventory instanceof Product)) { return }
+    for(let machine of this.machines)
+    {
+      for(let product of machine.inputRequirements)
+      {
+        if(product.name === player.inventory.name)
+        {
+          let needsProduct = true;
+          for(let inv of machine.inventory)
+          {
+            if(inv.name === product.name)
+            {
+              needsProduct = false;
+              break;
+            }
+          }
+          if(needsProduct)
+          {
+            this.enableParticleField(machine);
+          }
+        }
+      }
+    }
+  }
+
+  resetParticleFields()
+  {
+    for(let machine of this.machines)
+    {
+      for (let particleRenderObject of machine.particleRenderObjects)
+      {
+        particleRenderObject.render = false
+      }
+    }
+  }
+
+  enableParticleField(machine: Machine)
+  {
+    for (let particleRenderObject of machine.particleRenderObjects)
+    {
+      particleRenderObject.render = true;
+    }
+  }
+
+  addParticleField(machine: Machine)
+  {
+    for (let particleRenderObject of machine.particleRenderObjects)
+    {
+      particleRenderObject.render = false;
+      RenderingService.instance().addRenderObject(particleRenderObject)
+    }
+  }
   /**
    * Prüft ob der Spieler mit einer Maschine interagieren kann.
    * Berechnet Interaktionszonen basierend auf der accessDirection der Maschine.
@@ -155,7 +211,7 @@ export class InteractableManager {
         const produced = result as Product;
         product.destroy();
         console.log("Produkt produziert:", produced.name);
-        produced.z = 50;
+        produced.z = machine.z;
         Products.addProduct(produced, new Coordinates(machine.x + Gamefield.fieldsize / 2 - produced.size / 2, machine.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
       } 
       // Zutat erfolgreich hinzugefügt, warte auf weitere

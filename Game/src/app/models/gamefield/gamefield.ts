@@ -15,11 +15,12 @@ export class Gamefield {
     // Interaktive Objekte (Wände, Maschinen)
     interactableObjects!: RenderObject[];
     // Größe eines einzelnen Feldes in Pixeln
-    static fieldsize: number;
+    static fieldsize: number = Math.round(window.innerWidth / 30);
     // Anzahl der Reihen
     rows!: number;
     // Anzahl der Spalten
     cols!: number;
+
 
     
     constructor()
@@ -29,7 +30,7 @@ export class Gamefield {
         this.interactableObjects = [];
         this.cols = 30;
         this.rows = 19;
-        Gamefield.fieldsize = Math.round(window.innerWidth / this.cols);
+        //Gamefield.fieldsize = Math.round(window.innerWidth / this.cols);
         this.generateEnvironment();
         this.generateInteractableObjects();
 
@@ -126,7 +127,7 @@ export class Gamefield {
     {
     const rectColor = "#FFE797";
     const layerColors = ["#FCB53B","#aa6a17ff"]
-            
+    const priority = 90;
         
     for(let i = 0; i < 10; i++)
     {
@@ -135,10 +136,10 @@ export class Gamefield {
             "rect",
             i * Gamefield.fieldsize,
             10 * Gamefield.fieldsize,
-            50,
             Gamefield.fieldsize,
             Gamefield.fieldsize,
-            0,
+            Gamefield.fieldsize,
+            priority,
             undefined,
             undefined,
             rectColor,
@@ -152,10 +153,10 @@ export class Gamefield {
             "rect",
             10 * Gamefield.fieldsize,
             (i + 4) * Gamefield.fieldsize,
-            50,
             Gamefield.fieldsize,
             Gamefield.fieldsize,
-            0,
+            Gamefield.fieldsize,
+            priority,
             undefined,
             undefined,
             rectColor,

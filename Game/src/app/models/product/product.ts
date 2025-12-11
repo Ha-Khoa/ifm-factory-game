@@ -68,25 +68,30 @@ export class Product {
     if (this._renderObject) {
       this._renderObject.x = v.x;
       this._renderObject.y = v.y;
+      RenderingService.instance().updateRenderingObject(this._renderObject.name, this._renderObject)
     }
   }
   get img(): string | undefined { return this._img; }
   set img(v: string | undefined) { this._img = v; }
   get renderObject(): RenderObject { return this._renderObject; }
-  set renderObject(v: RenderObject) { this._renderObject = v; }
+  set renderObject(v: RenderObject) { this._renderObject = v
+  }
   get size(): number { return this._size; }
   set size(v: number) { this._size = v; }
   get z(): number { return this._renderObject.z; }
   set z(v: number) {
     this._renderObject.z = v;
     this._z = v;
+    RenderingService.instance().sortRenderingBuffer()
   }
   set x(v: number){
     this._renderObject.x = v;
     this._position.x = v;
+    RenderingService.instance().sortRenderingBuffer()
   }
   set y(v: number){
     this._renderObject.y = v;
     this._position.y = v;
+    RenderingService.instance().sortRenderingBuffer()
   }
 }

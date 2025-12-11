@@ -2,6 +2,8 @@ import { RenderObject } from "../rendering/render-object";
 import { Coordinates } from "../coordinates/coordinates";
 import { Hitbox } from "../../interfaces/hitbox";
 import { Direction } from "../../enums/direction";
+import { Gamefield } from "../gamefield/gamefield";
+import { ParticleRenderObject } from "../rendering/particle-render-object";
 
 export class InteractableObject {
     protected _renderObject: RenderObject;
@@ -10,6 +12,7 @@ export class InteractableObject {
     protected _width: number;
     protected _height: number;
     protected _directions: Direction[];
+    protected _particleRenderObjects: ParticleRenderObject[] = [];
 
     constructor(
         name: string,
@@ -42,12 +45,37 @@ export class InteractableObject {
             z,
             this._width,
             this._height,
-            0,
+            90,
             img,
             imgWall,
             color,
             colorLayers
         );
+
+        let xParticles;
+        let yParticles;
+        let i = 0;
+        for(let direction of this.directions)
+        {
+        xParticles = direction === Direction.RIGHT ? this.position.x + Gamefield.fieldsize :
+                     direction === Direction.LEFT ? this.position.x - Gamefield.fieldsize : this.position.x;
+        yParticles = direction === Direction.DOWN ? this.position.y + Gamefield.fieldsize :
+                     direction === Direction.UP ? this.position.y - Gamefield.fieldsize : this.position.y;
+        
+        this._particleRenderObjects.push(new ParticleRenderObject(
+                  `particle-${i}`,
+                  xParticles,
+                  yParticles,
+                  0,
+                  Gamefield.fieldsize,
+                  Gamefield.fieldsize,
+                  300,  
+                  "straightUp",
+                  "rect",
+                  ["#ffffffff", "#d8d876ff", "#f1f1f1ff", "#FFFF00"]
+                ))
+            i++;
+            }
     }
 
     // Accessors
@@ -93,6 +121,10 @@ export class InteractableObject {
       /** RenderObject für die visuelle Darstellung */
     get renderObject(): RenderObject { return this._renderObject; }
     set renderObject(v: RenderObject) { this._renderObject = v; }
+
+    get particleRenderObjects(): ParticleRenderObject[] { return this._particleRenderObjects }
+    
+    
 
 }
 
