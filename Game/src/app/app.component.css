@@ -1,3 +1,15 @@
+/* Importiere eine Font von Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap');
+
+body, html {
+  margin: 0;
+  padding: 0;
+  background-color: #1a1a2e; /* Dunkler Hintergrund statt Weiß */
+  font-family: 'Exo 2', sans-serif; /* Sci-Fi Font */
+  color: white;
+  overflow: hidden;
+}
+
 .game-container {
   position: relative;
   /* Referenzpunkt für HUD */
