@@ -7,7 +7,7 @@ import { DebugMenuComponent } from '../debug-menu/debug-menu.component';
   standalone: true,
   imports: [CommonModule, DebugMenuComponent],
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.css'
+  styleUrls: ['./../settings/settings-general.component.css','./settings.component.css']
 })
 export class SettingsComponent {
   @Output() closeSettings = new EventEmitter<void>();

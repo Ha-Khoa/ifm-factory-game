@@ -1,76 +1,65 @@
 .debug-menu-container {
   background-color: var(--primary);
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  padding: var(--gap-large);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--box-shadow-level-1);
   width: 600px;
-  text-align: center;
   border: 5px solid var(--tertiary);
   color: var(--text-color);
-  font-family: var(--font-family);
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.two-column {
+.menu-title{
   display: flex;
-  gap: 20px;
+  justify-content: center;
+  margin-bottom: var(--gap-extra-large);
+}
+
+.container{
+  display: flex;
+  flex-direction: column;
+}
+.row-container{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr) ;
+  gap: var(--gap-large);
+}
+.column-container{
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-small);
+}
+
+.section-title{
 }
 
 .column {
+  display: flex;
+  flex-direction: column;
   flex: 1;
 }
 
-h1 {
-  font-size: 2em;
-  margin-bottom: 20px;
-}
-
-h4 {
-  margin: 10px;
+.row{
+  display: flex;
+  flex-direction: row;
 }
 
 .form-group {
-  margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--gap-extra-small);
+  background: rgba(0 0 0 / 15%);
+  padding: var(--gap-small);
+  border-radius: var(--border-radius-small);
+  flex-grow: 1;
+}
+.form-group .section {
+  flex-grow: 1;
 }
 
-label {
-  font-size: 1.2em;
-  font-weight: bold;
-}
-
-input,
-select {
-  padding: 10px;
-  border-radius: 5px;
-  border: 2px solid var(--border-color);
-  background-color: #fff;
-  font-size: 1em;
+.divider{
+  height: 1px;
   width: 100%;
-  box-sizing: border-box;
-}
-
-button {
-  background-color: var(--tertiary);
-  color: var(--secondary);
-  border: none;
-  padding: 15px;
-  border-radius: 10px;
-  font-size: 1.2em;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  border-bottom: 5px solid black;
-  margin-top: 10px;
-  width: 100%;
-}
-
-button:hover {
-  background-color: #4a555e;
-}
-
-button:active {
-  border-bottom-width: 2px;
-  margin-top: 3px;
+  border-bottom: 1px solid var(--md-sys-color-outline);
+  margin: var(--gap-small) 0;
 }

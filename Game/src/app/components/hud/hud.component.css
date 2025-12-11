@@ -1,61 +1,33 @@
 .stats-box {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--gap-large);
   background-color: var(--tertiary);
   color: var(--primary);
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  padding: 10px 20px;
-  font-family: var(--font-family);
-  font-size: 1.1em;
+  border-radius: var(--border-radius-small);
+  box-shadow: var(--box-shadow-level-1);
+  padding: var(--gap-large);
+  font-size: var(--font-size-large);
   font-weight: bold;
-  position: fixed; /* Positioniert relativ zum Viewport */
-  top: 20px; /* Abstand vom oberen Rand */
-  right: 20px; /* Abstand vom rechten Rand */
+  position: fixed;
+  top: var(--gap-large);
+  right: var(--gap-large);
   pointer-events: auto;
   white-space: nowrap;
-  z-index: 10;
+  user-select: none;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--gap-small);
+  position: relative;
+  height: 100%;
 }
 
-.icon {
+.stat-item .icon {
   width: 24px;
   aspect-ratio: 1/1;
-  filter: drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.4));
-}
-
-.money-val, .score-val {
-  color: var(--secondary);
-  font-weight: bold;
-}
-
-.player-name {
-  color: var(--primary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.separator {
-  width: 2px;
-  height: 24px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-}
-
-.settings-btn {
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-  /* `filter` wird nicht mehr benötigt, wenn das Icon eine passende Farbe hat */
-}
-
-.settings-btn:hover {
-  transform: rotate(90deg) scale(1.1);
+  filter: var(--box-shadow-level-1);
 }

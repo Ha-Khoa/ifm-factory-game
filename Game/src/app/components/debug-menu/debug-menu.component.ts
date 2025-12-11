@@ -11,7 +11,7 @@ import { Product } from '../../models/product/product';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './debug-menu.component.html',
-  styleUrls: ['./debug-menu.component.css']
+  styleUrls: ['./../settings/settings-general.component.css','./debug-menu.component.css']
 })
 export class DebugMenuComponent implements OnInit {
   playerMoney = 0;
