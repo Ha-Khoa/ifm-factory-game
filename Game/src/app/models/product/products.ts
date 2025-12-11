@@ -29,8 +29,6 @@ export class Products {
   // Aktuell im Spiel existierende Produkt-Instanzen
   public static generatedProducts: (Product | Package)[] = [];
 
-  public static reachDistance: number = 70; // Reichweite für Interaktionen in Pixel
-
   /** Gibt ein Produkt anhand seiner ID zurück */
   public static getProductById(id: number): Product | undefined {
     return this.simple_productsList.find(product => product.id === id);
@@ -112,7 +110,7 @@ export class Products {
    */
   public static checkForInteraction(player: Hitbox): Product | Package | null {
     const productToInteract = this.shortestProductDistance(player);
-    if (productToInteract && productToInteract.distance <= Products.reachDistance) {
+    if (productToInteract && productToInteract.distance <= Gamefield.fieldsize) {
       return productToInteract.product;
     }
     return null;

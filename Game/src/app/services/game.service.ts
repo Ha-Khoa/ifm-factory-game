@@ -10,6 +10,11 @@ import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
+import { Orders } from '../models/orders/orders';
+import { Particle } from '../models/particle/particle';
+import { ParticleRenderObject } from '../models/rendering/particle-render-object';
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -44,22 +49,22 @@ export class GameService {
    */
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
     // Initialisiere UI Service
-
+       this.gamefield = new Gamefield();
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
-    this.playerVelocity = 300; // in Pixel pro Sekunde
+
     this.uiService.init(ctxUI, this.angle, this.images);
 
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
 
     // Initialisiere Spielobjekte
-    this.gamefield = new Gamefield();
+    this.playerVelocity = Gamefield.fieldsize * 4; // in Pixel pro Sekunde
     this.player = new Player(
-      new Hitbox(new Coordinates(50, 50), 50, 30),
+      new Hitbox(new Coordinates(50, 50), Gamefield.fieldsize * 4/5 , 30),
       this.playerVelocity,
       this.gamefield
     );
@@ -128,7 +133,6 @@ export class GameService {
       this.interactableManager.checkForInteraction(this.player);
       RenderingService.instance().rotateMap();
 
-
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
       this.player.dropProduct();
@@ -141,6 +145,10 @@ export class GameService {
       this.player.updateProductInHand();
       RenderingService.instance().render();
 
+      // Render Particles
+      this.interactableManager.resetParticleFields();
+      this.interactableManager.checkMachineNeedsProduct(this.player);
+      
 
       if (this.player.inventory === null) {
 

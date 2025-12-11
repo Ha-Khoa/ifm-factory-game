@@ -14,7 +14,8 @@ import { Player } from "../player/player";
 import { SubmissionArea } from "../submission-area/submission-area";
 import { InteractableObject } from "./interactable-object";
 import { Package } from "../package/package";
-import { NgSwitchCase } from "@angular/common";
+import { ParticleRenderObject } from "../rendering/particle-render-object";
+import { ParticleRenderingService } from "../../services/particle-rendering.service";
 
 /**
  * MachineManager-Klasse: Verwaltet alle Maschinen im Spiel.
@@ -26,22 +27,22 @@ export class InteractableManager {
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       // Sensor-Maschine (benötigt Raw Silicon + Circuit Board)
-      new Machine(64 * 4, 64 * 4, 64, 64, "Basic Sensor", "/images/wall.png", "/images/wall.png", 
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Basic Sensor", "/images/wall.png", "/images/wall.png", 
                   [Direction.DOWN], Products.getProductByName("Basic Sensor")!, 
                   [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Circuit Board")!]),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(64 * 4, 64 * 8, 64, 64, "Plastic Case", "/images/wall.png", "/images/wall.png", 
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Plastic Case", "/images/wall.png", "/images/wall.png", 
                   [Direction.UP], Products.getProductByName("Plastic Case")!, 
                   [Products.getProductByName("Raw Plastic")!]),
-      new Machine(64 * 8, 64 * 4, 64, 64, "Circuit Board", "/images/wall.png", "/images/wall.png", 
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Circuit Board", "/images/wall.png", "/images/wall.png", 
                   [Direction.DOWN], Products.getProductByName("Circuit Board")!, 
                   [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper wire")!])
     ];
 
     private submissionArea: SubmissionArea = new SubmissionArea(
-      new Coordinates(64 * 29, 64 * 5),
-      64,
-      150
+      new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 5),
+      Gamefield.fieldsize,
+      2 * Gamefield.fieldsize
     );
   
   constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>) {
@@ -54,6 +55,7 @@ export class InteractableManager {
     this.updateUnlockedMachine(2);
     this.machines.forEach((machine) => {
       this.generateInteractionField(machine)
+      this.addParticleField(machine)
     })
     this.generateInteractionField(this.submissionArea)
     console.log(this.machines)
@@ -78,6 +80,60 @@ export class InteractableManager {
   }
 
 
+  checkMachineNeedsProduct(player: Player)
+  {
+    if(!player.inventory || !(player.inventory instanceof Product)) { return }
+    for(let machine of this.machines)
+    {
+      for(let product of machine.inputRequirements)
+      {
+        if(product.name === player.inventory.name)
+        {
+          let needsProduct = true;
+          for(let inv of machine.inventory)
+          {
+            if(inv.name === product.name)
+            {
+              needsProduct = false;
+              break;
+            }
+          }
+          if(needsProduct)
+          {
+            this.enableParticleField(machine);
+          }
+        }
+      }
+    }
+  }
+
+  resetParticleFields()
+  {
+    for(let machine of this.machines)
+    {
+      for (let particleRenderObject of machine.particleRenderObjects)
+      {
+        particleRenderObject.render = false
+      }
+    }
+  }
+
+  enableParticleField(machine: Machine)
+  {
+    for (let particleRenderObject of machine.particleRenderObjects)
+    {
+      particleRenderObject.render = true;
+    }
+  }
+
+  addParticleField(machine: Machine)
+  {
+    for (let particleRenderObject of machine.particleRenderObjects)
+    {
+      particleRenderObject.render = false;
+      RenderingService.instance().addRenderObject(particleRenderObject)
+    }
+  }
   /**
    * Prüft ob der Spieler mit einer Maschine interagieren kann.
    * Berechnet Interaktionszonen basierend auf der accessDirection der Maschine.
@@ -114,10 +170,10 @@ export class InteractableManager {
   {
     for (let direction of interactableObject.directions)
     {
-      const interactionX = direction === Direction.RIGHT ? interactableObject.position.x + this._gamefield.fieldsize :
-                           direction === Direction.LEFT ? interactableObject.position.x - this._gamefield.fieldsize : interactableObject.position.x;
-      const interactionY = direction === Direction.DOWN ? interactableObject.position.y + this._gamefield.fieldsize :
-                           direction === Direction.UP ? interactableObject.position.y - this._gamefield.fieldsize : interactableObject.position.y;
+      const interactionX = direction === Direction.RIGHT ? interactableObject.position.x + Gamefield.fieldsize :
+                           direction === Direction.LEFT ? interactableObject.position.x - Gamefield.fieldsize : interactableObject.position.x;
+      const interactionY = direction === Direction.DOWN ? interactableObject.position.y + Gamefield.fieldsize :
+                           direction === Direction.UP ? interactableObject.position.y - Gamefield.fieldsize : interactableObject.position.y;
 
       const interactionHitbox: Hitbox = new Hitbox(
         new Coordinates(interactionX, interactionY), 
@@ -155,8 +211,8 @@ export class InteractableManager {
         const produced = result as Product;
         product.destroy();
         console.log("Produkt produziert:", produced.name);
-        produced.z = 50;
-        Products.addProduct(produced, new Coordinates(machine.x + this._gamefield.fieldsize / 2 - produced.size / 2, machine.y + this._gamefield.fieldsize / 2 - produced.size / 2 ));
+        produced.z = machine.z;
+        Products.addProduct(produced, new Coordinates(machine.x + Gamefield.fieldsize / 2 - produced.size / 2, machine.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
       } 
       // Zutat erfolgreich hinzugefügt, warte auf weitere
       else if (result === true) {
@@ -193,7 +249,7 @@ export class InteractableManager {
 
   generateInteractionField(interactionObject: InteractableObject)
   {
-    const size = this._gamefield.fieldsize;
+    const size = Gamefield.fieldsize;
     const base = interactionObject.position;
 
     interactionObject.directions.forEach((direction, idx) => {

@@ -4,7 +4,7 @@ import {RenderObject} from "../rendering/render-object";
 import {Products} from "../product/products";
 import {RenderingService} from "../../services/rendering.service";
 import {Package} from "../package/package";
-import { TypeofExpr } from "@angular/compiler";
+import { Gamefield } from "../gamefield/gamefield";
 
 export enum ConveyorType {
     RAW_MATERIALS = "raw_materials",
@@ -413,7 +413,7 @@ export class ConveyorBelt extends RenderObject{
                const distance = Math.sqrt(dx * dx + dy * dy);
                //console.log(`  Product ${i}: pos(${productPos.x.toFixed(1)}, ${productPos.y.toFixed(1)}), center(${productCenterX.toFixed(1)}, ${productCenterY.toFixed(1)}), dist: ${distance.toFixed(2)}px`);
              
-               if (distance <= Products.reachDistance){
+               if (distance <= Gamefield.fieldsize){
                    this._items.splice(i, 1);
                    //productData.items.destroy();
                    //console.log(`✓ Produkt ${productData.items.name} von Förderband ${this.conveyorId} entfernt (Distanz: ${distance.toFixed(2)}px).`);

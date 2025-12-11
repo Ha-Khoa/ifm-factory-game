@@ -228,6 +228,9 @@ public class GameController : ControllerBase {
         if ( player == null )
             return NotFound($"Player not found.");
 
+        if( value < 0)
+            return Conflict($"There are no debts in this world! Negative values are not allowed");
+
         player.Money = value;
         await context.SaveChangesAsync();
 
@@ -246,6 +249,9 @@ public class GameController : ControllerBase {
 
         if ( player == null )
             return NotFound($"Player not found.");
+
+        if( value < 0 )
+            return Conflict("Adding negativ value to the money is not allowed.");
 
         player.Money += value;
         await context.SaveChangesAsync();
@@ -273,8 +279,11 @@ public class GameController : ControllerBase {
         if ( player == null )
             return NotFound($"Player not found.");
 
+        if( value < 0 )
+            return Conflict("Removing negativ value to the money is not allowed.");
+
         int money = player.Money;
-        if ( money - value < 0 ) {
+        if ( (money - value) < 0 ) {
             return Conflict($"Player has not enough money. Current Money: {money}");
         }
 

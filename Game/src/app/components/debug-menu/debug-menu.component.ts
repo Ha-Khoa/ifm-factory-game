@@ -27,7 +27,7 @@ export class DebugMenuComponent implements OnInit {
   quantity: number = 1;
   reward: number = 10;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) { }
 
   ngOnInit() {
     this.products = Products.getAllProducts();
@@ -62,7 +62,7 @@ export class DebugMenuComponent implements OnInit {
   }
 
   createCustomOrder() {
-    const items = [{ productId: this.selectedProductId, quantity: this.quantity }];
+    const items = [{ productId: Number(this.selectedProductId), quantity: this.quantity }];
     Orders.addOrder(items, this.reward);
     console.log('Custom order created');
   }

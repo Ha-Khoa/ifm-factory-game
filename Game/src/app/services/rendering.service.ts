@@ -5,6 +5,9 @@ import { Collision } from "../models/collision/collision";
 import { Coordinates } from "../models/coordinates/coordinates";
 import { Injectable } from "@angular/core";
 import { Direction } from "../enums/direction";
+import { ParticleRenderingService } from "./particle-rendering.service";
+import { Particles } from "../models/particle/particles";
+import { ParticleRenderObject } from "../models/rendering/particle-render-object";
 
 
 /**
@@ -29,6 +32,10 @@ export class RenderingService {
 
   private _lastFrameTime!: number;
 
+  private _deltaTime!: number;
+
+  private _particleRenderingService!: ParticleRenderingService;
+
   // Singleton support
   private static _instance: RenderingService | null = null;
 
@@ -46,8 +53,13 @@ export class RenderingService {
     this._ctx = ctx;
     this._images = images;
     this._angle = angle;
+    this._particleRenderingService = new ParticleRenderingService();
+    this._particleRenderingService.init(ctx, angle);
   }
-
+  /**
+   * Fügt ein einzelnes RenderObject zum Buffer hinzu und sortiert neu.
+   * @param renderObject Das hinzuzufügende Objekt
+   */
   addRenderObject(renderObject: RenderObject) {
     this._renderingBuffer.push(renderObject);
     this.sortRenderingBuffer();
@@ -179,6 +191,10 @@ export class RenderingService {
 
         }
       }
+      else if (Obj instanceof ParticleRenderObject && Obj.type === "particle" && Obj.render)
+      {
+        this._particleRenderingService.render((Obj as ParticleRenderObject).particles, this._deltaTime);
+      }
     }
     );
   }
@@ -211,12 +227,12 @@ export class RenderingService {
 
   updateFPS() {
     const now = performance.now();
-    let deltaTime = now - this._lastFrameTime;
-    this._lastFrameTime = now;
-    if (deltaTime === 0) {
-      deltaTime = 1; // Vermeidet Division durch 0 bei sehr schnellen Frames
-    }
-    this._fps = 1000 / deltaTime;
+       this._deltaTime = now - this._lastFrameTime;
+       this._lastFrameTime = now;
+       if (this._deltaTime === 0) {
+           this._deltaTime = 1; // Vermeidet Division durch 0 bei sehr schnellen Frames
+       }
+       this._fps = 1000 / this._deltaTime;
   }
 
 

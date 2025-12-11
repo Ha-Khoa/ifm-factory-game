@@ -6,6 +6,8 @@ import { Products } from "../product/products";
 import { Player } from "../player/player";
 import { InteractableObject } from "../interactableObject/interactable-object";
 import { Coordinates } from "../coordinates/coordinates";
+import { Gamefield } from "../gamefield/gamefield";
+import { ParticleRenderObject } from "../rendering/particle-render-object";
 
 /**
  * Machine-Klasse: Repräsentiert eine Produktionsmaschine im Spiel.
@@ -72,7 +74,7 @@ export class Machine extends InteractableObject {
       new Coordinates(x, y),
       width,
       height,
-      50,
+      Gamefield.fieldsize,
       accessDirection,
       "rect",
       undefined,
@@ -227,4 +229,6 @@ export class Machine extends InteractableObject {
   set inputRequirements(v: Product[]) { this._inputRequirements = v; }
 
   get outputProduct(): Product { return this._outputProduct; } 
+
+  get z(): number { return this._renderObject.z }
 }

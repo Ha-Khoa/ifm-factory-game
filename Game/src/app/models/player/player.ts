@@ -67,7 +67,7 @@ export class Player {
        this._velocity = velocity;
        this._gamefield = gamefield;
        this._direction = null;
-       this._z = 140;
+       this._z = hitbox.width * 1.35 / Math.sin(RenderingService.instance().angle); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        this._renderingObject = new RenderObject(
            "player",
            "gif",
@@ -76,7 +76,7 @@ export class Player {
            this._z,
            this._hitbox.width,
            this._hitbox.height,
-           (this._z - 50) * -4,
+           (this._z - 50) * -3.5,
            this.img,
            undefined,
            undefined,
@@ -108,7 +108,7 @@ export class Player {
         if(!this._directionPressed)
          {
             let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3
-            this._inventory.z = 0;
+            this._inventory.z = 20;
             this._inventory.x = newPositionX
             this._inventory.y = this._position.y;
             return
@@ -123,10 +123,10 @@ export class Player {
                             this._lastDirection === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2:
                             this._lastDirection === Direction.LEFT ? this._position.x - inv.size / 2:
                             this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3;
-       let newZ = ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Product) ? 50 :
-                  ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Package) ? 70 :
-                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Product) ? 50 :
-                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Package) ? 70 : 0;
+       let newZ = ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Product) ? Gamefield.fieldsize :
+                  ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Package) ? Gamefield.fieldsize * 1.5 :
+                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Product) ? Gamefield.fieldsize :
+                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Package) ? Gamefield.fieldsize * 1.5 : 0;
        inv.x= newPositionX
        inv.y = this._position.y
        inv.z = newZ;
@@ -229,13 +229,13 @@ export class Player {
                        this._position.y = 0;
                        break;
                    case Direction.DOWN:
-                       this._position.y = this._gamefield.fieldsize * this._gamefield.rows - this.hitbox.height;
+                       this._position.y = Gamefield.fieldsize * this._gamefield.rows - this.hitbox.height;
                        break;
                    case Direction.LEFT:
                        this._position.x = 0;
                        break;
                    case Direction.RIGHT:
-                       this._position.x = this._gamefield.fieldsize * this._gamefield.cols - this.hitbox.width;
+                       this._position.x = Gamefield.fieldsize * this._gamefield.cols - this.hitbox.width;
                        break;
                }
                return;
@@ -305,7 +305,7 @@ export class Player {
                this._inventory = productFromConveyor;
                this._canInteractProduct = false;
                this._hasPicked = true;
-               this._inventory.renderObject.priority = 300
+               this._inventory.renderObject.priority = 200
                console.log("Produkt vom Förderband aufgenommen:", this._inventory);
                Products.generatedProducts.push(productFromConveyor);
                this._inventory!.z = 50
@@ -317,10 +317,10 @@ export class Player {
            this._inventory = nearestObj;
            this._canInteractProduct = false;
            this._hasPicked = true;
+           this._inventory.renderObject.priority = 200
            if (nearestObj instanceof Package) {
                Products.deleteGeneratedProduct(nearestObj);
            }
-           this._inventory.renderObject.priority = 300
            this._inventory!.z = 50
            return this._inventory;
        }
@@ -361,6 +361,10 @@ export class Player {
            }
            droppedProduct.renderObject.priority = 100;
            return droppedProduct;
+       }
+       if(this.inventory)
+       {
+        console.log(this.inventory.renderObject.priority) 
        }
        return null;
    }
@@ -420,6 +424,12 @@ export class Player {
    set inventory(v: Product | Package | null) { this._inventory = v; }
 
    get canInteractProduct(): boolean { return this._canInteractProduct; }
+
+   get z(): number {return this._z}
+   set z(v: number) { 
+        this._z = v;
+        this._renderingObject.z = v;
+    }
 
 
 }

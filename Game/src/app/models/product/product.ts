@@ -1,6 +1,7 @@
 import { Coordinates } from "../coordinates/coordinates";
 import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
+import { Gamefield } from "../gamefield/gamefield"
 // Removed import of Products to avoid circular dependency with products.ts
 
 export class Product {
@@ -21,8 +22,8 @@ export class Product {
     this._name = name;
     this._img = img;
     this._position = new Coordinates(0, 0);
-    this._size = 2/5 * 64; // Standardgröße für Produkte
-    this._z = z !== undefined ? z : 0;
+    this._size = 2/5 * Gamefield.fieldsize; // Standardgröße für Produkte
+    this._z = z !== undefined ? z : 0;  
     this._renderObject = new RenderObject(
       `product:${this._name}:${this._instanceId}`,
       "img",
@@ -67,25 +68,30 @@ export class Product {
     if (this._renderObject) {
       this._renderObject.x = v.x;
       this._renderObject.y = v.y;
+      RenderingService.instance().updateRenderingObject(this._renderObject.name, this._renderObject)
     }
   }
   get img(): string | undefined { return this._img; }
   set img(v: string | undefined) { this._img = v; }
   get renderObject(): RenderObject { return this._renderObject; }
-  set renderObject(v: RenderObject) { this._renderObject = v; }
+  set renderObject(v: RenderObject) { this._renderObject = v
+  }
   get size(): number { return this._size; }
   set size(v: number) { this._size = v; }
   get z(): number { return this._renderObject.z; }
   set z(v: number) {
     this._renderObject.z = v;
     this._z = v;
+    RenderingService.instance().sortRenderingBuffer()
   }
   set x(v: number){
     this._renderObject.x = v;
     this._position.x = v;
+    RenderingService.instance().sortRenderingBuffer()
   }
   set y(v: number){
     this._renderObject.y = v;
     this._position.y = v;
+    RenderingService.instance().sortRenderingBuffer()
   }
 }

@@ -1,0 +1,43 @@
+import { RenderObject } from "./render-object";
+import { Particles } from "../particle/particles";
+
+export class ParticleRenderObject extends RenderObject {
+    
+    private _particles: Particles;
+    private _render: boolean;
+
+    constructor(
+        id: string,
+        x: number,
+        y: number,
+        z: number,
+        width: number,
+        height: number,
+        spawnRate: number,
+        type: string,
+        spawnType: string,
+        colors: string[]
+    ) {
+        super(id, "particle", x, y, z, width, height, 5000);
+        this._particles = new Particles(
+            x,
+            y,
+            z,
+            width,
+            height,
+            spawnRate, // spawnRate
+            type, // type
+            spawnType, // spawnType
+            colors // colors
+        );
+        this._render = false;
+    }
+
+    get particles(): Particles { return this._particles; }
+    set particles(v: Particles) { this._particles = v; }
+
+    get render(): boolean { return this._render }
+    set render(v: boolean) { this._render = v }
+
+
+}
