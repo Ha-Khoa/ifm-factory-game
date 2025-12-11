@@ -19,7 +19,7 @@ export class Package {
     constructor(position: Coordinates) {
         this._id = Package._lastId++;
         this._position = position;
-        this._size = 60;
+        this._size = 4/5 * 64;
         this._img = '/images/package.png';
         this._z = 50;
         this._renderObject = new RenderObject(

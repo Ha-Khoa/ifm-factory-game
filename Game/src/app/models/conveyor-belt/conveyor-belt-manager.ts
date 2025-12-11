@@ -20,10 +20,10 @@ export class ConveyorBeltManager {
    private initializeConveyorBelts(): void {
     //Package Förderband
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              12*75,
-              -2*75,
-              1*75,
-              4*75,
+              12*64,
+              -2*64,
+              1*64,
+              4*64,
               'down',
               0.1,
               true,
@@ -33,10 +33,10 @@ export class ConveyorBeltManager {
        ));
        //Rohr Materialien wird hier erstellt
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-           10*75,
-           -2*75,
-           1*75,
-           4*75,
+           10*64,
+           -2*64,
+           1*64,
+           4*64,
            'down',
            0.1,
            true,
@@ -45,10 +45,10 @@ export class ConveyorBeltManager {
            ConveyorType.COPPER_WIRE
        ));
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              8*75,
-              -2*75,
-              1*75,
-              4*75,
+              8*64,
+              -2*64,
+              1*64,
+              4*64,
               'down',
               0.1,
               true,
@@ -57,10 +57,10 @@ export class ConveyorBeltManager {
             ConveyorType.RAW_PLASTIC
        ));
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              6*75,
-              -2*75,
-              1*75,
-              4*75,
+              6*64,
+              -2*64,
+              1*64,
+              4*64,
               'down',
               0.1,
               true,

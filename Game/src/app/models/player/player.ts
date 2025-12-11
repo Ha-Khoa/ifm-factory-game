@@ -67,7 +67,7 @@ export class Player {
        this._velocity = velocity;
        this._gamefield = gamefield;
        this._direction = null;
-       this._z = 150;
+       this._z = 140;
        this._renderingObject = new RenderObject(
            "player",
            "gif",

@@ -36,12 +36,18 @@ export class GameService {
 
   constructor(private uiService: UIService) { }
 
+
   /**
    * Initialisiert das Spiel, setzt Startwerte und lädt Bilder vor.
+   * @param ctx CanvasRenderingContext2D zum Zeichnen
    */
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
+    // Initialisiere UI Service
+
+
+    // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
     this.playerVelocity = 300; // in Pixel pro Sekunde
     this.uiService.init(ctxUI, this.angle);
@@ -52,11 +58,12 @@ export class GameService {
     // Initialisiere Spielobjekte
     this.gamefield = new Gamefield();
     this.player = new Player(
-      new Hitbox(new Coordinates(50, 50), 60, 30),
+      new Hitbox(new Coordinates(50, 50), 50, 30),
       this.playerVelocity,
       this.gamefield
     );
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs);
+
 
     // Lade benötigte Texturen vor
     const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png", "/images/Brick_01-512x512.png", "/images/interaction-field.png"];
@@ -76,11 +83,20 @@ export class GameService {
     Products.generateProducts();
   }
 
+  /**
+   * Lädt mehrere Bilder asynchron vor und speichert sie im images-Objekt.
+   * @param srcs Array mit Bildpfaden
+   */
   async preloadImages(srcs: string[]) {
     const promises = srcs.map(src => this.loadImage(src).then(img => this.images[src] = img));
     await Promise.all(promises);
   }
 
+  /**
+   * Lädt ein einzelnes Bild asynchron.
+   * @param src Bildpfad
+   * @returns Promise mit geladenem HTMLImageElement
+   */
   loadImage(src: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -92,6 +108,7 @@ export class GameService {
 
   /**
    * Startet die Hauptspielschleife (Game Loop).
+   * Zeichnet und aktualisiert das Spiel solange GameRunning true ist.
    */
   startGame() {
     this.GameRunning = true;
@@ -110,6 +127,7 @@ export class GameService {
       this.interactableManager.checkForInteraction(this.player);
       RenderingService.instance().rotateMap();
 
+
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
       this.player.dropProduct();
@@ -122,8 +140,7 @@ export class GameService {
       this.player.updateProductInHand();
       RenderingService.instance().render();
       
-      // --- UPDATE: Popup Logik ---
-      // Wir zeigen das Popup NUR, wenn der Spieler NICHTS in der Hand hat
+
       if (this.player.inventory === null) {
         
         // Prüfen, ob ein Item in der Nähe ist
@@ -139,21 +156,10 @@ export class GameService {
         // Wenn wir was tragen: Sicherstellen, dass das Popup weg ist!
         this.uiService.clearItemPopup();
       }
-      // ---------------------------
 
       requestAnimationFrame(loop);
     };
-    RenderingService.instance().render();
 
-    // Vignette Effekt
-    const gradient = this.ctx.createRadialGradient(
-      this.ctx.canvas.width / 2, this.ctx.canvas.height / 2, this.ctx.canvas.height / 3,
-      this.ctx.canvas.width / 2, this.ctx.canvas.height / 2, this.ctx.canvas.height
-    );
-    gradient.addColorStop(0, "rgba(0,0,0,0)");
-    gradient.addColorStop(1, "rgba(0,0,0,0.6)"); 
-    this.ctx.fillStyle = gradient;
-    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     requestAnimationFrame(loop);
   }
 
