@@ -70,6 +70,16 @@ export class Orders {
         return false;
     }
 
+    static completeAllOrders(): void {
+      const currentOrders = this.ordersList$.getValue();
+      currentOrders.forEach(order => {
+        if (order.status === false) {
+          order.status = true;
+        }
+      });
+      this.ordersList$.next([...currentOrders]);
+    }
+
     static getOrderById(id: number): Order | undefined {
         return this.ordersList$.getValue().find(order => order.id === id);
     }

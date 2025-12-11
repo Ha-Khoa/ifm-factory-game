@@ -1,7 +1,7 @@
 import {Inventory, InventoryItem} from "../../interfaces/inventory";
-import {Product} from "../../interfaces/product";
+import {Product} from "../product/product";
 import {Machine} from "../machine/machine";
-import {MachineManager} from "../interactableObject/interactable-manager";
+import {InteractableManager} from "../interactableObject/interactable-manager";
 
 export class InventoryManager {
     private static inventory: Inventory = {

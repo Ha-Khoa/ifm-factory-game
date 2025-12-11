@@ -1,7 +1,7 @@
-import { RenderObject } from "../rendering/render-object.js";
-import { Coordinates } from "../coordinates/coordinates.js";
-import { Hitbox } from "../../interfaces/hitbox.js";
-import { Direction } from "../../enums/direction.js";
+import { RenderObject } from "../rendering/render-object";
+import { Coordinates } from "../coordinates/coordinates";
+import { Hitbox } from "../../interfaces/hitbox";
+import { Direction } from "../../enums/direction";
 
 export class InteractableObject {
     protected _renderObject: RenderObject;
