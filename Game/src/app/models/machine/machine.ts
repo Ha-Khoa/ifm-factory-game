@@ -216,10 +216,15 @@ export class Machine extends InteractableObject {
   /** Richtung für Spieler-Interaktion (read-only) */
   get accessDirection(): Direction { return this._directions[0]; }
 
-
-
-
   /** Produktions Timer */
   get productionTimer(): number { return this._productionTimer; }
   set productionTimer(v: number) { this._productionTimer = v; }
+
+  get inventory(): Product[] { return this._inventory; }
+  set inventory(v: Product[]) { this._inventory = v; }
+
+  get inputRequirements(): Product[] { return this._inputRequirements; }
+  set inputRequirements(v: Product[]) { this._inputRequirements = v; }
+
+  get outputProduct(): Product { return this._outputProduct; } 
 }

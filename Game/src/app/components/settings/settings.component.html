@@ -1,10 +1,12 @@
 <div class="settings-overlay">
-  <div class="settings-panel">
-    <h1>Einstellungen</h1>
-    <div class="settings-options">
-      <button class="btn">Platzhalter</button>
-      <button class="btn">Platzhalter</button>
-      <button class="btn" (click)="close()">Schließen</button>
+  <div class="menus-container">
+    <div class="settings-panel">
+      <h1>Einstellungen</h1>
+      <div class="settings-options">
+        <button class="btn" (click)="showDebugMenu = !showDebugMenu">Debug Menu</button>
+        <button class="btn" (click)="close()">Schließen</button>
+      </div>
     </div>
+    <app-debug-menu *ngIf="showDebugMenu"></app-debug-menu>
   </div>
 </div>

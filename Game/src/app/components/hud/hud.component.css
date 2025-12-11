@@ -1,4 +1,3 @@
-/* Der Container: Schwebt oben rechts */
 .stats-box {
   display: flex;
   align-items: center;
@@ -62,7 +61,9 @@
   letter-spacing: 1px;
 }
 
-/* Vertikaler Strich als Trenner */
+.money-val { color: #00ff9d; } /* Neon Grün */
+.score-val { color: #ff9e00; } /* Neon Orange */
+
 .separator {
   width: 2px;
   height: 24px;
@@ -96,14 +97,10 @@
   /* Angenehme Größe */
   height: 35px;
   cursor: pointer;
-  transition: transform 0.2s;
-
+  transition: transform 0.3s ease, filter 0.3s;
+  filter: invert(1); /* Macht schwarze Icons weiß */
 }
 
 .settings-btn:hover {
-  transform: scale(1.1);
-}
-
-.settings-btn:active {
-  transform: scale(0.9);
+  transform: rotate(90deg) scale(1.1);
 }

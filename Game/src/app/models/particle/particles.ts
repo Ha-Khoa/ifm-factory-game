@@ -61,7 +61,7 @@ export class Particles {
             const ry = this._y + Math.random() * this._height;
             const rz = this._z;
             const rvx = 0;
-            const rvy = 10;
+            const rvy = 0;
             const rvz = - 30 - Math.random() * 50;
             const lifeTime = 2 + Math.random() * 1 ;
             const size = 0.2 + Math.random() * 0.5;
@@ -79,7 +79,7 @@ export class Particles {
             particle.z -= particle.vz * deltaTime / 1000;
             //particle.x += (Math.random() - 0.5) * 100 * deltaTime / 1000;
             particle.age += deltaTime / 1000;
-            let speed = 10;
+            let speed = 20;
             
             if((particle.x - this.x) - (particle.y - this.y) < 0 && (particle.x - this.x) + (particle.y - this.y) < this._width)
             {

@@ -47,8 +47,6 @@ export class RenderingService {
     return this._instance;
   }
 
-
-
   constructor() { }
 
   init(ctx: CanvasRenderingContext2D, images: { [key: string]: HTMLImageElement }, angle: number) {
@@ -67,27 +65,16 @@ export class RenderingService {
     this.sortRenderingBuffer();
   }
 
-  /**
-   * Fügt mehrere RenderObjects zum Buffer hinzu und sortiert neu.
-   * @param renderObjects Array von hinzuzufügenden Objekten
-   */
   addRenderObjects(renderObjects: RenderObject[]) {
     renderObjects.forEach((obj) => {
       this._renderingBuffer.push(obj);
     });
     this.sortRenderingBuffer();
-
   }
 
-  /**
-   * Aktualisiert ein bestehendes RenderObject anhand des Namens.
-   * @param name Name des zu aktualisierenden Objekts
-   * @param renderObject Das neue RenderObject
-   */
   updateRenderingObject(name: string, renderObject: RenderObject) {
     const index = this._renderingBuffer.findIndex(Obj => Obj.name === name);
     if (index === -1) {
-      // Fallback: wenn Objekt nicht existiert, füge es hinzu statt den Buffer zu korrupten
       this.addRenderObject(renderObject);
     } else {
       this._renderingBuffer[index] = renderObject;
@@ -97,53 +84,71 @@ export class RenderingService {
 
   sortRenderingBuffer() {
     this._renderingBuffer.sort((a, b) => (a.y * 10 + a.z * 20 + a.priority * 5) - (b.y * 10 + b.z * 20 + b.priority * 5));
-
   }
 
-
-  /**
-   * Sucht ein RenderObject anhand seiner ID.
-   * @param id Die ID des gesuchten Objekts
-   * @returns Das gefundene Objekt oder undefined
-   */
   getRenderingObjektByID(id: number): RenderObject | undefined {
     return this._renderingBuffer.find((obj) => obj.id === id);
   }
 
-  /**
-   * Sucht ein RenderObject anhand seines Namens.
-   * @param name Der Name des gesuchten Objekts
-   * @returns Das gefundene Objekt oder undefined
-   */
   getRenderingObjektByName(name: string): RenderObject | undefined {
     return this._renderingBuffer.find((obj) => obj.name === name);
   }
 
-  /**
-   * Löscht ein RenderObject anhand seiner ID.
-   * @param id Die ID des zu löschenden Objekts
-   */
   deleteRenderingObjektByID(id: number): void {
-    console.log(this._renderingBuffer.length);
     this._renderingBuffer = this._renderingBuffer.filter((obj) => obj.id !== id);
-    console.log(this._renderingBuffer.length);
   }
 
-  /**
-   * Löscht ein RenderObject anhand seines Namens.
-   * @param name Der Name des zu löschenden Objekts
-   */
   deleteRenderingObjektByName(name: string): void {
     this._renderingBuffer = this._renderingBuffer.filter((obj) => obj.name !== name);
   }
 
   /**
    * Rendert alle Objekte im Buffer auf das Canvas.
-   * Wendet isometrische Projektion an und zeichnet Rechtecke mit 3D-Tiefeneffekt oder Bilder.
+   * Jetzt mit Schatten-Logik! 🌑
    */
   render(): void {
     if (!this._ctx) return;
     this._renderingBuffer.forEach((Obj) => {
+      /*
+      // Zeichnet einen Schatten unter alles, was eine Höhe hat (z > 0)
+      // --- NEU: Verbesserte Schatten-Logik (Smart Shadows 🧠) ---
+      if (Obj.z > 0) {
+        this._ctx.save();
+        
+        // Position am Boden berechnen (Basis-Y projiziert)
+        const shadowBaseY = (Obj.y + Obj.height) * Math.cos(this._angle);
+        
+        this._ctx.fillStyle = "rgba(0, 0, 0, 0.3)"; // Schattenfarbe (etwas dunkler für besseren Kontrast)
+
+        if (Obj.type === 'rect') {
+            // --- Rechteckiger Schatten für Blöcke/Maschinen ---
+            // Zeichnet exakt die Grundfläche des Blocks am Boden nach
+            this._ctx.fillRect(
+                Obj.x, 
+                shadowBaseY, 
+                Obj.width, 
+                Obj.height * Math.cos(this._angle) // Perspektivisch korrekte Tiefe
+            );
+        } else {
+            // --- Runder Schatten für Spieler & Items ---
+            const centerX = Obj.x + Obj.width / 2;
+            
+            this._ctx.translate(centerX, shadowBaseY);
+            this._ctx.beginPath();
+            this._ctx.ellipse(
+                0, 0,
+                Obj.width / 1.6,   // Breite Ellipse
+                Obj.width / 3.5,   // Flache Ellipse (wegen Perspektive)
+                0, 0, 2 * Math.PI
+            );
+            this._ctx.fill();
+        }
+        
+        this._ctx.restore();
+      }*/
+      // ---------------------------------------------------------
+
+
       // Berechne isometrische Projektion
       const zTransform = Obj.z * Math.sin(this._angle)
       const yProjection = Obj.y * Math.cos(this._angle) - zTransform
@@ -172,7 +177,6 @@ export class RenderingService {
 
       }
       else if (Obj.type === "img") {
-        // Bild gefunden, als Bild rendern
         this._ctx.drawImage(
           this._images[Obj.img!],
           Obj.x,
@@ -196,7 +200,7 @@ export class RenderingService {
           this._ctx.drawImage(
             this._images[Obj.img!],
             Obj.x,
-            yProjection + Obj.height * Math.cos(this._angle) / 2,
+            yProjection + Obj.height * Math.cos(this._angle),
             Obj.width,
             Obj.z * Math.sin(this._angle)
           );
@@ -223,7 +227,7 @@ export class RenderingService {
           this._ctx.drawImage(
             this._images[Obj.nextFrame],
             mirror * Obj.x,
-            yProjection + Obj.height * Math.cos(this._angle) / 2,
+            yProjection + Obj.height * Math.cos(this._angle),
             Obj.width * mirror,
             Obj.z * Math.sin(this._angle)
             )
@@ -239,10 +243,6 @@ export class RenderingService {
     );
   }
 
-
-  /**
-* Erhöht den Winkel für die Projektion.
-*/
   async rotateMap() {
     const max = 30 / 360 * 2 * Math.PI;
     if (this._angle < max) {

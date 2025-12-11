@@ -18,36 +18,55 @@ export class ConveyorBeltManager {
 
 
    private initializeConveyorBelts(): void {
-       //Rohr Materialien wird hier erstellt
+    //Package Förderband
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-           12*50,
-           12*50,
-           5*50,
-           50,
-           'right',
-           0.1,
-           true,
-           2000,
-           10,
-           ConveyorType.RAW_MATERIALS
-
-       ));
-
-       
-
-
-       //Package Förderband
-       ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              11*50,
-              5*50,
-              5*50,
-              50,
-              'left',
+              12*Gamefield.fieldsize,
+              -2*Gamefield.fieldsize,
+              1*Gamefield.fieldsize,
+              4*Gamefield.fieldsize,
+              'down',
               0.1,
               true,
               2000,
               5,
             ConveyorType.PACKAGES
+       ));
+       //Rohr Materialien wird hier erstellt
+       ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
+           10*Gamefield.fieldsize,
+           -2*Gamefield.fieldsize,
+           1*Gamefield.fieldsize,
+           4*Gamefield.fieldsize,
+           'down',
+           0.1,
+           true,
+           2000,
+           10,
+           ConveyorType.COPPER_WIRE
+       ));
+       ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
+              8*Gamefield.fieldsize,
+              -2*Gamefield.fieldsize,
+              1*Gamefield.fieldsize,
+              4*Gamefield.fieldsize,
+              'down',
+              0.1,
+              true,
+              2000,
+              5,
+            ConveyorType.RAW_PLASTIC
+       ));
+       ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
+              6*Gamefield.fieldsize,
+              -2*Gamefield.fieldsize,
+              1*Gamefield.fieldsize,
+              4*Gamefield.fieldsize,
+              'down',
+              0.1,
+              true,
+              2000,
+              5,
+            ConveyorType.RAW_SILICON
        ));
        this.updateGamefield();
    }

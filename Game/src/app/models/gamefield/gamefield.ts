@@ -15,7 +15,7 @@ export class Gamefield {
     // Interaktive Objekte (Wände, Maschinen)
     interactableObjects!: RenderObject[];
     // Größe eines einzelnen Feldes in Pixeln
-    fieldsize!: number;
+    static fieldsize: number;
     // Anzahl der Reihen
     rows!: number;
     // Anzahl der Spalten
@@ -24,11 +24,12 @@ export class Gamefield {
     
     constructor()
     {
+      console.log(window.innerHeight)
         this.environmetObjects = [];
         this.interactableObjects = [];
-        this.fieldsize = 50;
-        this.cols = 20;
-        this.rows =15;
+        this.cols = 30;
+        this.rows = 19;
+        Gamefield.fieldsize = Math.round(window.innerWidth / this.cols);
         this.generateEnvironment();
         this.generateInteractableObjects();
 
@@ -75,19 +76,19 @@ export class Gamefield {
      */
     generateEnvironment()
     {
-        for(let i = 0; i < this.rows; i++)
+        for(let i = 0; i < this.rows + 1; i++)
         {
             for(let j = 0; j < this.cols; j++)
             {
                 this.environmetObjects.push(new RenderObject(
                     `floor-${i}-${j}`,
                     "rect",
-                    j * this.fieldsize,
-                    i * this.fieldsize,
+                    j * Gamefield.fieldsize,
+                    i * Gamefield.fieldsize,
                     0,
-                    this.fieldsize,
-                    this.fieldsize,
-                    0,
+                    Gamefield.fieldsize,
+                    Gamefield.fieldsize,
+                    -1000,
                     "/images/Metal_16-512x512.png",
                     undefined,
                     "#000000aa",
@@ -95,19 +96,19 @@ export class Gamefield {
                 ))
             }
         }
-        for(let i = 0; i < this.rows * 8; i++)
+        for(let i = 0; i < (this.rows + 1) * 8; i++)
         {
             for(let j = 0; j < this.cols; j++)
             {
                 this.environmetObjects.push(new RenderObject(
                     `floor2-${i}-${j}`,
                     "rect",
-                    j * this.fieldsize,
-                    i * this.fieldsize / 8,
+                    j * Gamefield.fieldsize,
+                    i * Gamefield.fieldsize / 8,
                     0,
-                    this.fieldsize,
+                    Gamefield.fieldsize,
                     0.1,
-                    0,
+                    -1000,
                     "/images/Metal_16-512x512.png",
                     undefined,
                     "#686767aa",
@@ -115,27 +116,6 @@ export class Gamefield {
                 ))
             }
         }
-        /*
-        for(let i = 0; i < this.rows; i+=2)
-        {
-            for(let j = 0; j < this.cols; j++)
-            {
-                this.environmetObjects.push(new RenderObject(
-                    `floor3-${i}-${j}`,
-                    "rect",
-                    j * this.fieldsize,
-                    i * this.fieldsize,
-                    0,
-                    this.fieldsize,
-                    this.fieldsize,
-                    0,
-                    "/images/Metal_16-512x512.png",
-                    undefined,
-                    "#494949aa",
-                    []
-                ))
-            }
-        }*/
     }
 
     /**
@@ -148,16 +128,16 @@ export class Gamefield {
     const layerColors = ["#FCB53B","#aa6a17ff"]
             
         
-    for (let i = 0; i < 4; i++)
-        {
+    for(let i = 0; i < 10; i++)
+    {
         this.interactableObjects.push(new RenderObject(
-            `wall-${4}-${i}`,
+            `table-${i}`,
             "rect",
-            4 * this.fieldsize,
-            i * this.fieldsize,
+            i * Gamefield.fieldsize,
+            10 * Gamefield.fieldsize,
             50,
-            this.fieldsize,
-            this.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
             0,
             undefined,
             undefined,
@@ -165,16 +145,16 @@ export class Gamefield {
             layerColors
         ))
     }
-    for (let i = 0; i < 5; i++)
-        {
+    for(let i = 0; i < 7; i++)
+    {
         this.interactableObjects.push(new RenderObject(
-            `wall-${i+4}-5`,
+            `table-${i}-2`,
             "rect",
-            (i + 4)* this.fieldsize,
-            5 * this.fieldsize,
+            10 * Gamefield.fieldsize,
+            (i + 4) * Gamefield.fieldsize,
             50,
-            this.fieldsize,
-            this.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
             0,
             undefined,
             undefined,
@@ -182,81 +162,7 @@ export class Gamefield {
             layerColors
         ))
     }
-    
-    this.interactableObjects.push(new RenderObject(
-        `wall-7-6`,
-        "rect",
-        7 * this.fieldsize,
-        6 * this.fieldsize,
-        50,
-        this.fieldsize,
-        this.fieldsize,
-        0,
-        undefined,
-        undefined,
-        rectColor,
-            layerColors
-    ))
-  
-    for (let i = 0; i < 8; i++)
-        {
-        this.interactableObjects.push(new RenderObject(
-            `wall-${i}-8`,
-            "rect",
-            i * this.fieldsize,
-            8 * this.fieldsize,
-            50,
-            this.fieldsize,
-            this.fieldsize,
-            0,
-            undefined,
-            undefined,
-            rectColor,
-            layerColors
-        ))
-        }
-        this.interactableObjects.push(new RenderObject(
-            `wall-5-11`,
-            "rect",
-            5* this.fieldsize ,
-            11 * this.fieldsize,
-            50,
-            this.fieldsize,
-            this.fieldsize,
-            0,
-            undefined,
-            undefined,
-           rectColor,
-            layerColors
-        ))
-        this.interactableObjects.push(new RenderObject(
-            `wall-a`,
-            "rect",
-            10 * this.fieldsize,
-            11 * this.fieldsize,
-            50,
-            this.fieldsize,
-            this.fieldsize,
-            0,
-            undefined,
-            undefined,
-            rectColor,
-            layerColors
-        ))
-        this.interactableObjects.push(new RenderObject(
-            `wall-b`,
-            "rect",
-            10 * this.fieldsize,
-            10 * this.fieldsize,
-            50,
-            this.fieldsize,
-            this.fieldsize,
-            0,
-            undefined,
-            undefined,
-            rectColor,
-            layerColors
-        ))
+
     }
 
     updateConveyorBelts(conveyorBelts: ConveyorBelt[]): void {

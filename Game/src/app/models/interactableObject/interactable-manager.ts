@@ -26,19 +26,22 @@ export class InteractableManager {
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       // Sensor-Maschine (benötigt Raw Silicon + Circuit Board)
-      new Machine(600, 400, 50, 50, "Sensor", "/images/wall.png", "/images/wall.png", 
-                  [Direction.DOWN, Direction.UP], Products.getProductByName("Basic Sensor")!, 
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Basic Sensor", "/images/wall.png", "/images/wall.png", 
+                  [Direction.DOWN], Products.getProductByName("Basic Sensor")!, 
                   [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Circuit Board")!]),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(500, 450, 50, 50, "Plastic Case", "/images/wall.png", "/images/wall.png", 
-                  [Direction.LEFT], Products.getProductByName("Plastic Case")!, 
-                  [Products.getProductByName("Raw Plastic")!])
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Plastic Case", "/images/wall.png", "/images/wall.png", 
+                  [Direction.UP], Products.getProductByName("Plastic Case")!, 
+                  [Products.getProductByName("Raw Plastic")!]),
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Circuit Board", "/images/wall.png", "/images/wall.png", 
+                  [Direction.DOWN], Products.getProductByName("Circuit Board")!, 
+                  [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper wire")!])
     ];
 
     private submissionArea: SubmissionArea = new SubmissionArea(
-      new Coordinates(950, 200),
-      50,
-      100
+      new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 5),
+      Gamefield.fieldsize,
+      2 * Gamefield.fieldsize
     );
   
   constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>) {
@@ -48,10 +51,12 @@ export class InteractableManager {
     // Standard-Maschinen freischalten
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
+    this.updateUnlockedMachine(2);
     this.machines.forEach((machine) => {
       this.generateInteractionField(machine)
     })
     this.generateInteractionField(this.submissionArea)
+    console.log(this.machines)
   }
 
   /** Gibt alle Maschinen zurück */
@@ -81,7 +86,6 @@ export class InteractableManager {
     let collision = false;
     // Kiollision mit Maschinen prüfen
     for (let machine of this.machines) {
-
       collision = this.interactionObject(machine, player);
       if (collision) {
         this.updateMachineOnInteraction(machine, player);
@@ -110,10 +114,10 @@ export class InteractableManager {
   {
     for (let direction of interactableObject.directions)
     {
-      const interactionX = direction === Direction.RIGHT ? interactableObject.position.x + this._gamefield.fieldsize :
-                           direction === Direction.LEFT ? interactableObject.position.x - this._gamefield.fieldsize : interactableObject.position.x;
-      const interactionY = direction === Direction.DOWN ? interactableObject.position.y + this._gamefield.fieldsize :
-                           direction === Direction.UP ? interactableObject.position.y - this._gamefield.fieldsize : interactableObject.position.y;
+      const interactionX = direction === Direction.RIGHT ? interactableObject.position.x + Gamefield.fieldsize :
+                           direction === Direction.LEFT ? interactableObject.position.x - Gamefield.fieldsize : interactableObject.position.x;
+      const interactionY = direction === Direction.DOWN ? interactableObject.position.y + Gamefield.fieldsize :
+                           direction === Direction.UP ? interactableObject.position.y - Gamefield.fieldsize : interactableObject.position.y;
 
       const interactionHitbox: Hitbox = new Hitbox(
         new Coordinates(interactionX, interactionY), 
@@ -152,7 +156,7 @@ export class InteractableManager {
         product.destroy();
         console.log("Produkt produziert:", produced.name);
         produced.z = 50;
-        Products.addProduct(produced, new Coordinates(machine.x + this._gamefield.fieldsize / 2 - produced.size / 2, machine.y + this._gamefield.fieldsize / 2 - produced.size / 2 ));
+        Products.addProduct(produced, new Coordinates(machine.x + Gamefield.fieldsize / 2 - produced.size / 2, machine.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
       } 
       // Zutat erfolgreich hinzugefügt, warte auf weitere
       else if (result === true) {
@@ -189,7 +193,7 @@ export class InteractableManager {
 
   generateInteractionField(interactionObject: InteractableObject)
   {
-    const size = this._gamefield.fieldsize;
+    const size = Gamefield.fieldsize;
     const base = interactionObject.position;
 
     interactionObject.directions.forEach((direction, idx) => {
@@ -216,7 +220,7 @@ export class InteractableManager {
         0,
         interactionWidth,
         interactionHeight,
-        150,
+        100,
         "/images/interaction-field.png",
         undefined,
         undefined,
