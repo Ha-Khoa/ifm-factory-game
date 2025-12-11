@@ -1,22 +1,11 @@
 <div class="stats-box">
   <div class="stat-item">
-    <span class="player-name">{{ playerName }}</span>
-  </div>
-
-  <div class="separator"></div>
-
-  <div class="stat-item">
-    <img src="/images/fox/fox-coin.png" class="icon" />
+    <img src="/images/fox/fox-coin.png" class="icon"  alt=""/>
     <span class="money-val">{{ playerMoney | number }}</span>
   </div>
 
-  <div class="separator"></div>
-
   <div class="stat-item">
-    <img src="/images/fox/fox-trophy.png" class="icon" />
+    <img src="/images/fox/fox-trophy.png" class="icon"  alt=""/>
     <span class="score-val">{{ playerScore }}</span>
   </div>
-
-  <div class="separator"></div>
-  <img (click)="addPlayerScore(1)" src="images/settings.png" alt="Settings" class="settings-btn">
 </div>
