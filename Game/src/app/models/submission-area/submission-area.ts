@@ -14,7 +14,7 @@ export class SubmissionArea extends InteractableObject {
             position,
             width,
             height,
-            75,
+            64,
             [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT],
             "rect",
             undefined,

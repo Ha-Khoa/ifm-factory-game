@@ -26,21 +26,21 @@ export class InteractableManager {
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       // Sensor-Maschine (benötigt Raw Silicon + Circuit Board)
-      new Machine(75 * 4, 75 * 4, 75, 75, "Basic Sensor", "/images/wall.png", "/images/wall.png", 
+      new Machine(64 * 4, 64 * 4, 64, 64, "Basic Sensor", "/images/wall.png", "/images/wall.png", 
                   [Direction.DOWN], Products.getProductByName("Basic Sensor")!, 
                   [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Circuit Board")!]),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(75 * 4, 75 * 8, 75, 75, "Plastic Case", "/images/wall.png", "/images/wall.png", 
+      new Machine(64 * 4, 64 * 8, 64, 64, "Plastic Case", "/images/wall.png", "/images/wall.png", 
                   [Direction.UP], Products.getProductByName("Plastic Case")!, 
                   [Products.getProductByName("Raw Plastic")!]),
-      new Machine(75 * 8, 75 * 4, 75, 75, "Circuit Board", "/images/wall.png", "/images/wall.png", 
+      new Machine(64 * 8, 64 * 4, 64, 64, "Circuit Board", "/images/wall.png", "/images/wall.png", 
                   [Direction.DOWN], Products.getProductByName("Circuit Board")!, 
                   [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper wire")!])
     ];
 
     private submissionArea: SubmissionArea = new SubmissionArea(
-      new Coordinates(1875, 300),
-      75,
+      new Coordinates(64 * 29, 64 * 5),
+      64,
       150
     );
   

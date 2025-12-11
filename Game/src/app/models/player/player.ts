@@ -35,7 +35,7 @@ export class Player {
    private _gamefield: Gamefield;
    // Aktuelle Bewegungsrichtung
    private _direction!: Direction | null;
-
+   
    private _hasPicked!: boolean;
 
 
@@ -67,7 +67,7 @@ export class Player {
        this._velocity = velocity;
        this._gamefield = gamefield;
        this._direction = null;
-       this._z = 150;
+       this._z = 140;
        this._renderingObject = new RenderObject(
            "player",
            "gif",
@@ -103,15 +103,18 @@ export class Player {
 
 
    updateProductInHand() {
-        if(!this._directionPressed && this._inventory)
+
+        if (this._inventory === null) { return }
+        if(!this._directionPressed)
          {
             let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3
-            let newPositionY = this._position.y + this._hitbox.height / 2 - 5
-            this._inventory.position = new Coordinates(newPositionX, newPositionY);
+            this._inventory.z = 0;
+            this._inventory.x = newPositionX
+            this._inventory.y = this._position.y;
             return
          }
         
-      if (this._direction === null || this._inventory === null) { return }
+
        // Stabilize narrowed properties in locals so TS knows they won't change within this method
        const dir = this._direction;
        const inv = this._inventory;
@@ -119,16 +122,14 @@ export class Player {
                             dir === Direction.LEFT ? this._position.x - inv.size / 2 :
                             this._lastDirection === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2:
                             this._lastDirection === Direction.LEFT ? this._position.x - inv.size / 2:
-                            this._position.x;
-       let newPositionY = dir === Direction.LEFT ? this._position.y - inv.size / 2 :
-                            dir === Direction.RIGHT ? this._position.y - inv.size / 2 :
-                            this._lastDirection === Direction.RIGHT ? this._position.y - inv.size / 2:
-                            this._lastDirection === Direction.LEFT ? this._position.y - inv.size / 2:
-                            this._position.y
-       // Position setzen aktualisiert automatisch das RenderObject in der Product-/Package-Klasse
-       
-       inv.position = new Coordinates(newPositionX, newPositionY);
-
+                            this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3;
+       let newZ = ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Product) ? 50 :
+                  ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Package) ? 70 :
+                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Product) ? 50 :
+                  ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Package) ? 70 : 0;
+       inv.x= newPositionX
+       inv.y = this._position.y
+       inv.z = newZ;
    }
 
 
@@ -304,6 +305,7 @@ export class Player {
                this._inventory = productFromConveyor;
                this._canInteractProduct = false;
                this._hasPicked = true;
+               this._inventory.renderObject.priority = 300
                console.log("Produkt vom Förderband aufgenommen:", this._inventory);
                Products.generatedProducts.push(productFromConveyor);
                this._inventory!.z = 50
@@ -318,6 +320,7 @@ export class Player {
            if (nearestObj instanceof Package) {
                Products.deleteGeneratedProduct(nearestObj);
            }
+           this._inventory.renderObject.priority = 300
            this._inventory!.z = 50
            return this._inventory;
        }
@@ -356,6 +359,7 @@ export class Player {
                this._inventory!.z = 50;
                return null;
            }
+           droppedProduct.renderObject.priority = 100;
            return droppedProduct;
        }
        return null;

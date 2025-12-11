@@ -26,9 +26,9 @@ export class Gamefield {
     {
         this.environmetObjects = [];
         this.interactableObjects = [];
-        this.fieldsize = 75;
-        this.cols = 26;
-        this.rows =15;
+        this.fieldsize = 64;
+        this.cols = 30;
+        this.rows = 19;
         this.generateEnvironment();
         this.generateInteractableObjects();
 
@@ -75,7 +75,7 @@ export class Gamefield {
      */
     generateEnvironment()
     {
-        for(let i = 0; i < this.rows; i++)
+        for(let i = 0; i < this.rows + 1; i++)
         {
             for(let j = 0; j < this.cols; j++)
             {
@@ -95,7 +95,7 @@ export class Gamefield {
                 ))
             }
         }
-        for(let i = 0; i < this.rows * 8; i++)
+        for(let i = 0; i < (this.rows + 1) * 8; i++)
         {
             for(let j = 0; j < this.cols; j++)
             {
@@ -161,6 +161,7 @@ export class Gamefield {
             layerColors
         ))
     }
+
     }
 
     updateConveyorBelts(conveyorBelts: ConveyorBelt[]): void {

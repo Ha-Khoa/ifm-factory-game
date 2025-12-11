@@ -29,7 +29,7 @@ export class Products {
   // Aktuell im Spiel existierende Produkt-Instanzen
   public static generatedProducts: (Product | Package)[] = [];
 
-  public static reachDistance: number = 80; // Reichweite für Interaktionen in Pixel
+  public static reachDistance: number = 70; // Reichweite für Interaktionen in Pixel
 
   /** Gibt ein Produkt anhand seiner ID zurück */
   public static getProductById(id: number): Product | undefined {
