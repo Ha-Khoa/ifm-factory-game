@@ -9,6 +9,7 @@ import { ParticleRenderingService } from "./particle-rendering.service";
 import { Particles } from "../models/particle/particles";
 import { ParticleRenderObject } from "../models/rendering/particle-render-object";
 import { Camera } from "../models/camera/camera";
+import { Particle } from "../models/particle/particle";
 
 
 /**
@@ -41,6 +42,8 @@ export class RenderingService {
   private _xOffset: number = 0;
   private _yOffset: number = 0;
 
+  private _fov!: number;
+
   // Singleton support
   private static _instance: RenderingService | null = null;
 
@@ -58,8 +61,7 @@ export class RenderingService {
     this._ctx = ctx;
     this._images = images;
     this._angle = angle;
-    this._particleRenderingService = new ParticleRenderingService();
-    this._particleRenderingService.init(ctx, angle);
+    ParticleRenderingService.instance().init(ctx, angle, this._xOffset, this._yOffset, this._fov);
   }
   /**
    * Fügt ein einzelnes RenderObject zum Buffer hinzu und sortiert neu.
@@ -93,8 +95,16 @@ export class RenderingService {
 
   convertToCameraPOV(camera: Camera): void
   {
-    this._xOffset = this._ctx.canvas.width / 2 - camera.position.x;
-    this._yOffset = this._ctx.canvas.height / 2 - camera.position.y;
+    this._xOffset = this._ctx.canvas.width / 2 - camera.position.x * this._fov;
+    this._yOffset = this._ctx.canvas.height / 2 - camera.position.y * this._fov; 
+    if(!this._fov)
+    {
+      this._fov = camera.fov
+    }
+
+    ParticleRenderingService.instance().xOffset = this._xOffset;
+    ParticleRenderingService.instance().yOffset = this._yOffset;
+    ParticleRenderingService.instance().fov = this._fov
   }
 
   getRenderingObjektByID(id: number): RenderObject | undefined {
@@ -121,29 +131,31 @@ export class RenderingService {
     if (!this._ctx) return;
     this._renderingBuffer.forEach((Obj) => {
       // Berechne isometrische Projektion
-      const zTransform = Obj.z * Math.sin(this._angle)
-      const yProjection = (Obj.y + this._yOffset) * Math.cos(this._angle) - zTransform
-      const xObj = Obj.x + this._xOffset;
+      const zTransform = this._fov * Obj.z * Math.sin(this._angle) 
+      const yProjection = this._fov * (Obj.y + this._yOffset / this._fov) * Math.cos(this._angle) - zTransform
+      const xObj = this._fov * Obj.x + this._xOffset;
+      const objHeight = this._fov * Obj.height;
+      const objWidth = this._fov * Obj.width
       if ((Obj.type === "rect")) {
         const layers = Obj.rectLayers!.length;
         for (let i = 0; i < layers; i++) {
           this._ctx.beginPath();
           this._ctx.fillStyle = Obj.rectLayers![i];
           this._ctx.rect(
-            xObj,
-            (Obj.y + this._yOffset + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle),
-            Obj.width,
-            (Obj.z / layers) * Math.sin(this._angle) + 1
+            Math.round(xObj),
+            this._fov * ( (Obj.y + this._yOffset / this._fov + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle) ),
+            Math.round(objWidth + 0.49),
+            this._fov * (Obj.z / layers) * Math.sin(this._angle) + 1
           );
           this._ctx.fill();
         }
         this._ctx.beginPath();
         this._ctx.fillStyle = Obj.rectColor!;
         this._ctx.fillRect(
-          xObj,
+          Math.round(xObj),
           yProjection,
-          Obj.width,
-          Obj.height * Math.cos(this._angle) + 1
+          Math.round(objWidth + 0.5),
+          objHeight * Math.cos(this._angle) + 1
         );
         this._ctx.fill();
 
@@ -151,18 +163,18 @@ export class RenderingService {
       else if (Obj.type === "img") {
         this._ctx.drawImage(
           this._images[Obj.img!],
-          xObj,
+          Math.round(xObj),
           yProjection,
-          Obj.width,
-          Obj.height * Math.cos(this._angle)
+          objWidth,
+          objHeight * Math.cos(this._angle)
         );
         if (Obj.imgWall) {
           this._ctx.drawImage(
             this._images[Obj.imgWall!],
-            xObj,
+            Math.round(xObj),
             yProjection + Obj.height * Math.cos(this._angle),
-            Obj.width,
-            Obj.z * Math.sin(this._angle)
+            objWidth,
+            this._fov * Obj.z * Math.sin(this._angle)
           );
         }
       }
@@ -170,10 +182,10 @@ export class RenderingService {
         if (Obj.img) {
           this._ctx.drawImage(
             this._images[Obj.img!],
-            xObj,
-            yProjection + Obj.height * Math.cos(this._angle),
-            Obj.width,
-            Obj.z * Math.sin(this._angle)
+            Math.round(xObj),
+            yProjection + this._fov *  Obj.height * Math.cos(this._angle),
+            objWidth,
+            this._fov * Obj.z * Math.sin(this._angle)
           );
         }
       }
@@ -194,10 +206,10 @@ export class RenderingService {
           Obj.singleFrameCount++;
           this._ctx.drawImage(
             this._images[Obj.nextFrame],
-            mirror * xObj,
-            yProjection + Obj.height * Math.cos(this._angle),
-            Obj.width * mirror,
-            Obj.z * Math.sin(this._angle)
+            mirror * Math.round(xObj),
+            yProjection + this._fov * Obj.height * Math.cos(this._angle),
+            objWidth * mirror,
+            this._fov * Obj.z * Math.sin(this._angle)
           )
           this._ctx.restore();
 
@@ -205,16 +217,18 @@ export class RenderingService {
       }
       else if (Obj instanceof ParticleRenderObject && Obj.type === "particle" && Obj.render)
       {
-        this._particleRenderingService.render((Obj as ParticleRenderObject).particles, this._deltaTime);
+
+        ParticleRenderingService.instance().render((Obj as ParticleRenderObject).particles, this._deltaTime);
       }
     }
     );
   }
 
   async rotateMap() {
+    await new Promise(r => setTimeout(r, 1000));
     const max = 30 / 360 * 2 * Math.PI;
     if (this._angle < max) {
-      this._angle += 0.001;
+      this._angle += 0.0012;
       if (this._angle > max) this._angle = max;
     }
 
@@ -235,6 +249,14 @@ export class RenderingService {
           this.rotationDirection = false;
         }
         */
+  }
+
+  async zoomOut()
+  {
+    if(this._fov > 3)
+    {
+    this._fov -= 0.05
+    }
   }
 
   updateFPS() {

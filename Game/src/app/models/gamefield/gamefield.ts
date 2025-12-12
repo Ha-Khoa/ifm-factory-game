@@ -15,7 +15,7 @@ export class Gamefield {
     // Interaktive Objekte (Wände, Maschinen)
     interactableObjects!: RenderObject[];
     // Größe eines einzelnen Feldes in Pixeln
-    static fieldsize: number = Math.round(window.innerWidth / 30);
+    static fieldsize: number = 50;
     // Anzahl der Reihen
     rows!: number;
     // Anzahl der Spalten
@@ -92,7 +92,7 @@ export class Gamefield {
                     -1000,
                     "/images/Metal_16-512x512.png",
                     undefined,
-                    "#000000aa",
+                    "#464646ff",
                     []
                 ))
             }
@@ -112,7 +112,7 @@ export class Gamefield {
                     -1000,
                     "/images/Metal_16-512x512.png",
                     undefined,
-                    "#686767aa",
+                    "#686767ff",
                     []
                 ))
             }

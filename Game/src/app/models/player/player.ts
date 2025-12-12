@@ -68,7 +68,7 @@ export class Player {
        this._velocity = velocity;
        this._gamefield = gamefield;
        this._direction = null;
-       this._camera = new Camera(this._position, 100);
+       this._camera = new Camera(new Coordinates(this._position.x + this._hitbox.width / 2, this._position.y + this._hitbox.height / 2), 30);
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        this._renderingObject = new RenderObject(
            "player",
@@ -248,6 +248,8 @@ export class Player {
        // Keine Kollision, bewege den Spieler
        this._position.x += velocityX;
        this._position.y += velocityY;
+       this._camera.x = this._position.x + this._hitbox.width / 2;
+       this._camera.y = this._position.y - this._hitbox.height / 2;
        console.log(this._position)
 
    }

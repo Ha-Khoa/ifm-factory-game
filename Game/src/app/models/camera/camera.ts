@@ -1,3 +1,4 @@
+import { RenderingService } from "../../services/rendering.service";
 import { Coordinates } from "../coordinates/coordinates";
 
 export class Camera {
@@ -22,7 +23,7 @@ export class Camera {
     
     get y(): number { return this._position.y }
 
-    set x(v: number) { this._position.x = v }
+    set x(v: number) { this._position.x =  v }
     
     set y(v: number) { this._position.y = v }
 
