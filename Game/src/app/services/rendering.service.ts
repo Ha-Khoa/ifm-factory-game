@@ -202,7 +202,7 @@ export class RenderingService {
   async rotateMap() {
     const max = 30 / 360 * 2 * Math.PI;
     if (this._angle < max) {
-      this._angle += 0.0005;
+      this._angle += 0.001;
       if (this._angle > max) this._angle = max;
     }
 

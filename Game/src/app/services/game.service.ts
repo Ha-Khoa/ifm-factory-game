@@ -53,7 +53,7 @@ export class GameService {
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
 
     this.uiService.init(ctxUI, this.angle, this.images);

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Particles } from '../models/particle/particles'
 import { Particle } from '../models/particle/particle'
+import { RenderingService } from './rendering.service';
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +42,7 @@ export class ParticleRenderingService {
 
   drawCircle(particle: Particle)
   {
+    this._angle = RenderingService.instance().angle
     this._ctx.beginPath();
     this._ctx.arc(particle.x, particle.y * Math.cos(this._angle) - particle.z * Math.sin(this._angle), particle.size, 0, 2 * Math.PI, false);
     this._ctx.fillStyle = particle.color;
