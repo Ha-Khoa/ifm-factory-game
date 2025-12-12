@@ -231,13 +231,13 @@ export class Player {
                        this._position.y = 0;
                        break;
                    case Direction.DOWN:
-                       this._position.y = Gamefield.fieldsize * this._gamefield.rows - this.hitbox.height;
+                       this._position.y = Gamefield.fieldsize * Gamefield.rows - this.hitbox.height;
                        break;
                    case Direction.LEFT:
                        this._position.x = 0;
                        break;
                    case Direction.RIGHT:
-                       this._position.x = Gamefield.fieldsize * this._gamefield.cols - this.hitbox.width;
+                       this._position.x = Gamefield.fieldsize * Gamefield.cols - this.hitbox.width;
                        break;
                }
                return;

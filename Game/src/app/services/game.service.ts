@@ -64,7 +64,7 @@ export class GameService {
     // Initialisiere Spielobjekte
     this.playerVelocity = Gamefield.fieldsize * 4; // in Pixel pro Sekunde
     this.player = new Player(
-      new Hitbox(new Coordinates(200, 250), Gamefield.fieldsize * 4/5 , Gamefield.fieldsize * 2/5),
+      new Hitbox(new Coordinates(400, 250), Gamefield.fieldsize * 4/5 , Gamefield.fieldsize * 2/5),
       this.playerVelocity,
       this.gamefield
     );

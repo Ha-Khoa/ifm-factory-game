@@ -44,6 +44,8 @@ export class RenderingService {
 
   private _fov!: number;
 
+  private _camera!: Camera;
+
   // Singleton support
   private static _instance: RenderingService | null = null;
 
@@ -97,8 +99,9 @@ export class RenderingService {
   {
     this._xOffset = this._ctx.canvas.width / 2 - camera.position.x * this._fov;
     this._yOffset = this._ctx.canvas.height / 2 - camera.position.y * this._fov; 
-    if(!this._fov)
+    if(!this._camera)
     {
+      this._camera = camera
       this._fov = camera.fov
     }
 
@@ -131,6 +134,7 @@ export class RenderingService {
     if (!this._ctx) return;
     this._renderingBuffer.forEach((Obj) => {
       // Berechne isometrische Projektion
+      // Rechtecke mit Canvas
       const zTransform = this._fov * Obj.z * Math.sin(this._angle) 
       const yProjection = this._fov * (Obj.y + this._yOffset / this._fov) * Math.cos(this._angle) - zTransform
       const xObj = this._fov * Obj.x + this._xOffset;
@@ -160,6 +164,7 @@ export class RenderingService {
         this._ctx.fill();
 
       }
+      // Bild mit Wand
       else if (Obj.type === "img") {
         this._ctx.drawImage(
           this._images[Obj.img!],
@@ -178,6 +183,7 @@ export class RenderingService {
           );
         }
       }
+      // Einfaches Bild
       else if (Obj.type === "static Img") {
         if (Obj.img) {
           this._ctx.drawImage(
@@ -189,6 +195,7 @@ export class RenderingService {
           );
         }
       }
+      //Animation
       else if (Obj.type === "gif") {
         if (Obj.frames && Obj.framesPerSecond && Obj.nextFrame) {
           let mirror = 1;
@@ -215,6 +222,7 @@ export class RenderingService {
 
         }
       }
+      //Partikel
       else if (Obj instanceof ParticleRenderObject && Obj.type === "particle" && Obj.render)
       {
 
@@ -230,33 +238,17 @@ export class RenderingService {
     if (this._angle < max) {
       this._angle += 0.0012;
       if (this._angle > max) this._angle = max;
-    }
-
-    /*
-        if(this.renderer.angle <= 90/360*2*Math.PI && !this.rotationDirection)
-        {
-        this.renderer.angle+=0.003;
-        return;
-        }
-        else{
-          this.rotationDirection = true;
-        }
-        if(this.renderer.angle >= 0/360*2*Math.PI && this.rotationDirection)
-        {
-          this.renderer.angle-=0.003;
-        }
-        else{
-          this.rotationDirection = false;
-        }
-        */
+    } 
   }
 
   async zoomOut()
   {
-    if(this._fov > 3)
+    if(this._fov > 2.5)
     {
+    this._camera.fov -= 0.05
     this._fov -= 0.05
     }
+
   }
 
   updateFPS() {

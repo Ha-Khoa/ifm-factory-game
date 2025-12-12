@@ -1,5 +1,7 @@
 import { RenderingService } from "../../services/rendering.service";
 import { Coordinates } from "../coordinates/coordinates";
+import { Gamefield } from "../gamefield/gamefield"
+
 
 export class Camera {
 
@@ -23,8 +25,36 @@ export class Camera {
     
     get y(): number { return this._position.y }
 
-    set x(v: number) { this._position.x =  v }
+    set x(v: number) { 
+        // Kamera out of Bounds prüfung
+        if(v < window.innerWidth / (this._fov * 2))
+        {
+            this.position.x = window.innerWidth / (this._fov * 2)
+        }
+        else if(v > Gamefield.fieldsize * Gamefield.cols - window.innerWidth/ (this._fov * 2)) 
+        {
+            this.position.x = Gamefield.fieldsize * Gamefield.cols - window.innerWidth/ (this._fov * 2)
+        }
+        else
+        {
+        this._position.x =  v
+        }
+     }
     
-    set y(v: number) { this._position.y = v }
+    set y(v: number) { 
+        // Kamera out of Bounds prüfung
+        if(v < window.innerHeight/ (this._fov * 2))
+        {
+            this.position.y = window.innerHeight / (this._fov * 2)
+        }
+        else if(v > Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) - window.innerHeight/ (this._fov * 2)) 
+        {
+            this.position.y = Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) - window.innerHeight/ (this._fov * 2)
+        }
+        else
+        {
+        this._position.y =  v
+        }
+     }
 
 }
