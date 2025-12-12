@@ -3,7 +3,6 @@ import { Machine } from '../models/machine/machine';
 import { Package } from '../models/package/package';
 import { Product } from '../models/product/product';
 import {Gamefield} from '../models/gamefield/gamefield';
-import {RenderingService} from './rendering.service';
 
 interface Rect {
   x: number;
@@ -41,6 +40,7 @@ export class UIService {
   private lastMachinePopupRect: Rect | null = null;
   private lastItemPopupRect: Rect | null = null;
   private neededItemPopups: Rect[] = [];
+  private producingPopups: Rect[] = [];
 
   private images : { [key: string]: HTMLImageElement } = {}
 
@@ -266,6 +266,48 @@ export class UIService {
 
         this.ctxUI.restore();
       }
+    }
+  }
+  drawMachineProducingPopup(machines: Machine[]){
+    this.producingPopups.forEach(rect => this.clearRectRounded(rect, 100, true))
+    this.producingPopups = [];
+    for (let machine of machines) {
+      if (machine.isProducing) {
+        const percent = 1 - (machine.productionTimer * 1000 / machine.productionRate);
+
+        const size = Gamefield.fieldsize * 0.75;
+        const offset = (Gamefield.fieldsize - size) / 2;
+        const ringWidth = 8;
+        const centerX = machine.position.x + offset + size / 2;
+        const centerY = machine.position.y * Math.cos(30 * Math.PI / 180) - size * 1.5 + size / 2;
+        const radius = size / 2;
+
+        this.ctxUI.save();
+        this.ctxUI.lineWidth = ringWidth;
+        this.ctxUI.lineCap = 'round';
+
+        // Background Ring
+        this.ctxUI.strokeStyle = UI_THEME.tertiary;
+        this.ctxUI.beginPath();
+        this.ctxUI.arc(centerX, centerY, radius - ringWidth / 2, 0, 2 * Math.PI);
+        this.ctxUI.stroke();
+
+        // Progress Ring
+        this.ctxUI.strokeStyle = UI_THEME.progressFill;
+        this.ctxUI.beginPath();
+        this.ctxUI.arc(centerX, centerY, radius - ringWidth / 2, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * percent);
+        this.ctxUI.stroke();
+
+        this.ctxUI.restore();
+
+        this.producingPopups.push({
+          x: centerX - radius,
+          y: centerY - radius,
+          width: size,
+          height: size
+        });
+      }
+
     }
   }
 

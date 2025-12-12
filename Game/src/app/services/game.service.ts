@@ -147,6 +147,7 @@ export class GameService {
 
       // Draw machines Item Needs Popup
       this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines())
+      this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines())
 
       if (this.player.inventory === null) {
 
