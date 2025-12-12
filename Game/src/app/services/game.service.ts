@@ -10,10 +10,6 @@ import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
-import { Orders } from '../models/orders/orders';
-import { Particle } from '../models/particle/particle';
-import { ParticleRenderObject } from '../models/rendering/particle-render-object';
-
 
 
 @Injectable({
@@ -148,7 +144,9 @@ export class GameService {
       // Render Particles
       this.interactableManager.resetParticleFields();
       this.interactableManager.checkMachineNeedsProduct(this.player);
-      
+
+      // Draw machines Item Needs Popup
+      this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines())
 
       if (this.player.inventory === null) {
 
