@@ -56,6 +56,7 @@
   --md-sys-color-glass: rgba(0, 0, 0, 0.3);
   --md-sys-color-black: hsl(0 0% 5%);
   --md-sys-color-white: hsl(0 0% 95%);
+  --md-sys-color-transparent: rgba(0, 0, 0, 0);
 
   /* endregion */
 

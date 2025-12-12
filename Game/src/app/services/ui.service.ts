@@ -3,6 +3,7 @@ import { Machine } from '../models/machine/machine';
 import { Package } from '../models/package/package';
 import { Product } from '../models/product/product';
 import {Gamefield} from '../models/gamefield/gamefield';
+import {RenderingService} from './rendering.service';
 
 interface Rect {
   x: number;
@@ -25,7 +26,8 @@ const UI_THEME = {
   progressBorder: '',
   primary: '',
   secondary: '',
-  tertiary: ''
+  tertiary: '',
+  transparent: '',
 };
 
 @Injectable({
@@ -66,6 +68,7 @@ export class UIService {
     UI_THEME.progressBg = rootStyle.getPropertyValue('--progress-bg').trim();
     UI_THEME.progressFill = rootStyle.getPropertyValue('--progress-fill').trim();
     UI_THEME.progressBorder = rootStyle.getPropertyValue('--progress-border').trim();
+    UI_THEME.transparent = rootStyle.getPropertyValue('--md-sys-color-transparent').trim();
   }
 
   // ==========================================================================
@@ -111,10 +114,10 @@ export class UIService {
 
     // 4. Löschbereich speichern (WICHTIG: Großzügiger Puffer gegen Schattenreste!)
     this.lastItemPopupRect = {
-      x: x - 10,
-      y: y - 10,
-      width: width + 20,
-      height: height + 20
+      x: x - 2,
+      y: y - 2,
+      width: width + 4,
+      height: height + 4
     };
 
     // 5. Zeichnen
@@ -148,9 +151,25 @@ export class UIService {
   clearItemPopup() {
     if (this.lastItemPopupRect) {
       const rect = this.lastItemPopupRect;
-      this.ctxUI.clearRect(rect.x, rect.y, rect.width, rect.height);
+      this.clearRectRounded(rect, 10);
       this.lastItemPopupRect = null;
     }
+  }
+
+  /**
+   * Clears a rectangular area with rounded corners on the canvas context.
+   *
+   * @param {Rect} rect - The rectangle object defining the position (x, y), width, and height of the area to clear.
+   * @param {number} [radius=10] - The radius of the corners. Defaults to 10 if not provided.
+   * @return {void} Does not return any value.
+   */
+  clearRectRounded(rect: Rect, radius?:number): void {
+    this.ctxUI.save();
+    this.ctxUI.beginPath();
+    this.ctxUI.roundRect(rect.x, rect.y, rect.width, rect.height, radius ?? 10);
+    this.ctxUI.clip();
+    this.ctxUI.clearRect(rect.x, rect.y, rect.width, rect.height);
+    this.ctxUI.restore();
   }
 
 
@@ -205,7 +224,8 @@ export class UIService {
   }
 
   drawMachineNeedsPopup(machines: Machine[]){
-    this.neededItemPopups.forEach(rect => this.ctxUI.clearRect(rect.x-1, rect.y-1, rect.width+2, rect.height+2))
+    this.neededItemPopups.forEach(rect => this.clearRectRounded(rect, 10))
+    this.neededItemPopups = [];
     for(let machine of machines){
       let items = machine.inputRequirements.map(item => item)
       items = items.filter((item) => !machine.inventory.some(invItem => invItem.id === item.id));
