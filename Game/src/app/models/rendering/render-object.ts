@@ -1,5 +1,6 @@
 import { Hitbox } from "../../interfaces/hitbox";
 import { Direction } from "../../enums/direction";
+import { Coordinates } from "../coordinates/coordinates";
 
 /**
  * RenderObject-Klasse: Repräsentiert ein zu renderndes Objekt mit Position, Größe und Darstellungsinformationen.
@@ -48,7 +49,7 @@ export class RenderObject {
 
     private _animationDirection: Direction = Direction.RIGHT;
 
-    private _hitboxY!: number;
+    private _worldCoordinates: Coordinates;
 
     constructor(name: string,
                 type: string,
@@ -81,6 +82,7 @@ export class RenderObject {
         this._priority = priority;
         this._frames = frames;
         this._framesPerSecond = framesPerSecons;
+        this._worldCoordinates = new Coordinates(x,y);
         this._nextFrame = this._frames ? this._frames[0] : undefined
     }
 
@@ -136,7 +138,10 @@ export class RenderObject {
             this._img!,
             this._imgWall!,
             this._rectColor!,
-            this._rectLayers!
+            this._rectLayers!,
+            this._frames!,
+            8,
+
         );
     }
 
@@ -157,4 +162,11 @@ export class RenderObject {
 
     get animationDirection(): Direction { return this._animationDirection }
     set animationDirection(v: Direction) {this._animationDirection = v}
+
+    get worldCoordinates(): Coordinates { return this._worldCoordinates;
+    }
+    set worldCoordinates(v: Coordinates) { this._worldCoordinates = v
+     }
+
+
 }

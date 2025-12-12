@@ -8,6 +8,7 @@ import { Direction } from "../enums/direction";
 import { ParticleRenderingService } from "./particle-rendering.service";
 import { Particles } from "../models/particle/particles";
 import { ParticleRenderObject } from "../models/rendering/particle-render-object";
+import { Camera } from "../models/camera/camera";
 
 
 /**
@@ -21,6 +22,7 @@ export class RenderingService {
 
   // Buffer mit allen zu rendernden Objekten
   private _renderingBuffer: RenderObject[] = [];
+  private _cameraRenderingBuffer: RenderObject[] = [];
   // Vorgeladene Bilder für Texturen
   private _images!: { [key: string]: HTMLImageElement };
   // Canvas-Kontext zum Zeichnen
@@ -35,6 +37,9 @@ export class RenderingService {
   private _deltaTime!: number;
 
   private _particleRenderingService!: ParticleRenderingService;
+
+  private _xOffset: number = 0;
+  private _yOffset: number = 0;
 
   // Singleton support
   private static _instance: RenderingService | null = null;
@@ -86,6 +91,12 @@ export class RenderingService {
     this._renderingBuffer.sort((a, b) => (a.y * 10 + a.z * 20 + a.priority * 5) - (b.y * 10 + b.z * 20 + b.priority * 5));
   }
 
+  convertToCameraPOV(camera: Camera): void
+  {
+    this._xOffset = this._ctx.canvas.width / 2 - camera.position.x;
+    this._yOffset = this._ctx.canvas.height / 2 - camera.position.y;
+  }
+
   getRenderingObjektByID(id: number): RenderObject | undefined {
     return this._renderingBuffer.find((obj) => obj.id === id);
   }
@@ -111,15 +122,16 @@ export class RenderingService {
     this._renderingBuffer.forEach((Obj) => {
       // Berechne isometrische Projektion
       const zTransform = Obj.z * Math.sin(this._angle)
-      const yProjection = Obj.y * Math.cos(this._angle) - zTransform
+      const yProjection = (Obj.y + this._yOffset) * Math.cos(this._angle) - zTransform
+      const xObj = Obj.x + this._xOffset;
       if ((Obj.type === "rect")) {
         const layers = Obj.rectLayers!.length;
         for (let i = 0; i < layers; i++) {
           this._ctx.beginPath();
           this._ctx.fillStyle = Obj.rectLayers![i];
           this._ctx.rect(
-            Obj.x,
-            (Obj.y + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle),
+            xObj,
+            (Obj.y + this._yOffset + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle),
             Obj.width,
             (Obj.z / layers) * Math.sin(this._angle) + 1
           );
@@ -128,7 +140,7 @@ export class RenderingService {
         this._ctx.beginPath();
         this._ctx.fillStyle = Obj.rectColor!;
         this._ctx.fillRect(
-          Obj.x,
+          xObj,
           yProjection,
           Obj.width,
           Obj.height * Math.cos(this._angle) + 1
@@ -139,7 +151,7 @@ export class RenderingService {
       else if (Obj.type === "img") {
         this._ctx.drawImage(
           this._images[Obj.img!],
-          Obj.x,
+          xObj,
           yProjection,
           Obj.width,
           Obj.height * Math.cos(this._angle)
@@ -147,7 +159,7 @@ export class RenderingService {
         if (Obj.imgWall) {
           this._ctx.drawImage(
             this._images[Obj.imgWall!],
-            Obj.x,
+            xObj,
             yProjection + Obj.height * Math.cos(this._angle),
             Obj.width,
             Obj.z * Math.sin(this._angle)
@@ -158,7 +170,7 @@ export class RenderingService {
         if (Obj.img) {
           this._ctx.drawImage(
             this._images[Obj.img!],
-            Obj.x,
+            xObj,
             yProjection + Obj.height * Math.cos(this._angle),
             Obj.width,
             Obj.z * Math.sin(this._angle)
@@ -182,7 +194,7 @@ export class RenderingService {
           Obj.singleFrameCount++;
           this._ctx.drawImage(
             this._images[Obj.nextFrame],
-            mirror * Obj.x,
+            mirror * xObj,
             yProjection + Obj.height * Math.cos(this._angle),
             Obj.width * mirror,
             Obj.z * Math.sin(this._angle)
