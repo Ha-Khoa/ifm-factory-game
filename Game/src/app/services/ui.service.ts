@@ -161,9 +161,16 @@ export class UIService {
    *
    * @param {Rect} rect - The rectangle object defining the position (x, y), width, and height of the area to clear.
    * @param {number} [radius=10] - The radius of the corners. Defaults to 10 if not provided.
+   * @param addOnePixel
    * @return {void} Does not return any value.
    */
-  clearRectRounded(rect: Rect, radius?:number): void {
+  clearRectRounded(rect: Rect, radius:number = 10, addOnePixel:boolean = false): void {
+    if(addOnePixel) {
+      rect.x -= 1;
+      rect.y -= 1;
+      rect.width += 2;
+      rect.height += 2;
+    }
     this.ctxUI.save();
     this.ctxUI.beginPath();
     this.ctxUI.roundRect(rect.x, rect.y, rect.width, rect.height, radius ?? 10);
@@ -224,7 +231,7 @@ export class UIService {
   }
 
   drawMachineNeedsPopup(machines: Machine[]){
-    this.neededItemPopups.forEach(rect => this.clearRectRounded(rect, 10))
+    this.neededItemPopups.forEach(rect => this.clearRectRounded(rect, 10, true))
     this.neededItemPopups = [];
     for(let machine of machines){
       let items = machine.inputRequirements.map(item => item)
