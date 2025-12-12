@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Machine } from '../models/machine/machine';
 import { Package } from '../models/package/package';
 import { Product } from '../models/product/product';
+import {Gamefield} from '../models/gamefield/gamefield';
 
 interface Rect {
   x: number;
@@ -37,6 +38,7 @@ export class UIService {
   // Lösch-Rechtecke speichern
   private lastMachinePopupRect: Rect | null = null;
   private lastItemPopupRect: Rect | null = null;
+  private neededItemPopups: Rect[] = [];
 
   private images : { [key: string]: HTMLImageElement } = {}
 
@@ -200,6 +202,44 @@ export class UIService {
     this._drawStyledUpgradeButton(x, currentY + 15, machine, popupConfig);
 
     this.ctxUI.restore();
+  }
+
+  drawMachineNeedsPopup(machines: Machine[]){
+    this.neededItemPopups.forEach(rect => this.ctxUI.clearRect(rect.x-1, rect.y-1, rect.width+2, rect.height+2))
+    for(let machine of machines){
+      let items = machine.inputRequirements.map(item => item)
+      items = items.filter((item) => !machine.inventory.some(invItem => invItem.id === item.id));
+      for(let item of items){
+
+        let size = Gamefield.fieldsize * .75;
+        let offset = (Gamefield.fieldsize - size) / 2;
+        let gap = 8;
+        let x = items.indexOf(item) == 0
+          ? machine.position.x + offset
+          : machine.position.x + ((size + gap) * (items.indexOf(item) % 2 === 0 ? -1 : 1)) + offset;
+        if(items.length % 2 === 0)
+          x -= size / 2 + gap/2;
+        let y = machine.position.y * Math.cos(30 * Math.PI / 180) - size * 1.5;
+
+        this.ctxUI.save();
+        this.ctxUI.beginPath();
+        this.ctxUI.fillStyle = UI_THEME.tertiary;
+        this.ctxUI.roundRect(
+          x,
+          y,
+          size,
+          size,
+          10
+        );
+        this.neededItemPopups.push({x, y, width: size, height: size});
+        this.ctxUI.fill();
+
+        let img = this.images[item._img!];
+        this.ctxUI.drawImage(img, x + size/4, y + size/4, size/2, size/2);
+
+        this.ctxUI.restore();
+      }
+    }
   }
 
   clearMachinePopUp() {
