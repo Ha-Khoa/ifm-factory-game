@@ -247,6 +247,9 @@ export class RenderingService {
     {
     this._camera.fov -= 0.05
     this._fov -= 0.05
+    // Prüft hier ob Kamera Out Of Bounds
+    this._camera.x = this._camera.x; 
+    this._camera.y = this._camera.y; 
     }
 
   }
