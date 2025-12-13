@@ -8,6 +8,8 @@ import { Direction } from "../enums/direction";
 import { ParticleRenderingService } from "./particle-rendering.service";
 import { Particles } from "../models/particle/particles";
 import { ParticleRenderObject } from "../models/rendering/particle-render-object";
+import { Camera } from "../models/camera/camera";
+import { Particle } from "../models/particle/particle";
 
 
 /**
@@ -21,6 +23,7 @@ export class RenderingService {
 
   // Buffer mit allen zu rendernden Objekten
   private _renderingBuffer: RenderObject[] = [];
+  private _cameraRenderingBuffer: RenderObject[] = [];
   // Vorgeladene Bilder für Texturen
   private _images!: { [key: string]: HTMLImageElement };
   // Canvas-Kontext zum Zeichnen
@@ -35,6 +38,13 @@ export class RenderingService {
   private _deltaTime!: number;
 
   private _particleRenderingService!: ParticleRenderingService;
+
+  private _xOffset: number = 0;
+  private _yOffset: number = 0;
+
+  private _fov!: number;
+
+  private _camera!: Camera;
 
   // Singleton support
   private static _instance: RenderingService | null = null;
@@ -53,8 +63,7 @@ export class RenderingService {
     this._ctx = ctx;
     this._images = images;
     this._angle = angle;
-    this._particleRenderingService = new ParticleRenderingService();
-    this._particleRenderingService.init(ctx, angle);
+    ParticleRenderingService.instance().init(ctx, angle, this._xOffset, this._yOffset, this._fov);
   }
   /**
    * Fügt ein einzelnes RenderObject zum Buffer hinzu und sortiert neu.
@@ -86,6 +95,21 @@ export class RenderingService {
     this._renderingBuffer.sort((a, b) => (a.y * 10 + a.z * 20 + a.priority * 5) - (b.y * 10 + b.z * 20 + b.priority * 5));
   }
 
+  convertToCameraPOV(camera: Camera): void
+  {
+    this._xOffset = this._ctx.canvas.width / 2 - camera.position.x * this._fov;
+    this._yOffset = this._ctx.canvas.height / 2 - camera.position.y * this._fov; 
+    if(!this._camera)
+    {
+      this._camera = camera
+      this._fov = camera.fov
+    }
+
+    ParticleRenderingService.instance().xOffset = this._xOffset;
+    ParticleRenderingService.instance().yOffset = this._yOffset;
+    ParticleRenderingService.instance().fov = this._fov
+  }
+
   getRenderingObjektByID(id: number): RenderObject | undefined {
     return this._renderingBuffer.find((obj) => obj.id === id);
   }
@@ -110,61 +134,68 @@ export class RenderingService {
     if (!this._ctx) return;
     this._renderingBuffer.forEach((Obj) => {
       // Berechne isometrische Projektion
-      const zTransform = Obj.z * Math.sin(this._angle)
-      const yProjection = Obj.y * Math.cos(this._angle) - zTransform
+      // Rechtecke mit Canvas
+      const zTransform = this._fov * Obj.z * Math.sin(this._angle) 
+      const yProjection = this._fov * (Obj.y + this._yOffset / this._fov) * Math.cos(this._angle) - zTransform
+      const xObj = this._fov * Obj.x + this._xOffset;
+      const objHeight = this._fov * Obj.height;
+      const objWidth = this._fov * Obj.width
       if ((Obj.type === "rect")) {
         const layers = Obj.rectLayers!.length;
         for (let i = 0; i < layers; i++) {
           this._ctx.beginPath();
           this._ctx.fillStyle = Obj.rectLayers![i];
           this._ctx.rect(
-            Obj.x,
-            (Obj.y + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle),
-            Obj.width,
-            (Obj.z / layers) * Math.sin(this._angle) + 1
+            Math.round(xObj),
+            this._fov * ( (Obj.y + this._yOffset / this._fov + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle) ),
+            Math.round(objWidth + 0.49),
+            this._fov * (Obj.z / layers) * Math.sin(this._angle) + 1
           );
           this._ctx.fill();
         }
         this._ctx.beginPath();
         this._ctx.fillStyle = Obj.rectColor!;
         this._ctx.fillRect(
-          Obj.x,
+          Math.round(xObj),
           yProjection,
-          Obj.width,
-          Obj.height * Math.cos(this._angle) + 1
+          Math.round(objWidth + 0.5),
+          objHeight * Math.cos(this._angle) + 1
         );
         this._ctx.fill();
 
       }
+      // Bild mit Wand
       else if (Obj.type === "img") {
         this._ctx.drawImage(
           this._images[Obj.img!],
-          Obj.x,
+          Math.round(xObj),
           yProjection,
-          Obj.width,
-          Obj.height * Math.cos(this._angle)
+          objWidth,
+          objHeight * Math.cos(this._angle)
         );
         if (Obj.imgWall) {
           this._ctx.drawImage(
             this._images[Obj.imgWall!],
-            Obj.x,
+            Math.round(xObj),
             yProjection + Obj.height * Math.cos(this._angle),
-            Obj.width,
-            Obj.z * Math.sin(this._angle)
+            objWidth,
+            this._fov * Obj.z * Math.sin(this._angle)
           );
         }
       }
+      // Einfaches Bild
       else if (Obj.type === "static Img") {
         if (Obj.img) {
           this._ctx.drawImage(
             this._images[Obj.img!],
-            Obj.x,
-            yProjection + Obj.height * Math.cos(this._angle),
-            Obj.width,
-            Obj.z * Math.sin(this._angle)
+            Math.round(xObj),
+            yProjection + this._fov *  Obj.height * Math.cos(this._angle),
+            objWidth,
+            this._fov * Obj.z * Math.sin(this._angle)
           );
         }
       }
+      //Animation
       else if (Obj.type === "gif") {
         if (Obj.frames && Obj.framesPerSecond && Obj.nextFrame) {
           let mirror = 1;
@@ -182,47 +213,45 @@ export class RenderingService {
           Obj.singleFrameCount++;
           this._ctx.drawImage(
             this._images[Obj.nextFrame],
-            mirror * Obj.x,
-            yProjection + Obj.height * Math.cos(this._angle),
-            Obj.width * mirror,
-            Obj.z * Math.sin(this._angle)
+            mirror * Math.round(xObj),
+            yProjection + this._fov * Obj.height * Math.cos(this._angle),
+            objWidth * mirror,
+            this._fov * Obj.z * Math.sin(this._angle)
           )
           this._ctx.restore();
 
         }
       }
+      //Partikel
       else if (Obj instanceof ParticleRenderObject && Obj.type === "particle" && Obj.render)
       {
-        this._particleRenderingService.render((Obj as ParticleRenderObject).particles, this._deltaTime);
+
+        ParticleRenderingService.instance().render((Obj as ParticleRenderObject).particles, this._deltaTime);
       }
     }
     );
   }
 
   async rotateMap() {
+    await new Promise(r => setTimeout(r, 1000));
     const max = 30 / 360 * 2 * Math.PI;
     if (this._angle < max) {
-      this._angle += 0.001;
+      this._angle += 0.0012;
       if (this._angle > max) this._angle = max;
+    } 
+  }
+
+  async zoomOut()
+  {
+    if(this._fov > 2.5)
+    {
+    this._camera.fov -= 0.05
+    this._fov -= 0.05
+    // Prüft hier ob Kamera Out Of Bounds
+    this._camera.x = this._camera.x; 
+    this._camera.y = this._camera.y; 
     }
 
-    /*
-        if(this.renderer.angle <= 90/360*2*Math.PI && !this.rotationDirection)
-        {
-        this.renderer.angle+=0.003;
-        return;
-        }
-        else{
-          this.rotationDirection = true;
-        }
-        if(this.renderer.angle >= 0/360*2*Math.PI && this.rotationDirection)
-        {
-          this.renderer.angle-=0.003;
-        }
-        else{
-          this.rotationDirection = false;
-        }
-        */
   }
 
   updateFPS() {

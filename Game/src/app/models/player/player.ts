@@ -10,7 +10,7 @@ import { RenderObject } from '../rendering/render-object';
 import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
 import { Package } from '../package/package';
 import { TimerManagerService } from '../../services/timer-manager.service';
-
+import { Camera } from '../camera/camera';
 
 /**
 * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
@@ -54,6 +54,7 @@ export class Player {
    private _renderingObject: RenderObject;
    private _walkingAnimation: string[];
    private _holdingAnimation: string[];
+   private _camera: Camera;
 
 
    constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield) {
@@ -67,6 +68,7 @@ export class Player {
        this._velocity = velocity;
        this._gamefield = gamefield;
        this._direction = null;
+       this._camera = new Camera(new Coordinates(this._position.x + this._hitbox.width / 2, this._position.y + this._hitbox.height / 2), 30);
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        this._renderingObject = new RenderObject(
            "player",
@@ -98,7 +100,6 @@ export class Player {
    render() {
        this._renderingObject.x = this._position.x;
        this._renderingObject.y = this._position.y;
-       RenderingService.instance().updateRenderingObject("player", this._renderingObject);
    }
 
 
@@ -230,13 +231,13 @@ export class Player {
                        this._position.y = 0;
                        break;
                    case Direction.DOWN:
-                       this._position.y = Gamefield.fieldsize * this._gamefield.rows - this.hitbox.height;
+                       this._position.y = Gamefield.fieldsize * Gamefield.rows - this.hitbox.height;
                        break;
                    case Direction.LEFT:
                        this._position.x = 0;
                        break;
                    case Direction.RIGHT:
-                       this._position.x = Gamefield.fieldsize * this._gamefield.cols - this.hitbox.width;
+                       this._position.x = Gamefield.fieldsize * Gamefield.cols - this.hitbox.width;
                        break;
                }
                return;
@@ -247,14 +248,20 @@ export class Player {
        // Keine Kollision, bewege den Spieler
        this._position.x += velocityX;
        this._position.y += velocityY;
+       this._camera.x = this._position.x + this._hitbox.width / 2;
+       this._camera.y = this._position.y - this._hitbox.height / 2;
+       console.log(this._position)
+
    }
    
 }
 
     updatePlayerAnimation()
     {
+        
         if(this._directionPressed)
         {
+            
             this._renderingObject.type = "gif"
             this._renderingObject.img = this._img;
             if(this._inventory !== null)
@@ -427,6 +434,9 @@ export class Player {
         this._z = v;
         this._renderingObject.z = v;
     }
+
+    get camera(): Camera { return this._camera; }
+
 
 
 }

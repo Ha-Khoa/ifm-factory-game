@@ -1,3 +1,4 @@
+import { Coordinates } from "../coordinates/coordinates";
 import { Particle } from "./particle";
 
 export class Particles {
@@ -15,6 +16,9 @@ export class Particles {
     private _height: number;
     private _colors: string[];;
     private _timeSinceLastSpawn: number = 0;
+    private _worldCoordinates: Coordinates;
+    private _standardWidth: number;
+    private _standardHeight: number;
 
     constructor(x: number, y: number, z: number,
                 width: number, height: number,
@@ -30,6 +34,9 @@ export class Particles {
         this._type = type;
         this._spawnType = spawnType;
         this._colors = colors;
+        this._worldCoordinates = new Coordinates(x, y)
+        this._standardHeight = this._height;
+        this._standardWidth = this._width
     }
 
     spawnParticles(deltaTime: number) {
@@ -109,6 +116,9 @@ export class Particles {
     get z(): number { return this._z; }
     get width(): number { return this._width; }
     get height(): number { return this._height; }
+    get worldCoordinates(): Coordinates { return this._worldCoordinates }
+    get standartWidth(): number { return this._standardWidth }
+    get standartHeight(): number { return this._standardHeight }
 
     set particles(v: Particle[]) { this._particles = v; }
     set spawnRate(v: number) { this._spawnRate = v; }
