@@ -50,7 +50,7 @@ export class ParticleRenderingService {
     }
     particleObject.updateParticles(deltaTime);
     
-    console.log(particles)
+
     for (let particle of particles) {
       this.drawCircle(particle);
     }

@@ -17,14 +17,14 @@ export class Machine extends InteractableObject {
 
   // Statische Eigenschaften
   public static Machines: Machine[] = [];
-  static lastID: number = 0;
 
   // Identifikation & Status
-  private _id: number;
+  private  _id: number;
   private _name!: string;
   private _unlocked: boolean = false;
   private _level: number = 1;
   private _upgradable: boolean = true;
+  private static lastID: number = 0;
 
   // Visuelle Darstellung
   private _imgUnlocked!: string;

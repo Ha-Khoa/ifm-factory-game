@@ -39,5 +39,14 @@ export class ParticleRenderObject extends RenderObject {
     get render(): boolean { return this._render }
     set render(v: boolean) { this._render = v }
 
+    get ptype(): string { return this._particles.type; }
+    set ptype(v: string) { this._particles.type = v; }
+
+    get spawnType(): string { return this._particles.spawnType; }
+    set spawnType(v: string) { this._particles.spawnType = v; }
+
+    get colors(): string[] { return this._particles.colors; }
+    set colors(v: string[]) { this._particles.colors = v; }
+
 
 }

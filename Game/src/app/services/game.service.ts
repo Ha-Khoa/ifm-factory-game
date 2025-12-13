@@ -146,6 +146,7 @@ export class GameService {
 
       // Render Particles
       this.interactableManager.resetParticleFields();
+      this.interactableManager.checkPackageInHand(this.player);
       this.interactableManager.checkMachineNeedsProduct(this.player);
 
       // Draw machines Item Needs Popup

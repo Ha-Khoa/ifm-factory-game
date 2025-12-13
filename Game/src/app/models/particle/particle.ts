@@ -50,6 +50,7 @@ export class Particle {
     get color(): string { return this._color; }
     get type(): string { return this._type; }
     get worldCoordinates(): Coordinates { return this._worldCoordinates }
+    set worldCoordinates(v: Coordinates) { this._worldCoordinates = v; }
 
     set x(v: number) { this._x = v; }
     set y(v: number) { this._y = v; }

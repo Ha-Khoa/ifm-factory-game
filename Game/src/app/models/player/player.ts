@@ -250,7 +250,6 @@ export class Player {
        this._position.y += velocityY;
        this._camera.x = this._position.x + this._hitbox.width / 2;
        this._camera.y = this._position.y - this._hitbox.height / 2;
-       console.log(this._position)
 
    }
    

@@ -44,6 +44,9 @@ export class Particles {
             case "rect":
                 this.spawnParticlesRect(deltaTime);
                 break;
+            case "empty":
+                this.spawnParticleEmptyRect(deltaTime);
+                break;
             default:
                 break;
         }
@@ -52,7 +55,10 @@ export class Particles {
     updateParticles(deltaTime: number) {
         switch(this._type) {
             case "straightUp":
-                this.particleBehaviorStraightUP(deltaTime);
+                this.particleBehaviorStraightUp(deltaTime);
+                break;
+            case "rotate":
+                this.particleRotatetUP(deltaTime);
                 break;
             default:
                 break;
@@ -80,8 +86,58 @@ export class Particles {
         }
     }
 
+    spawnParticleEmptyRect(deltaTime: number)
+    {
+        if(!deltaTime) return
+        this._timeSinceLastSpawn += deltaTime / 1000 * this._spawnRate;
+        while (this._timeSinceLastSpawn > 1)
+        {
+            let rx = 0;
+            let ry = 0;
+            const side = Math.round(Math.random() * 4)
+            switch(side) {
+               case 0:
+                rx = this._x + Math.random() * this._width;
+                ry = this._y;
+                break;
+                case 1:
+                rx = this._x + Math.random() * this._width;
+                ry = this._y + this._height;
+                break;
+                case 2:
+                rx = this._x
+                ry = this._y + Math.random() * this._height
+                break;
+                case 3:
+                rx = this._x + this._width;
+                ry = this._y + Math.random() * this._height
+                break;
+            }
+            const rz = this._z;
+            const rvx = 0;
+            const rvy = 0;
+            const rvz = -50;
+            const lifeTime = 2 + Math.random() * 1 ;
+            const size = 0.2 + Math.random() * 0.5;
+            const color = this._colors[Math.floor(Math.random() * this._colors.length)];
+            const type = "circle";
+            const particle = new Particle(rx, ry, rz, rvx, rvy, rvz, lifeTime, size, color, type);
+            this._particles.push(particle);
+            this._timeSinceLastSpawn -= 1;
+        }
+    }
 
-    particleBehaviorStraightUP(deltaTime: number) {
+    particleBehaviorStraightUp(deltaTime: number)
+    {
+        for (let particle of this._particles)
+        {
+            particle.z -= particle.vz * deltaTime / 1000;
+            particle.age += deltaTime / 1000;
+        }
+        this._particles = this._particles.filter(p => p.age < p.lifeTime);
+    }
+
+    particleRotatetUP(deltaTime: number) {
         for (let particle of this._particles) {
             particle.z -= particle.vz * deltaTime / 1000;
             particle.age += deltaTime / 1000;
@@ -119,6 +175,8 @@ export class Particles {
     get worldCoordinates(): Coordinates { return this._worldCoordinates }
     get standartWidth(): number { return this._standardWidth }
     get standartHeight(): number { return this._standardHeight }
+    get spawnType(): string { return this._spawnType }
+    get colors(): string[] { return this._colors; }
 
     set particles(v: Particle[]) { this._particles = v; }
     set spawnRate(v: number) { this._spawnRate = v; }
@@ -128,4 +186,6 @@ export class Particles {
     set z(v: number) { this._z = v; }
     set width(v: number) { this._width = v; }
     set height(v: number) { this._height = v; }     
+    set spawnType(v: string) { this._spawnType = v; }
+    set colors(v: string[]) { this._colors = v; }
 }
