@@ -18,7 +18,7 @@ export class ParticleRenderObject extends RenderObject {
         spawnType: string,
         colors: string[]
     ) {
-        super(id, "particle", x, y, z, width, height, 5000);
+        super(id, "particle", x, y, z, width, height, 300);
         this._particles = new Particles(
             x,
             y,

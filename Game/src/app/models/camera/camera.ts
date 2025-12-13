@@ -47,9 +47,9 @@ export class Camera {
         {
             this.position.y = window.innerHeight / (this._fov * 2)
         }
-        else if(v > Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) - window.innerHeight/ (this._fov * 2)) 
+        else if(v > Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) - window.innerHeight/ (this._fov * 2 * Math.cos(30 / 360 * Math.PI)))
         {
-            this.position.y = Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) - window.innerHeight/ (this._fov * 2)
+            this.position.y = Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) -  window.innerHeight/ (this._fov * 2 * Math.cos(30 / 360 * Math.PI))
         }
         else
         {
