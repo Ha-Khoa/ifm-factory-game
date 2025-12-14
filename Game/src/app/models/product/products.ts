@@ -1,5 +1,3 @@
-
-import { RenderingService } from '../../services/rendering.service';
 import { RenderObject } from '../rendering/render-object';
 import { Hitbox } from '../../interfaces/hitbox';
 import { Coordinates } from '../coordinates/coordinates';
@@ -7,8 +5,6 @@ import { Product } from './product';
 import { Package } from '../package/package';
 import { Collision } from '../collision/collision';
 import { Gamefield } from '../gamefield/gamefield';
-import { Direction } from '../../enums/direction';
-import { producerUpdateValueVersion } from '@angular/core/primitives/signals';
 
 /**
  * Products-Klasse: Verwaltet alle Produkte im Spiel (statisch).
@@ -20,7 +16,7 @@ export class Products {
   private static simple_productsList: Product[] = [
     new Product(1, "Raw Plastic", "/images/Products/raw-plastic.png"),
     new Product(2, "Raw Silicon", "/images/Products/raw-silicon.png"),
-    new Product(3, "Copper wire", "/images/Products/copper-wire.png"),
+    new Product(3, "Copper Wire", "/images/Products/copper-wire.png"),
     new Product(4, "Plastic Case", "/images/Products/plastic-case.png"),
     new Product(5, "Circuit Board", "/images/Products/circuit-board.png"),
     new Product(6, "Basic Sensor", "/images/Products/basic-sensor.png")
@@ -36,7 +32,7 @@ export class Products {
 
   /** Gibt ein Produkt anhand seines Namens zurück */
   public static getProductByName(name: string): Product | undefined {
-    return this.simple_productsList.find(product => product.name === name);
+    return this.simple_productsList.find(product => product.name.toLowerCase() === name.toLowerCase());
   }
 
   /** Gibt alle verfügbaren Produkttypen zurück */

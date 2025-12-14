@@ -116,8 +116,6 @@ export class Machine extends InteractableObject {
     return new Promise(async (resolve) => {
       const interval = setInterval(() => {
         this._productionTimer -= stepSize;
-        console.log(`${this._name} Produktion: ${this._productionTimer}s verbleibend`);
-
         if (this._productionTimer <= 0) {
           clearInterval(interval);
           this._productionTimer = this._productionRate / 1000;
