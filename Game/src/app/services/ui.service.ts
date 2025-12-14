@@ -9,11 +9,13 @@ interface Rect {
   y: number;
   width: number;
   height: number;
+  radius?: number;
 }
 
 // Das UI_THEME Objekt wird jetzt dynamisch gefüllt.
 const UI_THEME = {
   fontFamily: '',
+  fontFamilyCentaur: '',
   textColor: '',
   bgColor: '',
   borderColor: '',
@@ -27,6 +29,7 @@ const UI_THEME = {
   secondary: '',
   tertiary: '',
   transparent: '',
+  black: '',
 };
 
 @Injectable({
@@ -37,8 +40,8 @@ export class UIService {
   private _angle!: number;
 
   // Lösch-Rechtecke speichern
-  private lastMachinePopupRect: Rect | null = null;
-  private lastItemPopupRect: Rect | null = null;
+  private machinePopups: Rect[] = [];
+  private itemPopups: Rect[] = [];
   private neededItemPopups: Rect[] = [];
   private producingPopups: Rect[] = [];
 
@@ -59,6 +62,7 @@ export class UIService {
     UI_THEME.secondary = rootStyle.getPropertyValue('--secondary').trim();
     UI_THEME.tertiary = rootStyle.getPropertyValue('--tertiary').trim();
     UI_THEME.fontFamily = rootStyle.getPropertyValue('--font-family').trim();
+    UI_THEME.fontFamilyCentaur = rootStyle.getPropertyValue('--font-family-centaur').trim();
     UI_THEME.textColor = UI_THEME.tertiary;
     UI_THEME.bgColor = UI_THEME.primary; // Use primary color for popup background
     UI_THEME.borderColor = rootStyle.getPropertyValue('--border-color').trim();
@@ -69,6 +73,7 @@ export class UIService {
     UI_THEME.progressFill = rootStyle.getPropertyValue('--progress-fill').trim();
     UI_THEME.progressBorder = rootStyle.getPropertyValue('--progress-border').trim();
     UI_THEME.transparent = rootStyle.getPropertyValue('--md-sys-color-transparent').trim();
+    UI_THEME.transparent = rootStyle.getPropertyValue('--md-sys-color-black').trim();
   }
 
   // ==========================================================================
@@ -83,14 +88,17 @@ export class UIService {
 
     // 2. Inhalt bestimmen
     let title;
-    let contentLines: string[] = [];
-
+    let contentLines: { content: any; counted: any }[] = [];
+    let titleImage;
     if (item instanceof Package) {
-      title = '📦 Paket (E)';
-      item.products.forEach(p => contentLines.push(`• ${p.name}`));
+      title = 'Paket';
+      titleImage = this.images[`/images/package.png`];
+      const map = new Map<string, number>();
+      for (const { name } of item.products) { map.set(name, (map.get(name) ?? 0) + 1); }
+      contentLines = [...map].map(([content, counted]) => ({ content: content, counted: counted }));
     } else {
-      title = 'Aufheben (E)';
-      contentLines.push(`• ${item.name}`);
+      titleImage = this.images[`/images/Products/${item.name.toLowerCase().replace(" ", "-")}.png`];
+      title = `${item.name}`;
     }
 
     // 3. Größe und Position
@@ -112,48 +120,69 @@ export class UIService {
     // Y-Position isometrisch projiziert + Offset nach oben
     const y = (item.position.y * Math.cos(this._angle)) - height - 40;
 
-    // 4. Löschbereich speichern (WICHTIG: Großzügiger Puffer gegen Schattenreste!)
-    this.lastItemPopupRect = {
-      x: x - 2,
-      y: y - 2,
-      width: width + 4,
-      height: height + 4
-    };
-
-    // 5. Zeichnen
+    // 4. Zeichnen
     // Rahmen zeichnen (undefined = Highlight-Farbe)
     this._drawStyledPopupBackground(x, y, popupConfig, undefined);
 
     this.ctxUI.textAlign = 'center';
     this.ctxUI.fillStyle = UI_THEME.textColor;
-    let currentY = y + popupConfig.borderWidth + 15;
+    let currentY = y + popupConfig.borderWidth;
     const centerX = x + (width / 2);
 
     // Titel
+    currentY += 17.5;
     this.ctxUI.font = `bold 13px ${UI_THEME.fontFamily}`;
     this.ctxUI.fillText(title, centerX, currentY);
-    currentY += 5;
+
+    this.ctxUI.drawImage(titleImage, x + 10, currentY - 15, 20, 20);
 
     // Linie
+    currentY += 5;
     this._drawSeparator(centerX, currentY, width);
-    currentY += 15;
 
     // Inhalt
+    currentY += 15;
     this.ctxUI.font = `12px ${UI_THEME.fontFamily}`;
     contentLines.forEach(line => {
-      this.ctxUI.fillText(line, centerX, currentY);
+      this.ctxUI.fillText(line.counted + "x " + line.content, centerX, currentY);
+
+      let image = this.images[`/images/Products/${line.content.toLowerCase().replace(" ", "-")}.png`];
+      this.ctxUI.drawImage(image, x + 10, currentY - 15, 20, 20);
       currentY += lineHeight;
     });
 
+    // Button
+    let image = this.images["/images/KeyBindings/keyBindings_E.png"];
+    this.ctxUI.drawImage(image, x + width - 20, y + height - 20, 35, 35)
+
     this.ctxUI.restore();
+
+    // 4. Löschbereich speichern
+    this.itemPopups.push({
+      x: x - 2,
+      y: y - 2,
+      width: width + 4,
+      height: height + 4
+    });
+    this.itemPopups.push({
+      x: x + width - 20,
+      y: y + height - 20,
+      width: 35,
+      height: 35,
+      radius: 0
+    })
   }
 
   clearItemPopup() {
-    if (this.lastItemPopupRect) {
-      const rect = this.lastItemPopupRect;
-      this.clearRectRounded(rect, 10);
-      this.lastItemPopupRect = null;
-    }
+    this.itemPopups.forEach(
+      rect => this.clearRectRounded(
+        rect,
+        rect.radius ?? 10,
+        true
+      )
+    )
+    this.itemPopups = [];
+    return;
   }
 
   /**
@@ -210,10 +239,6 @@ export class UIService {
     const x = 50;
     const y = 610;
 
-    this.lastMachinePopupRect = {
-      x: x - 10, y: y - 10, width: popupConfig.width + 20, height: popupConfig.height + 20
-    };
-
     this._drawStyledPopupBackground(x, y, popupConfig, machine.unlocked);
 
     let currentY = y + popupConfig.borderWidth + 30;
@@ -227,7 +252,25 @@ export class UIService {
     currentY = this._drawStyledProgressBar(x, currentY, machine, popupConfig);
     this._drawStyledUpgradeButton(x, currentY + 15, machine, popupConfig);
 
+    // User Action Button
+    let image = this.images["/images/KeyBindings/keyBindings_F.png"];
+    this.ctxUI.drawImage(image, popupConfig.width + x - 25, popupConfig.height + y - 25, 40, 40)
+
     this.ctxUI.restore();
+
+    this.machinePopups.push({
+      x: x - 10,
+      y: y - 10,
+      width: popupConfig.width + 20,
+      height: popupConfig.height + 20
+    });
+    this.machinePopups.push({
+      x: popupConfig.width + x - 25,
+      y: popupConfig.height + y - 25,
+      width: 40,
+      height: 40,
+      radius: 0
+    })
   }
 
   drawMachineNeedsPopup(machines: Machine[]){
@@ -237,7 +280,6 @@ export class UIService {
       let items = machine.inputRequirements.map(item => item)
       items = items.filter((item) => !machine.inventory.some(invItem => invItem.id === item.id));
       for(let item of items){
-
         let size = Gamefield.fieldsize * .75;
         let offset = (Gamefield.fieldsize - size) / 2;
         let gap = 8;
@@ -298,6 +340,12 @@ export class UIService {
         this.ctxUI.arc(centerX, centerY, radius - ringWidth / 2, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * percent);
         this.ctxUI.stroke();
 
+        // Timer
+        this.ctxUI.fillStyle = UI_THEME.progressFill;
+        this.ctxUI.textAlign = 'center';
+        this.ctxUI.font = `bold 16px ${UI_THEME.fontFamily}`;
+        this.ctxUI.fillText(`${Math.floor(machine.productionTimer) + 1}`, centerX, centerY + 6);
+
         this.ctxUI.restore();
 
         this.producingPopups.push({
@@ -312,11 +360,8 @@ export class UIService {
   }
 
   clearMachinePopUp() {
-    if (this.lastMachinePopupRect) {
-      const rect = this.lastMachinePopupRect;
-      this.ctxUI.clearRect(rect.x, rect.y, rect.width, rect.height);
-      this.lastMachinePopupRect = null;
-    }
+    this.machinePopups.forEach(popUp => this.clearRectRounded(popUp, popUp.radius ?? 10, true));
+    this.machinePopups = [];
   }
 
   // --- HELPER ---

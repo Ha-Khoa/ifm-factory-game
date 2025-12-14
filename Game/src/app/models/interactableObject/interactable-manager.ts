@@ -38,7 +38,7 @@ export class InteractableManager {
                   [Products.getProductByName("Raw Plastic")!]),
       new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Circuit Board", "/images/wall.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductByName("Circuit Board")!,
-                  [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper wire")!])
+                  [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper Wire")!])
     ];
 
     private submissionArea: SubmissionArea = new SubmissionArea(
