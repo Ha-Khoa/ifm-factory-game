@@ -5,6 +5,7 @@ import { CanvasHelper } from './canvas.helper';
 import { UI_THEME } from './theme.manager';
 import { Player } from '../../models/player/player';
 import { RenderingService } from '../rendering.service';
+import { Camera } from '../../models/camera/camera';
 
 /**
  * Handles drawing all UI elements related to machines,
@@ -76,7 +77,7 @@ export class MachinePopupDrawer {
    */
   public drawNeeds(machines: Machine[], offsetCamera: [number, number], fov: number): Rect[] {
     const drawnRects: Rect[] = [];
-    const isometricAngle = 30 * Math.PI / 180;
+    const isometricAngle = RenderingService.instance().angle;
     // console.log(offsetCamera)
 
     for (const machine of machines) {
@@ -84,10 +85,10 @@ export class MachinePopupDrawer {
 
       for (let i = 0; i < neededItems.length; i++) {
         const item = neededItems[i];
-        const size = Gamefield.fieldsize * 1.25;
+        const size = Gamefield.fieldsize * fov / 2;
         // const offset = (Gamefield.fieldsize - size) / 2;
         const offset = size / 2;
-        const gap = 8;
+        const gap = 8 * fov / 2.5;
 
         let x = neededItems.indexOf(item) == 0
           ? fov * machine.position.x + offset + offsetCamera[0]
@@ -95,7 +96,7 @@ export class MachinePopupDrawer {
 
         if(neededItems.length % 2 === 0)
           x -= size / 2 + gap/2;
-        let y = fov * machine.position.y * Math.cos(isometricAngle) - size * 1.5 + offsetCamera[1];
+        let y = fov * machine.position.y * Math.cos(isometricAngle) - size * 1.5 + offsetCamera[1] * Math.cos(isometricAngle);
 
         this.ctx.save();
         this.ctx.fillStyle = UI_THEME.tertiary;
@@ -119,19 +120,20 @@ export class MachinePopupDrawer {
    * @param machines An array of all machines.
    * @returns An array of Rects for later clearing.
    */
-  public drawProductionProgress(machines: Machine[]): Rect[] {
+  public drawProductionProgress(machines: Machine[], offsetCamera: [number, number], fov: number): Rect[] {
     const drawnRects: Rect[] = [];
-    const isometricAngle = 30 * Math.PI / 180;
+    const isometricAngle = RenderingService.instance().angle;
 
     for (const machine of machines) {
       if (machine.isProducing) {
         const percent = 1 - (machine.productionTimer * 1000 / machine.productionRate);
-        const size = Gamefield.fieldsize * 0.75;
-        const offset = (Gamefield.fieldsize - size) / 2;
-        const ringWidth = 8;
-        const radius = size / 2;
-        const centerX = machine.position.x + offset + radius;
-        const centerY = machine.position.y * Math.cos(isometricAngle) - size * 1.5 + radius;
+        const size = Gamefield.fieldsize * 0.75 * fov / 2.5;
+        const offset = (Gamefield.fieldsize - size) / 2 * fov;
+        const ringWidth = 8 * fov / 2.5;
+        const radius = size / 2
+        ;
+        const centerX = machine.position.x * fov + offset + radius * fov+ offsetCamera[0];
+        const centerY = machine.position.y * Math.cos(isometricAngle) * fov + offsetCamera[1] * Math.cos(isometricAngle) - size * 2.5 + radius;
 
         this.ctx.save();
         this.ctx.lineWidth = ringWidth;

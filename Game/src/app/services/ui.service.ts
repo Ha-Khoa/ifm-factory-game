@@ -44,7 +44,7 @@ export class UIService {
 
     // Load the theme and initialize drawer classes
     loadTheme();
-    this.itemPopupDrawer = new ItemPopupDrawer(this.ctxUI, this.images, this.angle);
+    this.itemPopupDrawer = new ItemPopupDrawer(this.ctxUI, this.images);
     this.machinePopupDrawer = new MachinePopupDrawer(this.ctxUI, this.images, this.angle);
 
   }
@@ -54,9 +54,9 @@ export class UIService {
   // ==========================================================================
 
   /** Draws a popup for a product or package on the ground. */
-  public drawItemPopup(item: Product | Package): void {
+  public drawItemPopup(item: Product | Package, offsetCamera: [number, number], fov: number): void {
     this.clearItemPopup();
-    this.itemPopups = this.itemPopupDrawer.draw(item);
+    this.itemPopups = this.itemPopupDrawer.draw(item, offsetCamera, fov);
   }
 
   /** Clears the currently visible item popup. */
@@ -85,10 +85,10 @@ export class UIService {
   }
 
   /** Draws progress rings for machines that are currently producing. */
-  public drawMachineProducingPopup(machines: Machine[]): void {
+  public drawMachineProducingPopup(machines: Machine[], offsetCamera: [number, number], fov: number): void {
     this.producingPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 100, true));
     this.producingPopups = [];
-    this.producingPopups = this.machinePopupDrawer.drawProductionProgress(machines);
+    this.producingPopups = this.machinePopupDrawer.drawProductionProgress(machines, offsetCamera, fov);
   }
 
   /**

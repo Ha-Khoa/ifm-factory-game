@@ -205,7 +205,7 @@ export class GameService {
 
       // Draw machines Item Needs Popup
       this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
-      this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines())
+      this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
 
       if (this.player.inventory === null) {
 
@@ -213,7 +213,7 @@ export class GameService {
         const itemInRange = Products.checkForInteraction(this.player.hitbox);
 
         if (itemInRange) {
-          this.uiService.drawItemPopup(itemInRange);
+          this.uiService.drawItemPopup(itemInRange, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
         } else {
           this.uiService.clearItemPopup();
         }
