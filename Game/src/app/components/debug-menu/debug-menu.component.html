@@ -32,9 +32,15 @@
             <input type="number" id="quantity" min="0" [(ngModel)]="quantity">
           </div>
 
-          <div class="section">
-            <label for="reward">Belohnung:</label>
-            <input type="number" id="reward" min="0" [(ngModel)]="reward">
+          <div class="row-container">
+            <div class="section">
+              <label for="reward">Belohnung:</label>
+              <input type="number" id="reward" min="0" [(ngModel)]="reward">
+            </div>
+            <div class="section">
+              <label for="reward">Geld:</label>
+              <input type="number" id="reward_money" min="0" [(ngModel)]="money">
+            </div>
           </div>
 
           <button (click)="createCustomOrder()">Eigene Aufgabe erstellen</button>
