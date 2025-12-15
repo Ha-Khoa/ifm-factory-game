@@ -4,12 +4,16 @@ import { Product } from "../product/product";
 import { InteractableObject } from "../interactableObject/interactable-object";
 import { Direction } from "../../enums/direction";
 import { Package } from "../package/package";
+import {HudStateService} from '../../components/hud/HudStateService';
+import {HudComponent} from '../../components/hud/hud.component';
 
 export class SubmissionArea extends InteractableObject {
 
-    constructor(position: Coordinates, width: number, height: number) {
+    hud:HudStateService;
+
+    constructor(position: Coordinates, width: number, height: number, hud: HudStateService) {
         // Initialize InteractableObject with all directions allowed
-        super(
+      super(
             "submission-area",
             position,
             width,
@@ -22,7 +26,7 @@ export class SubmissionArea extends InteractableObject {
             "#7D0A0A",
             ["#BF3131","#EAD196"]
         );
-
+      this.hud = hud;
     }
 
     addPackage(packObj: Package): boolean
@@ -54,6 +58,8 @@ export class SubmissionArea extends InteractableObject {
                 }
             }
             if (rightOrder) {
+                this.hud.addMoney(order.money);
+                this.hud.addScore(order.reward);
                 Orders.completeOrder(order.id);
                 return true;
             }

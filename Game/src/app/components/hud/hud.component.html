@@ -1,11 +1,11 @@
-<div class="stats-box">
+<div *ngIf="player$ | async as player" class="stats-box">
   <div class="stat-item">
-    <img src="/images/fox/fox-coin.png" class="icon"  alt=""/>
-    <span class="money-val">{{ playerMoney | number }}</span>
+    <img src="/images/fox/fox-coin.png" class="icon" alt="" />
+    <span class="money-val">{{ player.money | number }}</span>
   </div>
 
   <div class="stat-item">
     <img src="/images/fox/fox-trophy.png" class="icon"  alt=""/>
-    <span class="score-val">{{ playerScore }}</span>
+    <span class="score-val">{{ player.score | number }}</span>
   </div>
 </div>
