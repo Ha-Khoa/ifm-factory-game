@@ -1,13 +1,10 @@
 import { Product } from "../product/product";
 import { Direction } from "../../enums/direction";
-import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
 import { Products } from "../product/products";
-import { Player } from "../player/player";
 import { InteractableObject } from "../interactableObject/interactable-object";
 import { Coordinates } from "../coordinates/coordinates";
 import { Gamefield } from "../gamefield/gamefield";
-import { ParticleRenderObject } from "../rendering/particle-render-object";
 
 /**
  * Machine-Klasse: Repräsentiert eine Produktionsmaschine im Spiel.
@@ -113,11 +110,12 @@ export class Machine extends InteractableObject {
    */
   private async produce(): Promise<Product> {
     this._producting = true;
+    const stepSize = 0.01; // Schrittgröße in Sekunden
+    const intervalMs = 10; // Intervall in Millisekunden
+
     return new Promise(async (resolve) => {
       const interval = setInterval(() => {
-        this._productionTimer -= 1;
-        console.log(`${this._name} Produktion: ${this._productionTimer}s verbleibend`);
-
+        this._productionTimer -= stepSize;
         if (this._productionTimer <= 0) {
           clearInterval(interval);
           this._productionTimer = this._productionRate / 1000;
@@ -125,7 +123,7 @@ export class Machine extends InteractableObject {
           this._producting = false;
           resolve(this._outputProduct);
         }
-      }, 1000);
+      }, intervalMs);
     });
   }
   /**
@@ -154,7 +152,7 @@ export class Machine extends InteractableObject {
           resolve(true);
         }
         // Removed stray destroy call on parameter
-        
+
       } else {
         resolve(false);
       }
@@ -228,7 +226,7 @@ export class Machine extends InteractableObject {
   get inputRequirements(): Product[] { return this._inputRequirements; }
   set inputRequirements(v: Product[]) { this._inputRequirements = v; }
 
-  get outputProduct(): Product { return this._outputProduct; } 
+  get outputProduct(): Product { return this._outputProduct; }
 
   get z(): number { return this._renderObject.z }
 }

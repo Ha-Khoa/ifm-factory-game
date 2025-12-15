@@ -1,4 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@font-face {
+  font-family: centaur;
+  src: url('/fonts/centaur.ttf') format("truetype");
+}
 
 
 :root {
@@ -115,6 +119,7 @@
   /* region Fonts */
 
   --font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --font-family-centaur: 'centaur';
   /* endregion */
 
   /* region Font Sizes */
