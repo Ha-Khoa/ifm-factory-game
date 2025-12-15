@@ -37,8 +37,8 @@ export class MachinePopupDrawer {
       lineHeight: lineHeight - 3,
     };
 
-    const x = 50;
-    const y = 610;
+    const x = window.innerWidth * 0.98 - popupConfig.width;
+    const y = 100;
 
     CanvasHelper.drawStyledPopupBackground(this.ctx, x, y, popupConfig, machine.unlocked);
 
@@ -58,12 +58,12 @@ export class MachinePopupDrawer {
     if (fKeyImage) {
         this.ctx.drawImage(fKeyImage, popupConfig.width + x - 25, popupConfig.height + y - 25, 40, 40);
     }
-    
+
     this.ctx.restore();
 
     const mainRect: Rect = { x: x - 10, y: y - 10, width: popupConfig.width + 20, height: popupConfig.height + 20, radius: popupConfig.radius };
     const buttonRect: Rect = { x: popupConfig.width + x - 25, y: popupConfig.height + y - 25, width: 40, height: 40, radius: 0 };
-    
+
     return [mainRect, buttonRect];
   }
 
@@ -83,10 +83,15 @@ export class MachinePopupDrawer {
         const item = neededItems[i];
         const size = Gamefield.fieldsize * 0.75;
         const offset = (Gamefield.fieldsize - size) / 2;
-        
-        // This logic seems complex and might need review for positioning, but is preserved from original
-        const x = machine.position.x + offset;
-        const y = machine.position.y * Math.cos(isometricAngle) - size * 1.5;
+        const gap = 8;
+
+        let x = neededItems.indexOf(item) == 0
+          ? machine.position.x + offset
+          : machine.position.x + ((size + gap) * (neededItems.indexOf(item) % 2 === 0 ? -1 : 1)) + offset;
+
+        if(neededItems.length % 2 === 0)
+          x -= size / 2 + gap/2;
+        let y = machine.position.y * Math.cos(isometricAngle) - size * 1.5;
 
         this.ctx.save();
         this.ctx.fillStyle = UI_THEME.tertiary;
@@ -160,7 +165,7 @@ export class MachinePopupDrawer {
     this.ctx.font = `bold 16px ${UI_THEME.fontFamily}`;
     this.ctx.fillText(machine.name, x, currentY);
     currentY += lineHeight;
-    
+
     this.ctx.font = `12px ${UI_THEME.fontFamily}`;
     this.ctx.fillStyle = '#6d4c41';
     this.ctx.fillText(`Level ${machine.level}`, x, currentY - 5);
@@ -238,7 +243,7 @@ export class MachinePopupDrawer {
     const btnWidth = config.width * 0.7;
     const btnHeight = 30;
     const btnX = x + (config.width - btnWidth) / 2;
-    
+
     this.ctx.save();
     this.ctx.fillStyle = UI_THEME.tertiary;
     this.ctx.beginPath();
