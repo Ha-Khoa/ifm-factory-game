@@ -196,7 +196,7 @@ export class GameService {
       RenderingService.instance().convertToCameraPOV(this.player.camera);
       RenderingService.instance().zoomOut();
       RenderingService.instance().render();
-      
+
 
       // Render Particles
       this.interactableManager.resetParticleFields();
@@ -204,7 +204,7 @@ export class GameService {
       this.interactableManager.checkMachineNeedsProduct(this.player);
 
       // Draw machines Item Needs Popup
-      this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines())
+      this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines())
 
       if (this.player.inventory === null) {

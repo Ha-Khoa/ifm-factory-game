@@ -98,7 +98,7 @@ export class RenderingService {
   convertToCameraPOV(camera: Camera): void
   {
     this._xOffset = this._ctx.canvas.width / 2 - camera.position.x * this._fov;
-    this._yOffset = this._ctx.canvas.height / 2 - camera.position.y * this._fov; 
+    this._yOffset = this._ctx.canvas.height / 2 - camera.position.y * this._fov;
     if(!this._camera)
     {
       this._camera = camera
@@ -135,7 +135,7 @@ export class RenderingService {
     this._renderingBuffer.forEach((Obj) => {
       // Berechne isometrische Projektion
       // Rechtecke mit Canvas
-      const zTransform = this._fov * Obj.z * Math.sin(this._angle) 
+      const zTransform = this._fov * Obj.z * Math.sin(this._angle)
       const yProjection = this._fov * (Obj.y + this._yOffset / this._fov) * Math.cos(this._angle) - zTransform
       const xObj = this._fov * Obj.x + this._xOffset;
       const objHeight = this._fov * Obj.height;
@@ -238,7 +238,7 @@ export class RenderingService {
     if (this._angle < max) {
       this._angle += 0.0012;
       if (this._angle > max) this._angle = max;
-    } 
+    }
   }
 
   async zoomOut()
@@ -248,8 +248,8 @@ export class RenderingService {
     this._camera.fov -= 0.05
     this._fov -= 0.05
     // Prüft hier ob Kamera Out Of Bounds
-    this._camera.x = this._camera.x; 
-    this._camera.y = this._camera.y; 
+    this._camera.x = this._camera.x;
+    this._camera.y = this._camera.y;
     }
 
   }
@@ -276,4 +276,9 @@ export class RenderingService {
   get angle(): number {
     return this._angle;
   }
+
+  get xOffset(): number {return this._xOffset}
+  get yOffset(): number {return this._yOffset}
+
+  get fov(): number {return this._fov}
 }

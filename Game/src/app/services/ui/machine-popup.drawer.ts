@@ -3,6 +3,8 @@ import { Gamefield } from '../../models/gamefield/gamefield';
 import { Rect } from './rect.interface';
 import { CanvasHelper } from './canvas.helper';
 import { UI_THEME } from './theme.manager';
+import { Player } from '../../models/player/player';
+import { RenderingService } from '../rendering.service';
 
 /**
  * Handles drawing all UI elements related to machines,
@@ -12,7 +14,7 @@ export class MachinePopupDrawer {
   constructor(
     private ctx: CanvasRenderingContext2D,
     private images: { [key: string]: HTMLImageElement },
-    private angle: number
+    private angle: number,
   ) {}
 
   /**
@@ -72,26 +74,28 @@ export class MachinePopupDrawer {
    * @param machines An array of all machines on the field.
    * @returns An array of Rects for later clearing.
    */
-  public drawNeeds(machines: Machine[]): Rect[] {
+  public drawNeeds(machines: Machine[], offsetCamera: [number, number], fov: number): Rect[] {
     const drawnRects: Rect[] = [];
     const isometricAngle = 30 * Math.PI / 180;
+    // console.log(offsetCamera)
 
     for (const machine of machines) {
       const neededItems = machine.inputRequirements.filter(req => !machine.inventory.some(invItem => invItem.id === req.id));
 
       for (let i = 0; i < neededItems.length; i++) {
         const item = neededItems[i];
-        const size = Gamefield.fieldsize * 0.75;
-        const offset = (Gamefield.fieldsize - size) / 2;
+        const size = Gamefield.fieldsize * 1.25;
+        // const offset = (Gamefield.fieldsize - size) / 2;
+        const offset = size / 2;
         const gap = 8;
 
         let x = neededItems.indexOf(item) == 0
-          ? machine.position.x + offset
-          : machine.position.x + ((size + gap) * (neededItems.indexOf(item) % 2 === 0 ? -1 : 1)) + offset;
+          ? fov * machine.position.x + offset + offsetCamera[0]
+          : fov * machine.position.x + ((size + gap) * (neededItems.indexOf(item) % 2 === 0 ? -1 : 1)) + offset + offsetCamera[0];
 
         if(neededItems.length % 2 === 0)
           x -= size / 2 + gap/2;
-        let y = machine.position.y * Math.cos(isometricAngle) - size * 1.5;
+        let y = fov * machine.position.y * Math.cos(isometricAngle) - size * 1.5 + offsetCamera[1];
 
         this.ctx.save();
         this.ctx.fillStyle = UI_THEME.tertiary;

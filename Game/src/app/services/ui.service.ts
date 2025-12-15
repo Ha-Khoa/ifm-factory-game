@@ -7,6 +7,8 @@ import { loadTheme } from './ui/theme.manager';
 import { CanvasHelper } from './ui/canvas.helper';
 import { ItemPopupDrawer } from './ui/item-popup.drawer';
 import { MachinePopupDrawer } from './ui/machine-popup.drawer';
+import { Player } from '../models/player/player';
+import { RenderingService } from './rendering.service';
 
 @Injectable({
   providedIn: 'root'
@@ -39,11 +41,12 @@ export class UIService {
     this.ctxUI = ctxUI;
     this.angle = angle;
     this.images = images;
-    
+
     // Load the theme and initialize drawer classes
     loadTheme();
     this.itemPopupDrawer = new ItemPopupDrawer(this.ctxUI, this.images, this.angle);
     this.machinePopupDrawer = new MachinePopupDrawer(this.ctxUI, this.images, this.angle);
+
   }
 
   // ==========================================================================
@@ -75,10 +78,10 @@ export class UIService {
   }
 
   /** Draws indicators for items needed by machines. */
-  public drawMachineNeedsPopup(machines: Machine[]): void {
+  public drawMachineNeedsPopup(machines: Machine[], offsetCamera: [number, number], fov: number): void {
     this.neededItemPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
     this.neededItemPopups = [];
-    this.neededItemPopups = this.machinePopupDrawer.drawNeeds(machines);
+    this.neededItemPopups = this.machinePopupDrawer.drawNeeds(machines, offsetCamera, fov);
   }
 
   /** Draws progress rings for machines that are currently producing. */
