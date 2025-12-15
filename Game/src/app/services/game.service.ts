@@ -10,6 +10,8 @@ import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
+import {HudComponent} from '../components/hud/hud.component';
+import {HudStateService} from '../components/hud/HudStateService';
 
 
 @Injectable({
@@ -35,7 +37,7 @@ export class GameService {
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
 
-  constructor(private uiService: UIService) { }
+  constructor(private uiService: UIService, private hud: HudStateService) { }
 
 
   /**
@@ -64,7 +66,7 @@ export class GameService {
       this.playerVelocity,
       this.gamefield
     );
-    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs);
+    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs, this.hud);
 
 
     // Lade benötigte Texturen vor
