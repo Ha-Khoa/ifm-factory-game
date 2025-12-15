@@ -23,8 +23,13 @@ export class HudComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.api.getPlayer('Player1').subscribe(player => {
+    this.api.getPlayer('Player1').subscribe({
+      next:(player) => {
       this.hudState.setPlayer(player);
+      },
+      error: () => {
+        this.api.createPlayer('Player1').subscribe(player => this.hudState.setPlayer(player));
+      }
     });
   }
 }
