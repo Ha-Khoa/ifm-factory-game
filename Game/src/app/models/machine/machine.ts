@@ -73,8 +73,8 @@ export class Machine extends InteractableObject {
       height,
       Gamefield.fieldsize,
       accessDirection,
-      "rect",
-      undefined,
+      "static Img",
+      imgUnlocked,
       undefined,
       "rgba(200, 206, 255, 1)",
       ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]

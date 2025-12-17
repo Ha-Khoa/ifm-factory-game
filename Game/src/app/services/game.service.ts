@@ -10,6 +10,7 @@ import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
+import { SlotMachineService } from './slot-machine.service';
 
 
 @Injectable({
@@ -43,7 +44,7 @@ export class GameService {
    * @param ctx CanvasRenderingContext2D zum Zeichnen
    * @param ctxUI
    */
-  async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
+  async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D, ctxSlots: CanvasRenderingContext2D) {
     // Initialisiere UI Service
        this.gamefield = new Gamefield();
 
@@ -51,9 +52,8 @@ export class GameService {
     this.ctx = ctx;
     this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
-
+    SlotMachineService.instance().init(ctxSlots, this.images);
     this.uiService.init(ctxUI, this.angle, this.images);
-
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
 
@@ -68,7 +68,7 @@ export class GameService {
 
 
     // Lade benötigte Texturen vor
-    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png", "/images/Brick_01-512x512.png", "/images/interaction-field.png"];
+    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png", "/images/Brick_01-512x512.png", "/images/interaction-field.png", "/images/machine.png"];
     const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
     const foxImages = ["/images/fox/walking_1.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png", "/images/fox/fox.png", "/images/fox/sitting.png",
@@ -197,6 +197,7 @@ export class GameService {
       RenderingService.instance().zoomOut();
       RenderingService.instance().render();
 
+      SlotMachineService.instance().render();
 
       // Render Particles
       this.interactableManager.resetParticleFields();
@@ -208,7 +209,6 @@ export class GameService {
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
 
       if (this.player.inventory === null) {
-
         // Prüfen, ob ein Item in der Nähe ist
         const itemInRange = Products.checkForInteraction(this.player.hitbox);
 

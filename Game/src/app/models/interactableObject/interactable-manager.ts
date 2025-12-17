@@ -25,7 +25,7 @@ export class InteractableManager {
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       // Sensor-Maschine (benötigt Raw Silicon + Circuit Board)
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Basic Sensor", "/images/wall.png", "/images/wall.png",
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Basic Sensor", "/images/machine.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductByName("Basic Sensor")!,
                   [
                     Products.getProductByName("Raw Silicon")!,

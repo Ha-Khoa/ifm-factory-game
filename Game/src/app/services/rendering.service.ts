@@ -281,4 +281,6 @@ export class RenderingService {
   get yOffset(): number {return this._yOffset}
 
   get fov(): number {return this._fov}
+
+  get deltaTime(): number {return this._deltaTime}
 }

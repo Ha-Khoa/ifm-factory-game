@@ -22,6 +22,9 @@ export class AppComponent {
   // UI canvas
   @ViewChild('ui') canvasUIRef!: ElementRef<HTMLCanvasElement>;
   private ctxUI!: CanvasRenderingContext2D;
+  //Slotmachine Canvas
+  @ViewChild('slotMachine') canvasSlotMachineRef!: ElementRef<HTMLCanvasElement>;
+  private ctxSlotMachine!: CanvasRenderingContext2D
   // Game Container
   @ViewChild('gameContainer') gameContainer!: ElementRef;
 
@@ -35,11 +38,13 @@ export class AppComponent {
     this.gameContainer.nativeElement.style.maxWidth = this.cwidth.toString();
     const canvas = this.canvasRef.nativeElement;
     const canvasUI = this.canvasUIRef.nativeElement;
+    const canvasSlotMachine = this.canvasSlotMachineRef.nativeElement;
 
     this.ctx = canvas.getContext('2d')!;
     this.ctxUI = canvasUI.getContext('2d')!;
+    this.ctxSlotMachine = canvasSlotMachine.getContext('2d')!;
 
-    await this.game.init(this.ctx, this.ctxUI);
+    await this.game.init(this.ctx, this.ctxUI, this.ctxSlotMachine);
     this.game.startGame();
 
   }
