@@ -47,7 +47,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     this.ctxUI = canvasUI.getContext('2d')!;
 
     await this.game.init(this.ctx, this.ctxUI);
-    this.game.startGame();
+
 
     this.gameLoopSubscription = this.game.gameLoopTick$.subscribe(() => {
       if (this.startScreen && this.startScreen.isHidden) {
@@ -83,6 +83,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
   async onStartGame(): Promise<void> {
     this.startScreen?.zoomOut();
+    this.game.startGame();
     setTimeout(() => {
       this.showStartScreen = false;
 
