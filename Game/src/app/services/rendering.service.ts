@@ -245,8 +245,9 @@ export class RenderingService {
   {
     if(this._fov > 2.5)
     {
-    this._camera.fov -= 0.05
-    this._fov -= 0.05
+    const df = Math.sqrt(this._fov) * 0.02
+    this._camera.fov -= df
+    this._fov -= df
     // Prüft hier ob Kamera Out Of Bounds
     this._camera.x = this._camera.x;
     this._camera.y = this._camera.y;

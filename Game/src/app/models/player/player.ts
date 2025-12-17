@@ -149,6 +149,7 @@ export class Player {
                numPressed++;
            }
        }
+       console.log(numPressed)
        if (numPressed === 0) {
            this._directionPressed = false;
        }

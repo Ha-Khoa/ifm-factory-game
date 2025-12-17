@@ -55,7 +55,7 @@ export class GameService {
     SlotMachineService.instance().init(ctxSlots, this.images);
     this.uiService.init(ctxUI, this.angle, this.images);
     // Initialisiere Eingaben
-    this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false };
+    this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false};
 
     // Initialisiere Spielobjekte
     this.playerVelocity = Gamefield.fieldsize * 4; // in Pixel pro Sekunde
@@ -72,8 +72,9 @@ export class GameService {
     const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
     const foxImages = ["/images/fox/walking_1.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png", "/images/fox/fox.png", "/images/fox/sitting.png",
-      "/images/fox/1-fox-holding.png", "/images/fox/2-fox-holding.png", "/images/fox/3-fox-holding.png", "/images/fox/4-fox-holding.png", "/images/fox/walking_5.png"
+      "/images/fox/1-fox-holding.png", "/images/fox/2-fox-holding.png", "/images/fox/3-fox-holding.png", "/images/fox/4-fox-holding.png", "/images/fox/walking_5.png", "/images/fox/fox-coin.png"
     ]
+    const slotMachineImages = ["/images/slotMachine/cherry.png", "/images/slotMachine/Bar.png", "/images/slotMachine/seven.png", "/images/slotMachine/diamond.png", "/images/slotMachine/lemon.png", "/images/slotMachine/ifm.png", "/images/slotMachine/manure.png"];
     const keyBindingImages = [
       "/images/KeyBindings/keyBindings_,.png",
       "/images/KeyBindings/keyBindings_..png",
@@ -128,7 +129,7 @@ export class GameService {
       "/images/KeyBindings/keyBindings_Controller_Button_5.png",
       "/images/KeyBindings/keyBindings_Controller_Button_6.png",
     ]
-    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages, ...keyBindingImages])];
+    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages, ...keyBindingImages, ...slotMachineImages])];
     await this.preloadImages(allImages);
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
@@ -197,6 +198,7 @@ export class GameService {
       RenderingService.instance().zoomOut();
       RenderingService.instance().render();
 
+      SlotMachineService.instance().setInput(this.inputs);
       SlotMachineService.instance().render();
 
       // Render Particles
