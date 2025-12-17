@@ -102,13 +102,11 @@ export class StartScreenComponent implements OnInit {
 
     const width = window.innerWidth + 'px';
     const height = window.innerHeight + 'px';
-    const transform = '';
 
     style.setProperty('top', `${y}px`);
     style.setProperty('left', `${x}px`);
     style.setProperty('width', width);
     style.setProperty('height', height);
-    style.setProperty('transform', transform);
 
     style.setProperty('pointer-events', 'none');
   }
@@ -118,7 +116,6 @@ export class StartScreenComponent implements OnInit {
     const renderingService = RenderingService.instance();
     const angle = renderingService.angle;
     const fov = renderingService.fov;
-    // Unterschiedliche Y Coords, sonst Sprung beim kompletten herauszoomen
     const newWidth = fov * this.width / 60;
     const newHeight = fov * this.height * Math.cos(angle) / 60;
     const gameY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov) * Math.cos(angle) - newHeight / 2;
@@ -129,16 +126,11 @@ export class StartScreenComponent implements OnInit {
     style.setProperty('width', width);
     style.setProperty('height', height);
 
-    
-    style.setProperty('transition', 'none');
-    
-
-
 
     // Calculate position dynamically
     const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset - newWidth / 2;
     style.setProperty('top', `${y}px`);
     style.setProperty('left', `${x}px`);
-    
+
   }
 }
