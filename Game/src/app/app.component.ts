@@ -4,10 +4,12 @@ import { HudComponent } from './components/hud/hud.component';
 import { CommonModule } from '@angular/common';
 import { SettingsComponent } from './components/settings/settings.component';
 import { OrderComponent } from "./components/order/order.component";
+import { StartScreenComponent } from './components/start-screen/start-screen.component'; // New import
 
 @Component({
   selector: 'app-root',
-  imports: [HudComponent, SettingsComponent, CommonModule, OrderComponent],
+  standalone: true, // Assuming standalone based on `imports` usage
+  imports: [HudComponent, SettingsComponent, CommonModule, OrderComponent, StartScreenComponent], // Add StartScreenComponent
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -27,7 +29,9 @@ export class AppComponent {
 
   // Settings
   @ViewChild(SettingsComponent) settingsMenu?: SettingsComponent;
+  @ViewChild(StartScreenComponent) startScreen?: StartScreenComponent;
   isSettingsOpen: boolean = false;
+  showStartScreen: boolean = true;
 
   constructor(private game: GameService) { }
 
@@ -38,14 +42,12 @@ export class AppComponent {
 
     this.ctx = canvas.getContext('2d')!;
     this.ctxUI = canvasUI.getContext('2d')!;
-
-    await this.game.init(this.ctx, this.ctxUI);
-    this.game.startGame();
-
   }
 
   @HostListener('window:keydown', ['$event']) // später durch richtige taste ersetzen
   onKeyDown(event: KeyboardEvent): void {
+    if (this.showStartScreen) return; // Ignore input if start screen is active
+
     if (event.key === 'Escape') {
       if(this.isSettingsOpen) this.settingsMenu?.closeSettingsMenu();
       else this.isSettingsOpen = true;
@@ -56,6 +58,7 @@ export class AppComponent {
 
   @HostListener('window:keyup', ['$event'])
   onKeyUp(event: KeyboardEvent): void {
+    if (this.showStartScreen) return; // Ignore input if start screen is active
     this.game.setInput(event.key, false);
   }
 
@@ -63,5 +66,12 @@ export class AppComponent {
     this.game.stopGame();
   }
 
-
+  async onStartGame(): Promise<void> {
+    await this.game.init(this.ctx, this.ctxUI);
+    this.game.startGame();
+    this.startScreen?.hide();
+    setTimeout(() => {
+      // this.showStartScreen = false;
+    }, 1500);
+  }
 }
