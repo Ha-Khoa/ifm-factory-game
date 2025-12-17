@@ -118,12 +118,12 @@ export class StartScreenComponent implements OnInit {
     const renderingService = RenderingService.instance();
     const angle = renderingService.angle;
     const fov = renderingService.fov;
-    console.log(fov, angle)
     // Unterschiedliche Y Coords, sonst Sprung beim kompletten herauszoomen
-    const gameY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 4) + renderingService.yOffset / fov) * Math.cos(angle);
-    let y = gameY;
     const newWidth = fov * this.width / 60;
     const newHeight = fov * this.height * Math.cos(angle) / 60;
+    const gameY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov) * Math.cos(angle) - newHeight / 2;
+    let y = gameY;
+
     const width = `${newWidth}px`;
     const height = `${newHeight}px`;
     style.setProperty('width', width);
@@ -136,7 +136,7 @@ export class StartScreenComponent implements OnInit {
 
 
     // Calculate position dynamically
-    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset - parseInt(width) / 2;
+    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset - newWidth / 2;
     style.setProperty('top', `${y}px`);
     style.setProperty('left', `${x}px`);
     

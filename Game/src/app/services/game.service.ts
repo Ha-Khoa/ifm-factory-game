@@ -197,8 +197,8 @@ export class GameService {
       // Render-Phase
       this.player.render();
       this.player.updateProductInHand();
-      RenderingService.instance().convertToCameraPOV(this.player.camera);
       RenderingService.instance().zoomOut();
+      RenderingService.instance().convertToCameraPOV(this.player.camera);
       RenderingService.instance().render();
 
 

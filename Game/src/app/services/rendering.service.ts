@@ -97,8 +97,8 @@ export class RenderingService {
 
   convertToCameraPOV(camera: Camera): void
   {
-    this._xOffset = this._ctx.canvas.width / 2 - camera.position.x * this._fov;
-    this._yOffset = this._ctx.canvas.height / 2 - camera.position.y * this._fov;
+    this._xOffset = window.innerWidth / 2 - camera.position.x * this._fov;
+    this._yOffset = window.innerHeight / 2 - camera.position.y * this._fov;
     if(!this._camera)
     {
       this._camera = camera
@@ -243,13 +243,17 @@ export class RenderingService {
 
   async zoomOut()
   {
-    if(this._fov > 2.5)
+    if(this._fov > 4)
     {
     this._camera.fov -= 0.05
     this._fov -= 0.05
     // Prüft hier ob Kamera Out Of Bounds
-    this._camera.x = this._camera.x;
-    this._camera.y = this._camera.y;
+    //this._camera.x = this._camera.x;
+    //this._camera.y = this._camera.y;
+    }
+    else{
+      this._camera.fov = 4;
+      this._fov = 4;
     }
 
   }
