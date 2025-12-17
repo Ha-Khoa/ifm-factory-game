@@ -71,7 +71,8 @@ export class AppComponent {
     this.game.startGame();
     this.startScreen?.hide();
     setTimeout(() => {
-      // this.showStartScreen = false;
+      this.showStartScreen = false;
+
     }, 1500);
   }
 }

@@ -35,7 +35,7 @@ export class Player {
    private _gamefield: Gamefield;
    // Aktuelle Bewegungsrichtung
    private _direction!: Direction | null;
-   
+
    private _hasPicked!: boolean;
 
 
@@ -67,8 +67,7 @@ export class Player {
        this._position = hitbox.position
        this._velocity = velocity;
        this._gamefield = gamefield;
-       this._direction = null;
-       this._camera = new Camera(new Coordinates(this._position.x + this._hitbox.width / 2, this._position.y + this._hitbox.height / 2), 30);
+       this._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2), 30);
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        this._renderingObject = new RenderObject(
            "player",
@@ -87,7 +86,7 @@ export class Player {
            8
        );
 
-  
+
        RenderingService.instance().addRenderObject(this._renderingObject);
    }
 
@@ -100,6 +99,11 @@ export class Player {
    render() {
        this._renderingObject.x = this._position.x;
        this._renderingObject.y = this._position.y;
+   }
+
+   changeCamera() {
+    this._camera.x = this._position.x + this._hitbox.width / 2
+    this._camera.y = this._position.y + this._hitbox.height / 2
    }
 
 
@@ -115,7 +119,7 @@ export class Player {
             this._inventory.y = this._position.y;
             return
          }
-        
+
 
        // Stabilize narrowed properties in locals so TS knows they won't change within this method
        const dir = this._direction;
@@ -135,7 +139,7 @@ export class Player {
    }
 
 
-  
+
    /**
     * Setzt die Eingabe-Richtung basierend auf gedrückten Tasten.
     * @param input Record mit Tastenstatus (z.B. {'w': true, 'a': false})
@@ -143,6 +147,7 @@ export class Player {
    setInput(input: Record<string, boolean>) {
        this._input  = input;
        let numPressed = 0;
+       this._direction = null;
        for (const [key, pressed] of Object.entries(input)) {
            if (pressed && key in KEY_TO_DIRECTION) {
                this._direction = KEY_TO_DIRECTION[key];
@@ -164,7 +169,7 @@ export class Player {
         {
             this._renderingObject.animationDirection = Direction.LEFT;
         }
-       
+
    }
 
 
@@ -183,7 +188,7 @@ export class Player {
        }
        this._frameVelocity = this._velocity * deltaTime / 1000; // Umrechnung: Pixel/Frame → Pixel/Sekunde
 
-   }  
+   }
 
 
  /**
@@ -206,7 +211,7 @@ export class Player {
            const objHitbox = new Hitbox(new Coordinates(obj.x, obj.y), obj.width, obj.height);
            const collision = Collision.checkCollisionNextFrame(this._hitbox, objHitbox, velocityX, velocityY);
            const borderCollision = Collision.checkObjectOutBoarder(this._hitbox, velocityX, velocityY, this._gamefield);
-          
+
            if (collision) {
                switch (this._direction) {
                    case Direction.UP:
@@ -224,7 +229,7 @@ export class Player {
                }
                return;
            }
-          
+
            if (borderCollision) {
                switch (this._direction) {
                    case Direction.UP:
@@ -252,15 +257,15 @@ export class Player {
        this._camera.y = this._position.y - this._hitbox.height / 2;
 
    }
-   
+
 }
 
     updatePlayerAnimation()
     {
-        
+
         if(this._directionPressed)
         {
-            
+
             this._renderingObject.type = "gif"
             this._renderingObject.img = this._img;
             if(this._inventory !== null)
@@ -284,7 +289,7 @@ export class Player {
         async sitPlayer() {
             // Starte den Timer nur, wenn keiner läuft (sonst wird er ständig neu gestartet)
             if (!this._timerManagerService.isRunning()) {
-                await this._timerManagerService.start(3000); 
+                await this._timerManagerService.start(3000);
                 this._renderingObject.img = "/images/fox/sitting.png";
             }
         }
@@ -355,7 +360,7 @@ export class Player {
            this._inventory = null;
            this._canInteractProduct = false;
            this._hasPicked = false;
-          
+
            if (droppedProduct instanceof Package) {
               Products.addPackage(droppedProduct);
            }
@@ -385,15 +390,15 @@ export class Player {
            const playerCenterX = this._hitbox.x + this._hitbox.width / 2;
            const playerCenterY = this._hitbox.y + this._hitbox.height / 2;
            const playerCenter = new Coordinates(playerCenterX, playerCenterY);
-          
+
            // Try position-based pickup first (picks nearest product within 50px)
            let product = conveyor.removeProductAtPosition(playerCenter);
-          
+
            // If no product nearby, try taking the furthest product
            /*if (!product) {
                product = conveyor.takeItem();
            }*/
-          
+
            if (product) {
            //console.log(`Produkt ${product.name} vom Förderband ${conveyor.getConveyorId()} aufgenommen.`);
                return product;
@@ -429,13 +434,11 @@ export class Player {
    get canInteractProduct(): boolean { return this._canInteractProduct; }
 
    get z(): number {return this._z}
-   set z(v: number) { 
+   set z(v: number) {
         this._z = v;
         this._renderingObject.z = v;
     }
 
     get camera(): Camera { return this._camera; }
-
-
 
 }
