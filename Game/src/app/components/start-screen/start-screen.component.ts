@@ -19,6 +19,10 @@ export class StartScreenComponent implements OnInit {
   private buttonRect = { x: 0, y: 0, width: 0, height: 0 };
   public isHidden = false;
 
+  private width: number = window.innerWidth;
+  private height: number = window.innerHeight;
+
+
   constructor() { }
 
   ngOnInit(): void {
@@ -89,22 +93,23 @@ export class StartScreenComponent implements OnInit {
     this.isHidden = true;
     const style = this.containerRef.nativeElement.style;
     const renderingService = RenderingService.instance();
-
+    console.log("test")
     // Calculate position dynamically
     const angle = renderingService.angle;
     const fov = renderingService.fov;
-    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset;
-    const y = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov);
+    const x = 0;
+    const y = 0;
 
-    const width = '200px';
-    const height = '150px';
-    const transform = 'translate(0%, 0%) scale(0.3)';
+    const width = window.innerWidth + 'px';
+    const height = window.innerHeight + 'px';
+    const transform = '';
 
     style.setProperty('top', `${y}px`);
-    style.setProperty('left', `${x - (parseInt(width) / 2)}px`);
+    style.setProperty('left', `${x}px`);
     style.setProperty('width', width);
     style.setProperty('height', height);
     style.setProperty('transform', transform);
+
     style.setProperty('pointer-events', 'none');
   }
 
@@ -113,22 +118,27 @@ export class StartScreenComponent implements OnInit {
     const renderingService = RenderingService.instance();
     const angle = renderingService.angle;
     const fov = renderingService.fov;
-
+    console.log(fov, angle)
     // Unterschiedliche Y Coords, sonst Sprung beim kompletten herauszoomen
-    const animationY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov);
-    const gameY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov) * Math.cos(angle);
-    const y = fov <= 2.5 ? gameY : animationY;
+    const gameY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 4) + renderingService.yOffset / fov) * Math.cos(angle);
+    let y = gameY;
+    const newWidth = fov * this.width / 60;
+    const newHeight = fov * this.height * Math.cos(angle) / 60;
+    const width = `${newWidth}px`;
+    const height = `${newHeight}px`;
+    style.setProperty('width', width);
+    style.setProperty('height', height);
 
-    if (fov <= 2.5) {
-      style.setProperty('transition', 'none');
-    }
+    
+    style.setProperty('transition', 'none');
+    
 
 
 
     // Calculate position dynamically
-    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset;
+    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset - parseInt(width) / 2;
     style.setProperty('top', `${y}px`);
-    style.setProperty('left', `${x - (parseInt(style.getPropertyValue('width')) / 2)}px`);
-
+    style.setProperty('left', `${x}px`);
+    
   }
 }

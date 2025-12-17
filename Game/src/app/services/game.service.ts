@@ -179,7 +179,7 @@ export class GameService {
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
       // Update-Phase
-      this.gameLoopTick.next();
+
       RenderingService.instance().updateFPS()
       this.player.changeVelocity();
       this.player.updatePlayer();
@@ -226,7 +226,7 @@ export class GameService {
         // Wenn wir was tragen: Sicherstellen, dass das Popup weg ist!
         this.uiService.clearItemPopup();
       }
-
+            this.gameLoopTick.next();
       requestAnimationFrame(loop);
     };
 

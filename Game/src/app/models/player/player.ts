@@ -67,7 +67,7 @@ export class Player {
        this._position = hitbox.position
        this._velocity = velocity;
        this._gamefield = gamefield;
-       this._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2), 30);
+       this._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2), 60);
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        this._renderingObject = new RenderObject(
            "player",
