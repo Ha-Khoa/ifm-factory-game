@@ -1,7 +1,6 @@
 import { Component, OnInit, ElementRef, ViewChild, HostListener, Output, EventEmitter } from '@angular/core';
 import { UI_THEME, loadTheme } from '../../services/ui/theme.manager';
 import { RenderingService } from '../../services/rendering.service';
-import { RenderObject } from '../../models/rendering/render-object';
 import { Gamefield } from '../../models/gamefield/gamefield';
 
 @Component({
@@ -89,19 +88,20 @@ export class StartScreenComponent implements OnInit {
   public zoomOut() {
     this.isHidden = true;
     const style = this.containerRef.nativeElement.style;
-    const angle = RenderingService.instance().angle;
-    const fov = RenderingService.instance().fov;
+    const renderingService = RenderingService.instance();
 
-    // These values can now be replaced by variables from other services or calculations
-    // const top = '50%';
-    const top  = fov * Math.cos(angle) * (Gamefield.fieldsize*5 + Gamefield.fieldsize/2) + RenderingService.instance().yOffset * Math.cos(angle);
-    const left = fov * (Gamefield.fieldsize*10 + Gamefield.fieldsize/2) + RenderingService.instance().xOffset - Number(style.getPropertyValue('width').trim()) / 2;
+    // Calculate position dynamically
+    const angle = renderingService.angle;
+    const fov = renderingService.fov;
+    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset;
+    const y = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov) * Math.cos(angle);
+
     const width = '200px';
     const height = '150px';
     const transform = 'translate(0%, 0%) scale(0.3)';
 
-    style.setProperty('top', `${top}px`);
-    style.setProperty('left', `${left}px`);
+    style.setProperty('top', `${y}px`);
+    style.setProperty('left', `${x - (parseInt(width) / 2)}px`);
     style.setProperty('width', width);
     style.setProperty('height', height);
     style.setProperty('transform', transform);
@@ -110,15 +110,19 @@ export class StartScreenComponent implements OnInit {
 
   public updatePosition() {
     const style = this.containerRef.nativeElement.style;
-    const angle = RenderingService.instance().angle;
-    const fov = RenderingService.instance().fov;
-    const top  = fov * Math.cos(angle) * (Gamefield.fieldsize*5 + Gamefield.fieldsize/2) + RenderingService.instance().yOffset * Math.cos(angle);
-    const left = fov * (Gamefield.fieldsize*10 + Gamefield.fieldsize/2) + RenderingService.instance().xOffset  - parseFloat((style.getPropertyValue('width'))) / 2;
-    style.setProperty('top', `${top}px`);
-    style.setProperty('left', `${left}px`);
+    const renderingService = RenderingService.instance();
+
+    // Calculate position dynamically
+    const angle = renderingService.angle;
+    const fov = renderingService.fov;
+    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset;
+    const y = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov) * Math.cos(angle);
+
+    style.setProperty('top', `${y}px`);
+    style.setProperty('left', `${x - (parseInt(style.getPropertyValue('width')) / 2)}px`);
+
     if (fov <= 2.5) {
-      style.setProperty('transition', 'none')
+      style.setProperty('transition', 'none');
     }
   }
-
 }
