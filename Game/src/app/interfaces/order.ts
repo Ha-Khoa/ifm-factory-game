@@ -8,5 +8,6 @@ export interface Order {
     id: number;
     items: OrderItem[];
     reward: number;
+    money: number;
     status: boolean;
 }

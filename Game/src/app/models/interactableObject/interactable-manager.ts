@@ -14,6 +14,7 @@ import { Player } from "../player/player";
 import { SubmissionArea } from "../submission-area/submission-area";
 import { InteractableObject } from "./interactable-object";
 import { Package } from "../package/package";
+import {HudStateService} from '../../components/hud/HudStateService';
 
 /**
  * MachineManager-Klasse: Verwaltet alle Maschinen im Spiel.
@@ -22,6 +23,7 @@ import { Package } from "../package/package";
 export class InteractableManager {
     private _gamefield: Gamefield;
     private ui: UIService;
+    private hud: HudStateService;
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       // Sensor-Maschine (benötigt Raw Silicon + Circuit Board)
@@ -41,16 +43,19 @@ export class InteractableManager {
                   [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper Wire")!])
     ];
 
-    private submissionArea: SubmissionArea = new SubmissionArea(
-      new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 5),
-      Gamefield.fieldsize,
-      2 * Gamefield.fieldsize
-    );
+    private submissionArea:SubmissionArea;
 
-  constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>) {
+  constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>, hud: HudStateService) {
     this._gamefield = _gamefield;
     this.ui = ui;
+    this.hud = hud;
     this._inputs = inputs;
+    this.submissionArea = new SubmissionArea(
+      new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 5),
+      Gamefield.fieldsize,
+      2 * Gamefield.fieldsize,
+      this.hud
+    );
     // Standard-Maschinen freischalten
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
@@ -320,6 +325,7 @@ export class InteractableManager {
   updateSubmissionAreaOnInteraction(player: Player) {
       this.submissionArea.renderObject.rectColor = "#9c0e0eff";
       if (this._inputs["e"] === true && player.inventory instanceof Package && !player.hasPicked()) {
+
       const packObj : Package = player.inventory;
 
       let result = this.submissionArea.addPackage(packObj);
@@ -334,7 +340,7 @@ export class InteractableManager {
       }
       // Zutat nicht benötigt, zurücklegen
       else if (result === false) {
-        console.log("falsches Bestellung");
+        console.log("falsche Bestellung");
       }
     }
   }
@@ -342,8 +348,5 @@ export class InteractableManager {
   resetSubmissionAreaOnInteraction() {
     this.submissionArea.renderObject.rectColor = "#7D0A0A"
   }
-
-
-
   }
 

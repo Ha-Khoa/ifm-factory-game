@@ -51,7 +51,7 @@ export class ApiService {
   }
 
   addMoney(identifier: string, value: number): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/Money/${identifier}/Add/${value}`, {});
+    return this.http.patch(`${this.baseUrl}/Money/${identifier}/Add/${value}`, {}, {responseType: 'text'});
   }
 
   removeMoney(identifier: string, value: number): Observable<any> {

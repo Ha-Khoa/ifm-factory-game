@@ -13,6 +13,7 @@ export class Orders {
                 {product: Products.getProductById(1)!, quantity: 3}
             ],
             reward: 20,
+            money: 40,
             status: false
         },
         {
@@ -22,6 +23,7 @@ export class Orders {
                 {product: Products.getProductById(3)!, quantity: 2}
             ],
             reward: 40,
+            money: 10,
             status: false
         },
         {
@@ -31,6 +33,7 @@ export class Orders {
                 {product: Products.getProductById(2)!, quantity: 3}
             ],
             reward: 70,
+            money: 100,
             status: false
         },
         {
@@ -38,6 +41,7 @@ export class Orders {
             items: [
                 {product: Products.getProductById(1)!, quantity: 1}],
                 reward: 30,
+                money: 5,
                 status: false
         },
         {
@@ -46,6 +50,7 @@ export class Orders {
                 {product: Products.getProductById(6)!, quantity: 1}
             ],
             reward: 60,
+            money: 5000,
             status: false
         }
     ]
@@ -84,7 +89,7 @@ export class Orders {
         return this.ordersList$.getValue().find(order => order.id === id);
     }
 
-    static addOrder(items: {productId: number, quantity: number}[], reward: number): Order {
+    static addOrder(items: {productId: number, quantity: number}[], reward: number, money: number): Order {
         const newOrderItems: OrderItem[] = [];
 
         for (const item of items) {
@@ -98,6 +103,7 @@ export class Orders {
             id: this.ordersList$.getValue().length + 1,
             items: newOrderItems,
             reward: reward,
+            money: money,
             status: false
         };
         this.ordersList$.next([...this.ordersList$.getValue(), newOrder]);
@@ -116,7 +122,8 @@ export class Orders {
             items.push({productId: randomProductId, quantity: randomQuantity});
         }
         const reward = Products.calculateProductPrice(items);
-        return Orders.addOrder(items, reward);
+        const money = Math.floor(Math.random() * 1000) + 100;
+        return Orders.addOrder(items, reward, money);
 
     }
 
@@ -128,12 +135,12 @@ export class Orders {
 //             50
 //.            ...
 //         );
-//. 
+//.
 //     } else if (playerLevel === 2) {
 //         return Orders.addOrder(
 //             [
-//                 { productId: 2, quantity: 2 }, 
-//                 { productId: 3, quantity: 1 }  
+//                 { productId: 2, quantity: 2 },
+//                 { productId: 3, quantity: 1 }
 //             ],
 //             100
 //             ...
@@ -143,7 +150,7 @@ export class Orders {
 //             [
 //                 { productId: 2, quantity: 1 },
 //                 { productId: 3, quantity: 1 },
-//                 { productId: 4, quantity: 1 }  
+//                 { productId: 4, quantity: 1 }
 //             ],
 //             200
 //         );
