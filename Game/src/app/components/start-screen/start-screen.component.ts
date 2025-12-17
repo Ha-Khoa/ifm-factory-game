@@ -1,5 +1,8 @@
 import { Component, OnInit, ElementRef, ViewChild, HostListener, Output, EventEmitter } from '@angular/core';
 import { UI_THEME, loadTheme } from '../../services/ui/theme.manager';
+import { RenderingService } from '../../services/rendering.service';
+import { RenderObject } from '../../models/rendering/render-object';
+import { Gamefield } from '../../models/gamefield/gamefield';
 
 @Component({
   selector: 'app-start-screen',
@@ -10,6 +13,7 @@ import { UI_THEME, loadTheme } from '../../services/ui/theme.manager';
 })
 export class StartScreenComponent implements OnInit {
   @ViewChild('startScreenCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('startScreenContainer') containerRef!: ElementRef<HTMLDivElement>;
   @Output() startClicked = new EventEmitter<void>();
 
   private ctx!: CanvasRenderingContext2D;
@@ -82,7 +86,39 @@ export class StartScreenComponent implements OnInit {
     }
   }
 
-  public hide(): void {
+  public zoomOut() {
     this.isHidden = true;
+    const style = this.containerRef.nativeElement.style;
+    const angle = RenderingService.instance().angle;
+    const fov = RenderingService.instance().fov;
+
+    // These values can now be replaced by variables from other services or calculations
+    // const top = '50%';
+    const top  = fov * Math.cos(angle) * (Gamefield.fieldsize*5 + Gamefield.fieldsize/2) + RenderingService.instance().yOffset * Math.cos(angle);
+    const left = fov * (Gamefield.fieldsize*10 + Gamefield.fieldsize/2) + RenderingService.instance().xOffset - Number(style.getPropertyValue('width').trim()) / 2;
+    const width = '200px';
+    const height = '150px';
+    const transform = 'translate(0%, 0%) scale(0.3)';
+
+    style.setProperty('top', `${top}px`);
+    style.setProperty('left', `${left}px`);
+    style.setProperty('width', width);
+    style.setProperty('height', height);
+    style.setProperty('transform', transform);
+    style.setProperty('pointer-events', 'none');
   }
+
+  public updatePosition() {
+    const style = this.containerRef.nativeElement.style;
+    const angle = RenderingService.instance().angle;
+    const fov = RenderingService.instance().fov;
+    const top  = fov * Math.cos(angle) * (Gamefield.fieldsize*5 + Gamefield.fieldsize/2) + RenderingService.instance().yOffset * Math.cos(angle);
+    const left = fov * (Gamefield.fieldsize*10 + Gamefield.fieldsize/2) + RenderingService.instance().xOffset  - parseFloat((style.getPropertyValue('width'))) / 2;
+    style.setProperty('top', `${top}px`);
+    style.setProperty('left', `${left}px`);
+    if (fov <= 2.5) {
+      style.setProperty('transition', 'none')
+    }
+  }
+
 }

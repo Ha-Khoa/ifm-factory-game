@@ -9,16 +9,6 @@
   overflow: hidden;
 }
 
-.start-screen-container.hidden {
-  top: 50%;
-  left: 50%;
-  width: 200px;
-  height: 150px;
-  transform: translate(0%, 0%) scale(0.3);
-  /* opacity: 0; */
-  pointer-events: none;
-}
-
 canvas {
   display: block;
   width: 100%;

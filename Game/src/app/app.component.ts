@@ -1,10 +1,11 @@
-import { Component, ViewChild, ElementRef, HostListener } from '@angular/core';
+import { Component, ViewChild, ElementRef, HostListener, OnDestroy, AfterViewInit } from '@angular/core';
 import { GameService } from './services/game.service';
 import { HudComponent } from './components/hud/hud.component';
 import { CommonModule } from '@angular/common';
 import { SettingsComponent } from './components/settings/settings.component';
 import { OrderComponent } from "./components/order/order.component";
 import { StartScreenComponent } from './components/start-screen/start-screen.component'; // New import
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,7 @@ import { StartScreenComponent } from './components/start-screen/start-screen.com
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit, OnDestroy {
   title = 'Game';
   cwidth = window.innerWidth;
   cheight = window.innerHeight;
@@ -33,6 +34,8 @@ export class AppComponent {
   isSettingsOpen: boolean = false;
   showStartScreen: boolean = true;
 
+  private gameLoopSubscription!: Subscription;
+
   constructor(private game: GameService) { }
 
   async ngAfterViewInit() {
@@ -42,6 +45,15 @@ export class AppComponent {
 
     this.ctx = canvas.getContext('2d')!;
     this.ctxUI = canvasUI.getContext('2d')!;
+
+    await this.game.init(this.ctx, this.ctxUI);
+    this.game.startGame();
+
+    this.gameLoopSubscription = this.game.gameLoopTick$.subscribe(() => {
+      if (this.startScreen && this.startScreen.isHidden) {
+        this.startScreen.updatePosition();
+      }
+    });
   }
 
   @HostListener('window:keydown', ['$event']) // später durch richtige taste ersetzen
@@ -64,12 +76,13 @@ export class AppComponent {
 
   ngOnDestroy(): void {
     this.game.stopGame();
+    if (this.gameLoopSubscription) {
+      this.gameLoopSubscription.unsubscribe();
+    }
   }
 
   async onStartGame(): Promise<void> {
-    await this.game.init(this.ctx, this.ctxUI);
-    this.game.startGame();
-    this.startScreen?.hide();
+    this.startScreen?.zoomOut();
     setTimeout(() => {
       this.showStartScreen = false;
 

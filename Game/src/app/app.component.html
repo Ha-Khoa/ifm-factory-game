@@ -1,4 +1,4 @@
-<app-start-screen *ngIf="showStartScreen" (startClicked)="onStartGame()"></app-start-screen>
+<app-start-screen (startClicked)="onStartGame()"></app-start-screen>
 
 <div #gameContainer class="game-container">
   <canvas #game width="{{ cwidth }}" height="{{ cheight }}"></canvas>

@@ -10,12 +10,16 @@ import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
+import { Subject } from 'rxjs';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
+
+  private gameLoopTick = new Subject<void>();
+  public gameLoopTick$ = this.gameLoopTick.asObservable();
 
   // Gibt an, ob das Spiel aktuell läuft
   private GameRunning!: boolean;
@@ -171,11 +175,11 @@ export class GameService {
     this.ctx.imageSmoothingEnabled = true;
     const loop = () => {
       if (!this.GameRunning) return;
-
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
       // Update-Phase
+      this.gameLoopTick.next();
       RenderingService.instance().updateFPS()
       this.player.changeVelocity();
       this.player.updatePlayer();
