@@ -73,6 +73,10 @@ export class ConveyorBelt extends RenderObject{
        this._spawnRate = spawnRate;
        this._maxItems = maxItems;
        this._conveyorType = conveyorType;
+       // Randomize initial spawn time to prevent all conveyors spawning simultaneously
+       if (canSpawnItems) {
+           this._lastSpawnTime = Date.now() - Math.random() * spawnRate;
+       }
    }
 
 
@@ -140,10 +144,10 @@ export class ConveyorBelt extends RenderObject{
            if (canSpawn){
                 let spawnSuccess = false;
                 if (this._conveyorType === ConveyorType.PACKAGES){
-                    this.spawnPackage();
+                    spawnSuccess = this.spawnPackage();
                 }
                 else {
-                    this.spawnProduct(typeProduct);
+                    spawnSuccess = this.spawnProduct(typeProduct);
                 }
                 if (spawnSuccess) {
                     this._lastSpawnTime = currentTime;
