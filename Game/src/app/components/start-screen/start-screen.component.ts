@@ -94,7 +94,7 @@ export class StartScreenComponent implements OnInit {
     const angle = renderingService.angle;
     const fov = renderingService.fov;
     const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset;
-    const y = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov) * Math.cos(angle);
+    const y = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov);
 
     const width = '200px';
     const height = '150px';
@@ -111,18 +111,24 @@ export class StartScreenComponent implements OnInit {
   public updatePosition() {
     const style = this.containerRef.nativeElement.style;
     const renderingService = RenderingService.instance();
-
-    // Calculate position dynamically
     const angle = renderingService.angle;
     const fov = renderingService.fov;
-    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset;
-    const y = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov) * Math.cos(angle);
 
-    style.setProperty('top', `${y}px`);
-    style.setProperty('left', `${x - (parseInt(style.getPropertyValue('width')) / 2)}px`);
+    // Unterschiedliche Y Coords, sonst Sprung beim kompletten herauszoomen
+    const animationY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov);
+    const gameY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov) * Math.cos(angle);
+    const y = fov <= 2.5 ? gameY : animationY;
 
     if (fov <= 2.5) {
       style.setProperty('transition', 'none');
     }
+
+
+
+    // Calculate position dynamically
+    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset;
+    style.setProperty('top', `${y}px`);
+    style.setProperty('left', `${x - (parseInt(style.getPropertyValue('width')) / 2)}px`);
+
   }
 }
