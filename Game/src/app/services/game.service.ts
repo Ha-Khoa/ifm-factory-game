@@ -10,6 +10,7 @@ import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
+import { Subject } from 'rxjs';
 import {HudComponent} from '../components/hud/hud.component';
 import {HudStateService} from '../components/hud/HudStateService';
 
@@ -18,6 +19,9 @@ import {HudStateService} from '../components/hud/HudStateService';
   providedIn: 'root'
 })
 export class GameService {
+
+  private gameLoopTick = new Subject<void>();
+  public gameLoopTick$ = this.gameLoopTick.asObservable();
 
   // Gibt an, ob das Spiel aktuell läuft
   private GameRunning!: boolean;
@@ -62,7 +66,7 @@ export class GameService {
     // Initialisiere Spielobjekte
     this.playerVelocity = Gamefield.fieldsize * 4; // in Pixel pro Sekunde
     this.player = new Player(
-      new Hitbox(new Coordinates(50, 50), Gamefield.fieldsize * 4/5 , Gamefield.fieldsize * 2/5),
+      new Hitbox(new Coordinates(200, 250), Gamefield.fieldsize * 4/5 , Gamefield.fieldsize * 2/5),
       this.playerVelocity,
       this.gamefield
     );
@@ -173,11 +177,11 @@ export class GameService {
     this.ctx.imageSmoothingEnabled = true;
     const loop = () => {
       if (!this.GameRunning) return;
-
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
       // Update-Phase
+
       RenderingService.instance().updateFPS()
       this.player.changeVelocity();
       this.player.updatePlayer();
@@ -195,15 +199,19 @@ export class GameService {
       // Render-Phase
       this.player.render();
       this.player.updateProductInHand();
+      RenderingService.instance().zoomOut();
+      RenderingService.instance().convertToCameraPOV(this.player.camera);
       RenderingService.instance().render();
+
 
       // Render Particles
       this.interactableManager.resetParticleFields();
+      this.interactableManager.checkPackageInHand(this.player);
       this.interactableManager.checkMachineNeedsProduct(this.player);
 
       // Draw machines Item Needs Popup
-      this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines())
-      this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines())
+      this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
+      this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
 
       if (this.player.inventory === null) {
 
@@ -211,7 +219,7 @@ export class GameService {
         const itemInRange = Products.checkForInteraction(this.player.hitbox);
 
         if (itemInRange) {
-          this.uiService.drawItemPopup(itemInRange);
+          this.uiService.drawItemPopup(itemInRange, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
         } else {
           this.uiService.clearItemPopup();
         }
@@ -220,7 +228,7 @@ export class GameService {
         // Wenn wir was tragen: Sicherstellen, dass das Popup weg ist!
         this.uiService.clearItemPopup();
       }
-
+            this.gameLoopTick.next();
       requestAnimationFrame(loop);
     };
 

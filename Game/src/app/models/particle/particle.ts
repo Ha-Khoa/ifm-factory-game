@@ -1,3 +1,5 @@
+import { Coordinates } from "../coordinates/coordinates";
+
 export class Particle {
 
     private static lastId : number = 0;
@@ -13,6 +15,7 @@ export class Particle {
     private _size: number;
     private _color: string;
     private _type: string;
+    private _worldCoordinates: Coordinates;
     
     constructor(x: number, y: number, z: number,
                 vx: number, vy: number, vz: number,
@@ -31,6 +34,7 @@ export class Particle {
         this._size = size;
         this._color = color;
         this._type = type;
+        this._worldCoordinates = new Coordinates(x, y)
     }
 
     get id(): number { return this._id; }
@@ -45,6 +49,8 @@ export class Particle {
     get size(): number { return this._size; }
     get color(): string { return this._color; }
     get type(): string { return this._type; }
+    get worldCoordinates(): Coordinates { return this._worldCoordinates }
+    set worldCoordinates(v: Coordinates) { this._worldCoordinates = v; }
 
     set x(v: number) { this._x = v; }
     set y(v: number) { this._y = v; }

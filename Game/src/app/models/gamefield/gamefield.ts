@@ -15,11 +15,11 @@ export class Gamefield {
     // Interaktive Objekte (Wände, Maschinen)
     interactableObjects!: RenderObject[];
     // Größe eines einzelnen Feldes in Pixeln
-    static fieldsize: number = Math.round(window.innerWidth / 30);
+    static fieldsize: number = 50;
     // Anzahl der Reihen
-    rows!: number;
+    static rows: number = 19;
     // Anzahl der Spalten
-    cols!: number;
+    static cols: number = 30;
 
 
     
@@ -28,8 +28,6 @@ export class Gamefield {
       console.log(window.innerHeight)
         this.environmetObjects = [];
         this.interactableObjects = [];
-        this.cols = 30;
-        this.rows = 19;
         //Gamefield.fieldsize = Math.round(window.innerWidth / this.cols);
         this.generateEnvironment();
         this.generateInteractableObjects();
@@ -77,9 +75,9 @@ export class Gamefield {
      */
     generateEnvironment()
     {
-        for(let i = 0; i < this.rows + 1; i++)
+        for(let i = 0; i < Gamefield.rows + 1; i++)
         {
-            for(let j = 0; j < this.cols; j++)
+            for(let j = 0; j < Gamefield.cols; j++)
             {
                 this.environmetObjects.push(new RenderObject(
                     `floor-${i}-${j}`,
@@ -92,14 +90,14 @@ export class Gamefield {
                     -1000,
                     "/images/Metal_16-512x512.png",
                     undefined,
-                    "#000000aa",
+                    "#464646ff",
                     []
                 ))
             }
         }
-        for(let i = 0; i < (this.rows + 1) * 8; i++)
+        for(let i = 0; i < (Gamefield.rows + 1) * 8; i++)
         {
-            for(let j = 0; j < this.cols; j++)
+            for(let j = 0; j < Gamefield.cols; j++)
             {
                 this.environmetObjects.push(new RenderObject(
                     `floor2-${i}-${j}`,
@@ -112,7 +110,7 @@ export class Gamefield {
                     -1000,
                     "/images/Metal_16-512x512.png",
                     undefined,
-                    "#686767aa",
+                    "#686767ff",
                     []
                 ))
             }

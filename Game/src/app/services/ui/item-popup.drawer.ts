@@ -3,6 +3,7 @@ import { Package } from '../../models/package/package';
 import { Rect } from './rect.interface';
 import { CanvasHelper } from './canvas.helper';
 import { UI_THEME } from './theme.manager';
+import { RenderingService } from '../rendering.service';
 
 /**
  * Handles drawing popups for items on the ground (Products and Packages).
@@ -13,10 +14,10 @@ export class ItemPopupDrawer {
    * @param images A map of loaded image elements.
    * @param angle The isometric projection angle.
    */
+
   constructor(
     private ctx: CanvasRenderingContext2D,
-    private images: { [key: string]: HTMLImageElement },
-    private angle: number
+    private images: { [key: string]: HTMLImageElement }
   ) {}
 
   /**
@@ -24,7 +25,7 @@ export class ItemPopupDrawer {
    * @param item The item to display the popup for.
    * @returns An array of Rects representing the areas drawn, for later clearing.
    */
-  public draw(item: Product | Package): Rect[] {
+  public draw(item: Product | Package, offsetCamera: [number, number], fov: number): Rect[] {
     this.ctx.save();
 
     let title: string;
@@ -42,15 +43,15 @@ export class ItemPopupDrawer {
       titleImage = this.images[`/images/Products/${item.name.toLowerCase().replace(' ', '-')}.png`];
     }
 
-    const lineHeight = 20;
-    const padding = 15;
-    const height = 15 + (contentLines.length * lineHeight) + padding;
-    const width = 150;
-
+    const lineHeight = 20 * fov / 2.5;
+    const padding = 15 * fov / 2.5;
+    const height = 15 * fov / 2.5 + (contentLines.length * lineHeight) + padding;
+    const width = 150 * fov / 2.5;
+    const angle = RenderingService.instance().angle;
     const popupConfig = { width, height, radius: 10, borderWidth: 2 };
 
-    const x = item.position.x + (item.size / 2) - (width / 2);
-    const y = (item.position.y * Math.cos(this.angle)) - height - 40;
+    const x = item.position.x * fov + (item.size / 2) - (width / 2) + offsetCamera[0];
+    const y = item.position.y * Math.cos(angle) * fov - height - 40 + offsetCamera[1] * Math.cos(angle);
 
     // The 'unlocked' parameter is undefined to trigger the special highlight border
     CanvasHelper.drawStyledPopupBackground(this.ctx, x, y, popupConfig);
