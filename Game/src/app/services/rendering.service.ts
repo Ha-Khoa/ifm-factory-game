@@ -243,17 +243,17 @@ export class RenderingService {
 
   async zoomOut()
   {
-    if(this._fov > 4)
+    if(this._fov > 2.5)
     {
-    this._camera.fov -= 0.05
-    this._fov -= 0.05
+    this._camera.fov -= 0.1
+    this._fov -= 0.1
     // Prüft hier ob Kamera Out Of Bounds
     //this._camera.x = this._camera.x;
     //this._camera.y = this._camera.y;
     }
     else{
-      this._camera.fov = 4;
-      this._fov = 4;
+      this._camera.fov = 2.5;
+      this._fov = 2.5;
     }
 
   }
