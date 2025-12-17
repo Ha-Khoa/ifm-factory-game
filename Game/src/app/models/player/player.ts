@@ -58,11 +58,11 @@ export class Player {
 
    // Speed boost properties
    private _baseVelocity: number;
-   private _boostVelocity: number = 1000
+   private _boostVelocity: number = 800
    private _isBoosting: boolean = false;
    private _boostCooldown: number = 1000; // 1 second cooldown
    private _lastBoostTime: number = -Infinity; // Start with cooldown available
-   private _boostDuration: number = 200; // 200ms boost duration
+   private _boostDuration: number = 350; // 200ms boost duration
 
    constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield) {
         this._lastDirection = Direction.RIGHT;
@@ -158,7 +158,6 @@ export class Player {
       // Handle movement direction
       let numPressedDirectional = 0;
       this._direction = null; // Reset direction at the start of each call
-      console.log(Object.entries(input))
 
       for (const [key, pressed] of Object.entries(input) ) {
           if (pressed && key in KEY_TO_DIRECTION) {
@@ -194,6 +193,8 @@ export class Player {
         this._isBoosting = true;
         this._lastBoostTime = performance.now();
         this._velocity = this._boostVelocity; // Boost-Geschwindigkeit
+        this._renderingObject.type = 'gif'
+        this._renderingObject.frames = ['/images/fox/fox-sprint.png']
 
         setTimeout(() => {
             this._velocity = this._baseVelocity;
@@ -291,7 +292,7 @@ export class Player {
     updatePlayerAnimation()
     {
 
-        if(this._directionPressed)
+        if(this._directionPressed && !this._isBoosting)
         {
 
             this._renderingObject.type = "gif"
@@ -307,7 +308,7 @@ export class Player {
                 this._timerManagerService.cancel();
             }
         }
-        else
+        else if (!this._isBoosting)
         {
             this._renderingObject.type = "static Img"
             this.sitPlayer();
