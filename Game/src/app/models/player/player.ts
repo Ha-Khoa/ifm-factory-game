@@ -56,6 +56,13 @@ export class Player {
    private _holdingAnimation: string[];
    private _camera: Camera;
 
+   // Speed boost properties
+   private _baseVelocity: number;
+   private _boostVelocity: number = 1000
+   private _isBoosting: boolean = false;
+   private _boostCooldown: number = 1000; // 1 second cooldown
+   private _lastBoostTime: number = -Infinity; // Start with cooldown available
+   private _boostDuration: number = 200; // 200ms boost duration
 
    constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield) {
         this._lastDirection = Direction.RIGHT;
@@ -66,6 +73,7 @@ export class Player {
        this._hitbox = hitbox;
        this._position = hitbox.position
        this._velocity = velocity;
+       this._baseVelocity = velocity; // Store base velocity
        this._gamefield = gamefield;
        this._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2), 60);
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
@@ -140,38 +148,58 @@ export class Player {
 
 
 
-   /**
-    * Setzt die Eingabe-Richtung basierend auf gedrückten Tasten.
-    * @param input Record mit Tastenstatus (z.B. {'w': true, 'a': false})
-    */
-   setInput(input: Record<string, boolean>) {
-       this._input  = input;
-       let numPressed = 0;
-       this._direction = null;
-       for (const [key, pressed] of Object.entries(input)) {
-           if (pressed && key in KEY_TO_DIRECTION) {
-               this._direction = KEY_TO_DIRECTION[key];
-               numPressed++;
-           }
-       }
-       if (numPressed === 0) {
-           this._directionPressed = false;
-       }
-       else
-       {
-           this._directionPressed = true;
-       }
-       if(this._direction === Direction.RIGHT)
-       {
-        this._renderingObject.animationDirection = Direction.RIGHT;
-       }
-       else if (this._direction === Direction.LEFT)
-        {
-            this._renderingObject.animationDirection = Direction.LEFT;
-        }
+    /**
+     * Setzt die Eingabe-Richtung basierend auf gedrückten Tasten und löst den Boost aus.
+     * @param input Record mit Tastenstatus (z.B. {'w': true, 'a': false})
+     */
+    setInput(input: Record<string, boolean>) {
+      this._input  = input;
 
-   }
+      // Handle movement direction
+      let numPressedDirectional = 0;
+      this._direction = null; // Reset direction at the start of each call
+      console.log(Object.entries(input))
 
+      for (const [key, pressed] of Object.entries(input) ) {
+          if (pressed && key in KEY_TO_DIRECTION) {
+              this._direction = KEY_TO_DIRECTION[key];
+              numPressedDirectional++
+          }
+      }
+
+      // If no directional keys are currently pressed, ensure _direction is null and _directionPressed is false
+      if (numPressedDirectional === 0) {
+          this._direction = null;
+          this._directionPressed = false;
+      } else {
+          this._directionPressed = true;
+      }
+
+      if (this._direction === Direction.RIGHT) {
+          this._renderingObject.animationDirection = Direction.RIGHT;
+      } else if (this._direction === Direction.LEFT) {
+          this._renderingObject.animationDirection = Direction.LEFT;
+      }
+
+      // Handle shift for boost
+      const now = performance.now();
+      if (input[' '] && !this._isBoosting && (now - this._lastBoostTime > this._boostCooldown)) {
+        this.activateBoost();
+      }
+    }
+    /**
+     * Aktiviert den Geschwindigkeits-Boost.
+     */
+    private activateBoost() {
+        this._isBoosting = true;
+        this._lastBoostTime = performance.now();
+        this._velocity = this._boostVelocity; // Boost-Geschwindigkeit
+
+        setTimeout(() => {
+            this._velocity = this._baseVelocity;
+            this._isBoosting = false;
+        }, this._boostDuration);
+    }
 
 
 
