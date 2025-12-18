@@ -36,7 +36,7 @@ export class Products {
     new Product(3, "Copper Wire", 15, 22, 15, true, "/images/Products/copper-wire.png"),
     new Product(4, "Plastic Case", 50, 50, [{productId: 1, quantity: 3}], true, "/images/Products/plastic-case.png"),
     new Product(5, "Circuit Board", 120, 150, [{productId: 2, quantity: 1}, {productId: 3, quantity: 1}], true, "/images/Products/circuit-board.png"),
-    new Product(6, "Basic Sensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 3}, {productId: 5, quantity: 2}], true, "/images/Products/basic-sensor.png")
+    new Product(6, "Basic Sensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png")
   ]
 
   /**

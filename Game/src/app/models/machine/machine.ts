@@ -154,15 +154,14 @@ export class Machine extends InteractableObject {
       product.destroy();
       Products.deleteGeneratedProduct(product);
 
+      console.log(`Added product ${product.name} to machine ${this._name}! Now checking if machine can produce.`);
       if (this._inventory.length === this.inputRequirements.length) {
         // Check if the amount of each product in the inventory equals than the required amount
         for(let invItem of this._inventory){
-          if(invItem.quantity !== requiredProduct.quantity) {
-            let missingAmount = requiredProduct.quantity - invItem.quantity;
-            if(missingAmount > 0) {
-              console.log(`The product ${invItem.product.name} is not enough for machine ${this._name}! Need ${missingAmount} more of it.`)
-              return resolve(true);
-            }
+          let missingAmount = this.getQuantityOfThisMissingProduct(invItem.product);
+          if(missingAmount > 0) {
+            console.log(`The product ${invItem.product.name} is not enough for machine ${this._name}! Need ${missingAmount} more of it.`)
+            return resolve(true);
           }
         }
 
@@ -176,6 +175,40 @@ export class Machine extends InteractableObject {
       }
       // Removed stray destroy call on parameter
     });
+  }
+
+  /**
+   * Retrieves the quantity of the specified product in the inventory.
+   *
+   * @param {Product} product - The product to find in the inventory.
+   * @return {number} The quantity of the specified product in the inventory. Returns 0 if the product is not found.
+   */
+  getQuantityOfProductInInventory(product: Product): number {
+    let productRequirements = this._inventory.find(inv => inv.product.id === product.id);
+    return productRequirements !== undefined ? productRequirements.quantity : 0;
+  }
+
+  /**
+   * Calculates the quantity of the specified product needed based on input requirements.
+   *
+   * @param {Product} product - The product for which the required quantity is to be determined.
+   * @return {number} The quantity of the specified product needed. Returns 0 if the product is not found in the input requirements.
+   */
+  getQuantityOfThisNeededProduct(product: Product): number{
+    let productRequirements = this.inputRequirements.find(req => req.product.id === product.id);
+    return productRequirements !== undefined ? productRequirements.quantity : 0;
+  }
+
+  /**
+   * Calculates and returns the quantity of a specific product that is missing from the inventory.
+   *
+   * @param {Product} product - The product for which the missing quantity is being calculated.
+   * @return {number} The number of units of the product that are missing, determined by subtracting the inventory quantity from the needed quantity.
+   */
+  getQuantityOfThisMissingProduct(product: Product): number{
+    let inventory:number = this.getQuantityOfProductInInventory(product);
+    let needed:number = this.getQuantityOfThisNeededProduct(product);
+    return needed - inventory;
   }
 
   /**
