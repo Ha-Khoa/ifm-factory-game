@@ -40,7 +40,17 @@ export class SlotMachineService {
   private _lockTarget: number[] = [0,0,0,0,0];
   private _lockDuration: number = 200; 
 
+  private _blinkDuration: number = 1000;
+
+  private _blinkT: number = 0;
+
+  private _blinkState: boolean = true;
+
+  private _activePatterns: number[][][] = [];
+
   private _probabilitys: number[] = [0.05, 0.1, 0.25, 0.13, 0.25, 0.2, 0.02]; // Summe muss gleich 1 sein
+
+  private _iconMultiplier: number[] = [20, 2, 1, 2, 1, 1.5, -50];
 
   private _slots: SlotIcon[][] = [];
 
@@ -129,7 +139,17 @@ export class SlotMachineService {
       }
     }
       this.drawEdge(this._sizePercentage);
+    if(this._stopped.every((stopped) => stopped))
+    {
+      this.drawPattern("#ff0000");
+    }
+    else
+    {
+      this._activePatterns = [];
+    }
   }
+
+
 
   calcNewIcon(): string
   {
@@ -156,6 +176,7 @@ export class SlotMachineService {
       this._locking[i] = false;
       this._lockT[i] = 0;
     }
+    
     this.stopSpin();
   }
 
@@ -167,6 +188,15 @@ export class SlotMachineService {
     for (let i = 0; i < 5; i++) {
       this.beginStop(i);
       await new Promise(r => setTimeout(r, this._delayBetweenStops));
+
+    }
+    this._slots.forEach((icon) => {
+      icon.sort((a,b) => a.progress - b.progress);
+    });
+    const won = this.checkAllPattern();
+    if(won > 0)
+    {
+      console.log("Gewonnen: " + won);
     }
   }
 
@@ -183,6 +213,251 @@ export class SlotMachineService {
     this._lockStart[i] = p0;
     this._lockTarget[i] = this._targets[i];
     this._velocitys[i] = 0;
+  }
+
+  checkAllPattern() : number
+  {
+    let totalWon = 0;
+
+
+    const emptyPattern = (): number[][] => Array.from({ length: 5 }, () => [0, 0, 0]);
+
+    const getVisibleImg = (reel: number, row: number): string | null => {
+
+      const slot = this._slots[reel]?.[row + 1];
+      return slot ? slot.img : null;
+    };
+
+    const addPaylinePattern = (rows: number[], start: number, length: number): number[][] => {
+      const p = emptyPattern();
+      for (let i = start; i < start + length; i++) {
+        const r = rows[i];
+        if (r < 0 || r > 2) continue;
+        p[i][r] = 1;
+      }
+      return p;
+    };
+
+    const checkPayline = (rows: number[], multiplier: number): number => {
+      if (rows.length !== 5) return 0;
+      for (const r of rows) if (r < 0 || r > 2) return 0;
+
+      const imgs: (string | null)[] = new Array(5);
+      for (let i = 0; i < 5; i++) imgs[i] = getVisibleImg(i, rows[i]);
+
+      let bestLen = 0;
+      let bestStart = 0;
+      let bestImg = '';
+
+      let runStart = 0;
+      let runLen = 0;
+      let runImg: string | null = null;
+
+      for (let i = 0; i < 5; i++) {
+        const img = imgs[i];
+        if (!img) {
+          // break the run on missing data
+          if (runLen > bestLen) {
+            bestLen = runLen;
+            bestStart = runStart;
+            bestImg = runImg ?? '';
+          }
+          runImg = null;
+          runLen = 0;
+          runStart = i + 1;
+          continue;
+        }
+
+        if (runImg === null || img !== runImg) {
+          // finalize previous run
+          if (runLen > bestLen) {
+            bestLen = runLen;
+            bestStart = runStart;
+            bestImg = runImg ?? '';
+          }
+          // start new run
+          runImg = img;
+          runStart = i;
+          runLen = 1;
+        } else {
+          runLen++;
+        }
+      }
+
+      // finalize last run
+      if (runLen > bestLen) {
+        bestLen = runLen;
+        bestStart = runStart;
+        bestImg = runImg ?? '';
+      }
+
+      if (bestLen < 3) return 0;
+      if (bestLen > 5) bestLen = 5;
+
+      this._activePatterns.push(addPaylinePattern(rows, bestStart, bestLen));
+      const idx = this._slotIcons.indexOf(bestImg);
+      const iconMult = idx >= 0 ? this._iconMultiplier[idx] : 1;
+      return bestLen * multiplier * iconMult;
+    };
+
+    // Checks a diagonal of length 3 starting at reel `startReel` with slope +1 (down) or -1 (up).
+    const checkDiagonal3 = (startReel: number, slope: 1 | -1, multiplier: number): number => {
+      if (startReel < 0 || startReel > 2) return 0;
+      const startRow = slope === 1 ? 0 : 2;
+      const rows3 = [startRow, startRow + slope, startRow + 2 * slope];
+      if (rows3.some(r => r < 0 || r > 2)) return 0;
+
+      const img0 = getVisibleImg(startReel, rows3[0]);
+      const img1 = getVisibleImg(startReel + 1, rows3[1]);
+      const img2 = getVisibleImg(startReel + 2, rows3[2]);
+      if (!img0 || !img1 || !img2) return 0;
+      if (img0 !== img1 || img0 !== img2) return 0;
+
+      const p = emptyPattern();
+      p[startReel][rows3[0]] = 1;
+      p[startReel + 1][rows3[1]] = 1;
+      p[startReel + 2][rows3[2]] = 1;
+      this._activePatterns.push(p);
+
+      const idx = this._slotIcons.indexOf(img0);
+      const iconMult = idx >= 0 ? this._iconMultiplier[idx] : 1;
+      return 3 * multiplier * iconMult;
+    };
+
+    // Column wins (3 stacked in a reel)
+    for(let i = 0; i < 5; i++)
+    {
+      const check = emptyPattern();
+      check[i] = [1,1,1];
+      totalWon += this.checkPattern(check, 5);
+    }
+    totalWon += this.checkPattern([[1,1,1],[1,1,1],[1,1,1],[1,1,1],[1,1,1]], 500); 
+
+    // Horizontal lines (top/middle/bottom): pay 3/4/5 in a row (no stacking)
+    totalWon += checkPayline([0, 0, 0, 0, 0], 10);
+    totalWon += checkPayline([1, 1, 1, 1, 1], 10);
+    totalWon += checkPayline([2, 2, 2, 2, 2], 10);
+
+    // Down then up: 0-1-2-1-0
+    {
+      const p = emptyPattern();
+      const rows = [0, 1, 2, 1, 0];
+      for (let i = 0; i < 5; i++) p[i][rows[i]] = 1;
+      totalWon += this.checkPattern(p, 12);
+    }
+
+    // Up then down: 2-1-0-1-2
+    {
+      const p = emptyPattern();
+      const rows = [2, 1, 0, 1, 2];
+      for (let i = 0; i < 5; i++) p[i][rows[i]] = 1;
+      totalWon += this.checkPattern(p, 12);
+    }
+
+    // Simple diagonals of length 3 (both directions), across all 3-reel windows
+    for (let startReel = 0; startReel <= 2; startReel++) {
+      totalWon += checkDiagonal3(startReel, 1, 10);  // 0-1-2
+      totalWon += checkDiagonal3(startReel, -1, 10); // 2-1-0
+    }
+
+    return totalWon;
+
+  }
+
+  checkPattern(pattern: number[][], multiplier: number) : number
+  {
+    // A pattern wins only if ALL marked cells match the same symbol.
+    let expected = 0;
+    let matched = 0;
+    let lastImg = "";
+
+    for (let i = 0; i < pattern.length; i++) {
+      for (let j = 0; j < pattern[i].length; j++) {
+        if (pattern[i][j] !== 1) continue;
+        expected++;
+
+        // Visible rows are mapped to slot indices 1..3 (skip the top offscreen icon at index 0)
+        const slotRowIndex = j + 1;
+        const slot = this._slots[i]?.[slotRowIndex];
+        if (!slot) return 0;
+
+        const img = slot.img;
+        if (lastImg === "") {
+          lastImg = img;
+          matched++;
+          continue;
+        }
+
+        if (img !== lastImg) return 0; // fail fast on first mismatch
+        matched++;
+      }
+    }
+
+    if (expected > 0 && matched === expected) {
+      this._activePatterns.push(pattern);
+      const idx = this._slotIcons.indexOf(lastImg);
+      const multiplier2 = idx >= 0 ? this._iconMultiplier[idx] : 1;
+      return matched * multiplier * multiplier2;
+    }
+
+    return 0;
+  }
+
+  drawPattern(_fallbackColor: string = '#ff0000')
+  {
+    if (this._activePatterns.length === 0) return;
+
+    // Blink timing should advance once per frame (not once per pattern)
+    const dt = RenderingService.instance().deltaTime ? RenderingService.instance().deltaTime : 1;
+    this._blinkT += dt;
+    if (this._blinkT >= this._blinkDuration)
+    {
+      this._blinkT = 0;
+      this._blinkState = !this._blinkState;
+    }
+    if (this._blinkState === false) return;
+
+    // Palette for different patterns; alpha makes overlaps visible
+    const palette: Array<[number, number, number]> = [
+      [255, 60, 60],
+      [60, 160, 255],
+      [60, 220, 140],
+      [255, 180, 60],
+      [200, 80, 255],
+      [60, 220, 220],
+    ];
+
+    this._ctx.save();
+    this._ctx.lineWidth = 4;
+    this._ctx.globalCompositeOperation = 'source-over';
+
+    for (let pIndex = 0; pIndex < this._activePatterns.length; pIndex++)
+    {
+      const pattern = this._activePatterns[pIndex];
+      const [r, g, b] = palette[pIndex % palette.length];
+      const fill = `rgba(${r}, ${g}, ${b}, 0.18)`;
+      const stroke = `rgba(${r}, ${g}, ${b}, 0.70)`;
+
+      for(let i = 0; i < pattern.length; i++)
+      {
+        for(let j = 0; j < pattern[i].length; j++)
+        {
+          if(pattern[i][j] === 1)
+          {
+            const x = i * (this._imgSize + this._iconEdgeOffset * 2) + this._ctx.canvas.width * (this._sizePercentage) / 200 + this._rowOffset * (i + 1) - this._rowOffset / 2;
+            const y = j * (this._imgSize + this._iconEdgeOffset * 2) + this._spawnStartY + 2 * this._iconEdgeOffset + this._imgSize;
+
+            // semi-transparent fill + stroke so overlaps remain visible
+            this._ctx.fillStyle = fill;
+            this._ctx.strokeStyle = stroke;
+            this._ctx.fillRect(x - 6, y - 6, this._imgSize + 12, this._imgSize + 12);
+            this._ctx.strokeRect(x - 6, y - 6, this._imgSize + 12, this._imgSize + 12);
+          }
+        }
+      }
+    }
+
+    this._ctx.restore();
   }
 
   /**
