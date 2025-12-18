@@ -87,7 +87,7 @@ export class InteractableManager {
         if(name === player.inventory.name) {
           let needsProduct = true;
           for(let inv of machine.inventory) {
-            if(inv.product.name === name) {
+            if(machine.getQuantityOfThisMissingProduct(inv.product) === 0) {
               needsProduct = false;
               break;
             }

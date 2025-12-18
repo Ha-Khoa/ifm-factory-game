@@ -13,7 +13,7 @@ export class Particles {
     private _z: number;
     private _width: number;
     private _height: number;
-    private _colors: string[];;
+    private _colors: string[];
     private _timeSinceLastSpawn: number = 0;
 
     constructor(x: number, y: number, z: number,
@@ -79,7 +79,7 @@ export class Particles {
             particle.z -= particle.vz * deltaTime / 1000;
             particle.age += deltaTime / 1000;
             let speed = 10;
-            
+
             if((particle.x - this.x) - (particle.y - this.y) < 0 && (particle.x - this.x) + (particle.y - this.y) < this._width)
             {
                 particle.y += speed * deltaTime / 1000;
@@ -117,5 +117,5 @@ export class Particles {
     set y(v: number) { this._y = v; }
     set z(v: number) { this._z = v; }
     set width(v: number) { this._width = v; }
-    set height(v: number) { this._height = v; }     
+    set height(v: number) { this._height = v; }
 }
