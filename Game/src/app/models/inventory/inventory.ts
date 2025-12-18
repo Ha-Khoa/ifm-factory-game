@@ -1,7 +1,6 @@
 import {Inventory, InventoryItem} from "../../interfaces/inventory";
 import {Product} from "../product/product";
 import {Machine} from "../machine/machine";
-import {InteractableManager} from "../interactableObject/interactable-manager";
 
 export class InventoryManager {
     private static inventory: Inventory = {
@@ -9,7 +8,7 @@ export class InventoryManager {
         items: [],
         carriedItem: null
     };
-    
+
     static getMaxSlots(): number{
         return this.inventory.maxSlots;
     }
@@ -22,7 +21,7 @@ export class InventoryManager {
 
 
     // Zuerst habe ich diese Methode geschrieben, um ein Produkt abzuholen und abzulegen .
-    // Aber dann habe ich gemerkt, dass wir diese Methode eigentlich nicht brauchen. 
+    // Aber dann habe ich gemerkt, dass wir diese Methode eigentlich nicht brauchen.
     // Wir müssen nur zu jeder Maschine gehen und allen Produkte in einer Maschine ins Inventory hinzufügen.
     // Deshalb habe ich diese Codezeilen vorerst auskommentiert – bis zur nächsten Besprechung.
 
@@ -49,13 +48,13 @@ export class InventoryManager {
     //     return this.inventory.carriedItem;
     // }
 
-    // static isCarryingItem(): boolean { 
+    // static isCarryingItem(): boolean {
     //     return this.inventory.carriedItem !== null;
     // }
 
 
 
-    //Füge ein Item zum Inventar hinzu (wenn der Spieler ein Item sammelt, er wählen kann, Inventar hinzufügen oder tragen) 
+    //Füge ein Item zum Inventar hinzu (wenn der Spieler ein Item sammelt, er wählen kann, Inventar hinzufügen oder tragen)
     static addToInventory(product: Product, quantity: number): boolean {
         const existingItem = this.inventory.items.find(item => item.product.id === product.id);
         if (existingItem){
@@ -100,7 +99,7 @@ export class InventoryManager {
 
 
     //Übertragung der Produkte von Maschinen zum Inventar und umgekerht
-    
+
     static async transferToMachine(machine: Machine, product: Product):Promise<boolean> {
         if (!this.hasProduct(product.id, 1)) {
             console.log(`Nicht genug ${product.name} im Inventar`);
@@ -146,23 +145,23 @@ export class InventoryManager {
         }
         let success = true;
         while (machine.inventory.length > 0){
-            const product = machine.inventory.pop();
-            if (product && this.getAvailableSlots()){
-                this.addToInventory(product, 1);
-                console.log(`${product.name} von ${machine.name} genommen`);
+            const productRequirements = machine.inventory.pop();
+            if (productRequirements && this.getAvailableSlots()){
+                this.addToInventory(productRequirements.product, 1);
+                console.log(`${productRequirements.product.name} von ${machine.name} genommen`);
             }
-            else if (product){
-                machine.inventory.push(product);
+            else if (productRequirements){
+                machine.inventory.push(productRequirements);
                 success = false;
-                console.log(`Nicht genug Platz im Inventar für ${product.name}`);
+                console.log(`Nicht genug Platz im Inventar für ${productRequirements.product.name}`);
                 break;
             }
         }
-        return success; 
+        return success;
     }
 
     static takeProductFromMachine(machine: Machine, productName: string): boolean {
-        const productIndex = machine.inventory.findIndex(product => product.name === productName);
+        const productIndex = machine.inventory.findIndex(productRequirements => productRequirements.product.name === productName);
         if (productIndex === -1){
             console.log(`${productName} nicht in ${machine.name} gefunden`);
             return false;
@@ -173,10 +172,10 @@ export class InventoryManager {
             return false;
         }
 
-        const product = machine.inventory[productIndex];
+        const productRequirements = machine.inventory[productIndex];
         machine.inventory.splice(productIndex, 1);
-        this.addToInventory(product, 1);
-        console.log(`${product.name} von ${machine.name} genommen`);
+        this.addToInventory(productRequirements.product, 1);
+        console.log(`${productRequirements.product.name} von ${machine.name} genommen`);
         return true;
     }
 
@@ -185,14 +184,24 @@ export class InventoryManager {
         if (!machine.unlocked){
             return false;
         }
-        return machine.inputRequirements.some(req => req.name === product.name);
+        return machine.inputRequirements.some(productRequirements => productRequirements.product.name === product.name);
     }
 
     private static doesMachineHaveProduct(machine: Machine, product: Product): boolean {
         if(!machine.unlocked){
             return false;
         }
-        return machine.inventory.some(inv => inv.name === product.name);
+        return this.amountOfItemsInMachineInventory(machine, product) > 0;
+    }
+
+    private static amountOfItemsInMachineInventory(machine:Machine, product: Product): number {
+      machine.inventory.forEach(invRequirements => {
+        if(invRequirements.product.name === product.name){
+          return invRequirements.quantity;
+        }
+        return 0;
+      });
+      return 0;
     }
 
     static hasProduct(productId: number, quantity: number): boolean {
@@ -200,8 +209,8 @@ export class InventoryManager {
     }
 
     static isMachineReady(machine: Machine): boolean {
-        return machine.inputRequirements.every(requiredproduct => machine.inventory.some(inventoryproduct => inventoryproduct.name === requiredproduct.name));
-    } 
+        return machine.inputRequirements.every(productRequirements => machine.inventory.some(invRequirements => invRequirements.product.name === productRequirements.product.name));
+    }
 }
 
 

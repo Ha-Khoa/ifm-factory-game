@@ -10,8 +10,8 @@ import { Coordinates } from '../models/coordinates/coordinates';
 import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
-import {HudComponent} from '../components/hud/hud.component';
 import {HudStateService} from '../components/hud/HudStateService';
+import {Orders} from '../models/orders/orders';
 
 
 @Injectable({
@@ -171,6 +171,8 @@ export class GameService {
   startGame() {
     this.GameRunning = true;
     this.ctx.imageSmoothingEnabled = true;
+    // Initialize the first orders
+    Orders.initializeOrders();
     const loop = () => {
       if (!this.GameRunning) return;
 
@@ -204,6 +206,9 @@ export class GameService {
       // Draw machines Item Needs Popup
       this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines())
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines())
+
+      // Orders
+
 
       if (this.player.inventory === null) {
 
