@@ -81,9 +81,21 @@ export class MachinePopupDrawer {
     // console.log(offsetCamera)
 
     for (const machine of machines) {
-      const neededItems = machine.inputRequirements.filter(req => !machine.inventory.some(invItem => invItem.id === req.id));
+      const neededRequirements = machine.inputRequirements.filter(req => !machine.inventory.some(invItem => invItem.product.id === req.product.id && invItem.quantity >= req.quantity));
+      const itemsAlreadyInserted = machine.inventory.map(invItem => invItem.product.id);
+
+      // update the neededItems quantity
+      neededRequirements.forEach(req => {
+        if(itemsAlreadyInserted.includes(req.product.id)) {
+          req.quantity -= machine.inventory.find(invItem => invItem.product.id === req.product.id)?.quantity ?? 0;
+        }
+      })
+
+      const neededItems = neededRequirements.map(req => req.product);
 
       for (let i = 0; i < neededItems.length; i++) {
+        // if(machine.name === Products.getProductById(4)?.name)
+        //   console.log("B");
         const item = neededItems[i];
         const size = Gamefield.fieldsize * fov / 2;
         // const offset = (Gamefield.fieldsize - size) / 2;
@@ -106,9 +118,23 @@ export class MachinePopupDrawer {
         drawnRects.push({x, y, width: size, height: size, radius: 10});
 
         const img = this.images[item._img!];
+        const quantity = neededRequirements.find(req => req.product.id === item.id)?.quantity ?? 0;
         if (img) {
           this.ctx.drawImage(img, x + size / 4, y + size / 4, size / 2, size / 2);
         }
+
+        if(quantity > 1) {
+          this.ctx.beginPath();
+          this.ctx.fillStyle = UI_THEME.primary;
+          this.ctx.roundRect(x - 10, y + size - 10, 20, 20, 10);
+          this.ctx.fill();
+          this.ctx.fillStyle = '#000000';
+          this.ctx.textAlign = 'center';
+          this.ctx.font = `clamp(12px, min(1dvw, 1dvh), 16px) ${UI_THEME.fontFamily}`;
+          this.ctx.fillText(`${quantity}`, x, y + size + 5);
+          drawnRects.push({x:x - 10, y:y + size - 10, width: 20, height: 20, radius: 10});
+        }
+
         this.ctx.restore();
       }
     }
@@ -207,11 +233,15 @@ export class MachinePopupDrawer {
       currentY += lineHeight;
     } else {
       for (const req of machine.inputRequirements) {
-        const img = this.images[req._img!];
+        let product = req.product;
+        let quantity = req.quantity;
+
+        const img = this.images[product._img!];
+
         if (img) {
           this.ctx.drawImage(img, x - 70, currentY - 15, 20, 20);
         }
-        this.ctx.fillText(req.name, x, currentY);
+        this.ctx.fillText(`${quantity}x ${product.name}`, x, currentY);
         currentY += lineHeight;
       }
     }

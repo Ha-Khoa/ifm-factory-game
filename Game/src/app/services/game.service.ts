@@ -13,7 +13,7 @@ import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manag
 import { Subject } from 'rxjs';
 import {HudComponent} from '../components/hud/hud.component';
 import {HudStateService} from '../components/hud/HudStateService';
-
+import {Orders} from '../models/orders/orders';
 
 @Injectable({
   providedIn: 'root'
@@ -175,6 +175,8 @@ export class GameService {
   startGame() {
     this.GameRunning = true;
     this.ctx.imageSmoothingEnabled = true;
+    // Initialize the first orders
+    Orders.initializeOrders();
     const loop = () => {
       if (!this.GameRunning) return;
       // Bildschirm löschen
@@ -212,6 +214,9 @@ export class GameService {
       // Draw machines Item Needs Popup
       this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
+
+      // Orders
+
 
       if (this.player.inventory === null) {
 

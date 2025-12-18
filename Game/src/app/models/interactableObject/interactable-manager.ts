@@ -27,20 +27,13 @@ export class InteractableManager {
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       // Sensor-Maschine (benötigt Raw Silicon + Circuit Board)
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Basic Sensor", "/images/wall.png", "/images/wall.png",
-                  [Direction.DOWN], Products.getProductByName("Basic Sensor")!,
-                  [
-                    Products.getProductByName("Raw Silicon")!,
-                    Products.getProductByName("Circuit Board")!,
-                    Products.getProductByName("Plastic Case")!,
-                  ]),
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/wall.png", "/images/wall.png",
+                  [Direction.DOWN], Products.getProductById(6)!),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Plastic Case", "/images/wall.png", "/images/wall.png",
-                  [Direction.UP], Products.getProductByName("Plastic Case")!,
-                  [Products.getProductByName("Raw Plastic")!]),
-      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Circuit Board", "/images/wall.png", "/images/wall.png",
-                  [Direction.DOWN], Products.getProductByName("Circuit Board")!,
-                  [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper Wire")!])
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/wall.png", "/images/wall.png",
+                  [Direction.UP], Products.getProductById(4)!, 10000),
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/wall.png", "/images/wall.png",
+                  [Direction.DOWN], Products.getProductById(5)!)
     ];
 
     private submissionArea:SubmissionArea;
@@ -102,26 +95,20 @@ export class InteractableManager {
     }
   }
 
-  checkMachineNeedsProduct(player: Player)
-  {
+  checkMachineNeedsProduct(player: Player) {
     if(!player.inventory || !(player.inventory instanceof Product)) { return }
-    for(let machine of this.machines)
-    {
-      for(let product of machine.inputRequirements)
-      {
-        if(product.name === player.inventory.name)
-        {
+    for(let machine of this.machines) {
+      for(let productRequirements of machine.inputRequirements) {
+        let name = productRequirements.product.name;
+        if(name === player.inventory.name) {
           let needsProduct = true;
-          for(let inv of machine.inventory)
-          {
-            if(inv.name === product.name)
-            {
+          for(let inv of machine.inventory) {
+            if(machine.getQuantityOfThisMissingProduct(inv.product) === 0) {
               needsProduct = false;
               break;
             }
           }
-          if(needsProduct)
-          {
+          if(needsProduct) {
             this.enableParticleField(machine);
           }
         }
@@ -236,9 +223,15 @@ export class InteractableManager {
       let result;
 
       if (product && !Products.checkItemOnTable(machine.renderObject, product) && !machine.isProducing && !player.hasPicked()) {
+        console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
+The product is not already on the machine and the machine is not currently producing.`);
         result = await machine.addProduct(product);
+
+        console.log(`The result of ading the product ${product.name} to the machine ${machine.name} is:`, result)
       }
       else {
+        console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
+The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' : 'not ' }already on the machine and the machine is currently ${machine.isProducing ? '' : 'not '}producing.`);
         result = false;
       }
       // Produktion abgeschlossen

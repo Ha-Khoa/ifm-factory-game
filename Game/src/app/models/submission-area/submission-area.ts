@@ -1,11 +1,9 @@
 import { Coordinates } from "../coordinates/coordinates";
 import { Orders } from "../orders/orders";
-import { Product } from "../product/product";
 import { InteractableObject } from "../interactableObject/interactable-object";
 import { Direction } from "../../enums/direction";
 import { Package } from "../package/package";
 import {HudStateService} from '../../components/hud/HudStateService';
-import {HudComponent} from '../../components/hud/hud.component';
 
 export class SubmissionArea extends InteractableObject {
 
@@ -29,8 +27,14 @@ export class SubmissionArea extends InteractableObject {
       this.hud = hud;
     }
 
-    addPackage(packObj: Package): boolean
-    {
+    /**
+     * Processes the given package by comparing its contents with active orders, completing the order if it matches.
+     * Updates the HUD with rewards and money for completed orders and generates a new random order.
+     *
+     * @param {Package} packObj - The package object containing a list of products.
+     * @return {boolean} - Returns true if an active order is successfully completed using the given package. Returns false otherwise.
+     */
+    addPackage(packObj: Package): boolean {
         const packageIdsSet = new Set<number>();
         for (const prod of packObj.products) {
             packageIdsSet.add(prod.id);
@@ -58,9 +62,10 @@ export class SubmissionArea extends InteractableObject {
                 }
             }
             if (rightOrder) {
-                this.hud.addMoney(order.money);
+                this.hud.addMoney(order.grants);
                 this.hud.addScore(order.reward);
                 Orders.completeOrder(order.id);
+                Orders.generateRandomOrder();
                 return true;
             }
         }

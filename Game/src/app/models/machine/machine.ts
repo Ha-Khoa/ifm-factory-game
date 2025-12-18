@@ -33,9 +33,9 @@ export class Machine extends InteractableObject {
   // Produktionslogik
   private _productionRate!: number;
   private _productionTimer: number;
+
   // accessDirection handled via InteractableObject directions (first entry)
-  private _inventory: Product[] = [];
-  private _inputRequirements: Product[] = [];
+  private _inventory: {product:Product, quantity: number}[] = [];
   private _outputProduct!: Product;
   private _producting: boolean = false;
 
@@ -51,7 +51,7 @@ export class Machine extends InteractableObject {
    * @param imgLocked Bild-Pfad für gesperrten Zustand
    * @param accessDirection Richtung für Spieler-Interaktion
    * @param outputProduct Das zu produzierende Endprodukt
-   * @param inputRequirements Liste der benötigten Input-Produkte
+   * @param productionRate Die Produktionsrate in Millisekunden. Standardwert: 5000 = 5 Sekunden
    */
   constructor(
     x: number,
@@ -63,7 +63,7 @@ export class Machine extends InteractableObject {
     imgLocked: string,
     accessDirection: Direction[],
     outputProduct: Product,
-    inputRequirements: Product[]
+    productionRate:number = 5000
   ) {
     // Initialize InteractableObject: position, size, z, img, allowed directions
     super(
@@ -87,9 +87,8 @@ export class Machine extends InteractableObject {
     this._height = height;
 
     // Produktionslogik initialisieren
-    this._inputRequirements = inputRequirements;
     this._outputProduct = outputProduct;
-    this._productionRate = 5000; // 5 Sekunden Standard-Produktionszeit
+    this._productionRate = productionRate;
     this._productionTimer = this._productionRate / 1000; // Timer in Sekunden
 
     // Bilder setzen
@@ -132,31 +131,84 @@ export class Machine extends InteractableObject {
    *
    * @returns true = Produkt hinzugefügt, false = nicht benötigt, Product = Produktion abgeschlossen
    */
-  async addProduct(Product: Product): Promise<boolean | Product> {
+  async addProduct(product: Product): Promise<boolean | Product> {
     return new Promise((resolve) => {
-      const isRequired = this._inputRequirements.find(req => req.id === Product.id);
-      const alreadyInInventory = this._inventory.find(inv => inv.id === Product.id);
+      const requiredProduct = this.inputRequirements.find(req => req.product.id === product.id);
 
-      if (isRequired && alreadyInInventory === undefined) {
-        this._inventory.push(Product);
-
-        // Alle Inputs vorhanden? Starte Produktion
-        if (this._inventory.length === this._inputRequirements.length) {
-
-          this._inventory.forEach(prod => {
-            prod.destroy();
-            Products.deleteGeneratedProduct(prod);
-          });
-          resolve(this.produce());
-        } else {
-          resolve(true);
-        }
-        // Removed stray destroy call on parameter
-
-      } else {
-        resolve(false);
+      if(!requiredProduct) {
+        console.log(`The product ${product.name} is not required for machine ${this._name}!`)
+        return resolve(false);
       }
+
+      const inventoryEntry = this._inventory.find(inv => {
+        return inv.product.id === product.id && inv.quantity < requiredProduct.quantity
+      });
+
+      if(!inventoryEntry) {
+        // The item is not in the inventory yet, add it
+        this._inventory.push({product: product, quantity: 1});
+      }
+      else
+        inventoryEntry.quantity += 1;
+
+      product.destroy();
+      Products.deleteGeneratedProduct(product);
+
+      console.log(`Added product ${product.name} to machine ${this._name}! Now checking if machine can produce.`);
+      if (this._inventory.length === this.inputRequirements.length) {
+        // Check if the amount of each product in the inventory equals than the required amount
+        for(let invItem of this._inventory){
+          let missingAmount = this.getQuantityOfThisMissingProduct(invItem.product);
+          if(missingAmount > 0) {
+            console.log(`The product ${invItem.product.name} is not enough for machine ${this._name}! Need ${missingAmount} more of it.`)
+            return resolve(true);
+          }
+        }
+
+        this._inventory.forEach(invItem => {
+          invItem.product.destroy();
+          Products.deleteGeneratedProduct(invItem.product);
+        });
+        resolve(this.produce());
+      } else {
+        resolve(true);
+      }
+      // Removed stray destroy call on parameter
     });
+  }
+
+  /**
+   * Retrieves the quantity of the specified product in the inventory.
+   *
+   * @param {Product} product - The product to find in the inventory.
+   * @return {number} The quantity of the specified product in the inventory. Returns 0 if the product is not found.
+   */
+  getQuantityOfProductInInventory(product: Product): number {
+    let productRequirements = this._inventory.find(inv => inv.product.id === product.id);
+    return productRequirements !== undefined ? productRequirements.quantity : 0;
+  }
+
+  /**
+   * Calculates the quantity of the specified product needed based on input requirements.
+   *
+   * @param {Product} product - The product for which the required quantity is to be determined.
+   * @return {number} The quantity of the specified product needed. Returns 0 if the product is not found in the input requirements.
+   */
+  getQuantityOfThisNeededProduct(product: Product): number{
+    let productRequirements = this.inputRequirements.find(req => req.product.id === product.id);
+    return productRequirements !== undefined ? productRequirements.quantity : 0;
+  }
+
+  /**
+   * Calculates and returns the quantity of a specific product that is missing from the inventory.
+   *
+   * @param {Product} product - The product for which the missing quantity is being calculated.
+   * @return {number} The number of units of the product that are missing, determined by subtracting the inventory quantity from the needed quantity.
+   */
+  getQuantityOfThisMissingProduct(product: Product): number{
+    let inventory:number = this.getQuantityOfProductInInventory(product);
+    let needed:number = this.getQuantityOfThisNeededProduct(product);
+    return needed - inventory;
   }
 
   /**
@@ -220,11 +272,19 @@ export class Machine extends InteractableObject {
   get productionTimer(): number { return this._productionTimer; }
   set productionTimer(v: number) { this._productionTimer = v; }
 
-  get inventory(): Product[] { return this._inventory; }
-  set inventory(v: Product[]) { this._inventory = v; }
+  get inventory(): {product:Product, quantity: number}[] { return this._inventory; }
+  set inventory(v: {product: Product, quantity: number}[]) { this._inventory = v; }
 
-  get inputRequirements(): Product[] { return this._inputRequirements; }
-  set inputRequirements(v: Product[]) { this._inputRequirements = v; }
+  get inputRequirements(): {product:Product, quantity:number}[] {
+    let products:{product:Product, quantity:number}[] = [];
+    this.outputProduct.requires.forEach(req => {
+      let product = Products.getProductById(req.productId)
+      if(product !== undefined)
+        products.push({product: product, quantity: req.quantity})
+    });
+
+    return products;
+  }
 
   get outputProduct(): Product { return this._outputProduct; }
 

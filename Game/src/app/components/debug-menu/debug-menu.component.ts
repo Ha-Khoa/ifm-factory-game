@@ -25,8 +25,6 @@ export class DebugMenuComponent implements OnInit {
   products: Product[] = [];
   selectedProductId: number = 1;
   quantity: number = 1;
-  reward: number = 10;
-  money: number = 100;
 
   constructor(private api: ApiService) { }
 
@@ -58,13 +56,13 @@ export class DebugMenuComponent implements OnInit {
   }
 
   createRandomOrder() {
-    Orders.generateRandomOrders();
+    Orders.generateRandomOrder();
     console.log('Random order created');
   }
 
   createCustomOrder() {
     const items = [{ productId: Number(this.selectedProductId), quantity: this.quantity }];
-    Orders.addOrder(items, this.reward, this.money);
+    Orders.addOrder(items);
     console.log('Custom order created');
   }
 

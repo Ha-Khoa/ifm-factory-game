@@ -2,6 +2,7 @@ import { Coordinates } from "../coordinates/coordinates";
 import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
 import { Gamefield } from "../gamefield/gamefield"
+import {Products} from './products';
 // Removed import of Products to avoid circular dependency with products.ts
 
 export class Product {
@@ -11,19 +12,40 @@ export class Product {
   private _id: number;
   private _name: string;
   private _position!: Coordinates;
+  private _requires: {productId: number, quantity:number}[] = [];
+  private _costs: number = 0;
+  private _grants: number = 0; /* The value that u get when the product will be served */
+  private _reward: number = 0;
+  private _unlocked: boolean = false;
   _img?: string;
   private _renderObject!: RenderObject;
   private _size: number;
   private _z : number;
 
-  constructor(id: number, name: string, img?: string, z?: number) {
+  constructor(id: number, name: string, grants: number, reward: number, costs: number, unlocked?:boolean, img? :string, z?: number);
+  constructor(id: number, name: string, grants: number, reward: number, requires: {productId: number, quantity:number}[], unlocked?:boolean, img? :string, z?: number);
+
+  constructor(id: number, name: string, grants: number, reward: number, arg5: number | {productId: number, quantity:number}[], unlocked:boolean = false, img? :string, z?: number) {
+
+    // Check what type of constructor was called
+    if (typeof arg5 === "number") {
+      // Variante mit costs
+      this._costs = arg5;
+    } else if (Array.isArray(arg5)) {
+      // Variante mit requires
+      this._requires = arg5;
+    }
+
     this._instanceId = Product.lastInstanceId++;
     this._id = id;
     this._name = name;
     this._img = img;
     this._position = new Coordinates(0, 0);
     this._size = 2/5 * Gamefield.fieldsize; // Standardgröße für Produkte
-    this._z = z !== undefined ? z : 0;  
+    this._z = z !== undefined ? z : 0;
+    this._grants = grants;
+    this._reward = reward;
+    this._unlocked = unlocked;
     this._renderObject = new RenderObject(
       `product:${this._name}:${this._instanceId}`,
       "img",
@@ -49,14 +71,15 @@ export class Product {
   }
 
   copy(): Product {
-    return new Product(this._id, this._name, this._img, this._z);
+    return new Product(this._id, this._name, this._costs, this._grants, this._reward, this._unlocked, this._img, this._z);
   }
-
 
   destroy() {
     RenderingService.instance().deleteRenderingObjektByName(this._renderObject.name);
-
+    Products.deleteGeneratedProduct(this);
   }
+
+  unlock() { this.unlocked = true; }
 
   // Getters / Setters
   get id(): number { return this._id; }
@@ -94,4 +117,25 @@ export class Product {
     this._position.y = v;
     RenderingService.instance().sortRenderingBuffer()
   }
+
+  get costs(): number {
+    if(this._requires.length > 0){
+      let sum = 0;
+      this._requires.forEach(requirement => {
+        let product = Products.getProductById(requirement.productId);
+        sum += product !== undefined ? product.costs * requirement.quantity: 0;
+      });
+      return sum;
+    }
+    return this._costs;
+  }
+  set costs(value: number) { this._costs = value; }
+  get grants(): number { return this._grants; }
+  set grants(value: number) { this._grants = value; }
+  get reward(): number { return this._reward; }
+  set reward(value: number) { this._reward = value; }
+  get requires(): {productId: number, quantity:number}[] { return this._requires; }
+  set requires(value: {productId: number, quantity:number}[]) { this._requires = value; }
+  get unlocked(): boolean { return this._unlocked; }
+  private set unlocked(value: boolean) { this._unlocked = value; }
 }
