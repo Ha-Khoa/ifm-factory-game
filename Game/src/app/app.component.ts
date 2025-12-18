@@ -1,17 +1,20 @@
-import { Component, ViewChild, ElementRef, HostListener } from '@angular/core';
+import { Component, ViewChild, ElementRef, HostListener, OnDestroy, AfterViewInit } from '@angular/core';
 import { GameService } from './services/game.service';
 import { HudComponent } from './components/hud/hud.component';
 import { CommonModule } from '@angular/common';
 import { SettingsComponent } from './components/settings/settings.component';
 import { OrderComponent } from "./components/order/order.component";
+import { StartScreenComponent } from './components/start-screen/start-screen.component'; // New import
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [HudComponent, SettingsComponent, CommonModule, OrderComponent],
+  standalone: true, // Assuming standalone based on `imports` usage
+  imports: [HudComponent, SettingsComponent, CommonModule, OrderComponent, StartScreenComponent], // Add StartScreenComponent
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit, OnDestroy {
   title = 'Game';
   cwidth = window.innerWidth;
   cheight = window.innerHeight;
@@ -27,7 +30,11 @@ export class AppComponent {
 
   // Settings
   @ViewChild(SettingsComponent) settingsMenu?: SettingsComponent;
+  @ViewChild(StartScreenComponent) startScreen?: StartScreenComponent;
   isSettingsOpen: boolean = false;
+  showStartScreen: boolean = true;
+
+  private gameLoopSubscription!: Subscription;
 
   constructor(private game: GameService) { }
 
@@ -40,12 +47,19 @@ export class AppComponent {
     this.ctxUI = canvasUI.getContext('2d')!;
 
     await this.game.init(this.ctx, this.ctxUI);
-    this.game.startGame();
 
+
+    this.gameLoopSubscription = this.game.gameLoopTick$.subscribe(() => {
+      if (this.startScreen && this.startScreen.isHidden) {
+        this.startScreen.updatePosition();
+      }
+    });
   }
 
   @HostListener('window:keydown', ['$event']) // später durch richtige taste ersetzen
   onKeyDown(event: KeyboardEvent): void {
+    if (this.showStartScreen) return; // Ignore input if start screen is active
+
     if (event.key === 'Escape') {
       if(this.isSettingsOpen) this.settingsMenu?.closeSettingsMenu();
       else this.isSettingsOpen = true;
@@ -56,12 +70,23 @@ export class AppComponent {
 
   @HostListener('window:keyup', ['$event'])
   onKeyUp(event: KeyboardEvent): void {
+    if (this.showStartScreen) return; // Ignore input if start screen is active
     this.game.setInput(event.key, false);
   }
 
   ngOnDestroy(): void {
     this.game.stopGame();
+    if (this.gameLoopSubscription) {
+      this.gameLoopSubscription.unsubscribe();
+    }
   }
 
+  async onStartGame(): Promise<void> {
+    this.startScreen?.zoomOut();
+    this.game.startGame();
+    setTimeout(() => {
+      this.showStartScreen = false;
 
+    }, 1500);
+  }
 }

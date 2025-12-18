@@ -57,19 +57,21 @@ export class InteractableObject {
         let i = 0;
         for(let direction of this.directions)
         {
-        xParticles = direction === Direction.RIGHT ? this.position.x + Gamefield.fieldsize :
+        xParticles = direction === Direction.RIGHT ? this.position.x + this.width :
                      direction === Direction.LEFT ? this.position.x - Gamefield.fieldsize : this.position.x;
-        yParticles = direction === Direction.DOWN ? this.position.y + Gamefield.fieldsize :
+        yParticles = direction === Direction.DOWN ? this.position.y + this.height :
                      direction === Direction.UP ? this.position.y - Gamefield.fieldsize : this.position.y;
+        width = direction === Direction.LEFT || direction === Direction.RIGHT ? Gamefield.fieldsize : this.width;
+        height = direction === Direction.UP || direction === Direction.DOWN ? Gamefield.fieldsize : this.height;
         
         this._particleRenderObjects.push(new ParticleRenderObject(
                   `particle-${i}`,
                   xParticles,
                   yParticles,
                   0,
-                  Gamefield.fieldsize,
-                  Gamefield.fieldsize,
-                  300,  
+                  width,
+                  height,
+                  200,  
                   "straightUp",
                   "rect",
                   ["#ffffffff", "#d8d876ff", "#f1f1f1ff", "#FFFF00"]

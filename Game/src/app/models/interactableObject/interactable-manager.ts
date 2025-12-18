@@ -58,6 +58,14 @@ export class InteractableManager {
       this.addParticleField(machine)
     })
     this.generateInteractionField(this.submissionArea)
+    this.setSubmissionAreaParticles()
+    this.submissionArea.particleRenderObjects.forEach((particleRenderObject) => {
+       particleRenderObject.ptype = "straightUp";
+      particleRenderObject.spawnType = "empty";
+      particleRenderObject.colors = ["#FFFFFF"];
+      particleRenderObject.render = false;
+      RenderingService.instance().addRenderObject(particleRenderObject)
+    })
   }
 
   /** Gibt alle Maschinen zurück */
@@ -78,6 +86,14 @@ export class InteractableManager {
     });
   }
 
+  setSubmissionAreaParticles()
+  {
+    for(let particleRenderObject of this.submissionArea.particleRenderObjects)
+    {
+      //particleRenderObject.ptype = "straightUp";
+      //particleRenderObject.spawnType = "empty";
+    }
+  }
 
   checkMachineNeedsProduct(player: Player) {
     if(!player.inventory || !(player.inventory instanceof Product)) { return }
@@ -100,6 +116,15 @@ export class InteractableManager {
     }
   }
 
+  checkPackageInHand(player: Player)
+  {
+    if(!player.inventory || !(player.inventory instanceof Package)) { return }
+    for(let particleRenderObject of this.submissionArea.particleRenderObjects)
+    {
+      particleRenderObject.render = true;
+    }
+  }
+
   resetParticleFields()
   {
     for(let machine of this.machines)
@@ -108,6 +133,10 @@ export class InteractableManager {
       {
         particleRenderObject.render = false
       }
+    }
+    for(let particleRenderObject of this.submissionArea.particleRenderObjects)
+    {
+      particleRenderObject.render = false;
     }
   }
 
