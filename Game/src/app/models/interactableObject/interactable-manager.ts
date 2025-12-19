@@ -6,7 +6,7 @@ import { Hitbox } from "../../interfaces/hitbox";
 import { Collision } from "../collision/collision";
 import { RenderingService} from "../../services/rendering.service";
 import { RenderObject } from "../rendering/render-object";
-
+import {PlayerService} from '../../services/player.service';
 import { Direction } from "../../enums/direction";
 import { Coordinates } from "../coordinates/coordinates";
 import { UIService } from "../../services/ui.service";
@@ -14,7 +14,6 @@ import { Player } from "../player/player";
 import { SubmissionArea } from "../submission-area/submission-area";
 import { InteractableObject } from "./interactable-object";
 import { Package } from "../package/package";
-import {HudStateService} from '../../components/hud/HudStateService';
 
 /**
  * MachineManager-Klasse: Verwaltet alle Maschinen im Spiel.
@@ -23,7 +22,7 @@ import {HudStateService} from '../../components/hud/HudStateService';
 export class InteractableManager {
     private _gamefield: Gamefield;
     private ui: UIService;
-    private hud: HudStateService;
+    private playerService: PlayerService;
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       // Sensor-Maschine (benötigt Raw Silicon + Circuit Board)
@@ -38,16 +37,16 @@ export class InteractableManager {
 
     private submissionArea:SubmissionArea;
 
-  constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>, hud: HudStateService) {
+  constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>, playerService: PlayerService) {
     this._gamefield = _gamefield;
     this.ui = ui;
-    this.hud = hud;
+    this.playerService = playerService;
     this._inputs = inputs;
     this.submissionArea = new SubmissionArea(
       new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 5),
       Gamefield.fieldsize,
       2 * Gamefield.fieldsize,
-      this.hud
+      this.playerService
     );
     // Standard-Maschinen freischalten
     this.updateUnlockedMachine(0);

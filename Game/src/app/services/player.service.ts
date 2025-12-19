@@ -1,10 +1,11 @@
 ﻿import {Injectable} from '@angular/core';
-import {PlayerInterface} from '../../interfaces/ui/playerInterface';
-import {BehaviorSubject, tap} from 'rxjs';
-import {ApiService} from '../../services/api.service';
+import {BehaviorSubject} from 'rxjs';
+import {ApiService} from './api.service';
+import {PlayerInterface} from '../interfaces/ui/playerInterface';
+
 
 @Injectable({ providedIn: 'root' })
-export class HudStateService {
+export class PlayerService {
   private playerSubject = new BehaviorSubject<PlayerInterface | null>(null);
   player$ = this.playerSubject.asObservable();
 

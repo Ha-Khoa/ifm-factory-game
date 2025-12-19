@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ApiService} from '../../services/api.service';
-import {HudStateService} from './HudStateService';
 import {PlayerInterface} from '../../interfaces/ui/playerInterface';
 import {Observable} from 'rxjs';
+import {PlayerService} from '../../services/player.service';
 
 @Component({
   selector: 'app-hud',
@@ -17,7 +17,7 @@ export class HudComponent implements OnInit {
 
   constructor(
     private api: ApiService,
-    private hudState: HudStateService
+    private hudState: PlayerService
   ) {
     this.player$ = this.hudState.player$
   }

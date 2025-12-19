@@ -11,7 +11,7 @@ import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
 import { Package } from '../package/package';
 import { TimerManagerService } from '../../services/timer-manager.service';
 import { Camera } from '../camera/camera';
-import {HudStateService} from '../../components/hud/HudStateService';
+import {PlayerService} from '../../services/player.service';
 
 /**
 * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
@@ -65,9 +65,9 @@ export class Player {
    private _boostDuration: number = 350; // 200ms boost duration
 
   // HUD
-  private _hud: HudStateService;
+  private _playerService: PlayerService;
 
-   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield, hud: HudStateService) {
+   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield, playerService: PlayerService) {
         this._lastDirection = Direction.RIGHT;
        this._img = "/images/fox/fox.png";
        this._walkingAnimation = ["/images/fox/walking_5.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png"]
@@ -97,7 +97,7 @@ export class Player {
            8
        );
 
-        this._hud = hud;
+        this._playerService = playerService;
        RenderingService.instance().addRenderObject(this._renderingObject);
    }
 
@@ -124,7 +124,7 @@ export class Player {
         if(!this._directionPressed)
          {
             let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3
-            this._inventory.z = Gamefield.fieldsize * 1/5;
+            this._inventory.z = Gamefield.fieldsize * (1/5);
             this._inventory.renderObject.priority = 350;
             this._inventory.x = newPositionX
             this._inventory.y = this._position.y;
@@ -355,7 +355,7 @@ export class Player {
                this._inventory!.z = 50
                if(productFromConveyor instanceof Product) {
                  console.log("Produkt gekauft:", productFromConveyor);
-                 this._hud.removeMoney(productFromConveyor.costs)
+                 this._playerService.removeMoney(productFromConveyor.costs)
                }
                return this._inventory;
            }
