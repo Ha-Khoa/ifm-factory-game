@@ -1,17 +1,18 @@
-import { Hitbox } from '../../interfaces/hitbox';
-import { Coordinates } from '../coordinates/coordinates';
-import { Product } from "../product/product";
-import { Products } from '../product/products';
-import { Collision } from "../collision/collision";
-import { Gamefield } from '../gamefield/gamefield';
-import { RenderingService } from '../../services/rendering.service';
-import { Direction, KEY_TO_DIRECTION } from '../../enums/direction';
-import { RenderObject } from '../rendering/render-object';
-import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
-import { Package } from '../package/package';
-import { TimerManagerService } from '../../services/timer-manager.service';
-import { Camera } from '../camera/camera';
+import {Hitbox} from '../../interfaces/hitbox';
+import {Coordinates} from '../coordinates/coordinates';
+import {Product} from "../product/product";
+import {Products} from '../product/products';
+import {Collision} from "../collision/collision";
+import {Gamefield} from '../gamefield/gamefield';
+import {RenderingService} from '../../services/rendering.service';
+import {Direction, KEY_TO_DIRECTION} from '../../enums/direction';
+import {RenderObject} from '../rendering/render-object';
+import {ConveyorBeltManager} from '../conveyor-belt/conveyor-belt-manager';
+import {Package} from '../package/package';
+import {TimerManagerService} from '../../services/timer-manager.service';
+import {Camera} from '../camera/camera';
 import {PlayerService} from '../../services/player.service';
+import {PlayerThoughtsType} from '../../services/ui/player-thoughts.drawer';
 
 /**
 * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
@@ -64,8 +65,11 @@ export class Player {
    private _lastBoostTime: number = -Infinity; // Start with cooldown available
    private _boostDuration: number = 350; // 200ms boost duration
 
-  // HUD
+  private _thoughts: PlayerThoughtsType = PlayerThoughtsType.NONE;
+
+  // playerService
   private _playerService: PlayerService;
+
 
    constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield, playerService: PlayerService) {
         this._lastDirection = Direction.RIGHT;
@@ -331,7 +335,7 @@ export class Player {
    /**
     * Versucht ein Produkt aufzunehmen, wenn E gedrückt wurde und kein Produkt getragen wird.
     */
-   pickProduct(): Product | Package | null {
+   async pickProduct(): Promise<Product | Package | null> {
        if (this._input['e']) {
            if (!this._interacted) {
                this._canInteractProduct = true;
@@ -343,8 +347,22 @@ export class Player {
            this._hasPicked = false;
        }
        if (this._canInteractProduct && this._inventory === null) {
+         // Check if the player can purchase the product from the conveyor belt
+         let productTypeOfConveyor = this.getConveyorBeltProduct();
+         if(productTypeOfConveyor instanceof Product) {
+           let payed:boolean = this._playerService.removeMoney(productTypeOfConveyor.costs)
+           if(!payed) {
+             // Not enough money!
+             this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY
+             setTimeout(() => {
+               this.thoughts = PlayerThoughtsType.NONE;
+             }, 1000);
+             return null;
+           }
+         }
+
            //versuche zuerst ein Produkt vom Förderband aufzunehmen
-           const productFromConveyor = this.takeProductFromConveyor();
+           const productFromConveyor: Product | Package | null = this.takeProductFromConveyor();
            if (productFromConveyor) {
                this._inventory = productFromConveyor;
                this._canInteractProduct = false;
@@ -353,10 +371,6 @@ export class Player {
                console.log("Produkt vom Förderband aufgenommen:", this._inventory);
                Products.generatedProducts.push(productFromConveyor);
                this._inventory!.z = 50
-               if(productFromConveyor instanceof Product) {
-                 console.log("Produkt gekauft:", productFromConveyor);
-                 this._playerService.removeMoney(productFromConveyor.costs)
-               }
                return this._inventory;
            }
        }
@@ -413,6 +427,22 @@ export class Player {
        return null;
    }
 
+   getConveyorBeltProduct(): Product | Package | null{
+     const conveyor = ConveyorBeltManager.getConveyorAt(
+       this._hitbox.x,
+       this._hitbox.y,
+       this._hitbox.width,
+       this._hitbox.height
+     );
+     if (!conveyor)
+       return null;
+
+     const playerCenterX = this._hitbox.x + this._hitbox.width / 2;
+     const playerCenterY = this._hitbox.y + this._hitbox.height / 2;
+     const playerCenter = new Coordinates(playerCenterX, playerCenterY);
+     // return conveyor.removeProductAtPosition(playerCenter)
+     return conveyor.getProductAtPosition(playerCenter)
+   }
 
    takeProductFromConveyor(): Product | Package |null {
        //console.log('Checking for conveyor at player position:', this._hitbox.x, this._hitbox.y, 'size:', this._hitbox.width, this._hitbox.height);
@@ -476,4 +506,8 @@ export class Player {
     }
   get camera(): Camera { return this._camera; }
 
+  get position(): Coordinates { return this._position; }
+
+  get thoughts(): PlayerThoughtsType { return this._thoughts; }
+  set thoughts(v: PlayerThoughtsType) { this._thoughts = v; }
 }

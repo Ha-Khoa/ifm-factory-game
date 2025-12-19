@@ -77,8 +77,23 @@ export class GameService {
     const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png", "/images/Brick_01-512x512.png", "/images/interaction-field.png"];
     const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
-    const foxImages = ["/images/fox/walking_1.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png", "/images/fox/fox.png", "/images/fox/sitting.png",
-      "/images/fox/1-fox-holding.png", "/images/fox/2-fox-holding.png", "/images/fox/3-fox-holding.png", "/images/fox/4-fox-holding.png", "/images/fox/walking_5.png", "/images/fox/fox-sprint.png"
+    const foxImages = [
+      "/images/fox/walking_1.png",
+      "/images/fox/walking_2.png",
+      "/images/fox/walking_3.png",
+      "/images/fox/walking_4.png",
+      "/images/fox/fox.png",
+      "/images/fox/sitting.png",
+      "/images/fox/1-fox-holding.png",
+      "/images/fox/2-fox-holding.png",
+      "/images/fox/3-fox-holding.png",
+      "/images/fox/4-fox-holding.png",
+      "/images/fox/walking_5.png",
+      "/images/fox/fox-sprint.png"
+    ]
+    const foxCoinImages = [
+      "/images/fox/fox-coin.png",
+      "/images/fox/no-fox-coin.png",
     ]
     const keyBindingImages = [
       "/images/KeyBindings/keyBindings_,.png",
@@ -134,7 +149,7 @@ export class GameService {
       "/images/KeyBindings/keyBindings_Controller_Button_5.png",
       "/images/KeyBindings/keyBindings_Controller_Button_6.png",
     ]
-    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages, ...keyBindingImages])];
+    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages, ...foxCoinImages, ...keyBindingImages])];
     await this.preloadImages(allImages);
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
@@ -214,6 +229,7 @@ export class GameService {
       // Draw machines Item Needs Popup
       this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
+      this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
 
       // Orders
 

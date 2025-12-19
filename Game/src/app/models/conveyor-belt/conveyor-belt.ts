@@ -1,10 +1,9 @@
-import { Product } from "../product/product";
+import {Product} from "../product/product";
 import {Coordinates} from "../coordinates/coordinates";
 import {RenderObject} from "../rendering/render-object";
 import {Products} from "../product/products";
-import {RenderingService} from "../../services/rendering.service";
 import {Package} from "../package/package";
-import { Gamefield } from "../gamefield/gamefield";
+import {Gamefield} from "../gamefield/gamefield";
 
 export enum ConveyorType {
     RAW_MATERIALS = "raw_materials",
@@ -142,7 +141,7 @@ export class ConveyorBelt extends RenderObject{
        if (this._items.length < this._maxItems &&currentTime - this._lastSpawnTime >= this._spawnRate){
            const canSpawn = this.canSpawnAtStart();
            if (canSpawn){
-                let spawnSuccess = false;
+                let spawnSuccess: boolean;
                 if (this._conveyorType === ConveyorType.PACKAGES){
                     spawnSuccess = this.spawnPackage();
                 }
@@ -233,8 +232,7 @@ export class ConveyorBelt extends RenderObject{
                });
            }
         }
-        const startPos = this.getProductPosition(startingProgress, newPackage);
-        newPackage.position = startPos;
+        newPackage.position = this.getProductPosition(startingProgress, newPackage);
         newPackage.z = this.z;
 
         const renderId = `conveyor-product-${this.conveyorId}-product-${this._itemsCounter++}`;
@@ -256,12 +254,7 @@ export class ConveyorBelt extends RenderObject{
     }
 
     private createRandomPackage(): Package {
-        const productCount = Math.floor(Math.random() * 3) + 1;
-
-        const newPackage = new Package(new Coordinates(0,0));
-
-        return newPackage;
-
+      return new Package(new Coordinates(0, 0));
     }
    getItemPosition(progress: number, product: Product | Package): Coordinates{
        let x = this.x;
@@ -385,6 +378,29 @@ export class ConveyorBelt extends RenderObject{
        return this.getReadyItems()
            .filter(item => item instanceof Package)
            .map(item => item as Package);
+   }
+
+   getProductAtPosition(position: Coordinates): Product | Package | null{
+       for (let i = 0; i < this._items.length; i++){
+         const productData = this._items[i];
+         const productPos = productData.items.position;
+         if (productPos){
+           const productCenterX = productPos.x + productData.items.size / 2;
+           const productCenterY = productPos.y + productData.items.size / 2;
+           const dx = productCenterX - position.x;
+           const dy = productCenterY - position.y;
+           const distance = Math.sqrt(dx * dx + dy * dy);
+           //console.log(`  Product ${i}: pos(${productPos.x.toFixed(1)}, ${productPos.y.toFixed(1)}), center(${productCenterX.toFixed(1)}, ${productCenterY.toFixed(1)}), dist: ${distance.toFixed(2)}px`);
+
+           if (distance <= Gamefield.fieldsize){
+             // this._items.splice(i, 1);
+             //productData.items.destroy();
+             //console.log(`✓ Produkt ${productData.items.name} von Förderband ${this.conveyorId} entfernt (Distanz: ${distance.toFixed(2)}px).`);
+             return productData.items;
+           }
+         }
+       }
+       return null;
    }
 
    removeProductAtPosition(position: Coordinates): Product | Package | null{

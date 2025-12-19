@@ -57,8 +57,8 @@ export class Orders {
     const initialOrders: Order[] = [
       { ...this.createOrder([{id: 1, quantity: 1}]), status: false },
       { ...this.createOrder([{id: 2, quantity: 1}, {id: 3, quantity: 1}]), status: false },
-      { ...this.createOrder([{id: 5, quantity: 2}]), status: false },
       { ...this.createOrder([{id: 4, quantity: 1}, {id: 5, quantity: 1}]), status: false },
+      { ...this.createOrder([{id: 5, quantity: 2}]), status: false },
       { ...this.createOrder([{id: 6, quantity: 1}]), status: false },
       { ...this.createOrder([{id: 4, quantity: 1}, {id: 5, quantity: 1}, {id: 6, quantity: 1}]), status: false }
     ];

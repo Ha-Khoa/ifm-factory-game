@@ -69,17 +69,24 @@ export class PlayerService {
     })
   }
 
-  removeMoney(amount: number) {
-    if (!this.player) return;
+  removeMoney(amount: number): boolean {
+    if (!this.player) return false;
+    if (this.player.money < amount) {
+      return false;
+    }
 
     this.api.removeMoney(this.player.name, amount).subscribe({
-      next: (money:number) => {
+        next: (money:number) => {
         this.playerSubject.next({
           ...this.player!,
           money
         })
       },
-      error: console.error
-    })
+        error: (error) => {
+          console.error(error);
+        }
+    });
+    return true;
   }
+
 }

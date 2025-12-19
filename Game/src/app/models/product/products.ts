@@ -31,10 +31,10 @@ export class Products {
    * - Image Path: The file path for the image representation of the product.
    */
   private static productsList: Product[] = [
-    new Product(1, "Raw Plastic", 5, 15, 2, true, "/images/Products/raw-plastic.png"),
-    new Product(2, "Raw Silicon", 10, 20, 5, true, "/images/Products/raw-silicon.png"),
-    new Product(3, "Copper Wire", 15, 22, 15, true, "/images/Products/copper-wire.png"),
-    new Product(4, "Plastic Case", 50, 50, [{productId: 1, quantity: 3}], true, "/images/Products/plastic-case.png"),
+    new Product(1, "Raw Plastic", 6, 15, 5, true, "/images/Products/raw-plastic.png"),
+    new Product(2, "Raw Silicon", 16, 20, 9, true, "/images/Products/raw-silicon.png"),
+    new Product(3, "Copper Wire", 15, 22, 20, true, "/images/Products/copper-wire.png"),
+    new Product(4, "Plastic Case", 50, 50, [{productId: 1, quantity: 3}, {productId: 2, quantity: 1}], true, "/images/Products/plastic-case.png"),
     new Product(5, "Circuit Board", 120, 150, [{productId: 2, quantity: 1}, {productId: 3, quantity: 1}], true, "/images/Products/circuit-board.png"),
     new Product(6, "Basic Sensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png")
   ]
