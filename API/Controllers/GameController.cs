@@ -120,7 +120,7 @@ public class GameController : ControllerBase {
         context.Players.Remove(player);
         await context.SaveChangesAsync();
 
-        return Ok($"Deleted Player {player.Name}");
+        return Ok(true);
     }
 
     /// <summary>
@@ -191,7 +191,7 @@ public class GameController : ControllerBase {
         player.Score = score;
         await context.SaveChangesAsync();
 
-        return Ok();
+        return Ok(player.Score);
     }
 
     /// <summary>
@@ -234,7 +234,7 @@ public class GameController : ControllerBase {
         player.Money = value;
         await context.SaveChangesAsync();
 
-        return Ok();
+        return Ok(player.Money);
     }
 
     /// Adds a specified amount of money to a player's account.
@@ -256,7 +256,7 @@ public class GameController : ControllerBase {
         player.Money += value;
         await context.SaveChangesAsync();
 
-        return Ok($"Added {value} to player money. New amount: {player.Money}");
+        return Ok(player.Money);
     }
 
     /// <summary>
@@ -280,7 +280,7 @@ public class GameController : ControllerBase {
             return NotFound($"Player not found.");
 
         if( value < 0 )
-            return Conflict("Removing negativ value to the money is not allowed.");
+            return Conflict("Removing negativ value from the money is not allowed.");
 
         int money = player.Money;
         if ( (money - value) < 0 ) {
@@ -290,7 +290,7 @@ public class GameController : ControllerBase {
         player.Money -= value;
         await context.SaveChangesAsync();
 
-        return Ok($"Removed {value} from player money. New amount: {player.Money}");
+        return Ok(player.Money);
     }
 
     /// <summary>
