@@ -195,6 +195,53 @@ public class GameController : ControllerBase {
     }
 
     /// <summary>
+    /// Adds the specified score to a player's current score.
+    /// This method fetches the player using their identifier, updates their
+    /// score by adding the provided value, and saves the changes to the database.
+    /// </summary>
+    /// <param name="identifier">The unique identifier of the player whose score is being updated.</param>
+    /// <param name="score">The score value to be added to the player's current score.</param>
+    /// <returns>Returns an IActionResult containing the updated score if the operation is successful.
+    /// If the player is not found, a NotFound result is returned.</returns>
+    [HttpPatch("Score/{identifier}/Add/{score}")]
+    public async Task<IActionResult> AddPlayerScore(string identifier, int score) {
+        Player? player = await GetPlayerElementByIdentifier(identifier);
+
+        if ( player == null )
+            return NotFound($"Player not found.");
+
+        player.Score += score;
+        await context.SaveChangesAsync();
+
+        return Ok(player.Score);
+    }
+
+    /// <summary>
+    /// Decreases the score of a specified player by a given amount.
+    /// If the resulting score falls below zero, it will be set to zero.
+    /// </summary>
+    /// <param name="identifier">The unique identifier of the player whose score will be modified.</param>
+    /// <param name="score">The amount by which the player's score will be reduced.</param>
+    /// <returns>Returns an IActionResult containing the updated score if the operation is successful, or a NotFound result if the player is not found.</returns>
+    [HttpPatch("Score/{identifier}/Remove/{score}")]
+    public async Task<IActionResult> RemovePlayerScore(string identifier, int score) {
+        Player? player = await GetPlayerElementByIdentifier(identifier);
+
+        if ( player == null )
+            return NotFound($"Player not found.");
+
+        player.Score -= score;
+
+        if ( player.Score < 0 ) {
+            player.Score = 0;
+        }
+
+        await context.SaveChangesAsync();
+
+        return Ok(player.Score);
+    }
+
+    /// <summary>
     /// Retrieves the score of a specified player.
     /// This method fetches the player identified by their unique identifier
     /// and returns their current score. If the player does not exist, a NotFound result is returned.
