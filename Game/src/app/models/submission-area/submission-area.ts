@@ -68,6 +68,10 @@ export class SubmissionArea extends InteractableObject {
                 return true;
             }
         }
+
+        // Wrong order submitted or no active orders exist
+        this.playerService.removeScore(15);
+        this.playerService.removeMoney(20);
         return false;
     }
 

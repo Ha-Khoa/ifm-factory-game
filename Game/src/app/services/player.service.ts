@@ -25,15 +25,10 @@ export class PlayerService {
   }
 
   addScore(amount: number) {
-    this.updateScore(this.getScore() + amount);
-  }
-
-
-  updateScore(score: number) {
     if (!this.player) return;
 
-    this.api.updateScore(this.player.name, score).subscribe({
-      next: () => {
+    this.api.addScore(this.player.name, amount).subscribe({
+      next: (score:number) => {
         this.playerSubject.next({
           ...this.player!,
           score
@@ -42,7 +37,19 @@ export class PlayerService {
       error: console.error
     });
   }
+  removeScore(amount: number) {
+    if (!this.player) return;
 
+    this.api.removeScore(this.player.name, amount).subscribe({
+      next: (score:number) => {
+        this.playerSubject.next({
+          ...this.player!,
+          score
+        });
+      },
+      error: console.error
+    });
+  }
 
   getMoney(): number {
     return this.player?.money ?? 0;

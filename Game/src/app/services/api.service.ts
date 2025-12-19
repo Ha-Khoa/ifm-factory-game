@@ -41,6 +41,14 @@ export class ApiService {
     return this.http.patch(`${this.baseUrl}/Score/${identifier}/${newScore}`, {});
   }
 
+  addScore(identifier: string, amount: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/Score/${identifier}/Add/${amount}`, {}, {responseType: 'text'});
+  }
+
+  removeScore(identifier: string, amount: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/Score/${identifier}/Remove/${amount}`, {}, {responseType: 'text'});
+  }
+
   // Money Management
   getMoney(identifier: string): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/Money/${identifier}`);
