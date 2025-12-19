@@ -53,7 +53,7 @@ public class Player {
     /// It is stored as an integer in the database and can be updated to reflect gains or deductions.
     /// </remarks>
     [Column(TypeName = "int")]
-    public int Money { get; set; } = 0;
+    public int Money { get; set; } = 50;
 
     // Navigation Property: Ein Player hat genau eine Factory
     public Factory.Factory? Factory { get; set; }
