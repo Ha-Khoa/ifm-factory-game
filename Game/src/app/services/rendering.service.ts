@@ -1,15 +1,9 @@
-import { Hitbox } from "../interfaces/hitbox";
 import { RenderObject } from "../models/rendering/render-object"
-import { Projection } from "../interfaces/projection";
-import { Collision } from "../models/collision/collision";
-import { Coordinates } from "../models/coordinates/coordinates";
 import { Injectable } from "@angular/core";
 import { Direction } from "../enums/direction";
 import { ParticleRenderingService } from "./particle-rendering.service";
-import { Particles } from "../models/particle/particles";
 import { ParticleRenderObject } from "../models/rendering/particle-render-object";
 import { Camera } from "../models/camera/camera";
-import { Particle } from "../models/particle/particle";
 
 
 /**
@@ -245,8 +239,9 @@ export class RenderingService {
   {
     if(this._fov > 2.5)
     {
-    this._camera.fov -= 0.1
-    this._fov -= 0.1
+      let speed = 1;
+    this._camera.fov -= speed
+    this._fov -= speed
     // Prüft hier ob Kamera Out Of Bounds
     //this._camera.x = this._camera.x;
     //this._camera.y = this._camera.y;

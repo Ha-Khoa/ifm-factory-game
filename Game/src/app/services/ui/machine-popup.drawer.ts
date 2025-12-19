@@ -3,9 +3,7 @@ import { Gamefield } from '../../models/gamefield/gamefield';
 import { Rect } from './rect.interface';
 import { CanvasHelper } from './canvas.helper';
 import { UI_THEME } from './theme.manager';
-import { Player } from '../../models/player/player';
 import { RenderingService } from '../rendering.service';
-import { Camera } from '../../models/camera/camera';
 
 /**
  * Handles drawing all UI elements related to machines,
@@ -15,7 +13,6 @@ export class MachinePopupDrawer {
   constructor(
     private ctx: CanvasRenderingContext2D,
     private images: { [key: string]: HTMLImageElement },
-    private angle: number,
   ) {}
 
   /**
@@ -73,6 +70,8 @@ export class MachinePopupDrawer {
   /**
    * Draws indicators for items that are required by machines but not yet inserted.
    * @param machines An array of all machines on the field.
+   * @param offsetCamera
+   * @param fov
    * @returns An array of Rects for later clearing.
    */
   public drawNeeds(machines: Machine[], offsetCamera: [number, number], fov: number): Rect[] {
@@ -94,11 +93,8 @@ export class MachinePopupDrawer {
       const neededItems = neededRequirements.map(req => req.product);
 
       for (let i = 0; i < neededItems.length; i++) {
-        // if(machine.name === Products.getProductById(4)?.name)
-        //   console.log("B");
         const item = neededItems[i];
         const size = Gamefield.fieldsize * fov / 2;
-        // const offset = (Gamefield.fieldsize - size) / 2;
         const offset = size / 2;
         const gap = 8 * fov / 2.5;
 
@@ -144,6 +140,8 @@ export class MachinePopupDrawer {
   /**
    * Draws a circular progress indicator for machines that are currently producing.
    * @param machines An array of all machines.
+   * @param offsetCamera
+   * @param fov
    * @returns An array of Rects for later clearing.
    */
   public drawProductionProgress(machines: Machine[], offsetCamera: [number, number], fov: number): Rect[] {

@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { Machine } from '../models/machine/machine';
-import { Package } from '../models/package/package';
-import { Product } from '../models/product/product';
-import { Rect } from './ui/rect.interface';
-import { loadTheme } from './ui/theme.manager';
-import { CanvasHelper } from './ui/canvas.helper';
-import { ItemPopupDrawer } from './ui/item-popup.drawer';
-import { MachinePopupDrawer } from './ui/machine-popup.drawer';
-import { Player } from '../models/player/player';
-import { RenderingService } from './rendering.service';
+import {Injectable} from '@angular/core';
+import {Machine} from '../models/machine/machine';
+import {Package} from '../models/package/package';
+import {Product} from '../models/product/product';
+import {Rect} from './ui/rect.interface';
+import {loadTheme} from './ui/theme.manager';
+import {CanvasHelper} from './ui/canvas.helper';
+import {ItemPopupDrawer} from './ui/item-popup.drawer';
+import {MachinePopupDrawer} from './ui/machine-popup.drawer';
+import {Player} from '../models/player/player';
+import {PlayerThoughtsDrawer, PlayerThoughtsType} from './ui/player-thoughts.drawer';
 
 @Injectable({
   providedIn: 'root'
@@ -21,12 +21,14 @@ export class UIService {
   // Drawer instances
   private itemPopupDrawer!: ItemPopupDrawer;
   private machinePopupDrawer!: MachinePopupDrawer;
+  private playerThoughtsDrawer!: PlayerThoughtsDrawer;
 
   // State management for drawn elements that need clearing
   private machinePopups: Rect[] = [];
   private itemPopups: Rect[] = [];
   private neededItemPopups: Rect[] = [];
   private producingPopups: Rect[] = [];
+  private playerThoughtsPopups: Rect[] = [];
 
   constructor() {}
 
@@ -37,7 +39,11 @@ export class UIService {
    * @param angle The isometric projection angle of the game world.
    * @param images A dictionary of pre-loaded image assets.
    */
-  public init(ctxUI: CanvasRenderingContext2D, angle: number, images: { [key: string]: HTMLImageElement }): void {
+  public init(
+    ctxUI: CanvasRenderingContext2D,
+    angle: number,
+    images: { [key: string]: HTMLImageElement }
+  ): void {
     this.ctxUI = ctxUI;
     this.angle = angle;
     this.images = images;
@@ -45,8 +51,8 @@ export class UIService {
     // Load the theme and initialize drawer classes
     loadTheme();
     this.itemPopupDrawer = new ItemPopupDrawer(this.ctxUI, this.images);
-    this.machinePopupDrawer = new MachinePopupDrawer(this.ctxUI, this.images, this.angle);
-
+    this.machinePopupDrawer = new MachinePopupDrawer(this.ctxUI, this.images);
+    this.playerThoughtsDrawer = new PlayerThoughtsDrawer(this.ctxUI, this.images);
   }
 
   // ==========================================================================
@@ -89,6 +95,17 @@ export class UIService {
     this.producingPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 100, true));
     this.producingPopups = [];
     this.producingPopups = this.machinePopupDrawer.drawProductionProgress(machines, offsetCamera, fov);
+  }
+
+  public drawPlayerThoughts(player: Player, offsetCamera: [number, number], fov: number): void {
+    this.playerThoughtsPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
+    this.playerThoughtsPopups = [];
+    switch (player.thoughts) {
+      case PlayerThoughtsType.NOT_ENOUGH_MONEY:
+        this.playerThoughtsPopups = this.playerThoughtsDrawer.drawNotEnoughMoney(player.position, offsetCamera, fov);
+        break;
+      default: break;
+    }
   }
 
   /**

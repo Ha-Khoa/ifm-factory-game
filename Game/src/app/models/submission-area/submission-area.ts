@@ -3,13 +3,13 @@ import { Orders } from "../orders/orders";
 import { InteractableObject } from "../interactableObject/interactable-object";
 import { Direction } from "../../enums/direction";
 import { Package } from "../package/package";
-import {HudStateService} from '../../components/hud/HudStateService';
+import {PlayerService} from '../../services/player.service';
 
 export class SubmissionArea extends InteractableObject {
 
-    hud:HudStateService;
+    playerService:PlayerService;
 
-    constructor(position: Coordinates, width: number, height: number, hud: HudStateService) {
+    constructor(position: Coordinates, width: number, height: number, playerService: PlayerService) {
         // Initialize InteractableObject with all directions allowed
       super(
             "submission-area",
@@ -24,7 +24,7 @@ export class SubmissionArea extends InteractableObject {
             "#7D0A0A",
             ["#BF3131","#EAD196"]
         );
-      this.hud = hud;
+      this.playerService = playerService;
     }
 
     /**
@@ -56,19 +56,22 @@ export class SubmissionArea extends InteractableObject {
             for (let id of packageIdsSet) {
                 if(rightOrder && order.items.filter(item => item.product.id === id)[0].quantity ===
                    packObj.products.filter(prod => prod.id === id).length) {
-                    continue;
                 } else {
                     rightOrder = false;
                 }
             }
             if (rightOrder) {
-                this.hud.addMoney(order.grants);
-                this.hud.addScore(order.reward);
+                this.playerService.addMoney(order.grants);
+                this.playerService.addScore(order.reward);
                 Orders.completeOrder(order.id);
                 Orders.generateRandomOrder();
                 return true;
             }
         }
+
+        // Wrong order submitted or no active orders exist
+        this.playerService.removeScore(15);
+        this.playerService.removeMoney(20);
         return false;
     }
 

@@ -1,23 +1,23 @@
-import { Hitbox } from '../../interfaces/hitbox';
-import { Coordinates } from '../coordinates/coordinates';
-import { Product } from "../product/product";
-import { Products } from '../product/products';
-import { Collision } from "../collision/collision";
-import { Gamefield } from '../gamefield/gamefield';
-import { RenderingService } from '../../services/rendering.service';
-import { Direction, KEY_TO_DIRECTION } from '../../enums/direction';
-import { RenderObject } from '../rendering/render-object';
-import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
-import { Package } from '../package/package';
-import { TimerManagerService } from '../../services/timer-manager.service';
-import { Camera } from '../camera/camera';
+import {Hitbox} from '../../interfaces/hitbox';
+import {Coordinates} from '../coordinates/coordinates';
+import {Product} from "../product/product";
+import {Products} from '../product/products';
+import {Collision} from "../collision/collision";
+import {Gamefield} from '../gamefield/gamefield';
+import {RenderingService} from '../../services/rendering.service';
+import {Direction, KEY_TO_DIRECTION} from '../../enums/direction';
+import {RenderObject} from '../rendering/render-object';
+import {ConveyorBeltManager} from '../conveyor-belt/conveyor-belt-manager';
+import {Package} from '../package/package';
+import {TimerManagerService} from '../../services/timer-manager.service';
+import {Camera} from '../camera/camera';
+import {PlayerService} from '../../services/player.service';
+import {PlayerThoughtsType} from '../../services/ui/player-thoughts.drawer';
 
 /**
 * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
 */
 export class Player {
-
-
    private _position!: Coordinates;
    // Hitbox des Spielers für Kollisionserkennung
    private _hitbox!: Hitbox;
@@ -37,6 +37,7 @@ export class Player {
    private _direction!: Direction | null;
 
    private _hasPicked!: boolean;
+
 
 
    private _directionPressed!: boolean;
@@ -64,7 +65,13 @@ export class Player {
    private _lastBoostTime: number = -Infinity; // Start with cooldown available
    private _boostDuration: number = 350; // 200ms boost duration
 
-   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield) {
+  private _thoughts: PlayerThoughtsType = PlayerThoughtsType.NONE;
+
+  // playerService
+  private _playerService: PlayerService;
+
+
+   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield, playerService: PlayerService) {
         this._lastDirection = Direction.RIGHT;
        this._img = "/images/fox/fox.png";
        this._walkingAnimation = ["/images/fox/walking_5.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png"]
@@ -94,7 +101,7 @@ export class Player {
            8
        );
 
-
+        this._playerService = playerService;
        RenderingService.instance().addRenderObject(this._renderingObject);
    }
 
@@ -121,7 +128,7 @@ export class Player {
         if(!this._directionPressed)
          {
             let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3
-            this._inventory.z = Gamefield.fieldsize * 1/5;
+            this._inventory.z = Gamefield.fieldsize * (1/5);
             this._inventory.renderObject.priority = 350;
             this._inventory.x = newPositionX
             this._inventory.y = this._position.y;
@@ -328,7 +335,7 @@ export class Player {
    /**
     * Versucht ein Produkt aufzunehmen, wenn E gedrückt wurde und kein Produkt getragen wird.
     */
-   pickProduct(): Product | Package | null {
+   async pickProduct(): Promise<Product | Package | null> {
        if (this._input['e']) {
            if (!this._interacted) {
                this._canInteractProduct = true;
@@ -340,8 +347,22 @@ export class Player {
            this._hasPicked = false;
        }
        if (this._canInteractProduct && this._inventory === null) {
+         // Check if the player can purchase the product from the conveyor belt
+         let productTypeOfConveyor = this.getConveyorBeltProduct();
+         if(productTypeOfConveyor instanceof Product) {
+           let payed:boolean = this._playerService.removeMoney(productTypeOfConveyor.costs)
+           if(!payed) {
+             // Not enough money!
+             this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY
+             setTimeout(() => {
+               this.thoughts = PlayerThoughtsType.NONE;
+             }, 1000);
+             return null;
+           }
+         }
+
            //versuche zuerst ein Produkt vom Förderband aufzunehmen
-           const productFromConveyor = this.takeProductFromConveyor();
+           const productFromConveyor: Product | Package | null = this.takeProductFromConveyor();
            if (productFromConveyor) {
                this._inventory = productFromConveyor;
                this._canInteractProduct = false;
@@ -406,6 +427,22 @@ export class Player {
        return null;
    }
 
+   getConveyorBeltProduct(): Product | Package | null{
+     const conveyor = ConveyorBeltManager.getConveyorAt(
+       this._hitbox.x,
+       this._hitbox.y,
+       this._hitbox.width,
+       this._hitbox.height
+     );
+     if (!conveyor)
+       return null;
+
+     const playerCenterX = this._hitbox.x + this._hitbox.width / 2;
+     const playerCenterY = this._hitbox.y + this._hitbox.height / 2;
+     const playerCenter = new Coordinates(playerCenterX, playerCenterY);
+     // return conveyor.removeProductAtPosition(playerCenter)
+     return conveyor.getProductAtPosition(playerCenter)
+   }
 
    takeProductFromConveyor(): Product | Package |null {
        //console.log('Checking for conveyor at player position:', this._hitbox.x, this._hitbox.y, 'size:', this._hitbox.width, this._hitbox.height);
@@ -467,7 +504,10 @@ export class Player {
         this._z = v;
         this._renderingObject.z = v;
     }
+  get camera(): Camera { return this._camera; }
 
-    get camera(): Camera { return this._camera; }
+  get position(): Coordinates { return this._position; }
 
+  get thoughts(): PlayerThoughtsType { return this._thoughts; }
+  set thoughts(v: PlayerThoughtsType) { this._thoughts = v; }
 }
