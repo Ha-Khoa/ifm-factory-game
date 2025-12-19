@@ -1,4 +1,4 @@
-﻿export interface Player {
+﻿export interface PlayerInterface {
   id: number;
   name: string;
   score: number;

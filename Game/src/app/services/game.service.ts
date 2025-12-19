@@ -68,7 +68,8 @@ export class GameService {
     this.player = new Player(
       new Hitbox(new Coordinates(200, 250), Gamefield.fieldsize * 4/5 , Gamefield.fieldsize * 2/5),
       this.playerVelocity,
-      this.gamefield
+      this.gamefield,
+      this.hud
     );
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs, this.hud);
 

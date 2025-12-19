@@ -71,7 +71,9 @@ export class Product {
   }
 
   copy(): Product {
-    return new Product(this._id, this._name, this._costs, this._grants, this._reward, this._unlocked, this._img, this._z);
+    if(this._requires.length > 0)
+      return new Product(this._id, this._name, this._grants, this._reward, this._requires, this._unlocked, this._img, this._z);
+    return new Product(this._id, this._name, this._grants, this._reward, this._costs, this._unlocked, this._img, this._z);
   }
 
   destroy() {

@@ -1,21 +1,21 @@
 ﻿import {Injectable} from '@angular/core';
-import {Player} from '../../interfaces/ui/player';
+import {PlayerInterface} from '../../interfaces/ui/playerInterface';
 import {BehaviorSubject, tap} from 'rxjs';
 import {ApiService} from '../../services/api.service';
 
 @Injectable({ providedIn: 'root' })
 export class HudStateService {
-  private playerSubject = new BehaviorSubject<Player | null>(null);
+  private playerSubject = new BehaviorSubject<PlayerInterface | null>(null);
   player$ = this.playerSubject.asObservable();
 
   constructor(private api: ApiService) {
   }
 
-  get player(): Player | null {
+  get player(): PlayerInterface | null {
     return this.playerSubject.value;
   }
 
-  setPlayer(player: Player) {
+  setPlayer(player: PlayerInterface) {
     this.playerSubject.next(player);
   }
 
@@ -48,21 +48,30 @@ export class HudStateService {
   }
 
   addMoney(amount: number) {
-    this.updateMoney(this.getMoney() + amount);
-  }
-
-  updateMoney(money: number) {
     if (!this.player) return;
 
-    this.api.addMoney(this.player.name, money - this.player.money).subscribe({
-      next: () => {
+    this.api.addMoney(this.player.name, amount).subscribe({
+      next: (money:number) => {
         this.playerSubject.next({
           ...this.player!,
           money
-        });
+        })
       },
       error: console.error
-    });
+    })
   }
 
+  removeMoney(amount: number) {
+    if (!this.player) return;
+
+    this.api.removeMoney(this.player.name, amount).subscribe({
+      next: (money:number) => {
+        this.playerSubject.next({
+          ...this.player!,
+          money
+        })
+      },
+      error: console.error
+    })
+  }
 }

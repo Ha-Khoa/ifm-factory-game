@@ -11,13 +11,12 @@ import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
 import { Package } from '../package/package';
 import { TimerManagerService } from '../../services/timer-manager.service';
 import { Camera } from '../camera/camera';
+import {HudStateService} from '../../components/hud/HudStateService';
 
 /**
 * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
 */
 export class Player {
-
-
    private _position!: Coordinates;
    // Hitbox des Spielers für Kollisionserkennung
    private _hitbox!: Hitbox;
@@ -37,6 +36,7 @@ export class Player {
    private _direction!: Direction | null;
 
    private _hasPicked!: boolean;
+
 
 
    private _directionPressed!: boolean;
@@ -64,7 +64,10 @@ export class Player {
    private _lastBoostTime: number = -Infinity; // Start with cooldown available
    private _boostDuration: number = 350; // 200ms boost duration
 
-   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield) {
+  // HUD
+  private _hud: HudStateService;
+
+   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield, hud: HudStateService) {
         this._lastDirection = Direction.RIGHT;
        this._img = "/images/fox/fox.png";
        this._walkingAnimation = ["/images/fox/walking_5.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png"]
@@ -94,7 +97,7 @@ export class Player {
            8
        );
 
-
+        this._hud = hud;
        RenderingService.instance().addRenderObject(this._renderingObject);
    }
 
@@ -350,6 +353,10 @@ export class Player {
                console.log("Produkt vom Förderband aufgenommen:", this._inventory);
                Products.generatedProducts.push(productFromConveyor);
                this._inventory!.z = 50
+               if(productFromConveyor instanceof Product) {
+                 console.log("Produkt gekauft:", productFromConveyor);
+                 this._hud.removeMoney(productFromConveyor.costs)
+               }
                return this._inventory;
            }
        }
@@ -467,7 +474,6 @@ export class Player {
         this._z = v;
         this._renderingObject.z = v;
     }
-
-    get camera(): Camera { return this._camera; }
+  get camera(): Camera { return this._camera; }
 
 }

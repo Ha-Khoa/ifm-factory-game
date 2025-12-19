@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ApiService} from '../../services/api.service';
 import {HudStateService} from './HudStateService';
-import {Player} from '../../interfaces/ui/player';
+import {PlayerInterface} from '../../interfaces/ui/playerInterface';
 import {Observable} from 'rxjs';
 
 @Component({
@@ -13,7 +13,7 @@ import {Observable} from 'rxjs';
   styleUrl: './hud.component.css'
 })
 export class HudComponent implements OnInit {
-  player$: Observable<Player | null>;
+  player$: Observable<PlayerInterface | null>;
 
   constructor(
     private api: ApiService,

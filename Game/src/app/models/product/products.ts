@@ -31,7 +31,7 @@ export class Products {
    * - Image Path: The file path for the image representation of the product.
    */
   private static productsList: Product[] = [
-    new Product(1, "Raw Plastic", 5, 15, 1, true, "/images/Products/raw-plastic.png"),
+    new Product(1, "Raw Plastic", 5, 15, 2, true, "/images/Products/raw-plastic.png"),
     new Product(2, "Raw Silicon", 10, 20, 5, true, "/images/Products/raw-silicon.png"),
     new Product(3, "Copper Wire", 15, 22, 15, true, "/images/Products/copper-wire.png"),
     new Product(4, "Plastic Case", 50, 50, [{productId: 1, quantity: 3}], true, "/images/Products/plastic-case.png"),

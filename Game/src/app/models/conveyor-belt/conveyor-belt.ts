@@ -108,7 +108,7 @@ export class ConveyorBelt extends RenderObject{
                const frontProduct = this._items[i - 1];
                maxAllowedProgress = frontProduct.progress - minDistance;
            }
-          
+
            let newProgress = productData.progress + this._speed * (deltaTime / 1000);
            if (newProgress > maxAllowedProgress){
                newProgress = maxAllowedProgress;
@@ -121,7 +121,7 @@ export class ConveyorBelt extends RenderObject{
            }
            productData.progress = newProgress;
        }
-      
+
 
 
    }
@@ -129,9 +129,9 @@ export class ConveyorBelt extends RenderObject{
 
    private trySpawnItem(): void {
        const currentTime = Date.now();
-       let typeProduct = this._conveyorType === ConveyorType.COPPER_WIRE ? Products.getProductByName("Copper wire") :
-                         this._conveyorType === ConveyorType.RAW_PLASTIC ? Products.getProductByName("Raw Plastic") :  
-                         this._conveyorType === ConveyorType.RAW_SILICON ? Products.getProductByName("Raw Silicon") :
+       let typeProduct = this._conveyorType === ConveyorType.COPPER_WIRE ? Products.getProductById(3) :
+                         this._conveyorType === ConveyorType.RAW_PLASTIC ? Products.getProductById(1) :
+                         this._conveyorType === ConveyorType.RAW_SILICON ? Products.getProductById(2) :
                          undefined;
         if(typeProduct)
         {
@@ -153,9 +153,9 @@ export class ConveyorBelt extends RenderObject{
                     this._lastSpawnTime = currentTime;
                 }
                 else {
-                    this._lastSpawnTime = currentTime - this._spawnRate + 500; 
+                    this._lastSpawnTime = currentTime - this._spawnRate + 500;
                 }
-               
+
            }
            else{
                this._lastSpawnTime = currentTime - this._spawnRate + 500; // Versuche es in 500ms erneut
@@ -239,32 +239,16 @@ export class ConveyorBelt extends RenderObject{
 
         const renderId = `conveyor-product-${this.conveyorId}-product-${this._itemsCounter++}`;
         this._items.push({items: newPackage, progress: startingProgress, renderId: renderId, type: 'package'});
-        this._items.sort((a, b) => b.progress - a.progress);    
+        this._items.sort((a, b) => b.progress - a.progress);
         return true;
    }
 
-//    private createRandomProduct(): Product {
-//         if (this._conveyorType === ConveyorType.RAW_MATERIALS){
-//             const rawMaterials = [
-//                 Products.getProductByName("Raw Plastic"),
-//                 Products.getProductByName("Raw Silicon"),
-//                 Products.getProductByName("Copper wire")
-//             ].filter(p => p !== undefined);
-//             const base = rawMaterials[Math.floor(Math.random() * rawMaterials.length)]!.copy();
-//             base.init(new Coordinates(base.position.x, base.position.y))
-//         }
-//         else if (this._conveyorType === ConveyorType.PACKAGES){
-//             const newPackage = this.createRandomPackage();
-//             return this.createRandomRawMaterial();
-//         }
-//         return this.createRandomRawMaterial();
-//    }
 
     private createRandomRawMaterial(): Product {
         const rawMaterials = [
-                Products.getProductByName("Raw Plastic"),
-                Products.getProductByName("Raw Silicon"),
-                Products.getProductByName("Copper wire")
+                Products.getProductById(1),
+                Products.getProductById(2),
+                Products.getProductById(3)
             ].filter(p => p !== undefined);
             const base = rawMaterials[Math.floor(Math.random() * rawMaterials.length)]!.copy();
             base.init(new Coordinates(base.position.x, base.position.y))
@@ -286,7 +270,7 @@ export class ConveyorBelt extends RenderObject{
 
        const productWidth = product.size;
        const productHeight = product.size;
-      
+
        switch(this._direction){
            case 'right':
                x += progress * (this.width -  productWidth);
@@ -409,14 +393,14 @@ export class ConveyorBelt extends RenderObject{
            const productData = this._items[i];
            const productPos = productData.items.position;
            if (productPos){
-              
+
                const productCenterX = productPos.x + productData.items.size / 2;
                const productCenterY = productPos.y + productData.items.size / 2;
                const dx = productCenterX - position.x;
                const dy = productCenterY - position.y;
                const distance = Math.sqrt(dx * dx + dy * dy);
                //console.log(`  Product ${i}: pos(${productPos.x.toFixed(1)}, ${productPos.y.toFixed(1)}), center(${productCenterX.toFixed(1)}, ${productCenterY.toFixed(1)}), dist: ${distance.toFixed(2)}px`);
-             
+
                if (distance <= Gamefield.fieldsize){
                    this._items.splice(i, 1);
                    //productData.items.destroy();
