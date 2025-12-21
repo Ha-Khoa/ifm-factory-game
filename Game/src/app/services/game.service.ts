@@ -74,7 +74,7 @@ export class GameService {
     const foxImages = ["/images/fox/walking_1.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png", "/images/fox/fox.png", "/images/fox/sitting.png",
       "/images/fox/1-fox-holding.png", "/images/fox/2-fox-holding.png", "/images/fox/3-fox-holding.png", "/images/fox/4-fox-holding.png", "/images/fox/walking_5.png", "/images/fox/fox-coin.png"
     ]
-    const slotMachineImages = ["/images/slotMachine/cherry.png", "/images/slotMachine/Bar.png", "/images/slotMachine/seven.png", "/images/slotMachine/diamond.png", "/images/slotMachine/lemon.png", "/images/slotMachine/ifm.png", "/images/slotMachine/manure.png"];
+    const slotMachineImages = ["/images/slotMachine/cherry.png", "/images/slotMachine/Bar.png", "/images/slotMachine/seven.png", "/images/slotMachine/diamond.png", "/images/slotMachine/lemon.png", "/images/slotMachine/ifm.png", "/images/slotMachine/manure.png", "/images/slotMachine/squirrel.png"];
     const keyBindingImages = [
       "/images/KeyBindings/keyBindings_,.png",
       "/images/KeyBindings/keyBindings_..png",

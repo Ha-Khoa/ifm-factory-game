@@ -44,13 +44,13 @@ export class SlotMachineService {
 
   private _blinkT: number = 0;
 
-  private _blinkState: boolean = true;
+  private _blinkState: boolean = false;
 
   private _activePatterns: number[][][] = [];
 
-  private _probabilitys: number[] = [0.05, 0.1, 0.25, 0.13, 0.25, 0.2, 0.02]; // Summe muss gleich 1 sein
+  private _probabilitys: number[] = [0.05, 0.1, 0.25, 0.13, 0.25, 0.2, 0.0000001,0.02]; // Summe muss gleich 1 sein
 
-  private _iconMultiplier: number[] = [20, 2, 1, 2, 1, 1.5, -50];
+  private _iconMultiplier: number[] = [20, 2, 1, 2, 1, 1.5, Infinity, -Infinity];
 
   private _slots: SlotIcon[][] = [];
 
@@ -77,6 +77,7 @@ export class SlotMachineService {
           "/images/slotMachine/diamond.png",
           "/images/slotMachine/lemon.png",
           "/images/slotMachine/ifm.png",
+          "/images/slotMachine/squirrel.png",
           "/images/slotMachine/manure.png"];
     this._startVelocity = 3000;
     this._iconEdgeOffset = this._ctx.canvas.height * (1 - ((this._sizePercentage) / 100)) / 5 * 0.1;
@@ -93,7 +94,7 @@ export class SlotMachineService {
       this._slots.push([]);
       for(let j = 0; j < 4; j++)
       {
-        this._slots[i].push({img: this._slotIcons[Math.floor(Math.random() * this._slotIcons.length)], progress: j * this._imgSize + 2 * j * this._iconEdgeOffset});
+        this._slots[i].push({img: this._slotIcons[Math.floor(Math.random() * (this._slotIcons.length - 2))], progress: j * this._imgSize + 2 * j * this._iconEdgeOffset});
       }
     }
   }
@@ -104,11 +105,9 @@ export class SlotMachineService {
                if(key === 'e' && pressed)
                {
                 let stopped = true;
-                console.log(this._stopped)
                 this._stopped.forEach((stopping) => {
                   if (!stopping) stopped = false;
                 });
-                console.log(stopped)
                 if (stopped) this.startSpin();
                }
            }
