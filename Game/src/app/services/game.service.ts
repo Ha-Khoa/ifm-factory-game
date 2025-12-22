@@ -199,7 +199,7 @@ export class GameService {
       RenderingService.instance().render();
 
       SlotMachineService.instance().setInput(this.inputs);
-      SlotMachineService.instance().render();
+      //SlotMachineService.instance().render();
 
       // Render Particles
       this.interactableManager.resetParticleFields();

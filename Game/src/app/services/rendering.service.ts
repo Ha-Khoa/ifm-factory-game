@@ -9,7 +9,7 @@ import { ParticleRenderingService } from "./particle-rendering.service";
 import { Particles } from "../models/particle/particles";
 import { ParticleRenderObject } from "../models/rendering/particle-render-object";
 import { Camera } from "../models/camera/camera";
-import { Particle } from "../models/particle/particle";
+import { Gamefield } from "../models/gamefield/gamefield";
 
 
 /**
@@ -45,6 +45,8 @@ export class RenderingService {
   private _fov!: number;
 
   private _camera!: Camera;
+
+  private _rotationZ: number = 0;
 
   // Singleton support
   private static _instance: RenderingService | null = null;
@@ -97,6 +99,7 @@ export class RenderingService {
 
   convertToCameraPOV(camera: Camera): void
   {
+    this._rotationZ = this._ctx.canvas.height / 2 - this._ctx.canvas.height / 2 * Math.cos(this._angle)
     this._xOffset = this._ctx.canvas.width / 2 - camera.position.x * this._fov;
     this._yOffset = this._ctx.canvas.height / 2 - camera.position.y * this._fov;
     if(!this._camera)
@@ -136,10 +139,11 @@ export class RenderingService {
       // Berechne isometrische Projektion
       // Rechtecke mit Canvas
       const zTransform = this._fov * Obj.z * Math.sin(this._angle)
-      const yProjection = this._fov * (Obj.y + this._yOffset / this._fov) * Math.cos(this._angle) - zTransform
+      const yProjection = this._fov * (Obj.y + this._yOffset / this._fov) * Math.cos(this._angle) - zTransform + this._rotationZ;
       const xObj = this._fov * Obj.x + this._xOffset;
       const objHeight = this._fov * Obj.height;
       const objWidth = this._fov * Obj.width
+
       if ((Obj.type === "rect")) {
         const layers = Obj.rectLayers!.length;
         for (let i = 0; i < layers; i++) {
@@ -147,7 +151,9 @@ export class RenderingService {
           this._ctx.fillStyle = Obj.rectLayers![i];
           this._ctx.rect(
             Math.round(xObj),
-            this._fov * ( (Obj.y + this._yOffset / this._fov + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle) ),
+            this._fov * ( (Obj.y + this._yOffset / this._fov + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle) ) + this._rotationZ 
+            
+            ,
             Math.round(objWidth + 0.49),
             this._fov * (Obj.z / layers) * Math.sin(this._angle) + 1
           );
@@ -232,11 +238,19 @@ export class RenderingService {
     );
   }
 
+  
+  rotateInSlotMachine()
+  {
+
+  }
+
   async rotateMap() {
     await new Promise(r => setTimeout(r, 1000));
     const max = 30 / 360 * 2 * Math.PI;
     if (this._angle < max) {
       this._angle += 0.0012;
+      this._camera.x = this._camera.x;
+      this._camera.y = this._camera.y;
       if (this._angle > max) this._angle = max;
     }
   }
@@ -284,4 +298,6 @@ export class RenderingService {
   get fov(): number {return this._fov}
 
   get deltaTime(): number {return this._deltaTime}
+
+  get rotationZ(): number {return this._rotationZ}
 }

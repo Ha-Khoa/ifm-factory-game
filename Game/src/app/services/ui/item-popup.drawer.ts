@@ -51,7 +51,7 @@ export class ItemPopupDrawer {
     const popupConfig = { width, height, radius: 10, borderWidth: 2 };
 
     const x = item.position.x * fov + (item.size / 2) - (width / 2) + offsetCamera[0];
-    const y = item.position.y * Math.cos(angle) * fov - height - 40 + offsetCamera[1] * Math.cos(angle);
+    const y = item.position.y * Math.cos(angle) * fov - height - 40 + offsetCamera[1] * Math.cos(angle) + RenderingService.instance().rotationZ;
 
     // The 'unlocked' parameter is undefined to trigger the special highlight border
     CanvasHelper.drawStyledPopupBackground(this.ctx, x, y, popupConfig);

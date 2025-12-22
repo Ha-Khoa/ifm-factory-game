@@ -96,7 +96,7 @@ export class MachinePopupDrawer {
 
         if(neededItems.length % 2 === 0)
           x -= size / 2 + gap/2;
-        let y = fov * machine.position.y * Math.cos(isometricAngle) - size * 1.5 + offsetCamera[1] * Math.cos(isometricAngle);
+        let y = fov * machine.position.y * Math.cos(isometricAngle) - size * 1.5 + offsetCamera[1] * Math.cos(isometricAngle) + RenderingService.instance().rotationZ;
 
         this.ctx.save();
         this.ctx.fillStyle = UI_THEME.tertiary;
@@ -133,7 +133,7 @@ export class MachinePopupDrawer {
         const radius = size / 2
         ;
         const centerX = machine.position.x * fov + offset + radius * fov+ offsetCamera[0];
-        const centerY = machine.position.y * Math.cos(isometricAngle) * fov + offsetCamera[1] * Math.cos(isometricAngle) - size * 2.5 + radius;
+        const centerY = machine.position.y * Math.cos(isometricAngle) * fov + offsetCamera[1] * Math.cos(isometricAngle) - size * 2.5 + radius + RenderingService.instance().rotationZ;
 
         this.ctx.save();
         this.ctx.lineWidth = ringWidth;

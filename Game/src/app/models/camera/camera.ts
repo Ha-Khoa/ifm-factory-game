@@ -1,3 +1,4 @@
+import { RedirectCommand } from "@angular/router";
 import { RenderingService } from "../../services/rendering.service";
 import { Coordinates } from "../coordinates/coordinates";
 import { Gamefield } from "../gamefield/gamefield"
@@ -43,13 +44,13 @@ export class Camera {
     
     set y(v: number) { 
         // Kamera out of Bounds prüfung
-        if(v < window.innerHeight/ (this._fov * 2))
+        if(v < window.innerHeight/ (this._fov * 2) + RenderingService.instance().rotationZ / 2)
         {
-            this.position.y = window.innerHeight / (this._fov * 2)
+            this.position.y = window.innerHeight / (this._fov * 2) + RenderingService.instance().rotationZ / 2
         }
-        else if(v > Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) - window.innerHeight/ (this._fov * 2 * Math.cos(30 / 360 * Math.PI)))
+        else if(v > Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) - window.innerHeight/ (this._fov * 2 * Math.cos(30 / 360 * Math.PI)) - RenderingService.instance().rotationZ / 2)
         {
-            this.position.y = Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) -  window.innerHeight/ (this._fov * 2 * Math.cos(30 / 360 * Math.PI))
+            this.position.y = Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) -  window.innerHeight/ (this._fov * 2 * Math.cos(30 / 360 * Math.PI)) - RenderingService.instance().rotationZ / 2
         }
         else
         {
