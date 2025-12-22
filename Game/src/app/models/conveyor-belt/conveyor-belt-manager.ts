@@ -68,6 +68,18 @@ export class ConveyorBeltManager {
               2,
             ConveyorType.RAW_SILICON
        ));
+       ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
+                14*Gamefield.fieldsize,
+                -2*Gamefield.fieldsize,
+                1*Gamefield.fieldsize,
+                4*Gamefield.fieldsize,
+                'down',
+                0.1,
+                true,
+                2500,
+                3,
+                ConveyorType.IRON_INGOT
+       ));
        this.updateGamefield();
    }
 

@@ -84,8 +84,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   async onStartGame(): Promise<void> {
     this.startScreen?.zoomOut();
     this.game.startGame();
-    setTimeout(() => {
-      this.showStartScreen = false;
+     setTimeout(() => {
+     this.showStartScreen = false;
 
     }, 1500);
   }

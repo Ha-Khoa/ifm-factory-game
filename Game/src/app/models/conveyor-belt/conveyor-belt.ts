@@ -10,6 +10,7 @@ export enum ConveyorType {
     COPPER_WIRE = "copper_wire",
     RAW_PLASTIC = "raw_plastic",
     RAW_SILICON = "raw_silicon",
+    IRON_INGOT = "iron_ingot",
     PACKAGES = 'packages'
 }
 
@@ -246,7 +247,8 @@ export class ConveyorBelt extends RenderObject{
         const rawMaterials = [
                 Products.getProductById(1),
                 Products.getProductById(2),
-                Products.getProductById(3)
+                Products.getProductById(3),
+                Products.getProductById(7)
             ].filter(p => p !== undefined);
             const base = rawMaterials[Math.floor(Math.random() * rawMaterials.length)]!.copy();
             base.init(new Coordinates(base.position.x, base.position.y))

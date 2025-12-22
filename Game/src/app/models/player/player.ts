@@ -13,7 +13,7 @@ import {TimerManagerService} from '../../services/timer-manager.service';
 import {Camera} from '../camera/camera';
 import {PlayerService} from '../../services/player.service';
 import {PlayerThoughtsType} from '../../services/ui/player-thoughts.drawer';
-
+import {PrepMachine} from '../preProcess/prep-machine';
 /**
 * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
 */
@@ -346,6 +346,10 @@ export class Player {
            this._canInteractProduct = false;
            this._hasPicked = false;
        }
+       // Übergibt das Produkt von der PrepMachine, wenn möglich
+       if (this._canInteractProduct && this.handlePrepMachineInteraction()){
+            return this._inventory;
+       }
        if (this._canInteractProduct && this._inventory === null) {
          // Check if the player can purchase the product from the conveyor belt
          let productTypeOfConveyor = this.getConveyorBeltProduct();
@@ -403,6 +407,24 @@ export class Player {
     * addToMap: true → Produkt in Weltliste aufnehmen, false → nur aus Hand entfernen
     */
    dropProduct(): Product | Package | null{
+        // Übergibt das Produkt an die PrepMachine, wenn möglich
+       if (this._canInteractProduct && this._inventory instanceof Product){
+            const nearestMachine = this.getNearestPrepMachine();
+            if (nearestMachine && nearestMachine.canAcceptProduct(this._inventory)) {
+                if (nearestMachine.acceptProduct(this._inventory)){
+                    console.log("Produkt der PrepMachine übergeben:", this._inventory);
+
+                    //Entferne das Produkt aus dem Inventar
+                    const placedProduct = this._inventory;
+                    placedProduct.destroy();
+                    this._inventory = null;
+                    this._canInteractProduct = false;
+                    this._hasPicked = false;
+
+                    return null;
+                }
+            }
+       }
        if (this._inventory instanceof Package && Products.checkForInteraction(this._hitbox) instanceof Product) {return null;}
        if (this._canInteractProduct && this._inventory !== null) {
            const droppedProduct = this._inventory;
@@ -477,6 +499,73 @@ export class Player {
        return null;
    }
 
+   /**
+    * Findet die nächste PrepMachine in Reichweite des Spielers.
+    * @returns Die nächste PrepMachine oder null, wenn keine gefunden wurde.
+    */
+   private getNearestPrepMachine(): PrepMachine | null {
+        let nearestMachine: PrepMachine | null = null;
+        let shortestDistance: number = Infinity;
+
+        for (const obj of this._gamefield.interactableObjects){
+            if (obj.name.startsWith('PrepMachine')) {
+                const machine = obj as PrepMachine;
+                const distance = Math.sqrt(
+                    Math.pow((this._position.x + this._hitbox.width/2) - (machine.x + machine.width/2), 2) +
+                    Math.pow((this._position.y + this._hitbox.height/2) - (machine.y + machine.height/2), 2)
+                );
+
+                if (distance < Gamefield.fieldsize * 1.5 && distance < shortestDistance) {
+                    shortestDistance = distance;
+                    nearestMachine = machine;
+                }
+            }
+        }
+
+        return nearestMachine;
+   }
+   /**
+    * 
+    * @returns boolean - ob eine Interaktion mit der PrepMachine stattgefunden hat
+    */
+   private handlePrepMachineInteraction(): boolean {
+        const nearestMachine = this.getNearestPrepMachine();
+        if (!nearestMachine) {
+            return false;
+        }
+        // Nimmt das Ausgangsprodukt von der PrepMachine auf
+        if (!this._inventory && nearestMachine.isOutputReady()){
+            const output = nearestMachine.collectOutput();
+            if (output){
+                this._inventory = output;
+                this._canInteractProduct = false;
+                this._hasPicked = true;
+                this._inventory.renderObject.priority = 200;
+
+                Products.generatedProducts.push(output);
+                this._inventory!.z = 50;
+
+                console.log("Produkt von PrepMachine aufgenommen:", this._inventory);
+                return true;
+            }
+        }
+        // Übergibt das Produkt an die PrepMachine
+        if (this._inventory instanceof Product && nearestMachine.canAcceptProduct(this._inventory)){
+            if (nearestMachine.acceptProduct(this._inventory)){
+                console.log("Produkt der PrepMachine übergeben:", this._inventory);
+
+                this._inventory.destroy();
+                this._inventory = null;
+                this._canInteractProduct = false;
+                this._hasPicked = false;
+
+                return true;
+            }
+
+            
+        }
+        return false;
+   }
    hasPicked(): boolean {
        return this._hasPicked;
    }

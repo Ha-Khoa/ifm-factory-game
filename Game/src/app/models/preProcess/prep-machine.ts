@@ -1,0 +1,273 @@
+import { Product} from '../product/product'
+import { Products } from '../product/products'
+import { RenderObject } from '../rendering/render-object';
+import { RenderingService } from '../../services/rendering.service';
+import { Gamefield } from '../gamefield/gamefield';
+
+/**
+ * PrepMachine Klasse: 
+ * - Idee: um das Spiel komlizierter zu machen, werden einige Produkte andere Wege verarbeiten müssen, bevor sie verkauft werden können.
+ * Mit der PrepMachine können einige Produkte vorverarbeitet werden, bevor in der Maschine weiterverarbeitet oder verkauft werden können.
+ * - Inspiration: Schneidebrett, Mixer in Overcooked (Fleisch erst schneiden bevor es gekocht werden kann)
+ * - Ein Produkt wurde in Produktliste hinzugefügt: "Iron Ingot". Nach der Verarbeitung von "Iron Ingot" bekommen wir "Iron Gear" durch PrepMachine.
+ * - Wir können in der Zukunft weitere Rezepte mit "Iron Gear" hinzufügen:
+ * - Iron Ingot -> PrepMachine -> Iron Gear
+ * - Iron Gear + Copper Wire -> Elektrische Motor 
+ */
+export class PrepMachine extends RenderObject {
+    /**
+     * - Id von PrepMachine
+     * - Zeit, die benötigt wird, um ein Produkt zu verarbeiten (in ms)
+     * - Eingangsprodukt, das von der Maschine akzeptiert wird
+     * - Ausgangsprodukt, das von der Maschine produziert wird
+     * - Aktuelles Eingangsprodukt, das gerade verarbeitet wird
+     * - Startzeit der Verarbeitung
+     * - Status, ob die Maschine gerade verarbeitet
+     * - Fortschritt der Verarbeitung (0 bis 1)
+     * - Status, ob das Ausgangsprodukt bereit zur Abholung ist
+     * - Rezept für die Verarbeitung (Eingangs- und Ausgangsprodukt IDs)
+     */
+        private static pre_machine_id: number = 0;
+        private processingTime: number;
+        private inputProduct?: Product;
+        private outputProduct?: Product;
+        private currentInput?: Product;
+        private processingStartTime?: number;
+        private isProcessing: boolean = false;
+        private processingProgress: number = 0;
+        private outputReady: boolean = false;
+
+        private recipe?: {
+            inputId: number;
+            outputId: number;
+        }
+        constructor(
+            x: number,
+            y: number,
+            width: number,
+            height: number,
+            processingTime: number = 5000,
+            inputProduct?: Product,
+            outputProduct?: Product
+        ) {
+           super(
+                `PrepMachine_${PrepMachine.pre_machine_id++}`,
+                'PrepMachine',
+                x,
+                y,
+                Gamefield.fieldsize,
+                width,
+                height,
+                90,
+                undefined,
+                undefined,
+                "#FFE797",   //rectColor
+                ["#FCB53B", "#aa6a17ff"],   //rectLayers
+                [//Frames Parameter
+                  `public/images/prep-machines/prep-machine-frame-1.png`,
+                  `public/images/prep-machines/prep-machine-frame-2.png`,
+                  `public/images/prep-machines/prep-machine-frame-3.png`,
+                  `public/images/prep-machines/prep-machine-frame-4.png`,
+                ],
+                5
+
+           );
+            this.processingTime = processingTime;
+            this.inputProduct = inputProduct;
+            this.outputProduct = outputProduct;
+
+            if (this.inputProduct && this.outputProduct) {
+                this.setRecipe(this.inputProduct.id, this.outputProduct.id);
+            }
+
+            RenderingService.instance().addRenderObject(this);
+        }
+        /**
+         * 
+         * @param inputId : Id des Eingangsprodukts (z.B. Iron Ingot (Produkt Id 7))
+         * @param outputId : Id des Ausgangsprodukts (z.B. Iron Gear (Produkt Id 8))
+         */
+        setRecipe(inputId: number, outputId: number): void {
+            this.recipe = {inputId, outputId};
+            this.inputProduct = Products.getProductById(inputId);
+            this.outputProduct = Products.getProductById(outputId);
+        }
+        /**
+         * 
+         * @param product - Produkt, das von der Maschine akzeptiert werden soll
+         * @returns boolean - true, wenn das Produkt akzeptiert wurde, false sonst
+         */
+        acceptProduct(product: Product){
+            if (this.canAcceptProduct(product)){
+                this.startProcessing(product);
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * 
+         * @param product - ProduktId
+         * Startet die Verarbeitung des Produkts
+         */
+        private startProcessing(product: Product){
+            this.currentInput = product;
+            this.isProcessing = true;
+            this.processingStartTime = Date.now();
+            this.processingProgress = 0;
+            this.outputReady = false;
+
+            this.frameNumber = 0;
+
+            console.log(`Started processing ${product.name}`)
+        }
+        /**
+         * Aktualisiert den Status der Maschine, überprüft den Fortschritt der Verarbeitung und aktualisiert die Animation.
+         * 
+         */
+        update(): void{
+            if (this.isProcessing && this.processingStartTime){
+                const currentTime = Date.now();
+                const elapsedTime = currentTime - this.processingStartTime;
+
+                this.processingProgress = Math.min(elapsedTime/this.processingTime, 1);
+
+                this.updateAnimation();
+
+                if (elapsedTime >= this.processingTime){
+                    this.completeProcessing();
+                }
+            }
+        }
+        /**
+         * Aktualisiert die Animationsframes basierend auf dem Verarbeitungsfortschritt.
+         */
+        private updateAnimation(): void{
+            if (this.frames && this.frames.length > 0) {
+                const frameIndex = Math.floor(this.processingProgress * this.frames.length);
+                this.frameNumber = Math.min(frameIndex, this.frames.length - 1);
+                this.nextFrame = this.frames[this.frameNumber];
+            }
+        }
+        private completeProcessing(): void {
+            this.isProcessing = false;
+            this.processingProgress = 1;
+            this.outputReady = true;
+
+            console.log(`Processing complete! ${this.outputProduct?.name}`)
+        }
+        /**
+         * 
+         * @returns - Produkt - das verarbeitete Ausgangsprodukt, wenn es bereit ist, sonst null
+         * Sammelt das Ausgangsprodukt, wenn es bereit ist, und setzt den Maschinenstatus zurück.
+         */
+        collectOutput(): Product | null{
+            if (this.outputReady && this.outputProduct){
+                const output = this.outputProduct.copy();
+                this.outputReady = false;
+                this.currentInput = undefined;
+                this.processingProgress = 0;
+
+                if(this.frames && this.frames.length > 0){
+                    this.frameNumber = 0;
+                    this.nextFrame = this.frames[0];
+                }
+
+                console.log(`Collected output: ${output.name}`);
+                return output;
+            }
+            return null;
+        }
+        /**
+         * 
+         * @param product  
+         * @returns boolean - ob die Produkte verarbeitet werden können
+         */
+
+        canAcceptProduct(product: Product): boolean {
+                if(!this.isProcessing && !this.outputReady && this.inputProduct &&product.id === this.inputProduct.id) {
+                    return true;
+                }
+                else{
+                    return false;
+                }
+                    
+                    
+                    
+        }
+
+        getSate():{
+            isProcessing: boolean;
+            progress: number;
+            outputReady: boolean;
+            currentInput?: string;
+            expectedOutput?: string;
+        }{
+            return {
+                isProcessing: this.isProcessing,
+                progress: this.processingProgress,
+                outputReady: this.outputReady,
+                currentInput: this.currentInput?.name,
+                expectedOutput: this.outputProduct?.name
+            };
+        }
+        /**
+         * 
+         * @returns boolean - ob die Maschine frei sind
+         */
+        isIdle(): boolean {
+            return !this.isProcessing && !this.outputReady;
+        }
+        /**
+         * 
+         * @returns boolean - ob das Ausgangsprodukt bereit ist
+         */
+        isOutputReady(): boolean {
+            return this.outputReady;
+        }
+
+        getProgress(): number {
+            return this.processingProgress;
+        }
+        /**
+         * Setzt die Maschine zurück auf den Anfangszustand.
+         */
+        reset(): void {
+            this.isProcessing = false;
+            this.outputReady = false;
+            this.currentInput = undefined;
+            this.processingStartTime = undefined;
+            this.processingProgress = 0;
+        
+        
+            if (this.frames && this.frames.length > 0) {
+               this.frameNumber = 0;
+                this.nextFrame = this.frames[0];
+            }
+        }
+
+        /**
+         * 
+         * @returns - der visuelle Zustand der Maschine
+         */
+        getVisualState(): {
+            progress: number;
+            isActive: boolean;
+            hasInput: boolean;
+            hasOutput: boolean;
+            inputName?: string;
+            outputName?: string;
+        } {
+            return {
+                progress: this.processingProgress,
+                isActive: this.isProcessing,
+                hasInput: !!this.currentInput,
+                hasOutput: this.outputReady,
+                inputName: this.currentInput?.name,
+                outputName: this.outputProduct?.name
+            };
+        }
+
+
+
+}
