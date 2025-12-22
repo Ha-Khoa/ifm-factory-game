@@ -19,7 +19,7 @@ export class DebugMenuComponent implements OnInit {
 
   playerMoney = 0;
   playerScore = 0;
-  playerName = 'Benjamin'; // Hardcoded player name
+  playerName = 'Player1'; // TODO: Hardcoded player name
 
   // Custom order
   products: Product[] = [];
