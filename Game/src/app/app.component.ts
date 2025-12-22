@@ -65,13 +65,13 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       else this.isSettingsOpen = true;
       return;
     }
-    this.game.setInput(event.key, true);
+    this.game.setInput(event.key.toLowerCase(), true);
   }
 
   @HostListener('window:keyup', ['$event'])
   onKeyUp(event: KeyboardEvent): void {
     if (this.showStartScreen) return; // Ignore input if start screen is active
-    this.game.setInput(event.key, false);
+    this.game.setInput(event.key.toLowerCase(), false);
   }
 
   ngOnDestroy(): void {
