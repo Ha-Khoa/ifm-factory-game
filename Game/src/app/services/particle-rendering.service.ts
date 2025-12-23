@@ -46,7 +46,7 @@ export class ParticleRenderingService {
     for(let particle of particles)
     {
       particle.x = (particle.worldCoordinates.x + this._xOffset / this._fov) * this._fov
-      particle.y = (particle.worldCoordinates.y * this._fov) + this._yOffset
+      particle.y = (particle.worldCoordinates.y * this._fov) + this._yOffset + RenderingService.instance().rotationZ
     }
     particleObject.updateParticles(deltaTime);
     

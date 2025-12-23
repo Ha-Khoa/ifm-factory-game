@@ -25,7 +25,8 @@ export class InteractableObject {
         img?: string,
         imgWall?: string,
         color?: string,
-        colorLayers?: string[]
+        colorLayers?: string[],
+        priority: number = 90
     ) {
         this._position = position;
         this._width = width;
@@ -45,7 +46,7 @@ export class InteractableObject {
             z,
             this._width,
             this._height,
-            90,
+            priority,
             img,
             imgWall,
             color,

@@ -11,6 +11,7 @@ import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
 import { SlotMachineService } from './slot-machine.service';
+import { SlotMachine } from '../models/slot-machine/slot-machine';
 
 
 @Injectable({
@@ -31,6 +32,7 @@ export class GameService {
   private player!: Player;
   private interactableManager!: InteractableManager;
   private conveyorBeltManager!: ConveyorBeltManager;
+  private slotMachine!: SlotMachine;
 
   // Input und Assets
   private inputs: Record<string, boolean> = {};
@@ -65,6 +67,8 @@ export class GameService {
       this.gamefield
     );
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs);
+    this.slotMachine = new SlotMachine(800, 100, this.gamefield);
+
 
 
     // Lade benötigte Texturen vor
@@ -199,7 +203,8 @@ export class GameService {
       RenderingService.instance().render();
 
       SlotMachineService.instance().setInput(this.inputs);
-      //SlotMachineService.instance().render();
+      SlotMachineService.instance().scaleCanvas(this.player.camera);
+      SlotMachineService.instance().render();
 
       // Render Particles
       this.interactableManager.resetParticleFields();

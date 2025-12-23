@@ -241,7 +241,34 @@ export class RenderingService {
   
   rotateInSlotMachine()
   {
-
+    const angle = 90 / 360 * 2 * Math.PI;
+    const zoom = 30;
+    const y = 500;
+    const z = 100;
+    if(this._angle < angle)
+    {
+      this._angle += 0.02;
+    }
+    if(this._fov < zoom)
+    {
+      this._fov += 0.5;
+    }
+    if(this._camera.y < y)
+    {
+      this._camera.y += 0.1;
+    }
+    else if(this._camera.y > y)
+    {
+      this._camera.y -= 0.1;
+    }
+    if(this._camera.position.z < z)
+    {
+      this._camera.position.z += 0.1;
+    }
+    else if(this._camera.position.z > z)
+    {
+      this._camera.position.z -= 0.1;
+    }
   }
 
   async rotateMap() {

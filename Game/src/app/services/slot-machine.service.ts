@@ -1,5 +1,6 @@
 import { Injectable, provideExperimentalCheckNoChangesForDebug } from '@angular/core';
 import { RenderingService } from './rendering.service';
+import { Camera } from '../models/camera/camera';
 
 export interface SlotIcon {
   img: string;
@@ -53,6 +54,11 @@ export class SlotMachineService {
   private _iconMultiplier: number[] = [20, 2, 1, 2, 1, 1.5, Infinity, -Infinity];
 
   private _slots: SlotIcon[][] = [];
+
+  private _scale: number = 1;
+  private _xOffset: number = 0;
+  private _yOffset: number = 0;
+
 
   constructor() { }
 
@@ -115,7 +121,10 @@ export class SlotMachineService {
 
   render()
   {
-    this._ctx.clearRect(0, 0, this._ctx.canvas.width, this._ctx.canvas.height);
+    this._ctx.save();
+    this._ctx.scale(this._scale, this._scale * Math.cos(RenderingService.instance().angle));
+    this._ctx.translate(this._xOffset, this._yOffset);
+    this._ctx.clearRect(-this._xOffset, -this._yOffset, this._ctx.canvas.width * 2, this._ctx.canvas.height * 2);
     this._ctx.rect(0, 0, this._ctx.canvas.width, this._ctx.canvas.height);
     this._ctx.fillStyle = "#ffffffff";
     this._ctx.fill();
@@ -146,9 +155,17 @@ export class SlotMachineService {
     {
       this._activePatterns = [];
     }
+    this._ctx.clearRect(0, this._ctx.canvas.height, this._ctx.canvas.width, this._ctx.canvas.height);
+    this._ctx.restore();
+    
   }
 
-
+  scaleCanvas(camera: Camera)
+  {
+    this._scale = RenderingService.instance().fov / 5;
+    this._xOffset = this._ctx.canvas.width / 2 - camera.position.x * RenderingService.instance().fov;
+    this._yOffset = RenderingService.instance().yOffset * RenderingService.instance().fov * Math.cos(RenderingService.instance().angle)
+  }
 
   calcNewIcon(): string
   {
