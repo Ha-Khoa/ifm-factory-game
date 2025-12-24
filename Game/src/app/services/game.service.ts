@@ -13,6 +13,7 @@ import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manag
 import { Subject } from 'rxjs';
 import {Orders} from '../models/orders/orders';
 import {PlayerService} from './player.service';
+import {PrepMachineManager} from "../models/preProcess/prep-machine-manager";
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +36,7 @@ export class GameService {
   private player!: Player;
   private interactableManager!: InteractableManager;
   private conveyorBeltManager!: ConveyorBeltManager;
+  private prepMachine!: PrepMachineManager;
 
   // Input und Assets
   private inputs: Record<string, boolean> = {};
@@ -157,6 +159,7 @@ export class GameService {
     this.gamefield.addGameFieldToRenderingBuffer();
     this.gamefield.updateConveyorBelts(ConveyorBeltManager.getConveyorBelts());
     this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
+    this.prepMachine = new PrepMachineManager(this.gamefield);
     Products.generateProducts();
   }
 
@@ -212,6 +215,8 @@ export class GameService {
 
       this.conveyorBeltManager.update();
       this.conveyorBeltManager.refreshGamefield();
+
+      this.prepMachine.update();
 
       // Render-Phase
       this.player.render();
