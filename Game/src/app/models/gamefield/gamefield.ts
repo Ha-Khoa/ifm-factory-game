@@ -3,6 +3,7 @@ import { Machine } from "../machine/machine";
 import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
 import { ConveyorBelt } from "../conveyor-belt/conveyor-belt";
+import { RenderType } from "../../enums/render-type";
 
 /**
  * Gamefield-Klasse: Verwaltet das Spielfeld mit Umgebungsobjekten und interaktiven Objekten.
@@ -81,7 +82,7 @@ export class Gamefield {
             {
                 this.environmetObjects.push(new RenderObject(
                     `floor-${i}-${j}`,
-                    "rect",
+                    RenderType.RECT,
                     j * Gamefield.fieldsize,
                     i * Gamefield.fieldsize,
                     0,
@@ -97,15 +98,14 @@ export class Gamefield {
         }
         for(let i = 0; i < (Gamefield.rows + 1) * 8; i++)
         {
-            for(let j = 0; j < Gamefield.cols; j++)
-            {
+
                 this.environmetObjects.push(new RenderObject(
-                    `floor2-${i}-${j}`,
-                    "rect",
-                    j * Gamefield.fieldsize,
+                    `floor2-${i}`,
+                    RenderType.RECT,
+                    0,
                     i * Gamefield.fieldsize / 8,
                     0,
-                    Gamefield.fieldsize,
+                    Gamefield.cols * Gamefield.fieldsize,
                     0.1,
                     -1000,
                     "/images/Metal_16-512x512.png",
@@ -113,7 +113,6 @@ export class Gamefield {
                     "#686767ff",
                     []
                 ))
-            }
         }
     }
 
@@ -131,7 +130,7 @@ export class Gamefield {
     {
         this.interactableObjects.push(new RenderObject(
             `table-${i}`,
-            "rect",
+            RenderType.RECT,
             i * Gamefield.fieldsize,
             10 * Gamefield.fieldsize,
             Gamefield.fieldsize,
@@ -148,7 +147,7 @@ export class Gamefield {
     {
         this.interactableObjects.push(new RenderObject(
             `table-${i}-2`,
-            "rect",
+            RenderType.RECT,
             10 * Gamefield.fieldsize,
             (i + 4) * Gamefield.fieldsize,
             Gamefield.fieldsize,
@@ -177,4 +176,6 @@ export class Gamefield {
             }
         });
     }
+
+
 }

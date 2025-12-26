@@ -6,6 +6,7 @@ import { Collision } from "../collision/collision";
 import { Gamefield } from '../gamefield/gamefield';
 import { RenderingService } from '../../services/rendering.service';
 import { Direction, KEY_TO_DIRECTION } from '../../enums/direction';
+import { RenderType } from '../../enums/render-type';
 import { RenderObject } from '../rendering/render-object';
 import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
 import { Package } from '../package/package';
@@ -55,6 +56,7 @@ export class Player {
    private _walkingAnimation: string[];
    private _holdingAnimation: string[];
    private _camera: Camera;
+   private _cameraFix: boolean = true;
 
 
    constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield) {
@@ -70,14 +72,15 @@ export class Player {
        this._direction = null;
        this._camera = new Camera(new Coordinates(this._position.x + this._hitbox.width / 2, this._position.y + this._hitbox.height / 2), 30);
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
+       const height = this._hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI);
        this._renderingObject = new RenderObject(
            "player",
-           "gif",
+           RenderType.GIF,
            this._position.x,
            this._position.y,
            this._z,
            this._hitbox.width,
-           this._hitbox.height,
+           height,
            (this._z - 50) * -3,
            this.img,
            undefined,
@@ -99,7 +102,7 @@ export class Player {
     */
    render() {
        this._renderingObject.x = this._position.x;
-       this._renderingObject.y = this._position.y;
+       this._renderingObject.y = this._position.y + this._hitbox.height / 2;
    }
 
 
@@ -149,7 +152,6 @@ export class Player {
                numPressed++;
            }
        }
-       console.log(numPressed)
        if (numPressed === 0) {
            this._directionPressed = false;
        }
@@ -249,10 +251,13 @@ export class Player {
        // Keine Kollision, bewege den Spieler
        this._position.x += velocityX;
        this._position.y += velocityY;
-       this._camera.x = this._position.x + this._hitbox.width / 2;
-       this._camera.y = this._position.y - this._hitbox.height / 2;
-
    }
+          if(this._cameraFix)
+       {
+           this._camera.x = this._position.x + this._hitbox.width / 2;
+           this._camera.y = this._position.y - this._hitbox.height / 2;
+           this._camera.setCameraInBounds();
+       }
    
 }
 
@@ -262,7 +267,7 @@ export class Player {
         if(this._directionPressed)
         {
             
-            this._renderingObject.type = "gif"
+            this._renderingObject.type = RenderType.GIF
             this._renderingObject.img = this._img;
             if(this._inventory !== null)
             {
@@ -277,7 +282,7 @@ export class Player {
         }
         else
         {
-            this._renderingObject.type = "static Img"
+            this._renderingObject.type = RenderType.CARD_BOARD
             this.sitPlayer();
         }
     }
@@ -436,6 +441,9 @@ export class Player {
     }
 
     get camera(): Camera { return this._camera; }
+
+    set cameraFix(v: boolean) { this._cameraFix = v; }
+    get cameraFix(): boolean { return this._cameraFix; }
 
 
 

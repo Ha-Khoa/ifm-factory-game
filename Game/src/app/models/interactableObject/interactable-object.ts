@@ -4,6 +4,7 @@ import { Hitbox } from "../../interfaces/hitbox";
 import { Direction } from "../../enums/direction";
 import { Gamefield } from "../gamefield/gamefield";
 import { ParticleRenderObject } from "../rendering/particle-render-object";
+import { RenderType } from "../../enums/render-type";
 
 export class InteractableObject {
     protected _renderObject: RenderObject;
@@ -21,7 +22,7 @@ export class InteractableObject {
         height: number,
         z: number,
         directions: Direction[],
-        type: string,
+        type: RenderType,
         img?: string,
         imgWall?: string,
         color?: string,
@@ -33,11 +34,9 @@ export class InteractableObject {
         this._height = height;
         this._directions = directions;
 
-        // Base hitbox is aligned to the object's position and size
         this._hitbox = new Hitbox(position, width, height);
 
 
-        // Create a render object based on provided args
         this._renderObject = new RenderObject(
             name,
             type,

@@ -1,5 +1,6 @@
 import { RenderObject } from "./render-object";
 import { Particles } from "../particle/particles";
+import { RenderType } from "../../enums/render-type";
 
 export class ParticleRenderObject extends RenderObject {
     
@@ -18,7 +19,7 @@ export class ParticleRenderObject extends RenderObject {
         spawnType: string,
         colors: string[]
     ) {
-        super(id, "particle", x, y, z, width, height, 300);
+        super(id, RenderType.PARTICLE, x, y, z, width, height, 300);
         this._particles = new Particles(
             x,
             y,

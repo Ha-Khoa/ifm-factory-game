@@ -6,7 +6,7 @@ import { Hitbox } from "../../interfaces/hitbox";
 import { Collision } from "../collision/collision";
 import { RenderingService} from "../../services/rendering.service";
 import { RenderObject } from "../rendering/render-object";
-
+import { RenderType } from "../../enums/render-type";
 import { Direction } from "../../enums/direction";
 import { Coordinates } from "../coordinates/coordinates";
 import { UIService } from "../../services/ui.service";
@@ -14,6 +14,7 @@ import { Player } from "../player/player";
 import { SubmissionArea } from "../submission-area/submission-area";
 import { InteractableObject } from "./interactable-object";
 import { Package } from "../package/package";
+import { SlotMachine } from "../slot-machine/slot-machine";
 
 /**
  * MachineManager-Klasse: Verwaltet alle Maschinen im Spiel.
@@ -31,16 +32,17 @@ export class InteractableManager {
                     Products.getProductByName("Raw Silicon")!,
                     Products.getProductByName("Circuit Board")!,
                     Products.getProductByName("Plastic Case")!,
-                  ]),
+                  ], RenderType.THREE_D_IMG),
       // Plastic Case-Maschine (benötigt Raw Plastic)
       new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Plastic Case", "/images/wall.png", "/images/wall.png",
                   [Direction.UP], Products.getProductByName("Plastic Case")!,
-                  [Products.getProductByName("Raw Plastic")!]),
+                  [Products.getProductByName("Raw Plastic")!], RenderType.RECT),
       new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Circuit Board", "/images/wall.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductByName("Circuit Board")!,
-                  [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper Wire")!])
+                  [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper Wire")!], RenderType.RECT)
     ];
 
+    private _slotMachine!: SlotMachine;
     private submissionArea: SubmissionArea = new SubmissionArea(
       new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 5),
       Gamefield.fieldsize,
@@ -51,6 +53,7 @@ export class InteractableManager {
     this._gamefield = _gamefield;
     this.ui = ui;
     this._inputs = inputs;
+    this._slotMachine = new SlotMachine(800, 100, this._gamefield);
     // Standard-Maschinen freischalten
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
@@ -61,6 +64,7 @@ export class InteractableManager {
     })
     this.generateInteractionField(this.submissionArea)
     this.setSubmissionAreaParticles()
+    this.generateInteractionField(this._slotMachine)
     this.submissionArea.particleRenderObjects.forEach((particleRenderObject) => {
        particleRenderObject.ptype = "straightUp";
       particleRenderObject.spawnType = "empty";
@@ -95,6 +99,12 @@ export class InteractableManager {
       //particleRenderObject.ptype = "straightUp";
       //particleRenderObject.spawnType = "empty";
     }
+  }
+
+  checkPlayerInSlotMachineArea(player: Player) : boolean
+  {
+    const collision = this.interactionObject(this._slotMachine, player);
+    return collision;
   }
 
   checkMachineNeedsProduct(player: Player)
@@ -186,7 +196,7 @@ export class InteractableManager {
     // Kollision mit Submission Area prüfen
     if (this.interactionObject(this.submissionArea, player))
     {
-      this.updateSubmissionAreaOnInteraction(player);
+      this.updateSubmissionAreaOnInteraction(player);   
 
     }
     else
@@ -200,15 +210,17 @@ export class InteractableManager {
   {
     for (let direction of interactableObject.directions)
     {
-      const interactionX = direction === Direction.RIGHT ? interactableObject.position.x + Gamefield.fieldsize :
+      const interactionX = direction === Direction.RIGHT ? interactableObject.position.x + interactableObject.width :
                            direction === Direction.LEFT ? interactableObject.position.x - Gamefield.fieldsize : interactableObject.position.x;
-      const interactionY = direction === Direction.DOWN ? interactableObject.position.y + Gamefield.fieldsize :
+      const interactionY = direction === Direction.DOWN ? interactableObject.position.y + interactableObject.height :
                            direction === Direction.UP ? interactableObject.position.y - Gamefield.fieldsize : interactableObject.position.y;
+      const interactionHeight = direction === Direction.DOWN || direction === Direction.UP ?  Gamefield.fieldsize : interactableObject.height;
+      const interactionWidth = direction === Direction.RIGHT || direction === Direction.LEFT ? Gamefield.fieldsize : interactableObject.width;
 
       const interactionHitbox: Hitbox = new Hitbox(
         new Coordinates(interactionX, interactionY),
-        interactableObject.width,
-        interactableObject.height
+        interactionWidth,
+        interactionHeight
       );
       const collision = Collision.checkCollision(player.hitbox, interactionHitbox);
       if (collision) {
@@ -300,7 +312,7 @@ export class InteractableManager {
       const name = `interaction-${interactionObject.renderObject.name}-${Direction[direction]}-${idx}`;
       const ro = new RenderObject(
         name,
-        "img",
+        RenderType.IMG,
         x,
         y  ,
         0,
@@ -339,10 +351,19 @@ export class InteractableManager {
     }
   }
 
+  checkForSlotMachineInteraction(player: Player) : boolean
+  {
+    const collision = this.interactionObject(this._slotMachine, player);
+    return collision;
+  }
+
   resetSubmissionAreaOnInteraction() {
     this.submissionArea.renderObject.rectColor = "#7D0A0A"
   }
 
+  get slotMachine(): SlotMachine {
+    return this._slotMachine;
+  }
 
 
   }

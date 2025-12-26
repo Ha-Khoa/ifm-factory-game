@@ -1,6 +1,8 @@
 import { Injectable, provideExperimentalCheckNoChangesForDebug } from '@angular/core';
 import { RenderingService } from './rendering.service';
 import { Camera } from '../models/camera/camera';
+import { SlotMachine } from '../models/slot-machine/slot-machine';
+import { Gamefield } from '../models/gamefield/gamefield';
 
 export interface SlotIcon {
   img: string;
@@ -20,7 +22,8 @@ export class SlotMachineService {
   private _sizePercentage: number = 20;
   // Initial spin velocity in px/s
   private _startVelocity!: number;
-  private _imgSize!: number;
+  private _imgSizeX!: number;
+  private _imgSizeY!: number;
   // Padding around each icon tile inside a cell
   private _iconEdgeOffset!: number;
   private _spawnStartY!: number;
@@ -55,10 +58,6 @@ export class SlotMachineService {
 
   private _slots: SlotIcon[][] = [];
 
-  private _scale: number = 1;
-  private _xOffset: number = 0;
-  private _yOffset: number = 0;
-
 
   constructor() { }
 
@@ -73,9 +72,10 @@ export class SlotMachineService {
     return this._instance;
   }
 
-  init(ctx: CanvasRenderingContext2D, images: { [key: string]: HTMLImageElement })
+  init(ctx: CanvasRenderingContext2D, images: { [key: string]: HTMLImageElement }, gamefield: Gamefield)
   {
     this._ctx = ctx;
+
     this._images = images;
     this._slotIcons = ["/images/slotMachine/seven.png",
        "/images/fox/fox-coin.png",
@@ -86,21 +86,22 @@ export class SlotMachineService {
           "/images/slotMachine/squirrel.png",
           "/images/slotMachine/manure.png"];
     this._startVelocity = 3000;
-    this._iconEdgeOffset = this._ctx.canvas.height * (1 - ((this._sizePercentage) / 100)) / 5 * 0.1;
-
-    this._imgSize = (this._ctx.canvas.height * (1 - ((this._sizePercentage) / 100))) / 3 - 2 * this._iconEdgeOffset;
-    this._spawnStartY = this._ctx.canvas.height * (this._sizePercentage) / 200 - this._imgSize - this._iconEdgeOffset
-    this._maxProgress = 4 * this._imgSize + this._iconEdgeOffset * 8;
-    this._step = this._imgSize + 2 * this._iconEdgeOffset;
     this._stopIntervall = 2500;
-    this._rowOffset = (this._ctx.canvas.width * (1 - ((this._sizePercentage) / 100)) - this._imgSize * 5) / 10;
+    this._iconEdgeOffset = this._ctx.canvas.height * (1 - ((this._sizePercentage) / 100)) / 5 * 0.1;
+    this._rowOffset = 20;
+    this._imgSizeX = (this._ctx.canvas.width * (1 - ((this._sizePercentage) / 100))) / 5 - 2 * this._iconEdgeOffset - 5/6 *this._rowOffset;
+    this._imgSizeY = (this._ctx.canvas.height * (1 - ((this._sizePercentage) / 100))) / 3 - 2 * this._iconEdgeOffset;
+    this._spawnStartY = this._ctx.canvas.height * (this._sizePercentage) / 200 - this._imgSizeY - this._iconEdgeOffset
+    this._maxProgress = 4 * this._imgSizeY + this._iconEdgeOffset * 8;
+    this._step = this._imgSizeY + 2 * this._iconEdgeOffset;
+
     // Lade Slot Icons
     for(let i = 0; i < 5; i++)
     {
       this._slots.push([]);
       for(let j = 0; j < 4; j++)
       {
-        this._slots[i].push({img: this._slotIcons[Math.floor(Math.random() * (this._slotIcons.length - 2))], progress: j * this._imgSize + 2 * j * this._iconEdgeOffset});
+        this._slots[i].push({img: this._slotIcons[1], progress: j * this._imgSizeY + 2 * j * this._iconEdgeOffset});
       }
     }
   }
@@ -119,12 +120,22 @@ export class SlotMachineService {
            }
   }
 
-  render()
+  render(x: number, y: number, width: number, height: number)
   {
     this._ctx.save();
-    this._ctx.scale(this._scale, this._scale * Math.cos(RenderingService.instance().angle));
-    this._ctx.translate(this._xOffset, this._yOffset);
-    this._ctx.clearRect(-this._xOffset, -this._yOffset, this._ctx.canvas.width * 2, this._ctx.canvas.height * 2);
+    
+    this._ctx.beginPath();
+    this._ctx.rect(x, y, width, height);
+    this._ctx.clip();
+    
+    this._ctx.translate(x, y);
+    
+    const scaleX = width / this._ctx.canvas.width;
+    const scaleY = height / this._ctx.canvas.height;
+    this._ctx.scale(scaleX, scaleY);
+
+    // Slot-machine background
+    this._ctx.beginPath();
     this._ctx.rect(0, 0, this._ctx.canvas.width, this._ctx.canvas.height);
     this._ctx.fillStyle = "#ffffffff";
     this._ctx.fill();
@@ -143,7 +154,7 @@ export class SlotMachineService {
     {
       if(RenderingService.instance().deltaTime)
       {
-      this.drawRow(this._slots[i], i * (this._imgSize + this._iconEdgeOffset * 2) + this._ctx.canvas.width * (this._sizePercentage) / 200 + this._rowOffset * (i + 1) - this._rowOffset / 2, RenderingService.instance().deltaTime, i);
+      this.drawRow(this._slots[i], i * (this._imgSizeX + this._iconEdgeOffset * 2) + this._ctx.canvas.width * (this._sizePercentage) / 200 + this._rowOffset * (i + 1), RenderingService.instance().deltaTime, i);
       }
     }
       this.drawEdge(this._sizePercentage);
@@ -155,22 +166,15 @@ export class SlotMachineService {
     {
       this._activePatterns = [];
     }
-    this._ctx.clearRect(0, this._ctx.canvas.height, this._ctx.canvas.width, this._ctx.canvas.height);
-    this._ctx.restore();
     
+    this._ctx.restore();
   }
 
-  scaleCanvas(camera: Camera)
-  {
-    this._scale = RenderingService.instance().fov / 5;
-    this._xOffset = this._ctx.canvas.width / 2 - camera.position.x * RenderingService.instance().fov;
-    this._yOffset = RenderingService.instance().yOffset * RenderingService.instance().fov * Math.cos(RenderingService.instance().angle)
-  }
 
   calcNewIcon(): string
   {
     const rand = Math.random();
-    let probSum = 0;
+    let probSum = 0; 
     for(let i = 0; i < this._probabilitys.length; i++)
     {
       probSum += this._probabilitys[i];
@@ -198,9 +202,7 @@ export class SlotMachineService {
 
   async stopSpin()
   {
-    // Delay before starting to stop reels
     await new Promise(r => setTimeout(r, this._stopIntervall));
-    // Stagger stopping per reel
     for (let i = 0; i < 5; i++) {
       this.beginStop(i);
       await new Promise(r => setTimeout(r, this._delayBetweenStops));
@@ -219,7 +221,6 @@ export class SlotMachineService {
   private beginStop(i: number) {
     if (this._isStopping[i] || this._stopped[i]) return;
     this._isStopping[i] = true;
-    // Determine next forward grid cell for a clean lock-in (no backward snap)
     const p0 = ((this._slots[i][0].progress % this._maxProgress) + this._maxProgress) % this._maxProgress;
     let k = Math.ceil(p0 / this._step);
     if (k * this._step >= this._maxProgress) k = 0;
@@ -423,7 +424,6 @@ export class SlotMachineService {
   {
     if (this._activePatterns.length === 0) return;
 
-    // Blink timing should advance once per frame (not once per pattern)
     const dt = RenderingService.instance().deltaTime ? RenderingService.instance().deltaTime : 1;
     this._blinkT += dt;
     if (this._blinkT >= this._blinkDuration)
@@ -433,7 +433,6 @@ export class SlotMachineService {
     }
     if (this._blinkState === false) return;
 
-    // Palette for different patterns; alpha makes overlaps visible
     const palette: Array<[number, number, number]> = [
       [255, 60, 60],
       [60, 160, 255],
@@ -460,14 +459,13 @@ export class SlotMachineService {
         {
           if(pattern[i][j] === 1)
           {
-            const x = i * (this._imgSize + this._iconEdgeOffset * 2) + this._ctx.canvas.width * (this._sizePercentage) / 200 + this._rowOffset * (i + 1) - this._rowOffset / 2;
-            const y = j * (this._imgSize + this._iconEdgeOffset * 2) + this._spawnStartY + 2 * this._iconEdgeOffset + this._imgSize;
+            const x = i * (this._imgSizeX + this._iconEdgeOffset * 2) + this._ctx.canvas.width * (this._sizePercentage) / 200 + this._rowOffset * (i + 1);
+            const y = j * (this._imgSizeY + this._iconEdgeOffset * 2) + this._spawnStartY + 2 * this._iconEdgeOffset + this._imgSizeY;
 
-            // semi-transparent fill + stroke so overlaps remain visible
             this._ctx.fillStyle = fill;
             this._ctx.strokeStyle = stroke;
-            this._ctx.fillRect(x - 6, y - 6, this._imgSize + 12, this._imgSize + 12);
-            this._ctx.strokeRect(x - 6, y - 6, this._imgSize + 12, this._imgSize + 12);
+            this._ctx.fillRect(x - 6, y - 6, this._imgSizeX + 12, this._imgSizeY + 12);
+            this._ctx.strokeRect(x - 6, y - 6, this._imgSizeX + 12, this._imgSizeY + 12);
           }
         }
       }
@@ -506,20 +504,18 @@ export class SlotMachineService {
         this._locking[reelIndex] = false;
       }
     } else {
-      // Normal spin advance
       Icons.forEach((icon) => {
         icon.progress += this._velocitys[reelIndex] * dt;
       });
     }
     
-    // Draw after updating per mode
     Icons.forEach((icon) => {
       this._ctx.drawImage(
         this._images[icon.img],
         xPosition,
         this._spawnStartY + icon.progress,
-        this._imgSize,
-        this._imgSize
+        this._imgSizeX,
+        this._imgSizeY
       );
     });
     
@@ -529,21 +525,10 @@ export class SlotMachineService {
   {
     const width = this._ctx.canvas.width;
     const height = this._ctx.canvas.height;
-    const aspectRatio = width / height;
-    let x1, y1, x2, y2;
-    if(aspectRatio < 16/9) 
-    {
-    x1 = width * sizePercentage / 200;
-    y1 = width * 9/16 * sizePercentage / 200;
-    y2 = width * 9/16 * (200 - sizePercentage) / 200;
-    x2 = width * (200 - sizePercentage) / 200;
-    }
-    else{
-    x1 = height * 16/9 * sizePercentage / 200;
-    y1 = height *  sizePercentage / 200;
-    y2 = height * (200 - sizePercentage) / 200;
-    x2 = height * 16/9 * (200 - sizePercentage) / 200;
-    }
+    let x1 = width * sizePercentage / 200;
+    let y1 = height *  sizePercentage / 200;
+    let y2 = height * (200 - sizePercentage) / 200;
+    let x2 = width * (200 - sizePercentage) / 200;
 
 
     this.drawRect([0, 0, x1, x1], [0, height, y2, y1], "#1b1b1bff");
@@ -561,9 +546,7 @@ export class SlotMachineService {
     }
     this._ctx.closePath();
     this._ctx.fillStyle = color;
-        // Fill the polygon first
     this._ctx.fill();
-    // Then stroke its outline with the same color to mask anti-aliased gaps
     this._ctx.strokeStyle = color;
     this._ctx.lineWidth = 1;
     this._ctx.lineJoin = 'miter';

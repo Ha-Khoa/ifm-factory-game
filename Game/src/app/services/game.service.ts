@@ -46,7 +46,7 @@ export class GameService {
    * @param ctx CanvasRenderingContext2D zum Zeichnen
    * @param ctxUI
    */
-  async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D, ctxSlots: CanvasRenderingContext2D) {
+  async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
     // Initialisiere UI Service
        this.gamefield = new Gamefield();
 
@@ -54,7 +54,7 @@ export class GameService {
     this.ctx = ctx;
     this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
-    SlotMachineService.instance().init(ctxSlots, this.images);
+    SlotMachineService.instance().init(this.ctx, this.images, this.gamefield);
     this.uiService.init(ctxUI, this.angle, this.images);
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false};
@@ -67,7 +67,8 @@ export class GameService {
       this.gamefield
     );
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs);
-    this.slotMachine = new SlotMachine(800, 100, this.gamefield);
+
+
 
 
 
@@ -78,7 +79,7 @@ export class GameService {
     const foxImages = ["/images/fox/walking_1.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png", "/images/fox/fox.png", "/images/fox/sitting.png",
       "/images/fox/1-fox-holding.png", "/images/fox/2-fox-holding.png", "/images/fox/3-fox-holding.png", "/images/fox/4-fox-holding.png", "/images/fox/walking_5.png", "/images/fox/fox-coin.png"
     ]
-    const slotMachineImages = ["/images/slotMachine/cherry.png", "/images/slotMachine/Bar.png", "/images/slotMachine/seven.png", "/images/slotMachine/diamond.png", "/images/slotMachine/lemon.png", "/images/slotMachine/ifm.png", "/images/slotMachine/manure.png", "/images/slotMachine/squirrel.png"];
+    const slotMachineImages = ["/images/slotMachine/cherry.png", "/images/slotMachine/Bar.png", "/images/slotMachine/seven.png", "/images/slotMachine/diamond.png", "/images/slotMachine/lemon.png", "/images/slotMachine/ifm.png", "/images/slotMachine/manure.png", "/images/slotMachine/squirrel.png", "/images/slotMachine/slot-machine.png"];
     const keyBindingImages = [
       "/images/KeyBindings/keyBindings_,.png",
       "/images/KeyBindings/keyBindings_..png",
@@ -186,7 +187,6 @@ export class GameService {
       this.player.updatePlayer();
 
       this.interactableManager.checkForInteraction(this.player);
-      RenderingService.instance().rotateMap();
 
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
@@ -199,12 +199,22 @@ export class GameService {
       this.player.render();
       this.player.updateProductInHand();
       RenderingService.instance().convertToCameraPOV(this.player.camera);
-      RenderingService.instance().zoomOut();
+      //RenderingService.instance().zoomOut();
       RenderingService.instance().render();
 
-      SlotMachineService.instance().setInput(this.inputs);
-      SlotMachineService.instance().scaleCanvas(this.player.camera);
-      SlotMachineService.instance().render();
+      if(this.interactableManager.checkPlayerInSlotMachineArea(this.player))
+      {
+        this.player.cameraFix = false;
+        RenderingService.instance().rotateInSlotMachine(this.interactableManager.slotMachine);
+        SlotMachineService.instance().setInput(this.inputs);
+      }
+      else
+      {
+        //this.player.cameraFix = true;
+        this.interactableManager.slotMachine.priority = 0;
+        if(RenderingService.instance().zoomOut()) this.player.cameraFix = true;
+        RenderingService.instance().rotateMap();
+      }
 
       // Render Particles
       this.interactableManager.resetParticleFields();

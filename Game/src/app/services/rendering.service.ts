@@ -5,11 +5,14 @@ import { Collision } from "../models/collision/collision";
 import { Coordinates } from "../models/coordinates/coordinates";
 import { Injectable } from "@angular/core";
 import { Direction } from "../enums/direction";
+import { RenderType } from "../enums/render-type";
 import { ParticleRenderingService } from "./particle-rendering.service";
 import { Particles } from "../models/particle/particles";
 import { ParticleRenderObject } from "../models/rendering/particle-render-object";
 import { Camera } from "../models/camera/camera";
 import { Gamefield } from "../models/gamefield/gamefield";
+import { SlotMachine } from "../models/slot-machine/slot-machine";
+import { SlotMachineService } from "./slot-machine.service";
 
 
 /**
@@ -99,7 +102,7 @@ export class RenderingService {
 
   convertToCameraPOV(camera: Camera): void
   {
-    this._rotationZ = this._ctx.canvas.height / 2 - this._ctx.canvas.height / 2 * Math.cos(this._angle)
+    this._rotationZ = this._ctx.canvas.height / 2 - this._ctx.canvas.height / 2 * Math.cos(this._angle) + camera.position.z * this._fov * Math.sin(this._angle);
     this._xOffset = this._ctx.canvas.width / 2 - camera.position.x * this._fov;
     this._yOffset = this._ctx.canvas.height / 2 - camera.position.y * this._fov;
     if(!this._camera)
@@ -143,17 +146,16 @@ export class RenderingService {
       const xObj = this._fov * Obj.x + this._xOffset;
       const objHeight = this._fov * Obj.height;
       const objWidth = this._fov * Obj.width
-
-      if ((Obj.type === "rect")) {
+      // Alle Objekte außerhalb des Sichtfeldes werden nicht gerendert 
+      if(xObj + objWidth < 0 || xObj > this._ctx.canvas.width || this._fov * (Obj.y + this._yOffset / this._fov) * Math.cos(this._angle) + objHeight * Math.cos(this._angle) + this._rotationZ < 0 || yProjection > this._ctx.canvas.height) return;
+      if ((Obj.type === RenderType.RECT)) {
         const layers = Obj.rectLayers!.length;
         for (let i = 0; i < layers; i++) {
           this._ctx.beginPath();
           this._ctx.fillStyle = Obj.rectLayers![i];
           this._ctx.rect(
             Math.round(xObj),
-            this._fov * ( (Obj.y + this._yOffset / this._fov + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle) ) + this._rotationZ 
-            
-            ,
+            this._fov * ( (Obj.y + this._yOffset / this._fov + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle) ) + this._rotationZ,
             Math.round(objWidth + 0.49),
             this._fov * (Obj.z / layers) * Math.sin(this._angle) + 1
           );
@@ -164,14 +166,14 @@ export class RenderingService {
         this._ctx.fillRect(
           Math.round(xObj),
           yProjection,
-          Math.round(objWidth + 0.5),
+          Math.round(objWidth + 0.49),
           objHeight * Math.cos(this._angle) + 1
         );
         this._ctx.fill();
 
       }
       // Bild mit Wand
-      else if (Obj.type === "img") {
+      else if (Obj.type === RenderType.IMG) {
         this._ctx.drawImage(
           this._images[Obj.img!],
           Math.round(xObj),
@@ -189,20 +191,25 @@ export class RenderingService {
           );
         }
       }
-      // Einfaches Bild
-      else if (Obj.type === "static Img") {
-        if (Obj.img) {
-          this._ctx.drawImage(
-            this._images[Obj.img!],
-            Math.round(xObj),
-            yProjection + this._fov *  Obj.height * Math.cos(this._angle),
-            objWidth,
-            this._fov * Obj.z * Math.sin(this._angle)
-          );
-        }
+      else if (Obj.type === RenderType.CARD_BOARD) {
+          if (Obj.img) {
+            this._ctx.drawImage(
+              this._images[Obj.img!],
+              Math.round(xObj),
+              yProjection,
+              objWidth,
+              this._fov * Obj.height * Math.sin(this._angle)
+            );
+          }
+      }
+      // Slot Machine Rendering
+      else if (Obj.type === RenderType.SLOT_MACHINE) {
+        this._ctx.save();
+        SlotMachineService.instance().render(xObj, yProjection, objWidth, objHeight * Math.sin(this._angle));
+        this._ctx.restore();
       }
       //Animation
-      else if (Obj.type === "gif") {
+      else if (Obj.type === RenderType.GIF) {
         if (Obj.frames && Obj.framesPerSecond && Obj.nextFrame) {
           let mirror = 1;
           this._ctx.save();
@@ -220,79 +227,134 @@ export class RenderingService {
           this._ctx.drawImage(
             this._images[Obj.nextFrame],
             mirror * Math.round(xObj),
-            yProjection + this._fov * Obj.height * Math.cos(this._angle),
+            yProjection,
             objWidth * mirror,
-            this._fov * Obj.z * Math.sin(this._angle)
+            this._fov * Obj.height * Math.sin(this._angle)
           )
           this._ctx.restore();
 
         }
       }
       //Partikel
-      else if (Obj instanceof ParticleRenderObject && Obj.type === "particle" && Obj.render)
+      else if (Obj instanceof ParticleRenderObject && Obj.type === RenderType.PARTICLE && Obj.render)
       {
 
         ParticleRenderingService.instance().render((Obj as ParticleRenderObject).particles, this._deltaTime);
+      }
+      //3D Bild
+      else if (Obj.type === RenderType.THREE_D_IMG) {
+        this._ctx.drawImage(
+          this._images[Obj.img!],
+          Math.round(xObj),
+          yProjection,
+          objWidth,
+          this._fov * Obj.height * Math.cos(this._angle) + this._fov * Obj.z * Math.sin(this._angle)
+        );
       }
     }
     );
   }
 
   
-  rotateInSlotMachine()
+  rotateInSlotMachine(slotMachine: SlotMachine)
   {
     const angle = 90 / 360 * 2 * Math.PI;
-    const zoom = 30;
-    const y = 500;
-    const z = 100;
+    const zoom = this._ctx.canvas.width / slotMachine.width;
+    const y = slotMachine.y + slotMachine.height / 2;
+    const z = Gamefield.fieldsize - 9 / 16 * slotMachine.width / 2;
+    const x = slotMachine.x + slotMachine.width / 2;
+    if(this._camera.x > x - 1 && this._camera.x < x + 1)
+    {
+      this._camera.x = x;
+    }
+    else if(this._camera.x < x)
+    {
+      this._camera.x += 0.5;
+    }
+    else if(this._camera.x > x)
+    {
+      this._camera.x -= 0.5;
+    }
     if(this._angle < angle)
     {
-      this._angle += 0.02;
+      this._angle += this._angle * 0.01;
+    }
+    else if(this._angle > angle)
+    {
+      this._angle = angle;
     }
     if(this._fov < zoom)
     {
-      this._fov += 0.5;
+      this._fov += this._fov * 0.01;
     }
-    if(this._camera.y < y)
+    else
     {
-      this._camera.y += 0.1;
+      slotMachine.priority = 10000;
+    }
+    if(this._camera.y > y - 1 && this._camera.y < y + 1)
+    {
+      this._camera.y = y;
+    }
+    else if(this._camera.y < y)
+    {
+      this._camera.y += 0.5;
     }
     else if(this._camera.y > y)
     {
-      this._camera.y -= 0.1;
+      this._camera.y -= 0.5;
     }
-    if(this._camera.position.z < z)
+
+    if(this._camera.position.z > z - 0.3 && this._camera.position.z < z + 0.3)
     {
-      this._camera.position.z += 0.1;
+      this._camera.position.z = z;
+    }
+    else if(this._camera.position.z < z)
+    {
+      this._camera.position.z += 0.2;
     }
     else if(this._camera.position.z > z)
     {
-      this._camera.position.z -= 0.1;
+      this._camera.position.z -= 0.2;
     }
   }
 
-  async rotateMap() {
-    await new Promise(r => setTimeout(r, 1000));
+  rotateMap() {
+    if(this._angle === 0) this._angle = 0.1
     const max = 30 / 360 * 2 * Math.PI;
-    if (this._angle < max) {
-      this._angle += 0.0012;
-      this._camera.x = this._camera.x;
-      this._camera.y = this._camera.y;
-      if (this._angle > max) this._angle = max;
+    if(this._camera.position.z !== 0)
+    {
+      this._camera.position.z -= this._camera.position.z * 0.05;
+    }
+    if(this._angle > max - 0.01 && this._angle < max + 0.01)
+    {
+      this._angle = max;
+    }
+    else if (this._angle < max) {
+      this._angle += this._angle * 0.01;
+      //this._camera.setCameraInBounds();
+    }
+    else if (this._angle > max) {
+      this._angle -= this._angle * 0.01;
+      //this._camera.setCameraInBounds();
     }
   }
 
-  async zoomOut()
+  zoomOut() : boolean
   {
     if(this._fov > 2.5)
     {
-    const df = Math.sqrt(this._fov) * 0.02
-    this._camera.fov -= df
+    const df = this._fov * 0.015
     this._fov -= df
-    // Prüft hier ob Kamera Out Of Bounds
-    this._camera.x = this._camera.x;
-    this._camera.y = this._camera.y;
+    this._camera.fov = this._fov
+    //this._camera.setCameraInBounds();
     }
+    else
+    {
+      this._fov = 2.5
+      this._camera.fov = 2.5
+      return true;
+    }
+    return false;
 
   }
 
@@ -327,4 +389,6 @@ export class RenderingService {
   get deltaTime(): number {return this._deltaTime}
 
   get rotationZ(): number {return this._rotationZ}
+
+  get fps(): number {return this._fps }
 }

@@ -1,6 +1,7 @@
 import { Hitbox } from "../../interfaces/hitbox";
 import { Direction } from "../../enums/direction";
 import { Coordinates } from "../coordinates/coordinates";
+import { RenderType } from "../../enums/render-type";
 
 /**
  * RenderObject-Klasse: Repräsentiert ein zu renderndes Objekt mit Position, Größe und Darstellungsinformationen.
@@ -14,7 +15,7 @@ export class RenderObject {
     private _id!: number;
     // Name des Objekts (z.B. "player", "wall-1-2")
     private _name!: string;
-    // Typ: "rect" oder "img"
+    // Typ: RenderType enum
     private _type!: string;
     // X-Position in Weltkoordinaten
     private _x!: number;
@@ -28,13 +29,13 @@ export class RenderObject {
     private _width!: number;
     // Höhe in Pixeln
     private _height!: number;
-    // Bild-Pfad (für type="img")
+    // Bild-Pfad (für type=RenderType.IMG)
     private _img!: string | void;
-    // Wand-Bild-Pfad (für 3D-Effekt bei type="img")
+    // Wand-Bild-Pfad (für 3D-Effekt bei type=RenderType.IMG)
     private _imgWall!: string | void;
-    // Rechteck-Farbe (für type="rect")
+    // Rechteck-Farbe (für type=RenderType.RECT)
     private _rectColor!: string | void;
-    // Layer-Farben für 3D-Tiefeneffekt (für type="rect")
+    // Layer-Farben für 3D-Tiefeneffekt (für type=RenderType.RECT)
     private _rectLayers!: string[] | void;
 
     private _frames!: string[] | void;

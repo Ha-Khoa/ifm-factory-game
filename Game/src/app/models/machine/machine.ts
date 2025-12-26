@@ -5,6 +5,7 @@ import { Products } from "../product/products";
 import { InteractableObject } from "../interactableObject/interactable-object";
 import { Coordinates } from "../coordinates/coordinates";
 import { Gamefield } from "../gamefield/gamefield";
+import { RenderType } from "../../enums/render-type";
 
 /**
  * Machine-Klasse: Repräsentiert eine Produktionsmaschine im Spiel.
@@ -63,7 +64,8 @@ export class Machine extends InteractableObject {
     imgLocked: string,
     accessDirection: Direction[],
     outputProduct: Product,
-    inputRequirements: Product[]
+    inputRequirements: Product[],
+    type: RenderType
   ) {
     // Initialize InteractableObject: position, size, z, img, allowed directions
     super(
@@ -73,7 +75,7 @@ export class Machine extends InteractableObject {
       height,
       Gamefield.fieldsize,
       accessDirection,
-      "rect",
+      type,
       imgUnlocked,
       undefined,
       "rgba(200, 206, 255, 1)",

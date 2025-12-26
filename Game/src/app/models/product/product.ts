@@ -1,7 +1,8 @@
 import { Coordinates } from "../coordinates/coordinates";
 import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
-import { Gamefield } from "../gamefield/gamefield"
+import { Gamefield } from "../gamefield/gamefield";
+import { RenderType } from "../../enums/render-type";
 // Removed import of Products to avoid circular dependency with products.ts
 
 export class Product {
@@ -26,7 +27,7 @@ export class Product {
     this._z = z !== undefined ? z : 0;  
     this._renderObject = new RenderObject(
       `product:${this._name}:${this._instanceId}`,
-      "img",
+      RenderType.IMG,
       this._position.x,
       this._position.y,
       this._z,

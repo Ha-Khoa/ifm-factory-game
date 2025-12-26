@@ -27,35 +27,51 @@ export class Camera {
     get y(): number { return this._position.y }
 
     set x(v: number) { 
-        // Kamera out of Bounds prüfung
-        if(v < window.innerWidth / (this._fov * 2))
-        {
-            this.position.x = window.innerWidth / (this._fov * 2)
-        }
-        else if(v > Gamefield.fieldsize * Gamefield.cols - window.innerWidth/ (this._fov * 2)) 
-        {
-            this.position.x = Gamefield.fieldsize * Gamefield.cols - window.innerWidth/ (this._fov * 2)
-        }
-        else
-        {
-        this._position.x =  v
-        }
+        this._position.x = v;
      }
     
     set y(v: number) { 
-        // Kamera out of Bounds prüfung
-        if(v < window.innerHeight/ (this._fov * 2) + RenderingService.instance().rotationZ / 2)
-        {
-            this.position.y = window.innerHeight / (this._fov * 2) + RenderingService.instance().rotationZ / 2
-        }
-        else if(v > Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) - window.innerHeight/ (this._fov * 2 * Math.cos(30 / 360 * Math.PI)) - RenderingService.instance().rotationZ / 2)
-        {
-            this.position.y = Gamefield.fieldsize * Gamefield.rows * Math.cos(30 / 360 * Math.PI) -  window.innerHeight/ (this._fov * 2 * Math.cos(30 / 360 * Math.PI)) - RenderingService.instance().rotationZ / 2
-        }
-        else
-        {
-        this._position.y =  v
-        }
+        this._position.y = v;
      }
+
+    /**
+     * Prüft, ob ein übergebener X-Wert innerhalb des Spielfelds liegt.
+     */
+    isXInBounds(v: number): boolean {
+        const minX = window.innerWidth / (this._fov * 2);
+        const maxX = Gamefield.fieldsize * Gamefield.cols - minX;
+        return v >= minX && v <= maxX;
+    }
+
+    /**
+     * Prüft, ob ein übergebener Y-Wert innerhalb des Spielfelds liegt.
+     */
+    isYInBounds(v: number): boolean {
+        const minY = window.innerHeight / (this._fov * 2) + RenderingService.instance().rotationZ / 2;
+        const maxY = Gamefield.fieldsize * Gamefield.rows * Math.cos(RenderingService.instance().angle)
+          - window.innerHeight / (this._fov * 2 * Math.cos(RenderingService.instance().angle))
+          - RenderingService.instance().rotationZ / 2;
+        return v >= minY && v <= maxY;
+    }
+
+    setCameraInBounds() {
+        if (!this.isXInBounds(this._position.x)) {
+            if (this._position.x < window.innerWidth / (this._fov * 2)) {
+                this._position.x = window.innerWidth / (this._fov * 2);
+            } else {
+                this._position.x = Gamefield.fieldsize * Gamefield.cols - window.innerWidth / (this._fov * 2);
+            }
+        }
+
+        if (!this.isYInBounds(this._position.y)) {
+            if (this._position.y < window.innerHeight / (this._fov * 2) + RenderingService.instance().rotationZ / 2) {
+                this._position.y = window.innerHeight / (this._fov * 2) + RenderingService.instance().rotationZ / 2;
+            } else {
+                this._position.y = Gamefield.fieldsize * Gamefield.rows * Math.cos(RenderingService.instance().angle)
+                - window.innerHeight / (this._fov * 2 * Math.cos(RenderingService.instance().angle))
+                - RenderingService.instance().rotationZ / 2;
+            }
+        }
+    }
 
 }

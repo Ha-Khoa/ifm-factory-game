@@ -4,6 +4,7 @@ import { Product } from "../product/product";
 import { RenderObject } from "../rendering/render-object";
 import { Products } from "../product/products";
 import { Gamefield } from "../gamefield/gamefield";
+import { RenderType } from "../../enums/render-type";
 
 export class Package {
 
@@ -25,7 +26,7 @@ export class Package {
         this._z = 50;
         this._renderObject = new RenderObject(
             `package-${this._id}`,
-            'img',
+            RenderType.IMG,
             this._position.x,
             this._position.y,
             this._z,

@@ -4,6 +4,7 @@ import { Product } from "../product/product";
 import { InteractableObject } from "../interactableObject/interactable-object";
 import { Direction } from "../../enums/direction";
 import { Package } from "../package/package";
+import { RenderType } from "../../enums/render-type";
 
 export class SubmissionArea extends InteractableObject {
 
@@ -16,7 +17,7 @@ export class SubmissionArea extends InteractableObject {
             height,
             64,
             [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT],
-            "rect",
+            RenderType.RECT,
             undefined,
             undefined,
             "#7D0A0A",
