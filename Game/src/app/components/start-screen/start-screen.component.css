@@ -1,0 +1,120 @@
+.start-screen-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#phone{
+	/* aspect-ratio: 16/9;
+	min-height: 50px;
+	max-height: 100vh; */
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	filter: drop-shadow(0 10px 5px rgba(0,0,0,0.7));
+}
+
+#phone::after{
+	content: "";
+	height: 50px;
+	width: 3px;
+	background: black;
+	position: absolute;
+	top: 32px;
+	right: 0;
+	transform: translatex(100%);
+	border-top-right-radius: 100vmax;
+	border-bottom-right-radius: 100vmax;
+}
+#phone::before{
+	content: "";
+	height: 30px;
+	width: 3px;
+	background: black;
+	position: absolute;
+	top: 92px;
+	right: 0;
+	transform: translatex(100%);
+	border-top-right-radius: 100vmax;
+	border-bottom-right-radius: 100vmax;
+}
+
+#phone #top-section,
+#phone #bottom-section{
+	--radius: 20px;
+	corner-shape: squircle;
+}
+
+#phone #top-section{
+	background: black;
+	min-height: clamp(15px, 3.1dvw, 20px);
+	height: clamp(15px, 3.1dvw, 20px);
+	border-top-left-radius: var(--radius);
+	border-top-right-radius: var(--radius);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#phone #top-section #camera{
+	height: 60%;
+	aspect-ratio: 1/1;
+	background: rgba(255 255 255 / .4);
+	border-radius: 100vmax;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+#phone #top-section #camera::after{
+	content: "";
+	background: black;
+	border-radius: 100vmax;
+	height:62%;
+	aspect-ratio: 1/1;
+}
+
+#phone #screen-container{
+	flex-grow:1;
+	border-right: 5px solid black;
+	border-left: 5px solid black;
+	display: flex;
+}
+#phone #bottom-section{
+	background: black;
+	min-height: clamp(20px, 5dvw, 30px);
+	height: clamp(20px, 5dvw, 30px);
+	border-bottom-left-radius: var(--radius);
+	border-bottom-right-radius: var(--radius);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 4px 0;
+}
+
+#phone #bottom-section #home-button{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 70%;
+	aspect-ratio: 1/1;
+	background: white;
+	border-radius: 100vmax;
+	background: #3b3b3b;
+background: radial-gradient(circle,rgba(0, 0, 0, 1) 0%, rgba(49, 49, 49, 1) 96%, rgba(92, 92, 92, 1) 100%);
+	border: 1px solid rgba(92, 92, 92, 1);
+}
+
+#phone #bottom-section #home-button::after{
+	content: "♠";
+	color: rgba(255 255 255 / .8);
+	font-size: clamp(12px, 1dvw, 20px);
+}

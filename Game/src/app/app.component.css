@@ -49,3 +49,7 @@ app-settings {
 .game-container canvas .ui {
   z-index: 10;
 }
+
+.game-container.hidden {
+  display: none;
+}

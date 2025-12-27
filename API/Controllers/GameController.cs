@@ -120,7 +120,7 @@ public class GameController : ControllerBase {
         context.Players.Remove(player);
         await context.SaveChangesAsync();
 
-        return Ok($"Deleted Player {player.Name}");
+        return Ok(true);
     }
 
     /// <summary>
@@ -191,7 +191,54 @@ public class GameController : ControllerBase {
         player.Score = score;
         await context.SaveChangesAsync();
 
-        return Ok();
+        return Ok(player.Score);
+    }
+
+    /// <summary>
+    /// Adds the specified score to a player's current score.
+    /// This method fetches the player using their identifier, updates their
+    /// score by adding the provided value, and saves the changes to the database.
+    /// </summary>
+    /// <param name="identifier">The unique identifier of the player whose score is being updated.</param>
+    /// <param name="score">The score value to be added to the player's current score.</param>
+    /// <returns>Returns an IActionResult containing the updated score if the operation is successful.
+    /// If the player is not found, a NotFound result is returned.</returns>
+    [HttpPatch("Score/{identifier}/Add/{score}")]
+    public async Task<IActionResult> AddPlayerScore(string identifier, int score) {
+        Player? player = await GetPlayerElementByIdentifier(identifier);
+
+        if ( player == null )
+            return NotFound($"Player not found.");
+
+        player.Score += score;
+        await context.SaveChangesAsync();
+
+        return Ok(player.Score);
+    }
+
+    /// <summary>
+    /// Decreases the score of a specified player by a given amount.
+    /// If the resulting score falls below zero, it will be set to zero.
+    /// </summary>
+    /// <param name="identifier">The unique identifier of the player whose score will be modified.</param>
+    /// <param name="score">The amount by which the player's score will be reduced.</param>
+    /// <returns>Returns an IActionResult containing the updated score if the operation is successful, or a NotFound result if the player is not found.</returns>
+    [HttpPatch("Score/{identifier}/Remove/{score}")]
+    public async Task<IActionResult> RemovePlayerScore(string identifier, int score) {
+        Player? player = await GetPlayerElementByIdentifier(identifier);
+
+        if ( player == null )
+            return NotFound($"Player not found.");
+
+        player.Score -= score;
+
+        if ( player.Score < 0 ) {
+            player.Score = 0;
+        }
+
+        await context.SaveChangesAsync();
+
+        return Ok(player.Score);
     }
 
     /// <summary>
@@ -234,7 +281,7 @@ public class GameController : ControllerBase {
         player.Money = value;
         await context.SaveChangesAsync();
 
-        return Ok();
+        return Ok(player.Money);
     }
 
     /// Adds a specified amount of money to a player's account.
@@ -256,7 +303,7 @@ public class GameController : ControllerBase {
         player.Money += value;
         await context.SaveChangesAsync();
 
-        return Ok($"Added {value} to player money. New amount: {player.Money}");
+        return Ok(player.Money);
     }
 
     /// <summary>
@@ -280,7 +327,7 @@ public class GameController : ControllerBase {
             return NotFound($"Player not found.");
 
         if( value < 0 )
-            return Conflict("Removing negativ value to the money is not allowed.");
+            return Conflict("Removing negativ value from the money is not allowed.");
 
         int money = player.Money;
         if ( (money - value) < 0 ) {
@@ -290,7 +337,7 @@ public class GameController : ControllerBase {
         player.Money -= value;
         await context.SaveChangesAsync();
 
-        return Ok($"Removed {value} from player money. New amount: {player.Money}");
+        return Ok(player.Money);
     }
 
     /// <summary>

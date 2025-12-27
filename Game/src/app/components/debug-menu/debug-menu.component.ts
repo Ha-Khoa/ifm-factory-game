@@ -19,13 +19,12 @@ export class DebugMenuComponent implements OnInit {
 
   playerMoney = 0;
   playerScore = 0;
-  playerName = 'Benjamin'; // Hardcoded player name
+  playerName = 'Player1'; // TODO: Hardcoded player name
 
   // Custom order
   products: Product[] = [];
   selectedProductId: number = 1;
   quantity: number = 1;
-  reward: number = 10;
 
   constructor(private api: ApiService) { }
 
@@ -57,13 +56,13 @@ export class DebugMenuComponent implements OnInit {
   }
 
   createRandomOrder() {
-    Orders.generateRandomOrders();
+    Orders.generateRandomOrder();
     console.log('Random order created');
   }
 
   createCustomOrder() {
     const items = [{ productId: Number(this.selectedProductId), quantity: this.quantity }];
-    Orders.addOrder(items, this.reward);
+    Orders.addOrder(items);
     console.log('Custom order created');
   }
 

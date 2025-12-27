@@ -14,7 +14,7 @@ export class Particles {
     private _z: number;
     private _width: number;
     private _height: number;
-    private _colors: string[];;
+    private _colors: string[];
     private _timeSinceLastSpawn: number = 0;
     private _worldCoordinates: Coordinates;
     private _standardWidth: number;
@@ -142,7 +142,7 @@ export class Particles {
             particle.z -= particle.vz * deltaTime / 1000;
             particle.age += deltaTime / 1000;
             let speed = 10;
-            
+
             if((particle.x - this.x) - (particle.y - this.y) < 0 && (particle.x - this.x) + (particle.y - this.y) < this._width)
             {
                 particle.y += speed * deltaTime / 1000;

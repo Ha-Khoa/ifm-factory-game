@@ -1,13 +1,8 @@
-import { Hitbox } from "../interfaces/hitbox";
 import { RenderObject } from "../models/rendering/render-object"
-import { Projection } from "../interfaces/projection";
-import { Collision } from "../models/collision/collision";
-import { Coordinates } from "../models/coordinates/coordinates";
 import { Injectable } from "@angular/core";
 import { Direction } from "../enums/direction";
 import { RenderType } from "../enums/render-type";
 import { ParticleRenderingService } from "./particle-rendering.service";
-import { Particles } from "../models/particle/particles";
 import { ParticleRenderObject } from "../models/rendering/particle-render-object";
 import { Camera } from "../models/camera/camera";
 import { Gamefield } from "../models/gamefield/gamefield";
@@ -156,7 +151,7 @@ export class RenderingService {
           this._ctx.rect(
             Math.round(xObj),
             this._fov * ( (Obj.y + this._yOffset / this._fov + Obj.height) * Math.cos(this._angle) - (Obj.z / layers) * (layers - i) * Math.sin(this._angle) ) + this._rotationZ,
-            Math.round(objWidth + 0.49),
+            Math.round(objWidth + 1),
             this._fov * (Obj.z / layers) * Math.sin(this._angle) + 1
           );
           this._ctx.fill();
@@ -166,7 +161,7 @@ export class RenderingService {
         this._ctx.fillRect(
           Math.round(xObj),
           yProjection,
-          Math.round(objWidth + 0.49),
+          Math.round(objWidth + 1),
           objHeight * Math.cos(this._angle) + 1
         );
         this._ctx.fill();
@@ -297,11 +292,11 @@ export class RenderingService {
     }
     else if(this._camera.y < y)
     {
-      this._camera.y += 0.5;
+      this._camera.y += 2;
     }
     else if(this._camera.y > y)
     {
-      this._camera.y -= 0.5;
+      this._camera.y -= 2;
     }
 
     if(this._camera.position.z > z - 0.3 && this._camera.position.z < z + 0.3)
@@ -331,11 +326,9 @@ export class RenderingService {
     }
     else if (this._angle < max) {
       this._angle += this._angle * 0.01;
-      //this._camera.setCameraInBounds();
     }
     else if (this._angle > max) {
       this._angle -= this._angle * 0.01;
-      //this._camera.setCameraInBounds();
     }
   }
 
@@ -343,10 +336,9 @@ export class RenderingService {
   {
     if(this._fov > 2.5)
     {
-    const df = this._fov * 0.015
+    const df = this._fov * 0.01
     this._fov -= df
     this._camera.fov = this._fov
-    //this._camera.setCameraInBounds();
     }
     else
     {
@@ -391,4 +383,6 @@ export class RenderingService {
   get rotationZ(): number {return this._rotationZ}
 
   get fps(): number {return this._fps }
+
+  get camera(): Camera { return this._camera }
 }

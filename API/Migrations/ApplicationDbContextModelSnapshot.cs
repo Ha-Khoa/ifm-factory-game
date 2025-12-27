@@ -37,7 +37,7 @@ namespace API.Migrations
                     b.HasIndex("PlayerId")
                         .IsUnique();
 
-                    b.ToTable("Factories");
+                    b.ToTable("Factories", (string)null);
                 });
 
             modelBuilder.Entity("API.Models.Factory.Machine", b =>
@@ -62,7 +62,7 @@ namespace API.Migrations
 
                     b.HasIndex("FactoryId");
 
-                    b.ToTable("Machines");
+                    b.ToTable("Machines", (string)null);
                 });
 
             modelBuilder.Entity("API.Models.User.Player", b =>
@@ -85,7 +85,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Players");
+                    b.ToTable("Players", (string)null);
                 });
 
             modelBuilder.Entity("API.Models.Factory.Factory", b =>

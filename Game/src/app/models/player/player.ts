@@ -12,13 +12,14 @@ import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
 import { Package } from '../package/package';
 import { TimerManagerService } from '../../services/timer-manager.service';
 import { Camera } from '../camera/camera';
+import { PlayerThoughtsType } from '../../services/ui/player-thoughts.drawer';
+import { PlayerService } from '../../services/player.service';
+import { PrepMachine } from '../preProcess/prep-machine';
 
 /**
 * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
 */
 export class Player {
-
-
    private _position!: Coordinates;
    // Hitbox des Spielers für Kollisionserkennung
    private _hitbox!: Hitbox;
@@ -36,8 +37,9 @@ export class Player {
    private _gamefield: Gamefield;
    // Aktuelle Bewegungsrichtung
    private _direction!: Direction | null;
-   
+
    private _hasPicked!: boolean;
+
 
 
    private _directionPressed!: boolean;
@@ -56,10 +58,23 @@ export class Player {
    private _walkingAnimation: string[];
    private _holdingAnimation: string[];
    private _camera: Camera;
-   private _cameraFix: boolean = true;
+   private _cameraFix: boolean = false;
+
+   // Speed boost properties
+   private _baseVelocity: number;
+   private _boostVelocity: number = 800
+   private _isBoosting: boolean = false;
+   private _boostCooldown: number = 1000; // 1 second cooldown
+   private _lastBoostTime: number = -Infinity; // Start with cooldown available
+   private _boostDuration: number = 350; // 200ms boost duration
+
+  private _thoughts: PlayerThoughtsType = PlayerThoughtsType.NONE;
+
+  // playerService
+  private _playerService: PlayerService;
 
 
-   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield) {
+   constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield, playerService: PlayerService) {
         this._lastDirection = Direction.RIGHT;
        this._img = "/images/fox/fox.png";
        this._walkingAnimation = ["/images/fox/walking_5.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png"]
@@ -68,9 +83,11 @@ export class Player {
        this._hitbox = hitbox;
        this._position = hitbox.position
        this._velocity = velocity;
+       this._baseVelocity = velocity; // Store base velocity
        this._gamefield = gamefield;
-       this._direction = null;
-       this._camera = new Camera(new Coordinates(this._position.x + this._hitbox.width / 2, this._position.y + this._hitbox.height / 2), 30);
+       const angle = RenderingService.instance().angle
+       const rotationZ = (window.innerHeight / 2 - window.innerHeight / 2 * Math.cos(angle)) / 60
+       this._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2 + rotationZ), 60);
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        const height = this._hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI);
        this._renderingObject = new RenderObject(
@@ -90,7 +107,7 @@ export class Player {
            8
        );
 
-  
+        this._playerService = playerService;
        RenderingService.instance().addRenderObject(this._renderingObject);
    }
 
@@ -105,6 +122,11 @@ export class Player {
        this._renderingObject.y = this._position.y + this._hitbox.height / 2;
    }
 
+   changeCamera() {
+    this._camera.x = this._position.x + this._hitbox.width / 2
+    this._camera.y = this._position.y + this._hitbox.height / 2
+   }
+
 
    updateProductInHand() {
 
@@ -112,13 +134,13 @@ export class Player {
         if(!this._directionPressed)
          {
             let newPositionX = this._position.x + this._hitbox.width / 2 - this._inventory.size / 2 + 3
-            this._inventory.z = Gamefield.fieldsize * 1/5;
+            this._inventory.z = Gamefield.fieldsize * (1/5);
             this._inventory.renderObject.priority = 350;
             this._inventory.x = newPositionX
             this._inventory.y = this._position.y;
             return
          }
-        
+
 
        // Stabilize narrowed properties in locals so TS knows they won't change within this method
        const dir = this._direction;
@@ -138,38 +160,60 @@ export class Player {
    }
 
 
-  
-   /**
-    * Setzt die Eingabe-Richtung basierend auf gedrückten Tasten.
-    * @param input Record mit Tastenstatus (z.B. {'w': true, 'a': false})
-    */
-   setInput(input: Record<string, boolean>) {
-       this._input  = input;
-       let numPressed = 0;
-       for (const [key, pressed] of Object.entries(input)) {
-           if (pressed && key in KEY_TO_DIRECTION) {
-               this._direction = KEY_TO_DIRECTION[key];
-               numPressed++;
-           }
-       }
-       if (numPressed === 0) {
-           this._directionPressed = false;
-       }
-       else
-       {
-           this._directionPressed = true;
-       }
-       if(this._direction === Direction.RIGHT)
-       {
-        this._renderingObject.animationDirection = Direction.RIGHT;
-       }
-       else if (this._direction === Direction.LEFT)
-        {
-            this._renderingObject.animationDirection = Direction.LEFT;
-        }
-       
-   }
 
+    /**
+     * Setzt die Eingabe-Richtung basierend auf gedrückten Tasten und löst den Boost aus.
+     * @param input Record mit Tastenstatus (z.B. {'w': true, 'a': false})
+     */
+    setInput(input: Record<string, boolean>) {
+      this._input  = input;
+
+      // Handle movement direction
+      let numPressedDirectional = 0;
+      this._direction = null; // Reset direction at the start of each call
+
+      for (const [key, pressed] of Object.entries(input) ) {
+          if (pressed && key in KEY_TO_DIRECTION) {
+              this._direction = KEY_TO_DIRECTION[key];
+              numPressedDirectional++
+          }
+      }
+
+      // If no directional keys are currently pressed, ensure _direction is null and _directionPressed is false
+      if (numPressedDirectional === 0) {
+          this._direction = null;
+          this._directionPressed = false;
+      } else {
+          this._directionPressed = true;
+      }
+
+      if (this._direction === Direction.RIGHT) {
+          this._renderingObject.animationDirection = Direction.RIGHT;
+      } else if (this._direction === Direction.LEFT) {
+          this._renderingObject.animationDirection = Direction.LEFT;
+      }
+
+      // Handle shift for boost
+      const now = performance.now();
+      if (input[' '] && !this._isBoosting && (now - this._lastBoostTime > this._boostCooldown)) {
+        this.activateBoost();
+      }
+    }
+    /**
+     * Aktiviert den Geschwindigkeits-Boost.
+     */
+    private activateBoost() {
+        this._isBoosting = true;
+        this._lastBoostTime = performance.now();
+        this._velocity = this._boostVelocity; // Boost-Geschwindigkeit
+        this._renderingObject.type = 'gif'
+        this._renderingObject.frames = ['/images/fox/fox-sprint.png']
+
+        setTimeout(() => {
+            this._velocity = this._baseVelocity;
+            this._isBoosting = false;
+        }, this._boostDuration);
+    }
 
 
 
@@ -186,7 +230,7 @@ export class Player {
        }
        this._frameVelocity = this._velocity * deltaTime / 1000; // Umrechnung: Pixel/Frame → Pixel/Sekunde
 
-   }  
+   }
 
 
  /**
@@ -209,7 +253,7 @@ export class Player {
            const objHitbox = new Hitbox(new Coordinates(obj.x, obj.y), obj.width, obj.height);
            const collision = Collision.checkCollisionNextFrame(this._hitbox, objHitbox, velocityX, velocityY);
            const borderCollision = Collision.checkObjectOutBoarder(this._hitbox, velocityX, velocityY, this._gamefield);
-          
+
            if (collision) {
                switch (this._direction) {
                    case Direction.UP:
@@ -227,7 +271,7 @@ export class Player {
                }
                return;
            }
-          
+
            if (borderCollision) {
                switch (this._direction) {
                    case Direction.UP:
@@ -263,8 +307,8 @@ export class Player {
 
     updatePlayerAnimation()
     {
-        
-        if(this._directionPressed)
+
+        if(this._directionPressed && !this._isBoosting)
         {
             
             this._renderingObject.type = RenderType.GIF
@@ -280,7 +324,7 @@ export class Player {
                 this._timerManagerService.cancel();
             }
         }
-        else
+        else if (!this._isBoosting)
         {
             this._renderingObject.type = RenderType.CARD_BOARD
             this.sitPlayer();
@@ -290,7 +334,7 @@ export class Player {
         async sitPlayer() {
             // Starte den Timer nur, wenn keiner läuft (sonst wird er ständig neu gestartet)
             if (!this._timerManagerService.isRunning()) {
-                await this._timerManagerService.start(3000); 
+                await this._timerManagerService.start(3000);
                 this._renderingObject.img = "/images/fox/sitting.png";
             }
         }
@@ -300,7 +344,7 @@ export class Player {
    /**
     * Versucht ein Produkt aufzunehmen, wenn E gedrückt wurde und kein Produkt getragen wird.
     */
-   pickProduct(): Product | Package | null {
+   async pickProduct(): Promise<Product | Package | null> {
        if (this._input['e']) {
            if (!this._interacted) {
                this._canInteractProduct = true;
@@ -311,9 +355,27 @@ export class Player {
            this._canInteractProduct = false;
            this._hasPicked = false;
        }
+       // Übergibt das Produkt von der PrepMachine, wenn möglich
+       if (this._canInteractProduct && this.handlePrepMachineInteraction()){
+            return this._inventory;
+       }
        if (this._canInteractProduct && this._inventory === null) {
+         // Check if the player can purchase the product from the conveyor belt
+         let productTypeOfConveyor = this.getConveyorBeltProduct();
+         if(productTypeOfConveyor instanceof Product) {
+           let payed:boolean = this._playerService.removeMoney(productTypeOfConveyor.costs)
+           if(!payed) {
+             // Not enough money!
+             this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY
+             setTimeout(() => {
+               this.thoughts = PlayerThoughtsType.NONE;
+             }, 1000);
+             return null;
+           }
+         }
+
            //versuche zuerst ein Produkt vom Förderband aufzunehmen
-           const productFromConveyor = this.takeProductFromConveyor();
+           const productFromConveyor: Product | Package | null = this.takeProductFromConveyor();
            if (productFromConveyor) {
                this._inventory = productFromConveyor;
                this._canInteractProduct = false;
@@ -354,6 +416,24 @@ export class Player {
     * addToMap: true → Produkt in Weltliste aufnehmen, false → nur aus Hand entfernen
     */
    dropProduct(): Product | Package | null{
+        // Übergibt das Produkt an die PrepMachine, wenn möglich
+       if (this._canInteractProduct && this._inventory instanceof Product){
+            const nearestMachine = this.getNearestPrepMachine();
+            if (nearestMachine && nearestMachine.canAcceptProduct(this._inventory)) {
+                if (nearestMachine.acceptProduct(this._inventory)){
+                    console.log("Produkt der PrepMachine übergeben:", this._inventory);
+
+                    //Entferne das Produkt aus dem Inventar
+                    const placedProduct = this._inventory;
+                    placedProduct.destroy();
+                    this._inventory = null;
+                    this._canInteractProduct = false;
+                    this._hasPicked = false;
+
+                    return null;
+                }
+            }
+       }
        if (this._inventory instanceof Package && Products.checkForInteraction(this._hitbox) instanceof Product) {return null;}
        if (this._canInteractProduct && this._inventory !== null) {
            const droppedProduct = this._inventory;
@@ -361,7 +441,7 @@ export class Player {
            this._inventory = null;
            this._canInteractProduct = false;
            this._hasPicked = false;
-          
+
            if (droppedProduct instanceof Package) {
               Products.addPackage(droppedProduct);
            }
@@ -378,6 +458,22 @@ export class Player {
        return null;
    }
 
+   getConveyorBeltProduct(): Product | Package | null{
+     const conveyor = ConveyorBeltManager.getConveyorAt(
+       this._hitbox.x,
+       this._hitbox.y,
+       this._hitbox.width,
+       this._hitbox.height
+     );
+     if (!conveyor)
+       return null;
+
+     const playerCenterX = this._hitbox.x + this._hitbox.width / 2;
+     const playerCenterY = this._hitbox.y + this._hitbox.height / 2;
+     const playerCenter = new Coordinates(playerCenterX, playerCenterY);
+     // return conveyor.removeProductAtPosition(playerCenter)
+     return conveyor.getProductAtPosition(playerCenter)
+   }
 
    takeProductFromConveyor(): Product | Package |null {
        //console.log('Checking for conveyor at player position:', this._hitbox.x, this._hitbox.y, 'size:', this._hitbox.width, this._hitbox.height);
@@ -391,15 +487,15 @@ export class Player {
            const playerCenterX = this._hitbox.x + this._hitbox.width / 2;
            const playerCenterY = this._hitbox.y + this._hitbox.height / 2;
            const playerCenter = new Coordinates(playerCenterX, playerCenterY);
-          
+
            // Try position-based pickup first (picks nearest product within 50px)
            let product = conveyor.removeProductAtPosition(playerCenter);
-          
+
            // If no product nearby, try taking the furthest product
            /*if (!product) {
                product = conveyor.takeItem();
            }*/
-          
+
            if (product) {
            //console.log(`Produkt ${product.name} vom Förderband ${conveyor.getConveyorId()} aufgenommen.`);
                return product;
@@ -412,6 +508,73 @@ export class Player {
        return null;
    }
 
+   /**
+    * Findet die nächste PrepMachine in Reichweite des Spielers.
+    * @returns Die nächste PrepMachine oder null, wenn keine gefunden wurde.
+    */
+   private getNearestPrepMachine(): PrepMachine | null {
+        let nearestMachine: PrepMachine | null = null;
+        let shortestDistance: number = Infinity;
+
+        for (const obj of this._gamefield.interactableObjects){
+            if (obj.name.startsWith('PrepMachine')) {
+                const machine = obj as PrepMachine;
+                const distance = Math.sqrt(
+                    Math.pow((this._position.x + this._hitbox.width/2) - (machine.x + machine.width/2), 2) +
+                    Math.pow((this._position.y + this._hitbox.height/2) - (machine.y + machine.height/2), 2)
+                );
+
+                if (distance < Gamefield.fieldsize * 1.5 && distance < shortestDistance) {
+                    shortestDistance = distance;
+                    nearestMachine = machine;
+                }
+            }
+        }
+
+        return nearestMachine;
+   }
+   /**
+    * 
+    * @returns boolean - ob eine Interaktion mit der PrepMachine stattgefunden hat
+    */
+   private handlePrepMachineInteraction(): boolean {
+        const nearestMachine = this.getNearestPrepMachine();
+        if (!nearestMachine) {
+            return false;
+        }
+        // Nimmt das Ausgangsprodukt von der PrepMachine auf
+        if (!this._inventory && nearestMachine.isOutputReady()){
+            const output = nearestMachine.collectOutput();
+            if (output){
+                this._inventory = output;
+                this._canInteractProduct = false;
+                this._hasPicked = true;
+                this._inventory.renderObject.priority = 200;
+
+                Products.generatedProducts.push(output);
+                this._inventory!.z = 50;
+
+                console.log("Produkt von PrepMachine aufgenommen:", this._inventory);
+                return true;
+            }
+        }
+        // Übergibt das Produkt an die PrepMachine
+        if (this._inventory instanceof Product && nearestMachine.canAcceptProduct(this._inventory)){
+            if (nearestMachine.acceptProduct(this._inventory)){
+                console.log("Produkt der PrepMachine übergeben:", this._inventory);
+
+                this._inventory.destroy();
+                this._inventory = null;
+                this._canInteractProduct = false;
+                this._hasPicked = false;
+
+                return true;
+            }
+
+            
+        }
+        return false;
+   }
    hasPicked(): boolean {
        return this._hasPicked;
    }
@@ -435,16 +598,18 @@ export class Player {
    get canInteractProduct(): boolean { return this._canInteractProduct; }
 
    get z(): number {return this._z}
-   set z(v: number) { 
+   set z(v: number) {
         this._z = v;
         this._renderingObject.z = v;
     }
+  get camera(): Camera { return this._camera; }
 
-    get camera(): Camera { return this._camera; }
-
-    set cameraFix(v: boolean) { this._cameraFix = v; }
-    get cameraFix(): boolean { return this._cameraFix; }
-
+  set cameraFix(v: boolean) { this._cameraFix = v; }
+  get cameraFix(): boolean { return this._cameraFix; }
 
 
+  get position(): Coordinates { return this._position; }
+
+  get thoughts(): PlayerThoughtsType { return this._thoughts; }
+  set thoughts(v: PlayerThoughtsType) { this._thoughts = v; }
 }

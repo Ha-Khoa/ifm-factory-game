@@ -1,7 +1,8 @@
+<app-start-screen (startClicked)="onStartGame()"></app-start-screen>
+
 <div #gameContainer class="game-container">
   <canvas #game width="{{ cwidth }}" height="{{ cheight }}"></canvas>
   <canvas #ui width="{{ cwidth }}" height="{{ cheight }}" class="ui"></canvas>
-  <canvas #slotMachine width="{{ cwidth }}" height="{{ cheight }}"></canvas>
   <app-hud></app-hud>
   <app-settings *ngIf="isSettingsOpen"
                 (closeSettingsRequest)="isSettingsOpen = false"></app-settings>

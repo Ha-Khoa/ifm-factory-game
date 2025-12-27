@@ -27,8 +27,8 @@ export class ConveyorBeltManager {
               'down',
               0.1,
               true,
-              2000,
-              5,
+              5000,
+              1,
             ConveyorType.PACKAGES
        ));
        //Rohr Materialien wird hier erstellt
@@ -41,7 +41,7 @@ export class ConveyorBeltManager {
            0.1,
            true,
            2000,
-           10,
+           3,
            ConveyorType.COPPER_WIRE
        ));
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
@@ -52,8 +52,8 @@ export class ConveyorBeltManager {
               'down',
               0.1,
               true,
-              2000,
-              5,
+              1000,
+              3,
             ConveyorType.RAW_PLASTIC
        ));
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
@@ -64,9 +64,21 @@ export class ConveyorBeltManager {
               'down',
               0.1,
               true,
-              2000,
-              5,
+              10000,
+              2,
             ConveyorType.RAW_SILICON
+       ));
+       ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
+                14*Gamefield.fieldsize,
+                -2*Gamefield.fieldsize,
+                1*Gamefield.fieldsize,
+                4*Gamefield.fieldsize,
+                'down',
+                0.1,
+                true,
+                2500,
+                3,
+                ConveyorType.IRON_INGOT
        ));
        this.updateGamefield();
    }

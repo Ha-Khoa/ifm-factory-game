@@ -7,6 +7,7 @@ import { Collision } from "../collision/collision";
 import { RenderingService} from "../../services/rendering.service";
 import { RenderObject } from "../rendering/render-object";
 import { RenderType } from "../../enums/render-type";
+import {PlayerService} from '../../services/player.service';
 import { Direction } from "../../enums/direction";
 import { Coordinates } from "../coordinates/coordinates";
 import { UIService } from "../../services/ui.service";
@@ -23,37 +24,33 @@ import { SlotMachine } from "../slot-machine/slot-machine";
 export class InteractableManager {
     private _gamefield: Gamefield;
     private ui: UIService;
+    private playerService: PlayerService;
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
-      // Sensor-Maschine (benötigt Raw Silicon + Circuit Board)
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Basic Sensor", "/images/machine.png", "/images/wall.png",
-                  [Direction.DOWN], Products.getProductByName("Basic Sensor")!,
-                  [
-                    Products.getProductByName("Raw Silicon")!,
-                    Products.getProductByName("Circuit Board")!,
-                    Products.getProductByName("Plastic Case")!,
-                  ], RenderType.THREE_D_IMG),
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine.png", "/images/wall.png",
+                  [Direction.DOWN], Products.getProductById(6)!, RenderType.THREE_D_IMG),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Plastic Case", "/images/wall.png", "/images/wall.png",
-                  [Direction.UP], Products.getProductByName("Plastic Case")!,
-                  [Products.getProductByName("Raw Plastic")!], RenderType.RECT),
-      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Circuit Board", "/images/wall.png", "/images/wall.png",
-                  [Direction.DOWN], Products.getProductByName("Circuit Board")!,
-                  [Products.getProductByName("Raw Silicon")!, Products.getProductByName("Copper Wire")!], RenderType.RECT)
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/wall.png", "/images/wall.png",
+                  [Direction.UP], Products.getProductById(4)!, RenderType.RECT,10000),
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/wall.png", "/images/wall.png",
+                  [Direction.DOWN], Products.getProductById(5)!, RenderType.RECT)
     ];
-
     private _slotMachine!: SlotMachine;
-    private submissionArea: SubmissionArea = new SubmissionArea(
-      new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 5),
-      Gamefield.fieldsize,
-      2 * Gamefield.fieldsize
-    );
 
-  constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>) {
+    private submissionArea:SubmissionArea;
+
+  constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>, playerService: PlayerService) {
     this._gamefield = _gamefield;
     this.ui = ui;
+    this.playerService = playerService;
     this._inputs = inputs;
     this._slotMachine = new SlotMachine(800, 100, this._gamefield);
+    this.submissionArea = new SubmissionArea(
+      new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 5),
+      Gamefield.fieldsize,
+      2 * Gamefield.fieldsize,
+      this.playerService
+    );
     // Standard-Maschinen freischalten
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
@@ -110,23 +107,18 @@ export class InteractableManager {
   checkMachineNeedsProduct(player: Player)
   {
     if(!player.inventory || !(player.inventory instanceof Product)) { return }
-    for(let machine of this.machines)
-    {
-      for(let product of machine.inputRequirements)
-      {
-        if(product.name === player.inventory.name)
-        {
+    for(let machine of this.machines) {
+      for(let productRequirements of machine.inputRequirements) {
+        let name = productRequirements.product.name;
+        if(name === player.inventory.name) {
           let needsProduct = true;
-          for(let inv of machine.inventory)
-          {
-            if(inv.name === product.name)
-            {
+          for(let inv of machine.inventory) {
+            if(machine.getQuantityOfThisMissingProduct(inv.product) === 0) {
               needsProduct = false;
               break;
             }
           }
-          if(needsProduct)
-          {
+          if(needsProduct) {
             this.enableParticleField(machine);
           }
         }
@@ -243,9 +235,15 @@ export class InteractableManager {
       let result;
 
       if (product && !Products.checkItemOnTable(machine.renderObject, product) && !machine.isProducing && !player.hasPicked()) {
+        console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
+The product is not already on the machine and the machine is not currently producing.`);
         result = await machine.addProduct(product);
+
+        console.log(`The result of ading the product ${product.name} to the machine ${machine.name} is:`, result)
       }
       else {
+        console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
+The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' : 'not ' }already on the machine and the machine is currently ${machine.isProducing ? '' : 'not '}producing.`);
         result = false;
       }
       // Produktion abgeschlossen
@@ -332,6 +330,7 @@ export class InteractableManager {
   updateSubmissionAreaOnInteraction(player: Player) {
       this.submissionArea.renderObject.rectColor = "#9c0e0eff";
       if (this._inputs["e"] === true && player.inventory instanceof Package && !player.hasPicked()) {
+
       const packObj : Package = player.inventory;
 
       let result = this.submissionArea.addPackage(packObj);
@@ -346,7 +345,7 @@ export class InteractableManager {
       }
       // Zutat nicht benötigt, zurücklegen
       else if (result === false) {
-        console.log("falsches Bestellung");
+        console.log("falsche Bestellung");
       }
     }
   }

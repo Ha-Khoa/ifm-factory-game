@@ -3,7 +3,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {Player} from '../interfaces/ui/player';
+import {PlayerInterface} from '../interfaces/ui/playerInterface';
 import {Machine} from '../interfaces/ui/machine';
 import {Factory} from '../interfaces/ui/factory';
 
@@ -16,16 +16,16 @@ export class ApiService {
   constructor(private http: HttpClient) { }
 
   // Player Management
-  getPlayers(): Observable<Player[]> {
-    return this.http.get<Player[]>(`${this.baseUrl}/Players`);
+  getPlayers(): Observable<PlayerInterface[]> {
+    return this.http.get<PlayerInterface[]>(`${this.baseUrl}/Players`);
   }
 
-  getPlayer(identifier: string): Observable<Player> {
-    return this.http.get<Player>(`${this.baseUrl}/Player/${identifier}`);
+  getPlayer(identifier: string): Observable<PlayerInterface> {
+    return this.http.get<PlayerInterface>(`${this.baseUrl}/Player/${identifier}`);
   }
 
-  createPlayer(username: string): Observable<Player> {
-    return this.http.post<Player>(`${this.baseUrl}/Player/${username}`, {});
+  createPlayer(username: string): Observable<PlayerInterface> {
+    return this.http.post<PlayerInterface>(`${this.baseUrl}/Player/${username}`, {});
   }
 
   deletePlayer(identifier: string): Observable<any> {
@@ -41,6 +41,14 @@ export class ApiService {
     return this.http.patch(`${this.baseUrl}/Score/${identifier}/${newScore}`, {});
   }
 
+  addScore(identifier: string, amount: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/Score/${identifier}/Add/${amount}`, {}, {responseType: 'text'});
+  }
+
+  removeScore(identifier: string, amount: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/Score/${identifier}/Remove/${amount}`, {}, {responseType: 'text'});
+  }
+
   // Money Management
   getMoney(identifier: string): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/Money/${identifier}`);
@@ -51,11 +59,11 @@ export class ApiService {
   }
 
   addMoney(identifier: string, value: number): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/Money/${identifier}/Add/${value}`, {});
+    return this.http.patch(`${this.baseUrl}/Money/${identifier}/Add/${value}`, {}, {responseType: 'text'});
   }
 
   removeMoney(identifier: string, value: number): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/Money/${identifier}/Remove/${value}`, {});
+    return this.http.patch(`${this.baseUrl}/Money/${identifier}/Remove/${value}`, {}, {responseType: 'text'});
   }
 
   // Machine Management

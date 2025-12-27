@@ -11,13 +11,18 @@ import { UIService } from './ui.service';
 import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
 import { SlotMachineService } from './slot-machine.service';
-import { SlotMachine } from '../models/slot-machine/slot-machine';
 
+import { Subject } from 'rxjs';
+import {Orders} from '../models/orders/orders';
+import {PlayerService} from './player.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
+
+  private gameLoopTick = new Subject<void>();
+  public gameLoopTick$ = this.gameLoopTick.asObservable();
 
   // Gibt an, ob das Spiel aktuell läuft
   private GameRunning!: boolean;
@@ -32,13 +37,12 @@ export class GameService {
   private player!: Player;
   private interactableManager!: InteractableManager;
   private conveyorBeltManager!: ConveyorBeltManager;
-  private slotMachine!: SlotMachine;
 
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
 
-  constructor(private uiService: UIService) { }
+  constructor(private uiService: UIService, private playerService: PlayerService) { }
 
 
   /**
@@ -52,7 +56,7 @@ export class GameService {
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
-    this.angle = 0 / 360 * 2 * Math.PI; // 30 Grad in Radiant
+    this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
     SlotMachineService.instance().init(this.ctx, this.images, this.gamefield);
     this.uiService.init(ctxUI, this.angle, this.images);
@@ -64,9 +68,11 @@ export class GameService {
     this.player = new Player(
       new Hitbox(new Coordinates(200, 250), Gamefield.fieldsize * 4/5 , Gamefield.fieldsize * 2/5),
       this.playerVelocity,
-      this.gamefield
+      this.gamefield,
+      this.playerService
     );
-    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs);
+        RenderingService.instance().convertToCameraPOV(this.player.camera);
+    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs, this.playerService);
 
 
 
@@ -76,8 +82,23 @@ export class GameService {
     const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png", "/images/Brick_01-512x512.png", "/images/interaction-field.png", "/images/machine.png"];
     const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
-    const foxImages = ["/images/fox/walking_1.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png", "/images/fox/fox.png", "/images/fox/sitting.png",
-      "/images/fox/1-fox-holding.png", "/images/fox/2-fox-holding.png", "/images/fox/3-fox-holding.png", "/images/fox/4-fox-holding.png", "/images/fox/walking_5.png", "/images/fox/fox-coin.png"
+    const foxImages = [
+      "/images/fox/walking_1.png",
+      "/images/fox/walking_2.png",
+      "/images/fox/walking_3.png",
+      "/images/fox/walking_4.png",
+      "/images/fox/fox.png",
+      "/images/fox/sitting.png",
+      "/images/fox/1-fox-holding.png",
+      "/images/fox/2-fox-holding.png",
+      "/images/fox/3-fox-holding.png",
+      "/images/fox/4-fox-holding.png",
+      "/images/fox/walking_5.png",
+      "/images/fox/fox-sprint.png"
+    ]
+    const foxCoinImages = [
+      "/images/fox/fox-coin.png",
+      "/images/fox/no-fox-coin.png",
     ]
     const slotMachineImages = ["/images/slotMachine/cherry.png", "/images/slotMachine/Bar.png", "/images/slotMachine/seven.png", "/images/slotMachine/diamond.png", "/images/slotMachine/lemon.png", "/images/slotMachine/ifm.png", "/images/slotMachine/manure.png", "/images/slotMachine/squirrel.png", "/images/slotMachine/slot-machine.png"];
     const keyBindingImages = [
@@ -134,7 +155,7 @@ export class GameService {
       "/images/KeyBindings/keyBindings_Controller_Button_5.png",
       "/images/KeyBindings/keyBindings_Controller_Button_6.png",
     ]
-    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages, ...keyBindingImages, ...slotMachineImages])];
+    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages, ...foxCoinImages, ...keyBindingImages, ...slotMachineImages])];
     await this.preloadImages(allImages);
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
@@ -175,13 +196,16 @@ export class GameService {
   startGame() {
     this.GameRunning = true;
     this.ctx.imageSmoothingEnabled = true;
+    // Initialize the first orders
+    Orders.initializeOrders();
     const loop = () => {
       if (!this.GameRunning) return;
-
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+                  
 
       // Update-Phase
+
       RenderingService.instance().updateFPS()
       this.player.changeVelocity();
       this.player.updatePlayer();
@@ -191,18 +215,16 @@ export class GameService {
       // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
       this.player.dropProduct();
-
       this.conveyorBeltManager.update();
       this.conveyorBeltManager.refreshGamefield();
 
       // Render-Phase
       this.player.render();
       this.player.updateProductInHand();
-      RenderingService.instance().convertToCameraPOV(this.player.camera);
-      //RenderingService.instance().zoomOut();
-      RenderingService.instance().render();
 
-      if(this.interactableManager.checkPlayerInSlotMachineArea(this.player))
+      let playerInteractSlotMachine = this.interactableManager.checkPlayerInSlotMachineArea(this.player)
+      
+      if(playerInteractSlotMachine)
       {
         this.player.cameraFix = false;
         RenderingService.instance().rotateInSlotMachine(this.interactableManager.slotMachine);
@@ -210,11 +232,16 @@ export class GameService {
       }
       else
       {
-        //this.player.cameraFix = true;
         this.interactableManager.slotMachine.priority = 0;
-        if(RenderingService.instance().zoomOut()) this.player.cameraFix = true;
+
         RenderingService.instance().rotateMap();
       }
+
+      if(!playerInteractSlotMachine && RenderingService.instance().zoomOut()) this.player.cameraFix = true;
+      RenderingService.instance().convertToCameraPOV(this.player.camera);
+      RenderingService.instance().sortRenderingBuffer();
+      RenderingService.instance().render();
+      
 
       // Render Particles
       this.interactableManager.resetParticleFields();
@@ -224,6 +251,10 @@ export class GameService {
       // Draw machines Item Needs Popup
       this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
+      this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
+
+      // Orders
+
 
       if (this.player.inventory === null) {
         // Prüfen, ob ein Item in der Nähe ist
@@ -239,6 +270,7 @@ export class GameService {
         // Wenn wir was tragen: Sicherstellen, dass das Popup weg ist!
         this.uiService.clearItemPopup();
       }
+      this.gameLoopTick.next();
 
       requestAnimationFrame(loop);
     };

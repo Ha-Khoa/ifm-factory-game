@@ -1,17 +1,21 @@
-import { Component, ViewChild, ElementRef, HostListener } from '@angular/core';
+import { Component, ViewChild, ElementRef, HostListener, OnDestroy, AfterViewInit } from '@angular/core';
 import { GameService } from './services/game.service';
 import { HudComponent } from './components/hud/hud.component';
 import { CommonModule } from '@angular/common';
 import { SettingsComponent } from './components/settings/settings.component';
 import { OrderComponent } from "./components/order/order.component";
+import { StartScreenComponent } from './components/start-screen/start-screen.component'; // New import
+import { Subscription } from 'rxjs';
+import { RenderingService } from './services/rendering.service';
 
 @Component({
   selector: 'app-root',
-  imports: [HudComponent, SettingsComponent, CommonModule, OrderComponent],
+  standalone: true, // Assuming standalone based on `imports` usage
+  imports: [HudComponent, SettingsComponent, CommonModule, OrderComponent, StartScreenComponent], // Add StartScreenComponent
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit, OnDestroy {
   title = 'Game';
   cwidth = window.innerWidth;
   cheight = window.innerHeight;
@@ -27,7 +31,12 @@ export class AppComponent {
 
   // Settings
   @ViewChild(SettingsComponent) settingsMenu?: SettingsComponent;
+  @ViewChild(StartScreenComponent) startScreen?: StartScreenComponent;
   isSettingsOpen: boolean = false;
+  showStartScreen: boolean = true;
+
+  private gameLoopSubscription!: Subscription;
+  private alignSubscription!: Subscription;
 
   constructor(private game: GameService) { }
 
@@ -39,29 +48,56 @@ export class AppComponent {
     this.ctx = canvas.getContext('2d')!;
     this.ctxUI = canvasUI.getContext('2d')!;
 
-    await this.game.init(this.ctx, this.ctxUI);
-    this.game.startGame();
+    this.game.init(this.ctx, this.ctxUI);
+
+        this.alignSubscription = this.game.gameLoopTick$.subscribe(() =>
+    {
+      RenderingService.instance().camera.setCameraInBounds();
+    })
+    
+    this.gameLoopSubscription = this.game.gameLoopTick$.subscribe(() => {
+      if (this.startScreen && this.startScreen.isHidden) {
+        this.startScreen.updatePosition();
+      }
+    });
+
+
+
+    
 
   }
 
   @HostListener('window:keydown', ['$event']) // später durch richtige taste ersetzen
   onKeyDown(event: KeyboardEvent): void {
+    if (this.showStartScreen) return; // Ignore input if start screen is active
+
     if (event.key === 'Escape') {
       if(this.isSettingsOpen) this.settingsMenu?.closeSettingsMenu();
       else this.isSettingsOpen = true;
       return;
     }
-    this.game.setInput(event.key, true);
+    this.game.setInput(event.key.toLowerCase(), true);
   }
 
   @HostListener('window:keyup', ['$event'])
   onKeyUp(event: KeyboardEvent): void {
-    this.game.setInput(event.key, false);
+    if (this.showStartScreen) return; // Ignore input if start screen is active
+    this.game.setInput(event.key.toLowerCase(), false);
   }
 
   ngOnDestroy(): void {
     this.game.stopGame();
+    if (this.gameLoopSubscription) {
+      this.gameLoopSubscription.unsubscribe();
+    }
   }
 
-
+  async onStartGame(): Promise<void> {
+    this.game.startGame();
+    this.startScreen?.zoomOut();
+     setTimeout(() => {
+     this.showStartScreen = false;
+      this.alignSubscription.unsubscribe();
+    }, 2000);
+  }
 }
