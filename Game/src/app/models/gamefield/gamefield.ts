@@ -11,7 +11,7 @@ import { PrepMachine } from "../preProcess/prep-machine";
  * Generiert Böden, Wände und Maschinen.
  */
 export class Gamefield {
-    
+
     // Umgebungsobjekte (Böden)
     environmetObjects!: RenderObject[];
     // Interaktive Objekte (Wände, Maschinen)
@@ -24,7 +24,7 @@ export class Gamefield {
     static cols: number = 30;
 
 
-    
+
     constructor()
     {
       console.log(window.innerHeight)
@@ -126,7 +126,7 @@ export class Gamefield {
     const rectColor = "#FFE797";
     const layerColors = ["#FCB53B","#aa6a17ff"]
     const priority = 90;
-        
+
     for(let i = 0; i < 10; i++)
     {
         this.interactableObjects.push(new RenderObject(
@@ -197,7 +197,7 @@ export class Gamefield {
         console.log('Total interactable objects:', this.interactableObjects.length);
     }
 
-    
+
 }
- 
-}
+
+
