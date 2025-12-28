@@ -28,6 +28,8 @@ export class ItemPopupDrawer {
   public draw(item: Product | Package, offsetCamera: [number, number], fov: number): Rect[] {
     this.ctx.save();
 
+    const gameFov = RenderingService.instance().gameFov
+
     let title: string;
     let contentLines: { content: string; counted: number }[] = [];
     let titleImage: HTMLImageElement;
@@ -43,10 +45,10 @@ export class ItemPopupDrawer {
       titleImage = this.images[`/images/Products/${item.name.toLowerCase().replace(' ', '-')}.png`];
     }
 
-    const lineHeight = 20 * fov / 2.5;
-    const padding = 15 * fov / 2.5;
-    const height = 15 * fov / 2.5 + (contentLines.length * lineHeight) + padding;
-    const width = 150 * fov / 2.5;
+    const lineHeight = 20 * fov / gameFov;
+    const padding = 15 * fov / gameFov;
+    const height = 15 * fov / gameFov + (contentLines.length * lineHeight) + padding;
+    const width = 150 * fov / gameFov;
     const angle = RenderingService.instance().angle;
     const popupConfig = { width, height, radius: 10, borderWidth: 2 };
 
@@ -96,7 +98,7 @@ export class ItemPopupDrawer {
     // Define areas to be cleared on the next frame
     const mainPopupRect: Rect = { x: x - 2, y: y - 2, width: width + 4, height: height + 4, radius: popupConfig.radius };
     const buttonRect: Rect = { x: x + width - 20, y: y + height - 20, width: 35, height: 35, radius: 0 };
-    
+
     return [mainPopupRect, buttonRect];
   }
 }

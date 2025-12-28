@@ -96,7 +96,7 @@ export class MachinePopupDrawer {
         const item = neededItems[i];
         const size = Gamefield.fieldsize * fov / 2;
         const offset = size / 2;
-        const gap = 8 * fov / 2.5;
+        const gap = 8 * fov / RenderingService.instance().gameFov;
 
         let x = neededItems.indexOf(item) == 0
           ? fov * machine.position.x + offset + offsetCamera[0]
@@ -147,17 +147,18 @@ export class MachinePopupDrawer {
   public drawProductionProgress(machines: Machine[], offsetCamera: [number, number], fov: number): Rect[] {
     const drawnRects: Rect[] = [];
     const isometricAngle = RenderingService.instance().angle;
+    const gameFov = RenderingService.instance().gameFov
 
     for (const machine of machines) {
       if (machine.isProducing) {
         const percent = 1 - (machine.productionTimer * 1000 / machine.productionRate);
-        const size = Gamefield.fieldsize * 0.75 * fov / 2.5;
+        const size = Gamefield.fieldsize * 0.75 * fov / gameFov;
         const offset = (Gamefield.fieldsize - size) / 2 * fov;
-        const ringWidth = 8 * fov / 2.5;
+        const ringWidth = 8 * fov / gameFov;
         const radius = size / 2
         ;
         const centerX = machine.position.x * fov + offset + radius * fov+ offsetCamera[0];
-        const centerY = machine.position.y * Math.cos(isometricAngle) * fov + offsetCamera[1] * Math.cos(isometricAngle) - size * 2.5 + radius + RenderingService.instance().rotationZ;
+        const centerY = machine.position.y * Math.cos(isometricAngle) * fov + offsetCamera[1] * Math.cos(isometricAngle) - size * gameFov + radius + RenderingService.instance().rotationZ;
 
         this.ctx.save();
         this.ctx.lineWidth = ringWidth;
