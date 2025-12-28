@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, HostListener, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, HostListener, OnDestroy, AfterViewInit, OnInit } from '@angular/core';
 import { GameService } from './services/game.service';
 import { HudComponent } from './components/hud/hud.component';
 import { CommonModule } from '@angular/common';
@@ -7,6 +7,8 @@ import { OrderComponent } from "./components/order/order.component";
 import { StartScreenComponent } from './components/start-screen/start-screen.component'; // New import
 import { Subscription } from 'rxjs';
 import { RenderingService } from './services/rendering.service';
+import { ApiService } from './services/api.service';
+import { PlayerService } from './services/player.service';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +17,7 @@ import { RenderingService } from './services/rendering.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements AfterViewInit, OnDestroy {
+export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
   title = 'Game';
   cwidth = window.innerWidth;
   cheight = window.innerHeight;
@@ -38,7 +40,25 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   private gameLoopSubscription!: Subscription;
   private alignSubscription!: Subscription;
 
-  constructor(private game: GameService) { }
+  constructor(
+    private game: GameService,
+    private apiService: ApiService,
+    private playerService: PlayerService
+  ) { }
+
+  ngOnInit(): void {
+    this.apiService.getPlayers().subscribe(players => {
+      if (players.length === 0) {
+        // No players exist, create 'Player1' automatically
+        this.apiService.createPlayer('Player1').subscribe(newPlayer => {
+          this.playerService.setPlayer(newPlayer);
+        });
+      } else {
+        // Load the first player if available
+        this.playerService.setPlayer(players[0]);
+      }
+    });
+  }
 
   async ngAfterViewInit() {
     this.gameContainer.nativeElement.style.maxWidth = this.cwidth.toString();
@@ -60,10 +80,6 @@ export class AppComponent implements AfterViewInit, OnDestroy {
         this.startScreen.updatePosition();
       }
     });
-
-
-
-    
 
   }
 

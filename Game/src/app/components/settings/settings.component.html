@@ -1,8 +1,9 @@
 <div class="settings-overlay">
-  <div class="menus-container" [ngClass]="{ 'closing': isClosing }">
-    <div class="settings-panel">
+  <div class="menus-popup" [ngClass]="{ 'closing': isClosing }">
+    <div class="settings-panel menu-container">
       <h1 class="menu-title">Einstellungen</h1>
       <div class="settings-options">
+        <button class="btn" (click)="handleSaveMenu()">Speicherstände</button>
         <button class="btn" (click)="handleDebugMenu()">Debug Menu</button>
         <button class="btn" (click)="closeSettingsMenu()">Schließen</button>
       </div>
@@ -10,5 +11,8 @@
     <app-debug-menu *ngIf="showDebugMenu"
                     (closeDebugMenuRequest)="showDebugMenu = false">
     </app-debug-menu>
+    <app-save-menu *ngIf="showSaveMenu"
+                   (closeSaveMenuRequest)="showSaveMenu = false">
+    </app-save-menu>
   </div>
 </div>

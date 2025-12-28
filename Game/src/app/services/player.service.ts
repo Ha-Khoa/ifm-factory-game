@@ -1,4 +1,4 @@
-﻿import {Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {ApiService} from './api.service';
 import {PlayerInterface} from '../interfaces/ui/playerInterface';
@@ -87,6 +87,34 @@ export class PlayerService {
         }
     });
     return true;
+  }
+
+  setMoney(amount: number) {
+    if (!this.player) return;
+
+    this.api.setMoney(this.player.name, amount).subscribe({
+      next: (money: number) => {
+        this.playerSubject.next({
+          ...this.player!,
+          money
+        });
+      },
+      error: console.error
+    });
+  }
+
+  setScore(amount: number) {
+    if (!this.player) return;
+
+    this.api.updateScore(this.player.name, amount).subscribe({
+      next: (score: number) => {
+        this.playerSubject.next({
+          ...this.player!,
+          score
+        });
+      },
+      error: console.error
+    });
   }
 
 }
