@@ -2,7 +2,8 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import {PlayerInterface} from '../interfaces/ui/playerInterface';
 import {Machine} from '../interfaces/ui/machine';
 import {Factory} from '../interfaces/ui/factory';
@@ -17,7 +18,24 @@ export class ApiService {
 
   // Player Management
   getPlayers(): Observable<PlayerInterface[]> {
-    return this.http.get<PlayerInterface[]>(`${this.baseUrl}/Players`);
+    return this.http.get<any>(`${this.baseUrl}/Players`).pipe(
+      map(response => {
+        // Handle ASP.NET Core's reference loop serialization format {$id: '1', $values: [...]}
+        if (response && Array.isArray(response['$values'])) {
+          return response['$values'];
+        }
+        // Handle standard array response
+        if (Array.isArray(response)) {
+          return response;
+        }
+        // Otherwise, return an empty array
+        return [];
+      }),
+      catchError(error => {
+        console.error('Error fetching players:', error);
+        return of([]); // Return an empty array on HTTP error to prevent UI breaking.
+      })
+    );
   }
 
   getPlayer(identifier: string): Observable<PlayerInterface> {

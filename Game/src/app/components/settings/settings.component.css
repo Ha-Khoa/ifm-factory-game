@@ -1,16 +1,6 @@
 .settings-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-large);
-  background: var(--primary);
-  padding: var(--gap-large);
-  border-radius: var(--border-radius-large);
-  box-shadow: var(--box-shadow-level-1);
-  width: 350px;
-  text-align: center;
-  border: 5px solid var(--tertiary);
-  color: var(--text-color);
-  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 1000;
 }
 
@@ -26,4 +16,9 @@
   justify-content: center;
   align-items: center;
   animation: fadeIn 0.2s ease-out;
+}
+
+.menus-popup {
+  display: flex;
+  gap: var(--gap-small);
 }

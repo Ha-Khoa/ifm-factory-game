@@ -1,0 +1,24 @@
+<div class="menu-container" [ngClass]="{ 'closing': isClosing }">
+  <h1 class="menu-title">Speicherstände</h1>
+  <div>
+    <div class="player-list">
+      @for (player of players$ | async; track player.id) {
+      <div class="player-item">
+        <span>{{ player.name }}</span>
+        <div class="player-actions">
+          <button (click)="switchPlayer(player)">Laden</button>
+          <button (click)="deletePlayer(player.name)" class="delete-btn">Löschen</button>
+        </div>
+      </div> }
+      @empty {
+        <p>Keine Spieler vorhanden. Erstelle einen neuen Spieler!</p>
+      }
+    </div>
+    <div class="new-player-form">
+      <input type="text" [(ngModel)]="newPlayerName" placeholder="Neuer Spielername" />
+      <button (click)="createNewPlayer()">Erstellen</button>
+    </div>
+
+    <button class="btn" (click)="closeSaveMenu()">Zurück</button>
+  </div>
+</div>

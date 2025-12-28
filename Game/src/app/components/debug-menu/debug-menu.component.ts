@@ -1,10 +1,12 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../services/api.service';
 import { Orders } from '../../models/orders/orders';
 import { Products } from '../../models/product/products';
 import { Product } from '../../models/product/product';
+import {Observable, Subscription} from 'rxjs';
+import { PlayerService } from '../../services/player.service';
+import { PlayerInterface } from '../../interfaces/ui/playerInterface';
 
 @Component({
   selector: 'app-debug-menu',
@@ -13,23 +15,36 @@ import { Product } from '../../models/product/product';
   templateUrl: './debug-menu.component.html',
   styleUrls: ['./../settings/settings-general.component.css','./debug-menu.component.css']
 })
-export class DebugMenuComponent implements OnInit {
+export class DebugMenuComponent implements OnInit, OnDestroy {
   @Output() closeDebugMenuRequest = new EventEmitter<void>();
   isClosing = false;
 
   playerMoney = 0;
   playerScore = 0;
-  playerName = 'Player1'; // TODO: Hardcoded player name
+  player$: Observable<PlayerInterface | null>;
+  private playerSubscription: Subscription | undefined;
 
   // Custom order
   products: Product[] = [];
   selectedProductId: number = 1;
   quantity: number = 1;
 
-  constructor(private api: ApiService) { }
+  constructor(private playerService: PlayerService) {
+    this.player$ = this.playerService.player$;
+  }
 
   ngOnInit() {
     this.products = Products.getAllProducts();
+    this.playerSubscription = this.player$.subscribe(player => {
+      if (player) {
+        this.playerMoney = player.money;
+        this.playerScore = player.score;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.playerSubscription?.unsubscribe();
   }
 
   closeDebugMenu() {
@@ -42,17 +57,11 @@ export class DebugMenuComponent implements OnInit {
   }
 
   setMoney() {
-    this.api.setMoney(this.playerName, this.playerMoney).subscribe({
-      next: () => console.log('Money updated'),
-      error: (err) => console.error('Error updating money', err)
-    });
+    this.playerService.setMoney(this.playerMoney);
   }
 
   setScore() {
-    this.api.updateScore(this.playerName, this.playerScore).subscribe({
-      next: () => console.log('Score updated'),
-      error: (err) => console.error('Error updating score', err)
-    });
+    this.playerService.setScore(this.playerScore);
   }
 
   createRandomOrder() {
