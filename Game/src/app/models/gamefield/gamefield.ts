@@ -4,6 +4,7 @@ import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
 import { ConveyorBelt } from "../conveyor-belt/conveyor-belt";
 import { RenderType } from "../../enums/render-type";
+import { PrepMachine } from "../preProcess/prep-machine";
 
 /**
  * Gamefield-Klasse: Verwaltet das Spielfeld mit Umgebungsobjekten und interaktiven Objekten.
@@ -177,5 +178,26 @@ export class Gamefield {
         });
     }
 
+    updatePrepMachines(prepMachines: PrepMachine[]): void {
+        //Entfernt alte PrepMachines aus den interaktiven Objekten
+        this.interactableObjects = this.interactableObjects.filter (obj => !obj.name.startsWith('PrepMachine_'));
 
+        //Fügt die aktuellen PrepMachines hinzu
+        prepMachines.forEach(machine =>{
+            console.log('Adding PrepMachine to gamefield:', machine.name, 'color:', machine.rectColor);
+            this.interactableObjects.push(machine)
+            // Stelle sicher, dass neue PrepMachines auch im Renderer landen
+            if (!RenderingService.instance().getRenderingObjektByName(machine.name)) {
+                console.log('Adding PrepMachine to renderer:', machine.name);
+                RenderingService.instance().addRenderObject(machine);
+            } else {
+                console.log('PrepMachine already in renderer:', machine.name);
+            }
+        });
+        console.log('Total interactable objects:', this.interactableObjects.length);
+    }
+
+    
+}
+ 
 }

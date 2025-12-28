@@ -132,6 +132,7 @@ export class ConveyorBelt extends RenderObject{
        let typeProduct = this._conveyorType === ConveyorType.COPPER_WIRE ? Products.getProductById(3) :
                          this._conveyorType === ConveyorType.RAW_PLASTIC ? Products.getProductById(1) :
                          this._conveyorType === ConveyorType.RAW_SILICON ? Products.getProductById(2) :
+                         this._conveyorType === ConveyorType.IRON_INGOT ? Products.getProductById(7) :
                          undefined;
         if(typeProduct)
         {

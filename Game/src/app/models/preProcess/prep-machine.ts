@@ -52,7 +52,7 @@ export class PrepMachine extends RenderObject {
         ) {
            super(
                 `PrepMachine_${PrepMachine.pre_machine_id++}`,
-                'PrepMachine',
+                'rect',
                 x,
                 y,
                 Gamefield.fieldsize,
@@ -62,15 +62,7 @@ export class PrepMachine extends RenderObject {
                 undefined,
                 undefined,
                 "#FFE797",   //rectColor
-                ["#FCB53B", "#aa6a17ff"],   //rectLayers
-                [//Frames Parameter
-                  `public/images/prep-machines/prep-machine-frame-1.png`,
-                  `public/images/prep-machines/prep-machine-frame-2.png`,
-                  `public/images/prep-machines/prep-machine-frame-3.png`,
-                  `public/images/prep-machines/prep-machine-frame-4.png`,
-                ],
-                5
-
+                ["#FCB53B", "#aa6a17ff"]   //rectLayers
            );
             this.processingTime = processingTime;
             this.inputProduct = inputProduct;
@@ -79,8 +71,6 @@ export class PrepMachine extends RenderObject {
             if (this.inputProduct && this.outputProduct) {
                 this.setRecipe(this.inputProduct.id, this.outputProduct.id);
             }
-
-            RenderingService.instance().addRenderObject(this);
         }
         /**
          * 
