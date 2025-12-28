@@ -1,0 +1,24 @@
+<div class="container">
+    <div class="column-container">
+      <h4>Spieler Stats</h4>
+      <div class="form-group">
+        <label for="money">Geld:</label>
+        <input type="number" id="money" min="0" [(ngModel)]="playerMoney">
+        <button (click)="setMoney()">Geld festlegen</button>
+      </div>
+      <div class="form-group">
+        <label for="score">Score:</label>
+        <input type="number" id="score" min="0" [(ngModel)]="playerScore">
+        <button (click)="setScore()">Score festlegen</button>
+      </div>
+    </div>
+    <div class="column-container">
+      <h4>Sonstiges</h4>
+      <div class="form-group">
+        <label for="fov">FOV:</label>
+        <input type="number" id="fov" min="2.5" [(ngModel)]="gameFov">
+        <button (click)="setGameFov()">Fov festlegen</button>
+      </div>
+    </div>
+</div>
+

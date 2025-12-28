@@ -1,4 +1,5 @@
 ﻿.menu-container {
+  position: relative;
   background-color: var(--primary);
   padding: var(--gap-large);
   border-radius: var(--border-radius-large);

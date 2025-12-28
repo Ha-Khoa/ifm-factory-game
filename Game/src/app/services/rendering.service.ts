@@ -41,6 +41,7 @@ export class RenderingService {
   private _yOffset: number = 0;
 
   private _fov!: number;
+  private _gameFov: number = 2.5;
 
   private _camera!: Camera;
 
@@ -141,7 +142,7 @@ export class RenderingService {
       const xObj = this._fov * Obj.x + this._xOffset;
       const objHeight = this._fov * Obj.height;
       const objWidth = this._fov * Obj.width
-      // Alle Objekte außerhalb des Sichtfeldes werden nicht gerendert 
+      // Alle Objekte außerhalb des Sichtfeldes werden nicht gerendert
       if(xObj + objWidth < 0 || xObj > this._ctx.canvas.width || this._fov * (Obj.y + this._yOffset / this._fov) * Math.cos(this._angle) + objHeight * Math.cos(this._angle) + this._rotationZ < 0 || yProjection > this._ctx.canvas.height) return;
       if ((Obj.type === RenderType.RECT)) {
         const layers = Obj.rectLayers!.length;
@@ -250,7 +251,7 @@ export class RenderingService {
     );
   }
 
-  
+
   rotateInSlotMachine(slotMachine: SlotMachine)
   {
     const angle = 90 / 360 * 2 * Math.PI;
@@ -334,7 +335,7 @@ export class RenderingService {
 
   zoomOut() : boolean
   {
-    if(this._fov > 2.5)
+    if(this._fov > this._gameFov)
     {
     const df = this._fov * 0.01
     this._fov -= df
@@ -342,8 +343,8 @@ export class RenderingService {
     }
     else
     {
-      this._fov = 2.5
-      this._camera.fov = 2.5
+      this._fov = this._gameFov
+      this._camera.fov = this._gameFov
       return true;
     }
     return false;
@@ -377,6 +378,10 @@ export class RenderingService {
   get yOffset(): number {return this._yOffset}
 
   get fov(): number {return this._fov}
+  set gameFov(value: number) {
+    this._gameFov = value;
+  }
+  get gameFov(): number {return this._gameFov}
 
   get deltaTime(): number {return this._deltaTime}
 
