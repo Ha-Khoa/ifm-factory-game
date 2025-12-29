@@ -98,7 +98,7 @@ export class RenderingService {
 
   convertToCameraPOV(camera: Camera): void
   {
-    this._rotationZ = this._ctx.canvas.height / 2 - this._ctx.canvas.height / 2 * Math.cos(this._angle) + camera.position.z * this._fov * Math.sin(this._angle);
+    this._rotationZ = this._ctx.canvas.height / 2 - this._ctx.canvas.height / 2 * Math.cos(this._angle) + camera.position.z * Math.sin(this._angle) * this._fov;
     this._xOffset = this._ctx.canvas.width / 2 - camera.position.x * this._fov;
     this._yOffset = this._ctx.canvas.height / 2 - camera.position.y * this._fov;
     if(!this._camera)

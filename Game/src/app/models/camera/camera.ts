@@ -47,10 +47,9 @@ export class Camera {
      * Prüft, ob ein übergebener Y-Wert innerhalb des Spielfelds liegt.
      */
     isYInBounds(v: number): boolean {
-        const minY = window.innerHeight / (this._fov * 2) + RenderingService.instance().rotationZ / 2;
-        const maxY = Gamefield.fieldsize * Gamefield.rows * Math.cos(RenderingService.instance().angle)
-          - window.innerHeight / (this._fov * 2 * Math.cos(RenderingService.instance().angle))
-          - RenderingService.instance().rotationZ / 2;
+        const minY = window.innerHeight / (this._fov * 2) / Math.cos(RenderingService.instance().angle);
+        const maxY = Gamefield.fieldsize * Gamefield.rows
+          - window.innerHeight / (this._fov * 2) / Math.cos(RenderingService.instance().angle)
         return v >= minY && v <= maxY;
     }
 
@@ -64,12 +63,11 @@ export class Camera {
         }
 
         if (!this.isYInBounds(this._position.y)) {
-            if (this._position.y < window.innerHeight / (this._fov * 2) + RenderingService.instance().rotationZ / 2) {
-                this._position.y = window.innerHeight / (this._fov * 2) + RenderingService.instance().rotationZ / 2;
+            if ((this._position.y < window.innerHeight / (this._fov * 2) / Math.cos(RenderingService.instance().angle))) {
+                (this._position.y = window.innerHeight / (this._fov * 2) / Math.cos(RenderingService.instance().angle));
             } else {
-                this._position.y = Gamefield.fieldsize * Gamefield.rows * Math.cos(RenderingService.instance().angle)
-                - window.innerHeight / (this._fov * 2 * Math.cos(RenderingService.instance().angle))
-                - RenderingService.instance().rotationZ / 2;
+                this._position.y = Gamefield.fieldsize * Gamefield.rows
+                - window.innerHeight / (this._fov * 2) / Math.cos(RenderingService.instance().angle)
             }
         }
     }
