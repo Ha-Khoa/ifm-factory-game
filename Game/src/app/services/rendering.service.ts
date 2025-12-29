@@ -335,9 +335,9 @@ export class RenderingService {
 
   zoomOut() : boolean
   {
-    if(this._fov > this._gameFov)
+    if(this._fov - 0.1 > this._gameFov || this.fov  + 0.1 < this._gameFov)
     {
-    const df = this._fov * 0.01
+    const df = (this._fov - this._gameFov) * 0.01 / Math.abs(this._fov - this._gameFov) * Math.abs(this._fov)
     this._fov -= df
     this._camera.fov = this._fov
     }
