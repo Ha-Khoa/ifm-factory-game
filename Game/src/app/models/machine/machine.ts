@@ -7,6 +7,7 @@ import { Coordinates } from "../coordinates/coordinates";
 import { Gamefield } from "../gamefield/gamefield";
 import { RenderType } from "../../enums/render-type";
 
+
 /**
  * Machine-Klasse: Repräsentiert eine Produktionsmaschine im Spiel.
  * Verarbeitet Input-Produkte und produziert nach einer festgelegten Zeit ein Output-Produkt.
