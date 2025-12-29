@@ -546,6 +546,8 @@ export class Player {
         if (!this._inventory && nearestMachine.isOutputReady()){
             const output = nearestMachine.collectOutput();
             if (output){
+                output.init(new Coordinates(this.position.x, this.position.y))
+
                 this._inventory = output;
                 this._canInteractProduct = false;
                 this._hasPicked = true;

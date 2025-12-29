@@ -157,13 +157,16 @@ export class PrepMachine extends RenderObject {
                 this.outputReady = false;
                 this.currentInput = undefined;
                 this.processingProgress = 0;
-
+                if (this.outputProduct.img){
+                     this.outputProduct.img;
+                }
                 if(this.frames && this.frames.length > 0){
                     this.frameNumber = 0;
                     this.nextFrame = this.frames[0];
                 }
 
                 console.log(`Collected output: ${output.name}`);
+                console.log(`Output image: ${output.renderObject.img}`);
                 return output;
             }
             return null;
