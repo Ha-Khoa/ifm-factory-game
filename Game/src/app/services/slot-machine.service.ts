@@ -1,8 +1,8 @@
-import { Injectable, provideExperimentalCheckNoChangesForDebug } from '@angular/core';
+import { Injectable} from '@angular/core';
 import { RenderingService } from './rendering.service';
-import { Camera } from '../models/camera/camera';
-import { SlotMachine } from '../models/slot-machine/slot-machine';
+import { PlayerService } from './player.service';
 import { Gamefield } from '../models/gamefield/gamefield';
+import { Player } from '../models/player/player';
 
 export interface SlotIcon {
   img: string;
@@ -54,12 +54,18 @@ export class SlotMachineService {
 
   private _probabilitys: number[] = [0.05, 0.1, 0.25, 0.13, 0.25, 0.2, 0.0000001,0.02]; // Summe muss gleich 1 sein
 
-  private _iconMultiplier: number[] = [20, 2, 1, 2, 1, 1.5, Infinity, -Infinity];
+  private _iconMultiplier: number[] = [10, 2, 1, 2, 1, 1.5, Infinity, -Infinity];
 
   private _slots: SlotIcon[][] = [];
 
+  private _won: number = 0;
 
-  constructor() { }
+  private _playerService!: PlayerService
+
+
+  constructor() 
+  {
+  }
 
 
     private static _instance: SlotMachineService | null = null;
@@ -72,9 +78,10 @@ export class SlotMachineService {
     return this._instance;
   }
 
-  init(ctx: CanvasRenderingContext2D, images: { [key: string]: HTMLImageElement }, gamefield: Gamefield)
+  init(ctx: CanvasRenderingContext2D, images: { [key: string]: HTMLImageElement }, playerService: PlayerService)
   {
     this._ctx = ctx;
+    this._playerService = playerService;
 
     this._images = images;
     this._slotIcons = ["/images/slotMachine/seven.png",
@@ -115,7 +122,11 @@ export class SlotMachineService {
                 this._stopped.forEach((stopping) => {
                   if (!stopping) stopped = false;
                 });
-                if (stopped) this.startSpin();
+                if (stopped && this._playerService.getMoney() >= 10) 
+                {
+                  this._playerService.removeMoney(10);
+                  this.startSpin();
+                }
                }
            }
   }
@@ -166,7 +177,8 @@ export class SlotMachineService {
     {
       this._activePatterns = [];
     }
-    
+    this.drawCosts();
+    this.drawWon();
     this._ctx.restore();
   }
 
@@ -214,7 +226,7 @@ export class SlotMachineService {
     const won = this.checkAllPattern();
     if(won > 0)
     {
-      console.log("Gewonnen: " + won);
+      this._playerService.addMoney(won);
     }
   }
 
@@ -311,10 +323,15 @@ export class SlotMachineService {
       if (bestLen < 3) return 0;
       if (bestLen > 5) bestLen = 5;
 
+      let payLen = 0
+      if(bestLen === 3) payLen = 1;
+      if(bestLen === 4) payLen = 2;
+      if(bestLen === 5) payLen = 4;
+
       this._activePatterns.push(addPaylinePattern(rows, bestStart, bestLen));
       const idx = this._slotIcons.indexOf(bestImg);
       const iconMult = idx >= 0 ? this._iconMultiplier[idx] : 1;
-      return bestLen * multiplier * iconMult;
+      return payLen * multiplier * iconMult;
     };
 
     // Checks a diagonal of length 3 starting at reel `startReel` with slope +1 (down) or -1 (up).
@@ -346,11 +363,11 @@ export class SlotMachineService {
     {
       const check = emptyPattern();
       check[i] = [1,1,1];
-      totalWon += this.checkPattern(check, 5);
+      totalWon += this.checkPattern(check, 4);
     }
     totalWon += this.checkPattern([[1,1,1],[1,1,1],[1,1,1],[1,1,1],[1,1,1]], 500); 
 
-    // Horizontal lines (top/middle/bottom): pay 3/4/5 in a row (no stacking)
+    // Horizontal lines (top/middle/bottom): pay 3/4/5 in a row
     totalWon += checkPayline([0, 0, 0, 0, 0], 10);
     totalWon += checkPayline([1, 1, 1, 1, 1], 10);
     totalWon += checkPayline([2, 2, 2, 2, 2], 10);
@@ -360,7 +377,7 @@ export class SlotMachineService {
       const p = emptyPattern();
       const rows = [0, 1, 2, 1, 0];
       for (let i = 0; i < 5; i++) p[i][rows[i]] = 1;
-      totalWon += this.checkPattern(p, 12);
+      totalWon += this.checkPattern(p, 7);
     }
 
     // Up then down: 2-1-0-1-2
@@ -368,16 +385,16 @@ export class SlotMachineService {
       const p = emptyPattern();
       const rows = [2, 1, 0, 1, 2];
       for (let i = 0; i < 5; i++) p[i][rows[i]] = 1;
-      totalWon += this.checkPattern(p, 12);
+      totalWon += this.checkPattern(p, 10);
     }
 
     // Simple diagonals of length 3 (both directions), across all 3-reel windows
     for (let startReel = 0; startReel <= 2; startReel++) {
-      totalWon += checkDiagonal3(startReel, 1, 10);  // 0-1-2
-      totalWon += checkDiagonal3(startReel, -1, 10); // 2-1-0
+      totalWon += checkDiagonal3(startReel, 1, 5);  // 0-1-2
+      totalWon += checkDiagonal3(startReel, -1, 5); // 2-1-0
     }
-
-    return totalWon;
+    this._won = Math.ceil(totalWon)
+    return Math.ceil(totalWon);
 
   }
 
@@ -416,7 +433,7 @@ export class SlotMachineService {
       const multiplier2 = idx >= 0 ? this._iconMultiplier[idx] : 1;
       return matched * multiplier * multiplier2;
     }
-
+    
     return 0;
   }
 
@@ -554,4 +571,45 @@ export class SlotMachineService {
     this._ctx.stroke();
 
   }
+
+
+
+  drawCosts()
+  {
+    const px = 100;
+    const string = "Kosten: 10"
+    this._ctx.fillStyle = "yellow"
+    this._ctx.font = `italic small-caps bold ${px}px arial`
+    this._ctx.fillText(
+      string,
+      this._ctx.canvas.width / 2 - this._ctx.measureText(string).width / 2 - px,
+      this._ctx.canvas.height * this._sizePercentage / 400 + px / 3);  
+    this._ctx.drawImage(
+      this._images["/images/fox/fox-coin.png"],
+      this._ctx.canvas.width / 2 + this._ctx.measureText(string).width / 2 - px + 10,
+      this._ctx.canvas.height * this._sizePercentage / 400 - px / 2,
+      px,
+      px
+    )
+  }
+
+drawWon()
+{
+  const string = `Gewinn:`;
+  const px = 50;
+  this._ctx.fillStyle = "yellow"
+  this._ctx.font = `italic small-caps bold ${px}px arial`;
+  this._ctx.fillText(
+    string,
+    this._ctx.canvas.width * this._sizePercentage / 400 - this._ctx.measureText(string).width / 2,
+    this._ctx.canvas.height / 2
+  )
+  this._ctx.fillText(
+    this._won + "",
+    this._ctx.canvas.width * this._sizePercentage / 400 - this._ctx.measureText(this._won + "").width / 2,
+    this._ctx.canvas.height / 2 + px
+  )
+
+}
+
 }

@@ -60,7 +60,7 @@ export class GameService {
     this.ctx = ctx;
     this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
-    SlotMachineService.instance().init(this.ctx, this.images, this.gamefield);
+    SlotMachineService.instance().init(this.ctx, this.images, this.playerService);
     this.uiService.init(ctxUI, this.angle, this.images);
     // Initialisiere Eingaben
     this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false};
