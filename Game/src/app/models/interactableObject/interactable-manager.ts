@@ -30,8 +30,8 @@ export class InteractableManager {
       new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(6)!, RenderType.THREE_D_IMG),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/wall.png", "/images/wall.png",
-                  [Direction.UP], Products.getProductById(4)!, RenderType.RECT,10000),
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/machine2.png", "/images/wall.png",
+                  [Direction.UP], Products.getProductById(4)!, RenderType.THREE_D_IMG,10000),
       new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/wall.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(5)!, RenderType.RECT)
     ];
@@ -186,7 +186,7 @@ export class InteractableManager {
     // Kollision mit Submission Area prüfen
     if (this.interactionObject(this.submissionArea, player))
     {
-      this.updateSubmissionAreaOnInteraction(player);   
+      this.updateSubmissionAreaOnInteraction(player);
 
     }
     else
