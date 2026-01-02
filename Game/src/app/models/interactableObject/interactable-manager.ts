@@ -268,6 +268,14 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
         console.log("Zutat nicht benötigt, zurückgelegt");
       }
     }
+    if (this._inputs["u"] === true && machine.unlocked) {
+      machine.upgrade(this.playerService).subscribe({
+        error: (err) => {
+          console.error("Maschinen-Upgrade fehlgeschlagen:", err.message);
+          // Optional: this.ui.showNotification("Upgrade fehlgeschlagen!", "error");
+        }
+      });
+    }
     // Visuelles Feedback: Maschine grün färben
     machine.renderObject.rectColor = "rgba(81, 255, 81, 1)";
     machine.renderObject.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];

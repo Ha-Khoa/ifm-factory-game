@@ -124,8 +124,15 @@ export class SlotMachineService {
                 });
                 if (stopped && this._playerService.getMoney() >= 10) 
                 {
-                  this._playerService.removeMoney(10);
-                  this.startSpin();
+                  this._playerService.removeMoney(10).subscribe({
+                    next: () => {
+                      this.startSpin();
+                    },
+                    error: (err) => {
+                      console.error("Could not start spin, failed to remove money:", err.message);
+                      // Maybe show a UI notification to the player
+                    }
+                  });
                 }
                }
            }

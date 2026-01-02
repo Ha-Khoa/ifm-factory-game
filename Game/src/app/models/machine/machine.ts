@@ -6,6 +6,9 @@ import { InteractableObject } from "../interactableObject/interactable-object";
 import { Coordinates } from "../coordinates/coordinates";
 import { Gamefield } from "../gamefield/gamefield";
 import { RenderType } from "../../enums/render-type";
+import { PlayerService } from "../../services/player.service";
+import { catchError, map, Observable, of, tap, throwError } from "rxjs";
+
 
 
 /**
@@ -214,15 +217,70 @@ export class Machine extends InteractableObject {
     return needed - inventory;
   }
 
+  private _isUpgrading: boolean = false;
+  private _lastUpgradeTimestamp: number = 0;
+  public readonly maxLevel: number = 10;
+
   /**
-   * Upgradet die Maschine: Erhöht das Level und verringert die Produktionszeit um 1 Sekunde.
+   * Upgradet die Maschine, wenn möglich.
+   * Behandelt Cooldown, Kosten und die Kommunikation mit dem PlayerService.
+   * @param playerService Der Service, der das Geld des Spielers verwaltet.
+   * @returns Ein Observable, das bei Erfolg true zurückgibt oder bei einem Fehler eine Fehlermeldung ausgibt.
    */
-  upgrade(): void {
-    if (this._upgradable) {
-      this._level += 1;
-      this._productionRate -= 1000;
-      console.log(`${this._name} upgraded auf Level ${this._level}!`);
+  upgrade(playerService: PlayerService): Observable<boolean> {
+    const now = Date.now();
+    const cooldown = 200;
+
+    if (this._isUpgrading) {
+      console.log("Upgrade bereits im Gange.");
+      return of(false);
     }
+
+    if (now - this._lastUpgradeTimestamp < cooldown) {
+      console.log("Upgrade ist auf Cooldown.");
+      return of(false);
+    }
+
+    if (!this._upgradable || this._level >= this.maxLevel) {
+      console.log("Maschine kann nicht aufgerüstet werden oder hat das maximale Level erreicht.");
+      return of(false);
+    }
+
+    const upgradeCost = this.getUpgradeCost();
+    if (playerService.getMoney() < upgradeCost) {
+      console.log("Nicht genug Geld für ein Upgrade (Client-Check).");
+      return of(false);
+    }
+
+    this._isUpgrading = true;
+    this._lastUpgradeTimestamp = now;
+
+    return playerService.removeMoney(upgradeCost).pipe(
+      tap(() => {
+        this._level += 1;
+        this._productionRate = Math.max(500, this._productionRate * 0.85); // 15% schneller, min. 0.5s
+        console.log(`${this._name} auf Level ${this._level} verbessert! Neue Produktionsrate: ${this._productionRate}ms`);
+      }),
+      map(() => {
+        this._isUpgrading = false;
+        return true;
+      }),
+      catchError((error) => {
+        console.error("Upgrade API-Aufruf fehlgeschlagen:", error);
+        this._isUpgrading = false;
+        this._lastUpgradeTimestamp = 0; // Cooldown bei Fehler zurücksetzen
+        return throwError(() => new Error('Upgrade auf dem Server fehlgeschlagen.')); // Fehler für den Manager erneut auslösen
+      })
+    );
+  }
+
+  /**
+   * Berechnet die Kosten für das nächste Upgrade.
+   * Die Kosten steigen exponentiell an.
+   * @returns Die Kosten für das nächste Upgrade.
+   */
+  getUpgradeCost(): number {
+    return Math.floor(100 * Math.pow(1.5, this._level - 1));
   }
 
   get isProducing(): boolean {

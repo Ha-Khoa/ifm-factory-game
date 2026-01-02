@@ -15,6 +15,7 @@ import { Camera } from '../camera/camera';
 import { PlayerThoughtsType } from '../../services/ui/player-thoughts.drawer';
 import { PlayerService } from '../../services/player.service';
 import { PrepMachine } from '../preProcess/prep-machine';
+import { firstValueFrom } from 'rxjs';
 
 /**
 * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
@@ -363,14 +364,18 @@ export class Player {
          // Check if the player can purchase the product from the conveyor belt
          let productTypeOfConveyor = this.getConveyorBeltProduct();
          if(productTypeOfConveyor instanceof Product) {
-           let payed:boolean = this._playerService.removeMoney(productTypeOfConveyor.costs)
-           if(!payed) {
-             // Not enough money!
-             this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY
+           try {
+             // Warte auf das Ergebnis der asynchronen Geldentfernung
+             await firstValueFrom(this._playerService.removeMoney(productTypeOfConveyor.costs));
+             // wenn dies erfolgreich ist, fahre mit der Logik fort
+           } catch (error) {
+             // wenn dies fehlschlägt (ein Fehler wird ausgelöst), behandle ihn hier
+             console.error("Bezahlung für Förderbandprodukt fehlgeschlagen:", error);
+             this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY;
              setTimeout(() => {
                this.thoughts = PlayerThoughtsType.NONE;
              }, 1000);
-             return null;
+             return null; // Ausführung stoppen
            }
          }
 

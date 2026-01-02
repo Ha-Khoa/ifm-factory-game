@@ -72,7 +72,9 @@ export class SubmissionArea extends InteractableObject {
 
         // Wrong order submitted or no active orders exist
         this.playerService.removeScore(15);
-        this.playerService.removeMoney(20);
+        this.playerService.removeMoney(20).subscribe({
+          error: (err) => console.error("Failed to remove money for wrong submission:", err.message)
+        });
         return false;
     }
 

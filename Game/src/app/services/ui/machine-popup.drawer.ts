@@ -213,7 +213,8 @@ export class MachinePopupDrawer {
     currentY += lineHeight;
 
     this.ctx.font = `14px ${UI_THEME.fontFamily}`;
-    this.ctx.fillText(`Dauer: ${machine.productionRate / 1000}s`, x, currentY);
+    const productionTime = machine.productionRate/ 1000
+    this.ctx.fillText(`Dauer: ${productionTime.toFixed(2)}s`, x, currentY);
     currentY += lineHeight;
     return currentY;
   }
@@ -288,7 +289,7 @@ export class MachinePopupDrawer {
     this.ctx.fillStyle = UI_THEME.secondary;
     this.ctx.font = `bold 14px ${UI_THEME.fontFamily}`;
     this.ctx.textAlign = 'center';
-    this.ctx.fillText(`Upgrade (2000$)`, x + config.width / 2, y + 20);
+    this.ctx.fillText(`Upgrade (${machine.getUpgradeCost()}$)`, x + config.width / 2, y + 20);
     this.ctx.restore();
   }
 }

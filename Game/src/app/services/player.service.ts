@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, Observable, tap, throwError} from 'rxjs';
 import {ApiService} from './api.service';
 import {PlayerInterface} from '../interfaces/ui/playerInterface';
 
@@ -69,24 +69,22 @@ export class PlayerService {
     })
   }
 
-  removeMoney(amount: number): boolean {
-    if (!this.player) return false;
+  removeMoney(amount: number): Observable<number> {
+    if (!this.player) {
+      return throwError(() => new Error('Spieler nicht verfügbar.'));
+    }
     if (this.player.money < amount) {
-      return false;
+      return throwError(() => new Error('Nicht genug Geld (Client-Check).'));
     }
 
-    this.api.removeMoney(this.player.name, amount).subscribe({
-        next: (money:number) => {
+    return this.api.removeMoney(this.player.name, amount).pipe(
+      tap((money: number) => {
         this.playerSubject.next({
           ...this.player!,
           money
-        })
-      },
-        error: (error) => {
-          console.error(error);
-        }
-    });
-    return true;
+        });
+      })
+    );
   }
 
   setMoney(amount: number) {
