@@ -37,7 +37,7 @@ export class InteractableManager {
     ];
     private _slotMachine!: SlotMachine;
 
-    private submissionArea:SubmissionArea;
+    private _submissionArea:SubmissionArea;
 
   constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>, playerService: PlayerService) {
     this._gamefield = _gamefield;
@@ -45,8 +45,8 @@ export class InteractableManager {
     this.playerService = playerService;
     this._inputs = inputs;
     this._slotMachine = new SlotMachine(800, 100, this._gamefield);
-    this.submissionArea = new SubmissionArea(
-      new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 5),
+    this._submissionArea = new SubmissionArea(
+      new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 10),
       Gamefield.fieldsize,
       2 * Gamefield.fieldsize,
       this.playerService
@@ -59,10 +59,10 @@ export class InteractableManager {
       this.generateInteractionField(machine)
       this.addParticleField(machine)
     })
-    this.generateInteractionField(this.submissionArea)
+    this.generateInteractionField(this._submissionArea)
     this.setSubmissionAreaParticles()
     this.generateInteractionField(this._slotMachine)
-    this.submissionArea.particleRenderObjects.forEach((particleRenderObject) => {
+    this._submissionArea.particleRenderObjects.forEach((particleRenderObject) => {
        particleRenderObject.ptype = "straightUp";
       particleRenderObject.spawnType = "empty";
       particleRenderObject.colors = ["#FFFFFF"];
@@ -85,13 +85,13 @@ export class InteractableManager {
   addToInteractableObjects() {
     this.machines.forEach(machine => {
       this._gamefield.interactableObjects.push(machine.renderObject);
-      this._gamefield.interactableObjects.push(this.submissionArea.renderObject);
+      this._gamefield.interactableObjects.push(this._submissionArea.renderObject);
     });
   }
 
   setSubmissionAreaParticles()
   {
-    for(let particleRenderObject of this.submissionArea.particleRenderObjects)
+    for(let particleRenderObject of this._submissionArea.particleRenderObjects)
     {
       //particleRenderObject.ptype = "straightUp";
       //particleRenderObject.spawnType = "empty";
@@ -127,7 +127,7 @@ export class InteractableManager {
   checkPackageInHand(player: Player)
   {
     if(!player.inventory || !(player.inventory instanceof Package)) { return }
-    for(let particleRenderObject of this.submissionArea.particleRenderObjects)
+    for(let particleRenderObject of this._submissionArea.particleRenderObjects)
     {
       particleRenderObject.render = true;
     }
@@ -142,7 +142,7 @@ export class InteractableManager {
         particleRenderObject.render = false
       }
     }
-    for(let particleRenderObject of this.submissionArea.particleRenderObjects)
+    for(let particleRenderObject of this._submissionArea.particleRenderObjects)
     {
       particleRenderObject.render = false;
     }
@@ -184,7 +184,7 @@ export class InteractableManager {
     }
 
     // Kollision mit Submission Area prüfen
-    if (this.interactionObject(this.submissionArea, player))
+    if (this.interactionObject(this._submissionArea, player))
     {
       this.updateSubmissionAreaOnInteraction(player);
 
@@ -334,12 +334,12 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
   }
 
   updateSubmissionAreaOnInteraction(player: Player) {
-      this.submissionArea.renderObject.rectColor = "#9c0e0eff";
+      this._submissionArea.renderObject.rectColor = "#9c0e0eff";
       if (this._inputs["e"] === true && player.inventory instanceof Package && !player.hasPicked()) {
 
       const packObj : Package = player.inventory;
 
-      let result = this.submissionArea.addPackage(packObj);
+      let result = this._submissionArea.addPackage(packObj);
 
       packObj.destroy();
 
@@ -363,13 +363,17 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
   }
 
   resetSubmissionAreaOnInteraction() {
-    this.submissionArea.renderObject.rectColor = "#7D0A0A"
+    this._submissionArea.renderObject.rectColor = "#7D0A0A"
   }
 
   get slotMachine(): SlotMachine {
     return this._slotMachine;
   }
 
+  get submissionArea(): SubmissionArea
+  {
+    return this._submissionArea;
+  }
 
   }
 

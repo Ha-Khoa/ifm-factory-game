@@ -5,7 +5,6 @@ import { RenderType } from "../../enums/render-type";
 export class ParticleRenderObject extends RenderObject {
     
     private _particles: Particles;
-    private _render: boolean;
 
     constructor(
         id: string,
@@ -36,9 +35,6 @@ export class ParticleRenderObject extends RenderObject {
 
     get particles(): Particles { return this._particles; }
     set particles(v: Particles) { this._particles = v; }
-
-    get render(): boolean { return this._render }
-    set render(v: boolean) { this._render = v }
 
     get ptype(): string { return this._particles.type; }
     set ptype(v: string) { this._particles.type = v; }

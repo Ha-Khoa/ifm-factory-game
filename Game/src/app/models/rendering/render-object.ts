@@ -52,6 +52,8 @@ export class RenderObject {
 
     private _worldCoordinates: Coordinates;
 
+    protected _render: boolean = true;
+
     constructor(name: string,
                 type: string,
                 x: number,
@@ -169,5 +171,7 @@ export class RenderObject {
     set worldCoordinates(v: Coordinates) { this._worldCoordinates = v
      }
 
+    get render() : boolean { return this._render }
+    set render(v: boolean) { this._render = v }
 
 }

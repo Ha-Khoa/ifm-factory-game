@@ -60,6 +60,10 @@ export class SlotMachineService {
 
   private _won: number = 0;
 
+  private _constFillStyle: string = "#ffff00ff";
+
+  private _canSpin: boolean = true;
+
   private _playerService!: PlayerService
 
 
@@ -116,13 +120,13 @@ export class SlotMachineService {
   setInput(inputs: Record<string, boolean>)
   {
     for (const [key, pressed] of Object.entries(inputs)) {
-               if(key === 'e' && pressed)
+               if(key === 'e' && pressed && this._canSpin)
                {
                 let stopped = true;
                 this._stopped.forEach((stopping) => {
                   if (!stopping) stopped = false;
                 });
-                if (stopped && this._playerService.getMoney() >= 10) 
+                if (stopped)
                 {
                   this._playerService.removeMoney(10).subscribe({
                     next: () => {
@@ -130,7 +134,12 @@ export class SlotMachineService {
                     },
                     error: (err) => {
                       console.error("Could not start spin, failed to remove money:", err.message);
-                      // Maybe show a UI notification to the player
+                      this._constFillStyle = "#ff0000ff";
+                      this._canSpin = false;
+                      setTimeout(() => {
+                        this._constFillStyle = "#ffff00ff";
+                        this._canSpin = true;
+                      }, 1000);
                     }
                   });
                 }
@@ -476,6 +485,7 @@ export class SlotMachineService {
       const [r, g, b] = palette[pIndex % palette.length];
       const fill = `rgba(${r}, ${g}, ${b}, 0.18)`;
       const stroke = `rgba(${r}, ${g}, ${b}, 0.70)`;
+      console.log(r, g, b, this._activePatterns.length)
 
       for(let i = 0; i < pattern.length; i++)
       {
@@ -585,15 +595,21 @@ export class SlotMachineService {
   {
     const px = 100;
     const string = "Kosten: 10"
-    this._ctx.fillStyle = "yellow"
-    this._ctx.font = `italic small-caps bold ${px}px arial`
+    this._ctx.fillStyle = this._constFillStyle;
+    this._ctx.font = `italic small-caps bold ${px}px arial`;
+    let shake = 0;
+    if(this._constFillStyle === "#ff0000ff")
+    {
+      shake = Math.sin(performance.now() / 40) * 20;
+    }
+
     this._ctx.fillText(
       string,
-      this._ctx.canvas.width / 2 - this._ctx.measureText(string).width / 2 - px,
+      this._ctx.canvas.width / 2 - this._ctx.measureText(string).width / 2 - px + shake,
       this._ctx.canvas.height * this._sizePercentage / 400 + px / 3);  
     this._ctx.drawImage(
       this._images["/images/fox/fox-coin.png"],
-      this._ctx.canvas.width / 2 + this._ctx.measureText(string).width / 2 - px + 10,
+      this._ctx.canvas.width / 2 + this._ctx.measureText(string).width / 2 - px + 10 + shake,
       this._ctx.canvas.height * this._sizePercentage / 400 - px / 2,
       px,
       px

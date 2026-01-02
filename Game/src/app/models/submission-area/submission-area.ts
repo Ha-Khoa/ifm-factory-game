@@ -5,10 +5,14 @@ import { Direction } from "../../enums/direction";
 import { Package } from "../package/package";
 import { RenderType } from "../../enums/render-type";
 import {PlayerService} from '../../services/player.service';
+import { SubmissionAnimation } from "./submission-animation";
 
 export class SubmissionArea extends InteractableObject {
 
     playerService:PlayerService;
+    private _submissionAnimation!: SubmissionAnimation;
+    private _updateAnimation: boolean = false;
+    private _packagesToPick: number = 0;
 
     constructor(position: Coordinates, width: number, height: number, playerService: PlayerService) {
         // Initialize InteractableObject with all directions allowed
@@ -18,7 +22,7 @@ export class SubmissionArea extends InteractableObject {
             width,
             height,
             64,
-            [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT],
+            [Direction.UP, Direction.DOWN, Direction.LEFT],
             RenderType.RECT,
             undefined,
             undefined,
@@ -26,6 +30,7 @@ export class SubmissionArea extends InteractableObject {
             ["#BF3131","#EAD196"]
         );
       this.playerService = playerService;
+      this._submissionAnimation = new SubmissionAnimation(this._position);
     }
 
     /**
@@ -66,9 +71,13 @@ export class SubmissionArea extends InteractableObject {
                 this.playerService.addScore(order.reward);
                 Orders.completeOrder(order.id);
                 Orders.generateRandomOrder();
+                this._updateAnimation = true;
+                this._packagesToPick += 1;
+                this.updateAnimation();
                 return true;
             }
         }
+        
 
         // Wrong order submitted or no active orders exist
         this.playerService.removeScore(15);
@@ -76,6 +85,22 @@ export class SubmissionArea extends InteractableObject {
           error: (err) => console.error("Failed to remove money for wrong submission:", err.message)
         });
         return false;
+    }
+
+    updateAnimation()
+    {
+        if(this._updateAnimation)
+        {
+            if(this._submissionAnimation.pickProduct())
+            {
+                this._packagesToPick -= 1;
+                if(this._packagesToPick < 1)
+                {
+                    this._updateAnimation = false;
+                }
+            }
+            this._submissionAnimation.updatePackage();
+        }
     }
 
 

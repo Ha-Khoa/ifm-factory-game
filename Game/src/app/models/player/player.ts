@@ -146,7 +146,7 @@ export class Player {
        // Stabilize narrowed properties in locals so TS knows they won't change within this method
        const dir = this._direction;
        const inv = this._inventory;
-       let newPositionX = dir === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2 :
+       let newX = dir === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2 :
                             dir === Direction.LEFT ? this._position.x - inv.size / 2 :
                             this._lastDirection === Direction.RIGHT ? this._position.x + this._hitbox.width -  inv.size / 2:
                             this._lastDirection === Direction.LEFT ? this._position.x - inv.size / 2:
@@ -155,7 +155,7 @@ export class Player {
                   ((dir === Direction.LEFT || dir === Direction.RIGHT) && inv instanceof Package) ? Gamefield.fieldsize * 1.5 :
                   ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Product) ? Gamefield.fieldsize * 0.9:
                   ((this._lastDirection === Direction.LEFT || this._lastDirection === Direction.RIGHT) && inv instanceof Package) ? Gamefield.fieldsize * 1.5 : 0;
-       inv.x= newPositionX
+       inv.x= newX
        inv.y = this._position.y
        inv.z = newZ;
    }

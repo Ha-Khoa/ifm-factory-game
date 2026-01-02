@@ -21,7 +21,6 @@ export class RenderingService {
 
   // Buffer mit allen zu rendernden Objekten
   private _renderingBuffer: RenderObject[] = [];
-  private _cameraRenderingBuffer: RenderObject[] = [];
   // Vorgeladene Bilder für Texturen
   private _images!: { [key: string]: HTMLImageElement };
   // Canvas-Kontext zum Zeichnen
@@ -34,8 +33,6 @@ export class RenderingService {
   private _lastFrameTime!: number;
 
   private _deltaTime!: number;
-
-  private _particleRenderingService!: ParticleRenderingService;
 
   private _xOffset: number = 0;
   private _yOffset: number = 0;
@@ -135,6 +132,7 @@ export class RenderingService {
   render(): void {
     if (!this._ctx) return;
     this._renderingBuffer.forEach((Obj) => {
+      if(!Obj.render) return;
       // Berechne isometrische Projektion
       // Rechtecke mit Canvas
       const zTransform = this._fov * Obj.z * Math.sin(this._angle)
@@ -181,7 +179,7 @@ export class RenderingService {
           this._ctx.drawImage(
             this._images[Obj.imgWall!],
             Math.round(xObj),
-            yProjection + Obj.height * Math.cos(this._angle),
+            yProjection + Obj.height * Math.cos(this._angle) * this._fov,
             objWidth,
             this._fov * Obj.z * Math.sin(this._angle)
           );

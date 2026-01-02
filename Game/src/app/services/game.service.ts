@@ -81,7 +81,7 @@ export class GameService {
 
 
     // Lade benötigte Texturen vor
-    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png", "/images/Brick_01-512x512.png", "/images/interaction-field.png", "/images/machine.png"];
+    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png", "/images/Brick_01-512x512.png", "/images/interaction-field.png", "/images/machine.png", "/images/truck_roof.png", "/images/truck_back.png"];
     const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
     const foxImages = [
@@ -233,7 +233,6 @@ export class GameService {
       {
         this.player.cameraFix = false;
         RenderingService.instance().rotateInSlotMachine(this.interactableManager.slotMachine);
-        SlotMachineService.instance().setInput(this.inputs);
       }
       else
       {
@@ -252,6 +251,7 @@ export class GameService {
       this.interactableManager.resetParticleFields();
       this.interactableManager.checkPackageInHand(this.player);
       this.interactableManager.checkMachineNeedsProduct(this.player);
+      this.interactableManager.submissionArea.updateAnimation();
 
       // Draw machines Item Needs Popup
       this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
@@ -289,6 +289,10 @@ export class GameService {
 
   setInput(key: string, pressed: boolean) {
     this.inputs[key] = pressed;
-    this.player.setInput(this.inputs)
+    this.player.setInput(this.inputs)     
+    if(this.interactableManager.checkPlayerInSlotMachineArea(this.player))
+      {   
+    SlotMachineService.instance().setInput(this.inputs);
+      }
   }
 }

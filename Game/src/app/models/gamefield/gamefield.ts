@@ -21,7 +21,7 @@ export class Gamefield {
     // Anzahl der Reihen
     static rows: number = 19;
     // Anzahl der Spalten
-    static cols: number = 30;
+    static cols: number = 35;
 
 
 
@@ -72,9 +72,6 @@ export class Gamefield {
     this.interactableObjects.push(obj);
   }
 
-    /**
-     * Generiert die Umgebung (Boden) als ein großes Rechteck.
-     */
     generateEnvironment()
     {
         for(let i = 0; i < Gamefield.rows + 1; i++)
@@ -106,7 +103,7 @@ export class Gamefield {
                     0,
                     i * Gamefield.fieldsize / 8,
                     0,
-                    Gamefield.cols * Gamefield.fieldsize,
+                    (Gamefield.cols - 5) * Gamefield.fieldsize,
                     0.1,
                     -1000,
                     "/images/Metal_16-512x512.png",
@@ -161,7 +158,40 @@ export class Gamefield {
             layerColors
         ))
     }
-
+    for(let i = 0; i < 10; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table-${i}-3`,
+            RenderType.RECT,
+            30 * Gamefield.fieldsize,
+            i * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
+    for(let i = 12; i < Gamefield.rows; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table-${i}-3`,
+            RenderType.RECT,
+            30 * Gamefield.fieldsize,
+            i * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
     }
 
     updateConveyorBelts(conveyorBelts: ConveyorBelt[]): void {
