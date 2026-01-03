@@ -27,9 +27,6 @@ export class ItemPopupDrawer {
    */
   public draw(item: Product | Package, offsetCamera: [number, number], fov: number): Rect[] {
     this.ctx.save();
-
-    const gameFov = RenderingService.instance().gameFov
-
     let title: string;
     let contentLines: { content: string; counted: number }[] = [];
     let titleImage: HTMLImageElement;
@@ -45,10 +42,10 @@ export class ItemPopupDrawer {
       titleImage = this.images[`/images/Products/${item.name.toLowerCase().replace(' ', '-')}.png`];
     }
 
-    const lineHeight = 20 * fov / gameFov;
-    const padding = 15 * fov / gameFov;
-    const height = 15 * fov / gameFov + (contentLines.length * lineHeight) + padding;
-    const width = 150 * fov / gameFov;
+    const lineHeight = 20;
+    const padding = 15;
+    const height = 15 + (contentLines.length * lineHeight) + padding;
+    const width = 150;
     const angle = RenderingService.instance().angle;
     const popupConfig = { width, height, radius: 10, borderWidth: 2 };
 

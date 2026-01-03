@@ -88,7 +88,7 @@ export class Player {
        this._gamefield = gamefield;
        const angle = RenderingService.instance().angle
        const rotationZ = (window.innerHeight / 2 - window.innerHeight / 2 * Math.cos(angle)) / 60
-       this._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2 + rotationZ), 60);
+       this._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2), window.innerHeight / 1080 * 60);
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        const height = this._hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI);
        this._renderingObject = new RenderObject(
