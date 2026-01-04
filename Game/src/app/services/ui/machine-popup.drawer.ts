@@ -110,6 +110,7 @@ export class MachinePopupDrawer {
         if(neededItems.length % 2 === 0)
           x -= size / 2 + gap/2;
         let y = fov * machine.position.y * Math.cos(isometricAngle) - size * 1.5 + offsetCamera[1] * Math.cos(isometricAngle) + RenderingService.instance().rotationZ;
+        // Zeichne ein Pfeil wenn die Maschiene außerhalb den Sichtbereiches ist
         if(playerInventory instanceof Product && playerInventory.id === item.id) {
           const isOutOfBounds = x < 0 || x > window.innerWidth - size || y < 0 || y > window.innerHeight - size;
           

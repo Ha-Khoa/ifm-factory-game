@@ -13,68 +13,61 @@ export interface SlotIcon {
   providedIn: 'root'
 })
 export class SlotMachineService {
-
+  // ======= Canvas & External Services =======
   private _ctx!: CanvasRenderingContext2D;
-
   private _images!: { [key: string]: HTMLImageElement };
-  // Available icon image keys used by the reels
-  private _slotIcons!: string[];
-  private _sizePercentage: number = 20;
-  // Initial spin velocity in px/s
-  private _startVelocity!: number;
-  private _imgSizeX!: number;
-  private _imgSizeY!: number;
-  // Padding around each icon tile inside a cell
-  private _iconEdgeOffset!: number;
-  private _spawnStartY!: number;
-  private _maxProgress!: number;
-  private _stopIntervall!: number;
-  // Per-reel velocity (px/s)
-  private _velocitys: number[] = [0,0,0,0,0];
-  private _rowOffset!: number;
-  private _step!: number;
-  // Per-reel state flags
+  private _playerService!: PlayerService;
+
+  // ======= Layout / Size Configuration =======
+  private _sizePercentage: number = 20; // portion of canvas used by UI
+  private _imgSizeX!: number; // computed icon width
+  private _imgSizeY!: number; // computed icon height
+  private _iconEdgeOffset!: number; // padding inside icon cell
+  private _spawnStartY!: number; // y offset where icons begin drawing
+  private _rowOffset!: number; // distance between reels
+  private _step!: number; // vertical distance per icon
+
+  // ======= Spin / Physics =======
+  private _startVelocity!: number; // initial spin velocity (px/s)
+  private _velocitys: number[] = [0, 0, 0, 0, 0]; // per-reel velocities
+  private _stopIntervall!: number; // ms until first reel stop starts
+
+  // ======= Reel Locking / Stopping State =======
+  private _targets: number[] = [0, 0, 0, 0, 0];
   private _isStopping: boolean[] = [false, false, false, false, false];
   private _stopped: boolean[] = [true, true, true, true, true];
-  private _targets: number[] = [0,0,0,0,0];
-  private _delayBetweenStops: number = 1000; 
+  private _delayBetweenStops: number = 1000; // ms between individual reel stops
   private _locking: boolean[] = [false, false, false, false, false];
-  private _lockT: number[] = [0,0,0,0,0];
-  private _lockStart: number[] = [0,0,0,0,0];
-  private _lockTarget: number[] = [0,0,0,0,0];
-  private _lockDuration: number = 200; 
+  private _lockT: number[] = [0, 0, 0, 0, 0]; // progress for lock easing
+  private _lockStart: number[] = [0, 0, 0, 0, 0];
+  private _lockTarget: number[] = [0, 0, 0, 0, 0];
+  private _lockDuration: number = 200; // ms for lock animation
 
+  // ======= Slot Data & Icons =======
+  /** Available icon image keys used by the reels */
+  private _slotIcons!: string[];
+  /** Probability weights for each icon (should sum to ~1) */
+  private _probabilitys: number[] = [0.05, 0.1, 0.25, 0.13, 0.25, 0.2, 0.0000001, 0.02];
+  /** Win multiplier per icon (index aligns with `_slotIcons`) */
+  private _iconMultiplier: number[] = [10, 2, 1, 2, 1, 1.5, Infinity, -Infinity];
+  private _slots: SlotIcon[][] = [];
+  private _maxProgress!: number; // wrap value for progress
+
+  // ======= UI / Effects =======
+  private _activePatterns: number[][][] = [];
   private _blinkDuration: number = 1000;
-
   private _blinkT: number = 0;
-
   private _blinkState: boolean = false;
 
-  private _activePatterns: number[][][] = [];
-
-  private _probabilitys: number[] = [0.05, 0.1, 0.25, 0.13, 0.25, 0.2, 0.0000001,0.02]; // Summe muss gleich 1 sein
-
-  private _iconMultiplier: number[] = [10, 2, 1, 2, 1, 1.5, Infinity, -Infinity];
-
-  private _slots: SlotIcon[][] = [];
-
-  private _won: number = 0;
-
-  private _constFillStyle: string = "#ffff00ff";
-
+  // ======= Game State =======
+  private _won: number = 0; // last spin total
+  private _constFillStyle: string = "#ffff00ff"; // cost text color
   private _canSpin: boolean = true;
 
-  private _playerService!: PlayerService
+  constructor() {}
 
-
-  constructor() 
-  {
-  }
-
-
-    private static _instance: SlotMachineService | null = null;
-
-
+  // Simple singleton accessor (used elsewhere in the project)
+  private static _instance: SlotMachineService | null = null;
   static instance(): SlotMachineService {
     if (!this._instance) {
       this._instance = new SlotMachineService();
@@ -82,6 +75,12 @@ export class SlotMachineService {
     return this._instance;
   }
 
+  /**
+   * Initialize the slot machine renderer and configuration.
+   * @param ctx Canvas rendering context to draw onto
+   * @param images Preloaded image map (keys -> HTMLImageElement)
+   * @param playerService Player service used for currency operations
+   */
   init(ctx: CanvasRenderingContext2D, images: { [key: string]: HTMLImageElement }, playerService: PlayerService)
   {
     this._ctx = ctx;
@@ -117,6 +116,10 @@ export class SlotMachineService {
     }
   }
 
+  /**
+   * Handle keyboard/input actions relevant to the slot machine.
+   * Expects a map of key -> pressed state.
+   */
   setInput(inputs: Record<string, boolean>)
   {
     for (const [key, pressed] of Object.entries(inputs)) {
@@ -147,6 +150,10 @@ export class SlotMachineService {
            }
   }
 
+  /**
+   * Render the whole slot machine UI into the provided rectangle.
+   * Coordinates are in screen pixels.
+   */
   render(x: number, y: number, width: number, height: number)
   {
     this._ctx.save();
@@ -199,6 +206,10 @@ export class SlotMachineService {
   }
 
 
+  /**
+   * Pick a new icon according to configured probability weights.
+   * Returns the image key for the chosen icon.
+   */
   calcNewIcon(): string
   {
     const rand = Math.random();
@@ -214,6 +225,10 @@ export class SlotMachineService {
     return this._slotIcons[0];
   }
 
+  /**
+   * Start spinning all reels.
+   * Resets per-reel velocities and state.
+   */
   startSpin()
   {
     for(let i = 0; i < 5; i++)
@@ -228,6 +243,10 @@ export class SlotMachineService {
     this.stopSpin();
   }
 
+  /**
+   * Gradually stop reels one by one and evaluate winnings.
+   * This method is async because it waits between reel stops.
+   */
   async stopSpin()
   {
     await new Promise(r => setTimeout(r, this._stopIntervall));
@@ -246,6 +265,10 @@ export class SlotMachineService {
     }
   }
 
+  /**
+   * Prepare a specific reel to stop: compute target and enable lock animation.
+   * @param i reel index (0..4)
+   */
   private beginStop(i: number) {
     if (this._isStopping[i] || this._stopped[i]) return;
     this._isStopping[i] = true;
@@ -260,6 +283,10 @@ export class SlotMachineService {
     this._velocitys[i] = 0;
   }
 
+  /**
+   * Inspect all winning patterns and calculate total payout for the last spin.
+   * Returns total won amount.
+   */
   checkAllPattern() : number
   {
     let totalWon = 0;
@@ -414,6 +441,12 @@ export class SlotMachineService {
 
   }
 
+  /**
+   * Check whether a specific boolean mask pattern matches identical icons
+   * across all marked cells and calculate its payout.
+   * @param pattern 5x3 matrix of 0/1 marking cells to match
+   * @param multiplier base multiplier for this pattern
+   */
   checkPattern(pattern: number[][], multiplier: number) : number
   {
     // A pattern wins only if ALL marked cells match the same symbol.
@@ -453,6 +486,10 @@ export class SlotMachineService {
     return 0;
   }
 
+  /**
+   * Draw blinking highlight over active winning patterns.
+   * @param _fallbackColor fallback stroke/fill color if palette not available
+   */
   drawPattern(_fallbackColor: string = '#ff0000')
   {
     if (this._activePatterns.length === 0) return;
@@ -515,6 +552,14 @@ export class SlotMachineService {
    * @param deltaTime Frame delta in ms
    * @param reelIndex Index of the reel (used to read/write per-reel state)
    */
+  /**
+   * Draw and advance a single reel.
+   * Icons contains the four icon entries for this reel (top-to-bottom order).
+   * @param Icons list of SlotIcon entries for the reel
+   * @param xPosition screen x coordinate to draw the reel
+   * @param deltaTime frame delta in ms
+   * @param reelIndex index of the reel (for per-reel state)
+   */
   drawRow(Icons: SlotIcon[],xPosition: number, deltaTime: number, reelIndex: number = 0)
   {
     const dt = deltaTime / 1000;
@@ -555,6 +600,10 @@ export class SlotMachineService {
     
   }
 
+  /**
+   * Draw decorative edges / background panels around the slot area.
+   * @param sizePercentage how much of canvas is used for UI area
+   */
   drawEdge(sizePercentage: number)
   {
     const width = this._ctx.canvas.width;
@@ -571,6 +620,9 @@ export class SlotMachineService {
     this.drawRect([0, x1, x2, width], [height, y2, y2, height], "#242424ff");
   }
 
+  /**
+   * Helper: draw a filled polygon defined by parallel x/y point arrays.
+   */
   drawRect(xPoints: number[], yPoints: number[] ,color: string): void {
     if(xPoints.length !== yPoints.length) return;
     this._ctx.beginPath();
@@ -591,6 +643,9 @@ export class SlotMachineService {
 
 
 
+  /**
+   * Draw the spin cost label and coin icon.
+   */
   drawCosts()
   {
     const px = 100;
@@ -616,8 +671,11 @@ export class SlotMachineService {
     )
   }
 
-drawWon()
-{
+  /**
+   * Draw current win total in the UI.
+   */
+  drawWon()
+  {
   const string = `Gewinn:`;
   const px = 50;
   this._ctx.fillStyle = "yellow"
@@ -634,5 +692,4 @@ drawWon()
   )
 
 }
-
 }
