@@ -136,7 +136,7 @@ export class StartScreenComponent implements OnInit {
     const startingFov = 60;
     const newWidth = (this.width) * fov / startingFov ;
     const newHeight = fov * this.height / startingFov;
-    const gameY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov) * Math.cos(angle) + RenderingService.instance().rotationZ - this.height / 2 / startingFov * fov
+    const gameY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + renderingService.yOffset / fov) * Math.cos(angle) + RenderingService.instance().rotationZ - this.height / 2 / startingFov * fov - 20 * fov / startingFov;
 
     const width = `${newWidth}px`;
     const height = `${newHeight}px`;
@@ -169,7 +169,7 @@ export class StartScreenComponent implements OnInit {
     cameraStyle.setProperty('height', `${cameraSize}px`);
 
     // Calculate position dynamically
-    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset - newWidth / 2
+    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + renderingService.xOffset - fov * (this.width ) / 120
     style.setProperty('top', `${gameY}px`);
     style.setProperty('left', `${x}px`);
 

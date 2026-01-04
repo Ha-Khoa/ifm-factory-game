@@ -84,10 +84,10 @@ export class UIService {
   }
 
   /** Draws indicators for items needed by machines. */
-  public drawMachineNeedsPopup(machines: Machine[], offsetCamera: [number, number], fov: number): void {
+  public drawMachineNeedsPopup(machines: Machine[], offsetCamera: [number, number], fov: number, playerInventory: Product | null | Package): void {
     this.neededItemPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
     this.neededItemPopups = [];
-    this.neededItemPopups = this.machinePopupDrawer.drawNeeds(machines, offsetCamera, fov);
+    this.neededItemPopups = this.machinePopupDrawer.drawNeeds(machines, offsetCamera, fov, playerInventory);
   }
 
   /** Draws progress rings for machines that are currently producing. */

@@ -81,7 +81,16 @@ export class GameService {
 
 
     // Lade benötigte Texturen vor
-    const baseImages = ["/images/StoneFloorTexture.png", "/images/wall.png", "/images/Concrete-Floor-Tile.png", "/images/package.png", "/images/Brick_01-512x512.png", "/images/interaction-field.png", "/images/machine.png", "/images/truck_roof.png", "/images/truck_back.png"];
+    const baseImages = ["/images/StoneFloorTexture.png",
+      "/images/wall.png",
+      "/images/Concrete-Floor-Tile.png",
+      "/images/package.png",
+      "/images/Brick_01-512x512.png",
+      "/images/interaction-field.png",
+      "/images/machine.png",
+      "/images/truck_roof.png",
+      "/images/truck_back.png",
+      "/images/arrow.png"];
     const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
     const foxImages = [
@@ -241,11 +250,13 @@ export class GameService {
         RenderingService.instance().rotateMap();
       }
 
-      if(!playerInteractSlotMachine && RenderingService.instance().zoomOut()) this.player.cameraFix = true;
+      const zoomFinished = !playerInteractSlotMachine ? RenderingService.instance().zoomOut() : false;
+
+      if(!playerInteractSlotMachine && zoomFinished) this.player.cameraFix = true;
+
       RenderingService.instance().convertToCameraPOV(this.player.camera);
       RenderingService.instance().sortRenderingBuffer();
       RenderingService.instance().render();
-      
 
       // Render Particles
       this.interactableManager.resetParticleFields();
@@ -254,8 +265,9 @@ export class GameService {
       this.interactableManager.submissionArea.updateAnimation();
 
       // Draw machines Item Needs Popup
-      this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
-      this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov)
+      if(!playerInteractSlotMachine && zoomFinished) this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov, this.player.inventory);
+      else this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov, null);
+      this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
       this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
 
       // Orders

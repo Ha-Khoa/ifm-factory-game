@@ -4,6 +4,9 @@ import { Rect } from './rect.interface';
 import { CanvasHelper } from './canvas.helper';
 import { UI_THEME } from './theme.manager';
 import { RenderingService } from '../rendering.service';
+import { Camera } from '../../models/camera/camera';
+import { Product } from '../../models/product/product';
+import { Package } from '../../models/package/package';
 
 /**
  * Handles drawing all UI elements related to machines,
@@ -74,7 +77,7 @@ export class MachinePopupDrawer {
    * @param fov
    * @returns An array of Rects for later clearing.
    */
-  public drawNeeds(machines: Machine[], offsetCamera: [number, number], fov: number): Rect[] {
+  public drawNeeds(machines: Machine[], offsetCamera: [number, number], fov: number, playerInventory: Product | null | Package): Rect[] {
     const drawnRects: Rect[] = [];
     const isometricAngle = RenderingService.instance().angle;
     // console.log(offsetCamera)
@@ -102,9 +105,47 @@ export class MachinePopupDrawer {
           ? fov * machine.position.x + offset + offsetCamera[0]
           : fov * machine.position.x + ((size + gap) * (neededItems.indexOf(item) % 2 === 0 ? -1 : 1)) + offset + offsetCamera[0];
 
+        
+
         if(neededItems.length % 2 === 0)
           x -= size / 2 + gap/2;
         let y = fov * machine.position.y * Math.cos(isometricAngle) - size * 1.5 + offsetCamera[1] * Math.cos(isometricAngle) + RenderingService.instance().rotationZ;
+        if(playerInventory instanceof Product && playerInventory.id === item.id) {
+          const isOutOfBounds = x < 0 || x > window.innerWidth - size || y < 0 || y > window.innerHeight - size;
+          
+          if(isOutOfBounds) {
+            let arrowY = this.clamp(y, 0, window.innerHeight - size);
+            let arrowX = this.clamp(x, 0, window.innerWidth - size);
+            let newY = this.clamp(y, size, window.innerHeight - 2*size);
+            let newX = this.clamp(x, size, window.innerWidth - 2*size);
+            this.ctx.save();
+            this.ctx.translate(arrowX + size / 2, arrowY + size / 2);
+            const camera = RenderingService.instance().camera;
+            const hypotenuse = 80;
+            let angle: number;
+            
+            if(playerInventory.position.x - machine.position.x === 0) {
+              angle = Math.PI / 2;
+            } else {
+              angle = Math.atan((machine.position.y - playerInventory.position.y) / (machine.position.x - playerInventory.position.x));
+            }
+            
+            if(machine.position.x - playerInventory.position.x < 0) {
+              angle += Math.PI;
+            }
+            if(-angle > Math.PI + 1/10 * Math.PI && -angle < Math.PI - 1/10 * Math.PI) {angle = Math.PI;}
+            if(-Math.sin(angle) * hypotenuse + y > size && newY < window.innerHeight / 2) {y -= Math.sin(angle) * hypotenuse }
+            else if(-Math.sin(angle) * hypotenuse + y < window.innerHeight - 2 * size && newY > window.innerHeight / 2) y -= Math.sin(angle) * hypotenuse; 
+            else y = newY;
+            if(-Math.cos(angle) * hypotenuse + x > size && newX < window.innerWidth / 2) x -= Math.cos(angle) * hypotenuse;
+            else if(-Math.cos(angle) * hypotenuse + x < window.innerWidth - 2 * size && newX > window.innerWidth / 2) x -= Math.cos(angle) * hypotenuse; else x = newX;
+            this.ctx.rotate(angle);
+            this.ctx.drawImage(this.images["/images/arrow.png"], -size / 2, -size / 2, size, size);
+            drawnRects.push({x: arrowX , y: arrowY, width: size * fov, height: size * fov, radius: 0});
+
+            this.ctx.restore();
+          }
+        }
 
         this.ctx.save();
         this.ctx.fillStyle = UI_THEME.tertiary;
@@ -120,6 +161,7 @@ export class MachinePopupDrawer {
         }
 
         if(quantity > 1) {
+
           this.ctx.beginPath();
           this.ctx.fillStyle = UI_THEME.primary;
           this.ctx.roundRect(x - 10, y + size - 10, 20, 20, 10);
@@ -291,5 +333,9 @@ export class MachinePopupDrawer {
     this.ctx.fillText(`Upgrade (${machine.getUpgradeCost()}$)`, x + config.width / 2, y + 20);
     this.ctx.restore();
 
+  }
+
+  private clamp(value: number, min: number, max: number): number {
+    return Math.min(Math.max(value, min), max);
   }
 }
