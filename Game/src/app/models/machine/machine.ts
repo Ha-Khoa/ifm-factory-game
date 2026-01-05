@@ -61,6 +61,7 @@ export class Machine extends InteractableObject {
   constructor(
     x: number,
     y: number,
+    z: number,
     width: number,
     height: number,
     name: string,
@@ -74,10 +75,10 @@ export class Machine extends InteractableObject {
     // Initialize InteractableObject: position, size, z, img, allowed directions
     super(
       name,
-      new Coordinates(x, y),
+      new Coordinates(x, y, z),
       width,
       height,
-      Gamefield.fieldsize,
+      z,
       accessDirection,
       type,
       imgUnlocked,
@@ -154,8 +155,7 @@ export class Machine extends InteractableObject {
         // The item is not in the inventory yet, add it
         this._inventory.push({product: product, quantity: 1});
       }
-      else
-        inventoryEntry.quantity += 1;
+      else inventoryEntry.quantity += 1;
 
       product.destroy();
       Products.deleteGeneratedProduct(product);

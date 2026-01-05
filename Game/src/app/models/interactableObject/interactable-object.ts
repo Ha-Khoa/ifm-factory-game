@@ -42,7 +42,7 @@ export class InteractableObject {
             type,
             this._position.x,
             this._position.y,
-            z,
+            this._position.z,
             this._width,
             this._height,
             priority,

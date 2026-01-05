@@ -28,12 +28,12 @@ export class InteractableManager {
     private playerService: PlayerService;
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine.png", "/images/wall.png",
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, 50,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(6)!, RenderType.THREE_D_IMG),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/machine2.png", "/images/wall.png",
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, 50,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/machine2.png", "/images/wall.png",
                   [Direction.UP], Products.getProductById(4)!, RenderType.THREE_D_IMG,10000),
-      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize - 10, "Machine: Circuit Board", "/images/Machine3.png", "/images/wall.png",
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/Machine3.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(5)!, RenderType.THREE_D_IMG)
     ];
     private _slotMachine!: SlotMachine;

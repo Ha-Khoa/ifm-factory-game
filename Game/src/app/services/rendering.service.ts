@@ -313,8 +313,8 @@ export class RenderingService {
   }
 
   rotateMap() {
-    if(this._angle === 0) this._angle = 0.1
-    const max = 40 / 360 * 2 * Math.PI;
+    if(this._angle === 0) this._angle = 0.0000000000000001
+    const max = 30 / 360 * 2 * Math.PI;
     if(this._camera.position.z !== 0)
     {
       this._camera.position.z -= this._camera.position.z * 0.05;
