@@ -364,19 +364,19 @@ export class Player {
          // Check if the player can purchase the product from the conveyor belt
          let productTypeOfConveyor = this.getConveyorBeltProduct();
          if(productTypeOfConveyor instanceof Product) {
-            try {
-              // Warte auf das Ergebnis der asynchronen Geldentfernung
-              await firstValueFrom(this._playerService.removeMoney(productTypeOfConveyor.costs));
-              // wenn dies erfolgreich ist, fahre mit der Logik fort
-            } catch (error) {
-              // wenn dies fehlschlägt (ein Fehler wird ausgelöst), behandle ihn hier
-              console.error("Bezahlung für Förderbandprodukt fehlgeschlagen:", error);
-              this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY;
-              setTimeout(() => {
-                this.thoughts = PlayerThoughtsType.NONE;
-              }, 1000);
-              return null; // Ausführung stoppen
-            }
+            // try {
+            //   // Warte auf das Ergebnis der asynchronen Geldentfernung
+            //   await firstValueFrom(this._playerService.removeMoney(productTypeOfConveyor.costs));
+            //   // wenn dies erfolgreich ist, fahre mit der Logik fort
+            // } catch (error) {
+            //   // wenn dies fehlschlägt (ein Fehler wird ausgelöst), behandle ihn hier
+            //   console.error("Bezahlung für Förderbandprodukt fehlgeschlagen:", error);
+            //   this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY;
+            //   setTimeout(() => {
+            //     this.thoughts = PlayerThoughtsType.NONE;
+            //   }, 1000);
+            //   return null; // Ausführung stoppen
+            // }
          }
 
            //versuche zuerst ein Produkt vom Förderband aufzunehmen
@@ -529,7 +529,7 @@ export class Player {
                     Math.pow((this._position.y + this._hitbox.height/2) - (machine.y + machine.height/2), 2)
                 );
 
-                if (distance < Gamefield.fieldsize * 1.5 && distance < shortestDistance) {
+                if (distance < Gamefield.fieldsize * 1.0 && distance < shortestDistance) {
                     shortestDistance = distance;
                     nearestMachine = machine;
                 }

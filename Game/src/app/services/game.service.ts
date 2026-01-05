@@ -113,6 +113,12 @@ export class GameService {
       "/images/fox/no-fox-coin.png",
     ]
     const slotMachineImages = ["/images/slotMachine/cherry.png", "/images/slotMachine/Bar.png", "/images/slotMachine/seven.png", "/images/slotMachine/diamond.png", "/images/slotMachine/lemon.png", "/images/slotMachine/ifm.png", "/images/slotMachine/manure.png", "/images/slotMachine/squirrel.png", "/images/slotMachine/slot-machine.png"];
+    const prepMachineImages = [
+      "/images/Products/prep-machine/frame_1.png",
+      "/images/Products/prep-machine/frame_2.png",
+      "/images/Products/prep-machine/frame_3.png",
+      "/images/Products/prep-machine/frame_4.png"
+    ];
     const keyBindingImages = [
       "/images/KeyBindings/keyBindings_,.png",
       "/images/KeyBindings/keyBindings_..png",
@@ -167,7 +173,7 @@ export class GameService {
       "/images/KeyBindings/keyBindings_Controller_Button_5.png",
       "/images/KeyBindings/keyBindings_Controller_Button_6.png",
     ]
-    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages, ...foxCoinImages, ...keyBindingImages, ...slotMachineImages])];
+    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages, ...foxCoinImages, ...keyBindingImages, ...slotMachineImages, ...prepMachineImages])];
     await this.preloadImages(allImages);
 
     // Füge Spielfeld zum Rendering-Buffer hinzu

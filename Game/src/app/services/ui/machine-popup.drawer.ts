@@ -27,7 +27,7 @@ export class MachinePopupDrawer {
   public drawDetails(machine: Machine): Rect[] {
     this.ctx.save();
 
-    // Check if it's a PrepMachine and handle differently
+    // Check ob es sich um eine PrepMachine handelt
     const isPrepMachine = machine instanceof PrepMachine;
     const requiredItemsCount = isPrepMachine ? 0 : machine.inputRequirements.length;
     const lineHeight = 23;
@@ -57,21 +57,25 @@ export class MachinePopupDrawer {
     CanvasHelper.drawSeparator(this.ctx, centerX, currentY - 10, popupConfig.width * 0.85);
     currentY += 15;
     
+    if (isPrepMachine) {
+      const prepMachine = machine as PrepMachine;
+      console.log('PrepMachine popup - prepNextFrame:', prepMachine.prepNextFrame);
+      if (prepMachine.prepNextFrame) {
+        const img = this.images[prepMachine.prepNextFrame];
+        console.log('Image loaded:', !!img, 'Path:', prepMachine.prepNextFrame);
+        if (img) {
+          this.ctx.drawImage(img, centerX - 40, currentY + 5, 80, 80);
+          console.log('Drew animation frame at:', centerX - 40, currentY + 5);
+          currentY += 90;
+        }
+      }
+    }
+    
     if (!isPrepMachine) {
       currentY = this.drawRequirements(centerX, currentY, machine, popupConfig.lineHeight);
     }
     
     this.drawProgressBar(x, currentY, machine, popupConfig);
-    
-    if (isPrepMachine) {
-      const prepMachine = machine as PrepMachine;
-      if (prepMachine.prepNextFrame) {
-        const img = this.images[prepMachine.prepNextFrame];
-        if (img) {
-          this.ctx.drawImage(img, centerX - 32, currentY - 70, 64, 64);
-        }
-      }
-    }
     
     if (!isPrepMachine) {
       this.drawUpgradeButton(x, currentY + 15, machine, popupConfig);
@@ -273,7 +277,7 @@ export class MachinePopupDrawer {
     this.ctx.fillStyle = UI_THEME.textColor;
     currentY += lineHeight - 5;
 
-    // For PrepMachine, show output product name only (no image since outputProduct is private)
+    //Für PrepMachine speziellen Text
     if (isPrepMachine) {
       this.ctx.font = `italic 14px ${UI_THEME.fontFamily}`;
       this.ctx.fillText("Manuelle Verarbeitung", x, currentY);
