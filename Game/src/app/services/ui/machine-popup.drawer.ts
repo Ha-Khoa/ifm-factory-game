@@ -59,14 +59,17 @@ export class MachinePopupDrawer {
     
     if (isPrepMachine) {
       const prepMachine = machine as PrepMachine;
-      console.log('PrepMachine popup - prepNextFrame:', prepMachine.prepNextFrame);
-      if (prepMachine.prepNextFrame) {
-        const img = this.images[prepMachine.prepNextFrame];
-        console.log('Image loaded:', !!img, 'Path:', prepMachine.prepNextFrame);
-        if (img) {
-          this.ctx.drawImage(img, centerX - 40, currentY + 5, 80, 80);
-          console.log('Drew animation frame at:', centerX - 40, currentY + 5);
-          currentY += 90;
+      // Zeigt nur die Animationsframes an, wenn die PrepMachine aktiv ist
+      if (prepMachine.isProcessingActive()) {
+        console.log('PrepMachine popup - prepNextFrame:', prepMachine.prepNextFrame);
+        if (prepMachine.prepNextFrame) {
+          const img = this.images[prepMachine.prepNextFrame];
+          console.log('Image loaded:', !!img, 'Path:', prepMachine.prepNextFrame);
+          if (img) {
+            this.ctx.drawImage(img, centerX - 40, currentY + 5, 80, 80);
+            console.log('Drew animation frame at:', centerX - 40, currentY + 5);
+            currentY += 90;
+          }
         }
       }
     }
