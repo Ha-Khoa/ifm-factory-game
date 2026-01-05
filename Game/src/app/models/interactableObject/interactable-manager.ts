@@ -33,8 +33,8 @@ export class InteractableManager {
       // Plastic Case-Maschine (benötigt Raw Plastic)
       new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/machine2.png", "/images/wall.png",
                   [Direction.UP], Products.getProductById(4)!, RenderType.THREE_D_IMG,10000),
-      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/wall.png", "/images/wall.png",
-                  [Direction.DOWN], Products.getProductById(5)!, RenderType.RECT)
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize - 10, "Machine: Circuit Board", "/images/Machine3.png", "/images/wall.png",
+                  [Direction.DOWN], Products.getProductById(5)!, RenderType.THREE_D_IMG)
     ];
     private _slotMachine!: SlotMachine;
 
@@ -241,7 +241,7 @@ export class InteractableManager {
   interactionObjectPrepMachine(prepMachine: PrepMachine, player: Player): boolean {
     // PrepMachine  von allen Seiten (ähnlich wie ein Tisch) interagierbar
     const directions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT];
-    
+
     for (let direction of directions) {
       const interactionX = direction === Direction.RIGHT ? prepMachine.x + prepMachine.width :
                            direction === Direction.LEFT ? prepMachine.x - Gamefield.fieldsize : prepMachine.x;
