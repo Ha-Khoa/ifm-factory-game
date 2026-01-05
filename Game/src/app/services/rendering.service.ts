@@ -314,7 +314,7 @@ export class RenderingService {
 
   rotateMap() {
     if(this._angle === 0) this._angle = 0.1
-    const max = 30 / 360 * 2 * Math.PI;
+    const max = 40 / 360 * 2 * Math.PI;
     if(this._camera.position.z !== 0)
     {
       this._camera.position.z -= this._camera.position.z * 0.05;
@@ -323,12 +323,10 @@ export class RenderingService {
     {
       this._angle = max;
     }
-    else if (this._angle < max) {
-      this._angle += this._angle * 0.01;
+    else{
+      this._angle -= (this._angle - max) * 0.005 / Math.abs(this._angle -max);
     }
-    else if (this._angle > max) {
-      this._angle -= this._angle * 0.01;
-    }
+
   }
 
   zoomOut() : boolean

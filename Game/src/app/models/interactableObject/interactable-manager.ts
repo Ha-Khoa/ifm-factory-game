@@ -271,8 +271,9 @@ export class InteractableManager {
    */
   async updateMachineOnInteraction(machine: Machine, player: Player) {
     // Produkt-Eingabe nur wenn E gedrückt, Maschine freigeschaltet und Spieler trägt was
-    if (this._inputs["e"] === true && machine.unlocked && player.inventory instanceof Product) {
+    if (player.pressedInteract === true && machine.unlocked && player.inventory instanceof Product) {
       const product: Product = player.inventory;
+      player.inventory = null;
       let result;
 
       if (product && !Products.checkItemOnTable(machine.renderObject, product) && !machine.isProducing && !player.hasPicked()) {
@@ -291,6 +292,7 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
       if (result instanceof Object ) {
         const produced = result as Product;
         product.destroy();
+        Products.deleteGeneratedProduct(product);
         console.log("Produkt produziert:", produced.name);
         produced.z = machine.z;
         Products.addProduct(produced, new Coordinates(machine.x + Gamefield.fieldsize / 2 - produced.size / 2, machine.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
@@ -306,12 +308,22 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
       // Zutat nicht benötigt, zurücklegen
       else if (result === false) {
         if (product && product.position) {
+          player.inventory = product;
           //Products.addProduct(product, product.position);
         }
         console.log("Zutat nicht benötigt, zurückgelegt");
       }
     }
-    if (this._inputs["u"] === true && machine.unlocked) {
+    // Visuelles Feedback: Maschine grün färben
+    machine.renderObject.rectColor = "rgba(81, 255, 81, 1)";
+    machine.renderObject.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
+    this.ui.drawMachinePopUp(machine);
+  }
+
+  upgradeMachineOnInteraction(player: Player) {
+    for(let machine of this.machines)
+    {
+    if (machine.unlocked && this.interactionObject(machine, player)) {
       machine.upgrade(this.playerService).subscribe({
         error: (err) => {
           console.error("Maschinen-Upgrade fehlgeschlagen:", err.message);
@@ -319,10 +331,7 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
         }
       });
     }
-    // Visuelles Feedback: Maschine grün färben
-    machine.renderObject.rectColor = "rgba(81, 255, 81, 1)";
-    machine.renderObject.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
-    this.ui.drawMachinePopUp(machine);
+  }
   }
 
   /**
@@ -351,7 +360,7 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
         obj.rectLayers = ["#FCB53B", "#aa6a17ff"];
       }
     }
-    this.ui.clearMachinePopUp();
+   // this.ui.clearMachinePopUp();
   }
 
   generateInteractionField(interactionObject: InteractableObject)

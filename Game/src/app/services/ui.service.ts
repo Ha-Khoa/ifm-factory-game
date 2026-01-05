@@ -9,6 +9,7 @@ import {ItemPopupDrawer} from './ui/item-popup.drawer';
 import {MachinePopupDrawer} from './ui/machine-popup.drawer';
 import {Player} from '../models/player/player';
 import {PlayerThoughtsDrawer, PlayerThoughtsType} from './ui/player-thoughts.drawer';
+import {Coordinates} from '../models/coordinates/coordinates';
 
 @Injectable({
   providedIn: 'root'
@@ -84,10 +85,10 @@ export class UIService {
   }
 
   /** Draws indicators for items needed by machines. */
-  public drawMachineNeedsPopup(machines: Machine[], offsetCamera: [number, number], fov: number, playerInventory: Product | null | Package): void {
+  public drawMachineNeedsPopup(machines: Machine[], offsetCamera: [number, number], fov: number, players: Player[] | null): void {
     this.neededItemPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
     this.neededItemPopups = [];
-    this.neededItemPopups = this.machinePopupDrawer.drawNeeds(machines, offsetCamera, fov, playerInventory);
+    this.neededItemPopups = this.machinePopupDrawer.drawNeeds(machines, offsetCamera, fov, players);
   }
 
   /** Draws progress rings for machines that are currently producing. */

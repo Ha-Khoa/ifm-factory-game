@@ -5,7 +5,7 @@ import { Products } from '../product/products';
 import { Collision } from "../collision/collision";
 import { Gamefield } from '../gamefield/gamefield';
 import { RenderingService } from '../../services/rendering.service';
-import { Direction, KEY_TO_DIRECTION } from '../../enums/direction';
+import { Direction, KEY_TO_DIRECTION, KEY_TO_DIRECTION2 } from '../../enums/direction';
 import { RenderType } from '../../enums/render-type';
 import { RenderObject } from '../rendering/render-object';
 import { ConveyorBeltManager } from '../conveyor-belt/conveyor-belt-manager';
@@ -41,6 +41,10 @@ export class Player {
 
    private _hasPicked!: boolean;
 
+   private _id!: number;
+
+   private _pressedInteract: boolean = false;
+
 
 
    private _directionPressed!: boolean;
@@ -58,8 +62,9 @@ export class Player {
    private _renderingObject: RenderObject;
    private _walkingAnimation: string[];
    private _holdingAnimation: string[];
-   private _camera: Camera;
-   private _cameraFix: boolean = false;
+   private static _camera: Camera;
+   private static _playerPositions: Coordinates[] = [new Coordinates(0, 0), new Coordinates(0, 0)];
+   private static _cameraFix: boolean = false;
 
    // Speed boost properties
    private _baseVelocity: number;
@@ -70,6 +75,8 @@ export class Player {
    private _boostDuration: number = 350; // 200ms boost duration
 
   private _thoughts: PlayerThoughtsType = PlayerThoughtsType.NONE;
+
+  public static players: Player[] = [];
 
   // playerService
   private _playerService: PlayerService;
@@ -88,7 +95,8 @@ export class Player {
        this._gamefield = gamefield;
        const angle = RenderingService.instance().angle
        const rotationZ = (window.innerHeight / 2 - window.innerHeight / 2 * Math.cos(angle)) / 60
-       this._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2), window.innerHeight / 1080 * 60);
+       if(Player._camera) this._id = 1; else this._id = 0;
+       Player._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2), window.innerHeight / 1080 * 60);
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        const height = this._hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI);
        this._renderingObject = new RenderObject(
@@ -110,6 +118,7 @@ export class Player {
 
         this._playerService = playerService;
        RenderingService.instance().addRenderObject(this._renderingObject);
+       Player.players.push(this);
    }
 
 
@@ -123,12 +132,8 @@ export class Player {
        this._renderingObject.y = this._position.y + this._hitbox.height / 2;
    }
 
-   changeCamera() {
-    this._camera.x = this._position.x + this._hitbox.width / 2
-    this._camera.y = this._position.y + this._hitbox.height / 2
-   }
 
-
+   
    updateProductInHand() {
 
         if (this._inventory === null) { return }
@@ -168,14 +173,17 @@ export class Player {
      */
     setInput(input: Record<string, boolean>) {
       this._input  = input;
-
       // Handle movement direction
+      if(this._id === 0) this._pressedInteract = input['e']; else this._pressedInteract = input['enter'];
       let numPressedDirectional = 0;
       this._direction = null; // Reset direction at the start of each call
-
       for (const [key, pressed] of Object.entries(input) ) {
-          if (pressed && key in KEY_TO_DIRECTION) {
+          if (pressed && key in KEY_TO_DIRECTION && this._id === 0) {
               this._direction = KEY_TO_DIRECTION[key];
+              numPressedDirectional++
+          }
+        if (pressed && key in KEY_TO_DIRECTION2 && this._id === 1) {
+              this._direction = KEY_TO_DIRECTION2[key];
               numPressedDirectional++
           }
       }
@@ -196,9 +204,9 @@ export class Player {
 
       // Handle shift for boost
       const now = performance.now();
-      if (input[' '] && !this._isBoosting && (now - this._lastBoostTime > this._boostCooldown)) {
+      if (input[' '] && !this._isBoosting && (now - this._lastBoostTime > this._boostCooldown) && this._id === 0) {
         this.activateBoost();
-      }
+    }
     }
     /**
      * Aktiviert den Geschwindigkeits-Boost.
@@ -218,7 +226,7 @@ export class Player {
 
 
 
-   /**
+   /**if(this._id === 0) this._player
     * Berechnet die Frame-Velocity basierend auf deltaTime.
     * Macht die Bewegung FPS-unabhängig (gleichförmige Bewegung).
     */
@@ -238,7 +246,7 @@ export class Player {
   * Aktualisiert die Spielerposition basierend auf Eingaben und prüft Kollisionen.
   * Bewegt den Spieler, solange kein Objekt oder Rand im Weg ist.
   */
-   updatePlayer() {
+   updatePlayer(twoPlayerMode: boolean = true) {
     this.updatePlayerAnimation();
         if(this._direction === Direction.RIGHT || this._direction === Direction.LEFT)
        {
@@ -296,12 +304,22 @@ export class Player {
        // Keine Kollision, bewege den Spieler
        this._position.x += velocityX;
        this._position.y += velocityY;
-   }
-          if(this._cameraFix)
+        }
+        if(Player._cameraFix)
        {
-           this._camera.x = this._position.x + this._hitbox.width / 2;
-           this._camera.y = this._position.y - this._hitbox.height / 2;
-           this._camera.setCameraInBounds();
+        Player._playerPositions[this._id].x = this._position.x;
+        Player._playerPositions[this._id].y = this._position.y;
+        if(!twoPlayerMode)
+        {
+           Player._camera.x = this._position.x + this._hitbox.width / 2;
+           Player._camera.y = this._position.y - this._hitbox.height / 2;
+        }
+        else
+        {
+            Player._camera.x = (Player._playerPositions[0].x + Player._playerPositions[1].x) / 2;
+            Player._camera.y = (Player._playerPositions[0].y + Player._playerPositions[1].y) / 2;
+        }
+        Player._camera.setCameraInBounds();
        }
    
 }
@@ -346,7 +364,7 @@ export class Player {
     * Versucht ein Produkt aufzunehmen, wenn E gedrückt wurde und kein Produkt getragen wird.
     */
    async pickProduct(): Promise<Product | Package | null> {
-       if (this._input['e']) {
+       if (this._pressedInteract) {
            if (!this._interacted) {
                this._canInteractProduct = true;
                this._interacted = true;
@@ -363,7 +381,12 @@ export class Player {
        if (this._canInteractProduct && this._inventory === null) {
          // Check if the player can purchase the product from the conveyor belt
          let productTypeOfConveyor = this.getConveyorBeltProduct();
-         if(productTypeOfConveyor instanceof Product) {
+        if(productTypeOfConveyor !== null)
+        {
+        this._canInteractProduct = false;
+        this._hasPicked = true;
+        }
+         if(productTypeOfConveyor instanceof Product){
             try {
               // Warte auf das Ergebnis der asynchronen Geldentfernung
               await firstValueFrom(this._playerService.removeMoney(productTypeOfConveyor.costs));
@@ -374,8 +397,9 @@ export class Player {
               this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY;
               setTimeout(() => {
                 this.thoughts = PlayerThoughtsType.NONE;
-              }, 1000);
+              }, 1000);              
               return null; // Ausführung stoppen
+
             }
          }
 
@@ -385,6 +409,7 @@ export class Player {
                this._inventory = productFromConveyor;
                this._canInteractProduct = false;
                this._hasPicked = true;
+               Products.deleteGeneratedProduct(this._inventory)
                this._inventory.renderObject.priority = 200
                console.log("Produkt vom Förderband aufgenommen:", this._inventory);
                Products.generatedProducts.push(productFromConveyor);
@@ -397,6 +422,7 @@ export class Player {
            this._inventory = nearestObj;
            this._canInteractProduct = false;
            this._hasPicked = true;
+           Products.deleteGeneratedProduct(this._inventory)
            this._inventory.renderObject.priority = 200
            if (nearestObj instanceof Package) {
                Products.deleteGeneratedProduct(nearestObj);
@@ -442,10 +468,12 @@ export class Player {
        if (this._inventory instanceof Package && Products.checkForInteraction(this._hitbox) instanceof Product) {return null;}
        if (this._canInteractProduct && this._inventory !== null) {
            const droppedProduct = this._inventory;
+           Products.generatedProducts.push(droppedProduct)
            this._inventory!.z = 0;
            this._inventory = null;
            this._canInteractProduct = false;
            this._hasPicked = false;
+           console.log(this._inventory)
 
            if (droppedProduct instanceof Package) {
               Products.addPackage(droppedProduct);
@@ -551,7 +579,7 @@ export class Player {
         if (!nearestMachine.isProcessingActive()) {
             return null;
         }
-        if (!this._input['e']) {
+        if (!this._pressedInteract) {
             return null;
         }
         return nearestMachine;
@@ -627,14 +655,18 @@ export class Player {
         this._z = v;
         this._renderingObject.z = v;
     }
-  get camera(): Camera { return this._camera; }
+  get camera(): Camera { return Player._camera; }
 
-  set cameraFix(v: boolean) { this._cameraFix = v; }
-  get cameraFix(): boolean { return this._cameraFix; }
+  set cameraFix(v: boolean) { Player._cameraFix = v; }
+  get cameraFix(): boolean { return Player._cameraFix; }
 
 
   get position(): Coordinates { return this._position; }
 
   get thoughts(): PlayerThoughtsType { return this._thoughts; }
   set thoughts(v: PlayerThoughtsType) { this._thoughts = v; }
+
+  get pressedInteract(): boolean { return this._pressedInteract; }
+
+  get id(): number { return this._id; }
 }

@@ -36,6 +36,8 @@ export class GameService {
   // Spielobjekte
   private gamefield!: Gamefield;
   private player!: Player;
+  private player2!: Player;
+  private towPlayerMode!: boolean;
   private interactableManager!: InteractableManager;
   private conveyorBeltManager!: ConveyorBeltManager;
   private prepMachine!: PrepMachineManager;
@@ -53,18 +55,18 @@ export class GameService {
    * @param ctx CanvasRenderingContext2D zum Zeichnen
    * @param ctxUI
    */
-  async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D) {
+  async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D, TwoPlayerMode: boolean = false) {
     // Initialisiere UI Service
        this.gamefield = new Gamefield();
-
+    this.towPlayerMode = TwoPlayerMode;
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
     this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
     RenderingService.instance().init(this.ctx, this.images, this.angle);
     SlotMachineService.instance().init(this.ctx, this.images, this.playerService);
     this.uiService.init(ctxUI, this.angle, this.images);
-    // Initialisiere Eingaben
-    this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false};
+    // Initialisiere Eingaben (verwende lowercase keys, passend zu event.key.toLowerCase())
+    this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false, 'arrowup': false, 'arrowleft': false, 'arrowdown': false, 'arrowright': false, 'enter': false, ' ': false };
 
     // Initialisiere Spielobjekte
     this.playerVelocity = Gamefield.fieldsize * 4; // in Pixel pro Sekunde
@@ -74,6 +76,15 @@ export class GameService {
       this.gamefield,
       this.playerService
     );
+    if(TwoPlayerMode)
+    {
+      this.player2 = new Player(
+        new Hitbox(new Coordinates(300, 250), Gamefield.fieldsize * 4/5 , Gamefield.fieldsize * 2/5),
+        this.playerVelocity,
+        this.gamefield,
+        this.playerService
+      );
+    }
         RenderingService.instance().convertToCameraPOV(this.player.camera);
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs, this.playerService);
 
@@ -221,28 +232,38 @@ export class GameService {
                   
 
       // Update-Phase
-
+      this.uiService.clearMachinePopUp();
       RenderingService.instance().updateFPS()
       this.player.changeVelocity();
-      this.player.updatePlayer();
-
+      this.player.updatePlayer(this.towPlayerMode);
       this.interactableManager.checkForInteraction(this.player);
-
-      // Interaktionslogik: erst aufnehmen, sonst ablegen
       this.player.pickProduct();
       this.player.dropProduct();
+            
+      if(this.towPlayerMode)
+      {
+        this.player2.changeVelocity();
+        this.player2.updatePlayer(this.towPlayerMode);
+        this.interactableManager.checkForInteraction(this.player2);
+        this.player2.pickProduct();
+        this.player2.dropProduct();
+        this.player2.render();
+        this.player2.updateProductInHand();
+        
+      }
+
       this.conveyorBeltManager.update();
       this.conveyorBeltManager.refreshGamefield();
 
       const workingPrepMachine = this.player.getWorkingPrepMachine();
       this.prepMachine.setWorkingMachine(workingPrepMachine);
       this.prepMachine.update(deltaMs);
-
-      // Render-Phase
+      
       this.player.render();
       this.player.updateProductInHand();
 
       let playerInteractSlotMachine = this.interactableManager.checkPlayerInSlotMachineArea(this.player)
+      playerInteractSlotMachine = !playerInteractSlotMachine && this.towPlayerMode ? this.interactableManager.checkPlayerInSlotMachineArea(this.player2) : playerInteractSlotMachine;  
       
       if(playerInteractSlotMachine)
       {
@@ -268,14 +289,19 @@ export class GameService {
       this.interactableManager.resetParticleFields();
       this.interactableManager.checkPackageInHand(this.player);
       this.interactableManager.checkMachineNeedsProduct(this.player);
+
+      if(this.towPlayerMode){
+      this.interactableManager.checkMachineNeedsProduct(this.player2);
+      this.interactableManager.checkPackageInHand(this.player2);
+      }
       this.interactableManager.submissionArea.updateAnimation();
 
       // Draw machines Item Needs Popup
-      if(!playerInteractSlotMachine && zoomFinished) this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov, this.player.inventory);
+      if(!playerInteractSlotMachine && zoomFinished) this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov, Player.players);
       else this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov, null);
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
       this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
-
+                  
       // Orders
 
 
@@ -310,7 +336,19 @@ export class GameService {
     this.player.setInput(this.inputs)     
     if(this.interactableManager.checkPlayerInSlotMachineArea(this.player))
       {   
-    SlotMachineService.instance().setInput(this.inputs);
+    SlotMachineService.instance().setInput(this.inputs, this.player);
       }
+      else if(this.player2 && this.interactableManager.checkPlayerInSlotMachineArea(this.player2))
+      {
+    SlotMachineService.instance().setInput(this.inputs, this.player2);
+      }
+    if(this.towPlayerMode)
+    {
+      this.player2.setInput(this.inputs);
+    }
+    if(this.inputs['u'] === true)
+    {
+    this.interactableManager.upgradeMachineOnInteraction(this.player);
+    }
   }
 }
