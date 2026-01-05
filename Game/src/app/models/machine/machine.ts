@@ -259,6 +259,7 @@ export class Machine extends InteractableObject {
       tap(() => {
         this._level += 1;
         this._productionRate = Math.max(500, this._productionRate * 0.85); // 15% schneller, min. 0.5s
+        this._productionTimer = this._productionRate / 1000
         console.log(`${this._name} auf Level ${this._level} verbessert! Neue Produktionsrate: ${this._productionRate}ms`);
       }),
       map(() => {
