@@ -4,6 +4,7 @@ import { Rect } from './rect.interface';
 import { CanvasHelper } from './canvas.helper';
 import { UI_THEME } from './theme.manager';
 import { RenderingService } from '../rendering.service';
+import { PrepMachine } from '../../models/preProcess/prep-machine';
 import { Camera } from '../../models/camera/camera';
 import { Product } from '../../models/product/product';
 import { Package } from '../../models/package/package';
@@ -55,6 +56,15 @@ export class MachinePopupDrawer {
     currentY += 15;
     currentY = this.drawRequirements(centerX, currentY, machine, popupConfig.lineHeight);
     this.drawProgressBar(x, currentY, machine, popupConfig);
+    if (machine instanceof PrepMachine) {
+      const prepMachine = machine as PrepMachine;
+      if (prepMachine.prepNextFrame) {
+        const img = this.images[prepMachine.prepNextFrame];
+        if (img) {
+          this.ctx.drawImage(img, centerX - 32, currentY - 70, 64, 64);
+        }
+      }
+    }
     this.drawUpgradeButton(x, currentY + 15, machine, popupConfig);
 
     const fKeyImage = this.images['/images/KeyBindings/keyBindings_F.png'];

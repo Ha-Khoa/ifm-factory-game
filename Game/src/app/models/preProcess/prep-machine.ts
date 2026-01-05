@@ -41,6 +41,16 @@ export class PrepMachine extends RenderObject {
             inputId: number;
             outputId: number;
         }
+
+        public prepFrames: string[] = [
+            '/images/Products/prep-machine/frame_1.png',
+            '/images/Products/prep-machine/frame_2.png',
+            '/images/Products/prep-machine/frame_3.png',
+            '/images/Products/prep-machine/frame_4.png'
+        ];
+
+        public prepFrameIndex: number = 0;
+        public prepNextFrame: string = this.prepFrames[0];
         constructor(
             x: number,
             y: number,
@@ -107,7 +117,8 @@ export class PrepMachine extends RenderObject {
             this.processingProgress = 0;
             this.outputReady = false;
 
-            this.frameNumber = 0;
+            this.prepFrameIndex = 0;
+            this.prepNextFrame = this.prepFrames[0];
 
             console.log(`Started processing ${product.name}`)
         }
@@ -133,10 +144,10 @@ export class PrepMachine extends RenderObject {
          * Aktualisiert die Animationsframes basierend auf dem Verarbeitungsfortschritt.
          */
         private updateAnimation(): void{
-            if (this.frames && this.frames.length > 0) {
-                const frameIndex = Math.floor(this.processingProgress * this.frames.length);
-                this.frameNumber = Math.min(frameIndex, this.frames.length - 1);
-                this.nextFrame = this.frames[this.frameNumber];
+            if (this.prepFrames && this.prepFrames.length > 0) {
+                const frameIndex = Math.floor(this.processingProgress * this.prepFrames.length);
+                this.prepFrameIndex = Math.min(frameIndex, this.prepFrames.length - 1);
+                this.prepNextFrame = this.prepFrames[this.prepFrameIndex];
             }
         }
         private completeProcessing(): void {
@@ -144,6 +155,8 @@ export class PrepMachine extends RenderObject {
             this.processingProgress = 1;
             this.outputReady = true;
 
+            this.prepFrameIndex = this.prepFrames.length - 1;
+            this.prepNextFrame = this.prepFrames[this.prepFrameIndex];
             console.log(`Processing complete! ${this.outputProduct?.name}`)
         }
         /**
@@ -160,9 +173,9 @@ export class PrepMachine extends RenderObject {
                 if (this.outputProduct.img){
                      this.outputProduct.img;
                 }
-                if(this.frames && this.frames.length > 0){
-                    this.frameNumber = 0;
-                    this.nextFrame = this.frames[0];
+                if(this.prepFrames && this.prepFrames.length > 0){
+                    this.prepFrameIndex = 0;
+                    this.prepNextFrame = this.prepFrames[0];
                 }
 
                 console.log(`Collected output: ${output.name}`);
@@ -188,7 +201,9 @@ export class PrepMachine extends RenderObject {
                     
                     
         }
-
+        getCurrentFrame(): string {
+            return this.prepNextFrame;
+        }
         getSate():{
             isProcessing: boolean;
             progress: number;
@@ -233,9 +248,9 @@ export class PrepMachine extends RenderObject {
             this.processingProgress = 0;
         
         
-            if (this.frames && this.frames.length > 0) {
-               this.frameNumber = 0;
-                this.nextFrame = this.frames[0];
+            if (this.prepFrames && this.prepFrames.length > 0) {
+               this.prepFrameIndex = 0;
+                this.prepNextFrame = this.prepFrames[0];
             }
         }
 
