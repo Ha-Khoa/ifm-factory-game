@@ -137,7 +137,7 @@ export class MachinePopupDrawer {
           if(isOutOfBounds) {
             let arrowY = this.clamp(y, 0, window.innerHeight - size);
             let arrowX = this.clamp(x, 0, window.innerWidth - size);
-            let newY = this.clamp(y, size, window.innerHeight - 2*size);
+            let newY = this.clamp(y, size / 2, window.innerHeight - 2*size);
             let newX = this.clamp(x, size, window.innerWidth - 2*size);
             this.ctx.save();
             this.ctx.translate(arrowX + size / 2, arrowY + size / 2);
@@ -154,12 +154,10 @@ export class MachinePopupDrawer {
             if(machine.position.x - playerInventory.position.x < 0) {
               angle += Math.PI;
             }
+            let a = false;
             if(-angle > Math.PI + 1/10 * Math.PI && -angle < Math.PI - 1/10 * Math.PI) {angle = Math.PI;}
-            if(-Math.sin(angle) * hypotenuse + y > size && newY < window.innerHeight / 2) {y -= Math.sin(angle) * hypotenuse }
-            else if(-Math.sin(angle) * hypotenuse + y < window.innerHeight - 2 * size && newY > window.innerHeight / 2) y -= Math.sin(angle) * hypotenuse; 
-            else y = newY;
-            if(-Math.cos(angle) * hypotenuse + x > size && newX < window.innerWidth / 2) x -= Math.cos(angle) * hypotenuse;
-            else if(-Math.cos(angle) * hypotenuse + x < window.innerWidth - 2 * size && newX > window.innerWidth / 2) x -= Math.cos(angle) * hypotenuse; else x = newX;
+            y = -Math.sin(angle) * hypotenuse + arrowY;
+            x = -Math.cos(angle) * hypotenuse + arrowX;
             this.ctx.rotate(angle);
             this.ctx.drawImage(this.images["/images/arrow.png"], -size / 2, -size / 2, size, size);
             drawnRects.push({x: arrowX , y: arrowY, width: size * fov, height: size * fov, radius: 0});
