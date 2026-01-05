@@ -32,7 +32,7 @@ export class PrepMachine extends RenderObject {
         private inputProduct?: Product;
         private outputProduct?: Product;
         private currentInput?: Product;
-        private processingStartTime?: number;
+        private workedMillis: number = 0;
         private isProcessing: boolean = false;
         private processingProgress: number = 0;
         private outputReady: boolean = false;
@@ -113,7 +113,7 @@ export class PrepMachine extends RenderObject {
         private startProcessing(product: Product){
             this.currentInput = product;
             this.isProcessing = true;
-            this.processingStartTime = Date.now();
+            this.workedMillis = 0;
             this.processingProgress = 0;
             this.outputReady = false;
 
@@ -126,18 +126,17 @@ export class PrepMachine extends RenderObject {
          * Aktualisiert den Status der Maschine, überprüft den Fortschritt der Verarbeitung und aktualisiert die Animation.
          * 
          */
-        update(): void{
-            if (this.isProcessing && this.processingStartTime){
-                const currentTime = Date.now();
-                const elapsedTime = currentTime - this.processingStartTime;
+        update(deltaMs: number, isBeingWorked: boolean = false): void{
+            if (!this.isProcessing || !isBeingWorked) {
+                return;
+            }
 
-                this.processingProgress = Math.min(elapsedTime/this.processingTime, 1);
+            this.workedMillis += deltaMs;
+            this.processingProgress = Math.min(this.workedMillis / this.processingTime, 1);
+            this.updateAnimation();
 
-                this.updateAnimation();
-
-                if (elapsedTime >= this.processingTime){
-                    this.completeProcessing();
-                }
+            if (this.processingProgress >= 1) {
+                this.completeProcessing();
             }
         }
         /**
@@ -244,7 +243,7 @@ export class PrepMachine extends RenderObject {
             this.isProcessing = false;
             this.outputReady = false;
             this.currentInput = undefined;
-            this.processingStartTime = undefined;
+            this.workedMillis = 0;
             this.processingProgress = 0;
         
         
@@ -252,6 +251,10 @@ export class PrepMachine extends RenderObject {
                this.prepFrameIndex = 0;
                 this.prepNextFrame = this.prepFrames[0];
             }
+        }
+
+        isProcessingActive(): boolean {
+            return this.isProcessing;
         }
 
         /**

@@ -27,7 +27,9 @@ export class MachinePopupDrawer {
   public drawDetails(machine: Machine): Rect[] {
     this.ctx.save();
 
-    const requiredItemsCount = machine.inputRequirements.length;
+    // Check if it's a PrepMachine and handle differently
+    const isPrepMachine = machine instanceof PrepMachine;
+    const requiredItemsCount = isPrepMachine ? 0 : machine.inputRequirements.length;
     const lineHeight = 23;
     const baseLines = 7; // Estimated lines for static content
     const reqLines = requiredItemsCount > 0 ? requiredItemsCount + 1 : 1;
@@ -44,7 +46,7 @@ export class MachinePopupDrawer {
     const x = window.innerWidth * 0.98 - popupConfig.width;
     const y = 100;
 
-    CanvasHelper.drawStyledPopupBackground(this.ctx, x, y, popupConfig, machine.unlocked);
+    CanvasHelper.drawStyledPopupBackground(this.ctx, x, y, popupConfig, isPrepMachine ? true : machine.unlocked);
 
     let currentY = y + popupConfig.borderWidth + 30;
     const centerX = x + popupConfig.width / 2;
@@ -54,9 +56,14 @@ export class MachinePopupDrawer {
     currentY = this.drawInfoText(centerX, currentY, machine, popupConfig.lineHeight);
     CanvasHelper.drawSeparator(this.ctx, centerX, currentY - 10, popupConfig.width * 0.85);
     currentY += 15;
-    currentY = this.drawRequirements(centerX, currentY, machine, popupConfig.lineHeight);
+    
+    if (!isPrepMachine) {
+      currentY = this.drawRequirements(centerX, currentY, machine, popupConfig.lineHeight);
+    }
+    
     this.drawProgressBar(x, currentY, machine, popupConfig);
-    if (machine instanceof PrepMachine) {
+    
+    if (isPrepMachine) {
       const prepMachine = machine as PrepMachine;
       if (prepMachine.prepNextFrame) {
         const img = this.images[prepMachine.prepNextFrame];
@@ -65,7 +72,10 @@ export class MachinePopupDrawer {
         }
       }
     }
-    this.drawUpgradeButton(x, currentY + 15, machine, popupConfig);
+    
+    if (!isPrepMachine) {
+      this.drawUpgradeButton(x, currentY + 15, machine, popupConfig);
+    }
 
     const fKeyImage = this.images['/images/KeyBindings/keyBindings_F.png'];
     if (fKeyImage) {
@@ -243,29 +253,49 @@ export class MachinePopupDrawer {
 
   private drawInfoText(x: number, y: number, machine: Machine, lineHeight: number): number {
     let currentY = y;
+    const isPrepMachine = machine instanceof PrepMachine;
+    
     this.ctx.font = `bold 16px ${UI_THEME.fontFamily}`;
     this.ctx.fillText(machine.name, x, currentY);
     currentY += lineHeight;
 
     this.ctx.font = `12px ${UI_THEME.fontFamily}`;
     this.ctx.fillStyle = '#6d4c41';
-    this.ctx.fillText(`Level ${machine.level}`, x, currentY - 5);
+    
+    if (isPrepMachine) {
+      this.ctx.fillText(`PrepMachine`, x, currentY - 5);
+    } else {
+      this.ctx.fillText(`Level ${machine.level}`, x, currentY - 5);
+    }
+    
     this.ctx.fillStyle = UI_THEME.textColor;
     currentY += lineHeight - 5;
 
-    const img = this.images[machine.outputProduct._img!];
-    if (img) {
-      this.ctx.drawImage(img, x - 70, currentY - 15, 20, 20);
+    // For PrepMachine, show output product name only (no image since outputProduct is private)
+    if (isPrepMachine) {
+      this.ctx.font = `italic 14px ${UI_THEME.fontFamily}`;
+      this.ctx.fillText("Manuelle Verarbeitung", x, currentY);
+      currentY += lineHeight;
+      
+      this.ctx.font = `14px ${UI_THEME.fontFamily}`;
+      this.ctx.fillText("Drückt 'E' zum Arbeiten", x, currentY);
+      currentY += lineHeight;
+    } else {
+      const img = this.images[machine.outputProduct._img!];
+      if (img) {
+        this.ctx.drawImage(img, x - 70, currentY - 15, 20, 20);
+      }
+
+      this.ctx.font = `italic 14px ${UI_THEME.fontFamily}`;
+      this.ctx.fillText(machine.outputProduct.name, x, currentY);
+      currentY += lineHeight;
+
+      this.ctx.font = `14px ${UI_THEME.fontFamily}`;
+      const productionTime = machine.productionRate / 1000;
+      this.ctx.fillText(`Dauer: ${productionTime.toFixed(2)}s`, x, currentY);
+      currentY += lineHeight;
     }
-
-    this.ctx.font = `italic 14px ${UI_THEME.fontFamily}`;
-    this.ctx.fillText(machine.outputProduct.name, x, currentY);
-    currentY += lineHeight;
-
-    this.ctx.font = `14px ${UI_THEME.fontFamily}`;
-    const productionTime = machine.productionRate/ 1000
-    this.ctx.fillText(`Dauer: ${productionTime.toFixed(2)}s`, x, currentY);
-    currentY += lineHeight;
+    
     return currentY;
   }
 
@@ -302,15 +332,28 @@ export class MachinePopupDrawer {
     const barWidth = config.width * 0.8;
     const barHeight = 12;
     const barX = x + (config.width - barWidth) / 2;
-    const progressPercentage = (1 - (machine.productionTimer * 1000 / machine.productionRate));
-    const progressValue = Math.max(0, Math.min(1, progressPercentage));
+    
+    let progressValue = 0;
+    let isActive = false;
+
+    // Check ob es sich um eine PrepMachine handelt
+    if (machine instanceof PrepMachine) {
+      const prepMachine = machine as PrepMachine;
+      progressValue = prepMachine.getProgress();
+      isActive = prepMachine.isProcessingActive();
+    } else {
+      // Für normale Maschinen
+      const progressPercentage = (1 - (machine.productionTimer * 1000 / machine.productionRate));
+      progressValue = Math.max(0, Math.min(1, progressPercentage));
+      isActive = machine.isProducing;
+    }
 
     this.ctx.fillStyle = UI_THEME.progressBg;
     this.ctx.beginPath();
     this.ctx.roundRect(barX, y, barWidth, barHeight, 6);
     this.ctx.fill();
 
-    if (machine.isProducing && progressValue > 0) {
+    if (isActive && progressValue > 0) {
       this.ctx.fillStyle = UI_THEME.progressFill;
       this.ctx.beginPath();
       this.ctx.roundRect(barX, y, barWidth * progressValue, barHeight, 6);

@@ -364,19 +364,19 @@ export class Player {
          // Check if the player can purchase the product from the conveyor belt
          let productTypeOfConveyor = this.getConveyorBeltProduct();
          if(productTypeOfConveyor instanceof Product) {
-           try {
-             // Warte auf das Ergebnis der asynchronen Geldentfernung
-             await firstValueFrom(this._playerService.removeMoney(productTypeOfConveyor.costs));
-             // wenn dies erfolgreich ist, fahre mit der Logik fort
-           } catch (error) {
-             // wenn dies fehlschlägt (ein Fehler wird ausgelöst), behandle ihn hier
-             console.error("Bezahlung für Förderbandprodukt fehlgeschlagen:", error);
-             this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY;
-             setTimeout(() => {
-               this.thoughts = PlayerThoughtsType.NONE;
-             }, 1000);
-             return null; // Ausführung stoppen
-           }
+            try {
+              // Warte auf das Ergebnis der asynchronen Geldentfernung
+              await firstValueFrom(this._playerService.removeMoney(productTypeOfConveyor.costs));
+              // wenn dies erfolgreich ist, fahre mit der Logik fort
+            } catch (error) {
+              // wenn dies fehlschlägt (ein Fehler wird ausgelöst), behandle ihn hier
+              console.error("Bezahlung für Förderbandprodukt fehlgeschlagen:", error);
+              this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY;
+              setTimeout(() => {
+                this.thoughts = PlayerThoughtsType.NONE;
+              }, 1000);
+              return null; // Ausführung stoppen
+            }
          }
 
            //versuche zuerst ein Produkt vom Förderband aufzunehmen
@@ -536,6 +536,24 @@ export class Player {
             }
         }
 
+        return nearestMachine;
+   }
+
+   /**
+    * Gibt die PrepMachine zurück, die gerade bearbeitet werden soll (Overcooked-Style).
+    * Fortschritt steigt nur, wenn Spieler in Reichweite ist und E gedrückt hält.
+    */
+   getWorkingPrepMachine(): PrepMachine | null {
+        const nearestMachine = this.getNearestPrepMachine();
+        if (!nearestMachine) {
+            return null;
+        }
+        if (!nearestMachine.isProcessingActive()) {
+            return null;
+        }
+        if (!this._input['e']) {
+            return null;
+        }
         return nearestMachine;
    }
    /**

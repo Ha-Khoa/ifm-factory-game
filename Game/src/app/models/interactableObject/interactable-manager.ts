@@ -16,6 +16,7 @@ import { SubmissionArea } from "../submission-area/submission-area";
 import { InteractableObject } from "./interactable-object";
 import { Package } from "../package/package";
 import { SlotMachine } from "../slot-machine/slot-machine";
+import { PrepMachine } from "../preProcess/prep-machine";
 
 /**
  * MachineManager-Klasse: Verwaltet alle Maschinen im Spiel.
@@ -179,6 +180,20 @@ export class InteractableManager {
       }
     }
 
+    // Check PrepMachines
+    if (!collision) {
+      for (let obj of this._gamefield.interactableObjects) {
+        if (obj.name.startsWith('PrepMachine_')) {
+          const prepMachine = obj as PrepMachine;
+          collision = this.interactionObjectPrepMachine(prepMachine, player);
+          if (collision) {
+            this.updatePrepMachineOnInteraction(prepMachine, player);
+            break;
+          }
+        }
+      }
+    }
+
     if (!collision) {
       this.resetMachineOnInteraction();
     }
@@ -218,7 +233,35 @@ export class InteractableManager {
       }
     }
     return false;
+  }
+
+  /**
+   * Check Interaktion mit PrepMachine (die extends RenderObject, nicht InteractableObject)
+   */
+  interactionObjectPrepMachine(prepMachine: PrepMachine, player: Player): boolean {
+    // PrepMachine  von allen Seiten (ähnlich wie ein Tisch) interagierbar
+    const directions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT];
+    
+    for (let direction of directions) {
+      const interactionX = direction === Direction.RIGHT ? prepMachine.x + prepMachine.width :
+                           direction === Direction.LEFT ? prepMachine.x - Gamefield.fieldsize : prepMachine.x;
+      const interactionY = direction === Direction.DOWN ? prepMachine.y + prepMachine.height :
+                           direction === Direction.UP ? prepMachine.y - Gamefield.fieldsize : prepMachine.y;
+      const interactionHeight = direction === Direction.DOWN || direction === Direction.UP ? Gamefield.fieldsize : prepMachine.height;
+      const interactionWidth = direction === Direction.RIGHT || direction === Direction.LEFT ? Gamefield.fieldsize : prepMachine.width;
+
+      const interactionHitbox: Hitbox = new Hitbox(
+        new Coordinates(interactionX, interactionY),
+        interactionWidth,
+        interactionHeight
+      );
+      const collision = Collision.checkCollision(player.hitbox, interactionHitbox);
+      if (collision) {
+        return true;
+      }
     }
+    return false;
+  }
 
   /**
    * Behandelt die Interaktion des Spielers mit einer Maschine.
@@ -283,6 +326,17 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
   }
 
   /**
+   * Handelt Interaktion mit PrepMachine (zeige Popup)
+   */
+  updatePrepMachineOnInteraction(prepMachine: PrepMachine, player: Player) {
+    // Visual feedback: color the machine green
+    prepMachine.rectColor = "rgba(81, 255, 81, 1)";
+    prepMachine.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
+    // Cast to Machine for UI compatibility
+    this.ui.drawMachinePopUp(prepMachine as any);
+  }
+
+  /**
    * Setzt alle Maschinen auf ihre normale Farbe zurück und schließt das UI-PopUp.
    */
   resetMachineOnInteraction() {
@@ -290,6 +344,13 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
       machine.renderObject.rectColor = "rgba(226, 229, 255, 1)";
       machine.renderObject.rectLayers = ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"];
     });
+    // Reset PrepMachines
+    for (let obj of this._gamefield.interactableObjects) {
+      if (obj.name.startsWith('PrepMachine_')) {
+        obj.rectColor = "#FFE797";
+        obj.rectLayers = ["#FCB53B", "#aa6a17ff"];
+      }
+    }
     this.ui.clearMachinePopUp();
   }
 
