@@ -5,6 +5,7 @@ import {Gamefield} from '../gamefield/gamefield';
 export class PrepMachineManager {
     private gamefield: Gamefield;
     private static prepMachines: PrepMachine[] = [];
+    private workingMachine: PrepMachine | null = null;
 
     constructor (gamefield: Gamefield){
         this.gamefield = gamefield;
@@ -28,10 +29,16 @@ export class PrepMachineManager {
         console.log('PrepMachines in gamefield:', PrepMachineManager.prepMachines.length);
     }
 
-    update(): void {
+    update(deltaMs: number): void {
         PrepMachineManager.prepMachines.forEach(prep_machine => {
-            prep_machine.update();
+            const isBeingWorked = this.workingMachine !== null && this.workingMachine === prep_machine;
+            prep_machine.update(deltaMs, isBeingWorked);
         });
+        this.workingMachine = null;
+    }
+
+    setWorkingMachine(machine: PrepMachine | null): void {
+        this.workingMachine = machine;
     }
 
     private updateGamefield(): void {
