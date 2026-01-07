@@ -120,10 +120,10 @@ export class SlotMachineService {
    * Handle keyboard/input actions relevant to the slot machine.
    * Expects a map of key -> pressed state.
    */
-  setInput(inputs: Record<string, boolean>)
+  setInput(inputs: Record<string, boolean>, player: Player)
   {
     for (const [key, pressed] of Object.entries(inputs)) {
-               if(key === 'e' && pressed && this._canSpin)
+               if(((key === 'e' && player.id === 0) || (key === 'enter' && player.id === 1)) && pressed  && this._canSpin)
                {
                 let stopped = true;
                 this._stopped.forEach((stopping) => {

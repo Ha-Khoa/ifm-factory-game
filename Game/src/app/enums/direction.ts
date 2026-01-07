@@ -17,6 +17,13 @@ export const KEY_TO_DIRECTION: Record<string, Direction> = {
   'd': Direction.RIGHT
 };
 
+export const KEY_TO_DIRECTION2: Record<string, Direction> = {
+  'arrowup': Direction.UP,
+  'arrowdown': Direction.DOWN,
+  'arrowleft': Direction.LEFT,
+  'arrowright': Direction.RIGHT
+};
+
 export const OPPOSITE_DIRECTION: Record<Direction, Direction> = {
   [Direction.UP]: Direction.DOWN,
   [Direction.DOWN]: Direction.UP,

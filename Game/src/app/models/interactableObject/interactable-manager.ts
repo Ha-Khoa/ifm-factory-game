@@ -28,13 +28,13 @@ export class InteractableManager {
     private playerService: PlayerService;
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine.png", "/images/wall.png",
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, 50,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(6)!, RenderType.THREE_D_IMG),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/machine2.png", "/images/wall.png",
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, 50,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/machine2.png", "/images/wall.png",
                   [Direction.UP], Products.getProductById(4)!, RenderType.THREE_D_IMG,10000),
-      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/wall.png", "/images/wall.png",
-                  [Direction.DOWN], Products.getProductById(5)!, RenderType.RECT)
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/Machine3.png", "/images/wall.png",
+                  [Direction.DOWN], Products.getProductById(5)!, RenderType.THREE_D_IMG)
     ];
     private _slotMachine!: SlotMachine;
 
@@ -241,7 +241,7 @@ export class InteractableManager {
   interactionObjectPrepMachine(prepMachine: PrepMachine, player: Player): boolean {
     // PrepMachine  von allen Seiten (ähnlich wie ein Tisch) interagierbar
     const directions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT];
-    
+
     for (let direction of directions) {
       const interactionX = direction === Direction.RIGHT ? prepMachine.x + prepMachine.width :
                            direction === Direction.LEFT ? prepMachine.x - Gamefield.fieldsize : prepMachine.x;
@@ -271,8 +271,9 @@ export class InteractableManager {
    */
   async updateMachineOnInteraction(machine: Machine, player: Player) {
     // Produkt-Eingabe nur wenn E gedrückt, Maschine freigeschaltet und Spieler trägt was
-    if (this._inputs["e"] === true && machine.unlocked && player.inventory instanceof Product) {
+    if (player.pressedInteract === true && machine.unlocked && player.inventory instanceof Product) {
       const product: Product = player.inventory;
+      player.inventory = null;
       let result;
 
       if (product && !Products.checkItemOnTable(machine.renderObject, product) && !machine.isProducing && !player.hasPicked()) {
@@ -291,6 +292,7 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
       if (result instanceof Object ) {
         const produced = result as Product;
         product.destroy();
+        Products.deleteGeneratedProduct(product);
         console.log("Produkt produziert:", produced.name);
         produced.z = machine.z;
         Products.addProduct(produced, new Coordinates(machine.x + Gamefield.fieldsize / 2 - produced.size / 2, machine.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
@@ -306,12 +308,22 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
       // Zutat nicht benötigt, zurücklegen
       else if (result === false) {
         if (product && product.position) {
+          player.inventory = product;
           //Products.addProduct(product, product.position);
         }
         console.log("Zutat nicht benötigt, zurückgelegt");
       }
     }
-    if (this._inputs["u"] === true && machine.unlocked) {
+    // Visuelles Feedback: Maschine grün färben
+    machine.renderObject.rectColor = "rgba(81, 255, 81, 1)";
+    machine.renderObject.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
+    this.ui.drawMachinePopUp(machine);
+  }
+
+  upgradeMachineOnInteraction(player: Player) {
+    for(let machine of this.machines)
+    {
+    if (machine.unlocked && this.interactionObject(machine, player)) {
       machine.upgrade(this.playerService).subscribe({
         error: (err) => {
           console.error("Maschinen-Upgrade fehlgeschlagen:", err.message);
@@ -319,10 +331,7 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
         }
       });
     }
-    // Visuelles Feedback: Maschine grün färben
-    machine.renderObject.rectColor = "rgba(81, 255, 81, 1)";
-    machine.renderObject.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
-    this.ui.drawMachinePopUp(machine);
+  }
   }
 
   /**
@@ -351,7 +360,7 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
         obj.rectLayers = ["#FCB53B", "#aa6a17ff"];
       }
     }
-    this.ui.clearMachinePopUp();
+   // this.ui.clearMachinePopUp();
   }
 
   generateInteractionField(interactionObject: InteractableObject)

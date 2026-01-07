@@ -14,7 +14,7 @@ export class SlotMachine extends InteractableObject {
 		const z = Gamefield.fieldsize * 1
 		super(
 			"slot-machine",
-			new Coordinates(x, y),
+			new Coordinates(x, y, Gamefield.fieldsize),
 			Gamefield.fieldsize,
 			Gamefield.fieldsize / 2,
 			z,

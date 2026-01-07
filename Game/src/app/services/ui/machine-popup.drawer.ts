@@ -8,6 +8,8 @@ import { PrepMachine } from '../../models/preProcess/prep-machine';
 import { Camera } from '../../models/camera/camera';
 import { Product } from '../../models/product/product';
 import { Package } from '../../models/package/package';
+import { Coordinates } from '../../models/coordinates/coordinates';
+import { Player } from '../../models/player/player';
 
 /**
  * Handles drawing all UI elements related to machines,
@@ -104,7 +106,7 @@ export class MachinePopupDrawer {
    * @param fov
    * @returns An array of Rects for later clearing.
    */
-  public drawNeeds(machines: Machine[], offsetCamera: [number, number], fov: number, playerInventory: Product | null | Package): Rect[] {
+  public drawNeeds(machines: Machine[], offsetCamera: [number, number], fov: number, players: Player[] | null): Rect[] {
     const drawnRects: Rect[] = [];
     const isometricAngle = RenderingService.instance().angle;
     // console.log(offsetCamera)
@@ -138,13 +140,15 @@ export class MachinePopupDrawer {
           x -= size / 2 + gap/2;
         let y = fov * machine.position.y * Math.cos(isometricAngle) - size * 1.5 + offsetCamera[1] * Math.cos(isometricAngle) + RenderingService.instance().rotationZ;
         // Zeichne ein Pfeil wenn die Maschiene außerhalb den Sichtbereiches ist
-        if(playerInventory instanceof Product && playerInventory.id === item.id) {
-          const isOutOfBounds = x < 0 || x > window.innerWidth - size || y < 0 || y > window.innerHeight - size;
-          
-          if(isOutOfBounds) {
-            let arrowY = this.clamp(y, 0, window.innerHeight - size);
+        for (let i = 0; i < players?.length!; i++) {
+          const playerInventory = players![i].inventory;
+          if(playerInventory instanceof Product && playerInventory.id === item.id) {
+            const isOutOfBounds = x < 0 || x > window.innerWidth - size || y < 0 || y > window.innerHeight - size;
+            
+            if(isOutOfBounds) {
+              let arrowY = this.clamp(y, 0, window.innerHeight - size);
             let arrowX = this.clamp(x, 0, window.innerWidth - size);
-            let newY = this.clamp(y, size, window.innerHeight - 2*size);
+            let newY = this.clamp(y, size / 2, window.innerHeight - 2*size);
             let newX = this.clamp(x, size, window.innerWidth - 2*size);
             this.ctx.save();
             this.ctx.translate(arrowX + size / 2, arrowY + size / 2);
@@ -161,12 +165,10 @@ export class MachinePopupDrawer {
             if(machine.position.x - playerInventory.position.x < 0) {
               angle += Math.PI;
             }
+            let a = false;
             if(-angle > Math.PI + 1/10 * Math.PI && -angle < Math.PI - 1/10 * Math.PI) {angle = Math.PI;}
-            if(-Math.sin(angle) * hypotenuse + y > size && newY < window.innerHeight / 2) {y -= Math.sin(angle) * hypotenuse }
-            else if(-Math.sin(angle) * hypotenuse + y < window.innerHeight - 2 * size && newY > window.innerHeight / 2) y -= Math.sin(angle) * hypotenuse; 
-            else y = newY;
-            if(-Math.cos(angle) * hypotenuse + x > size && newX < window.innerWidth / 2) x -= Math.cos(angle) * hypotenuse;
-            else if(-Math.cos(angle) * hypotenuse + x < window.innerWidth - 2 * size && newX > window.innerWidth / 2) x -= Math.cos(angle) * hypotenuse; else x = newX;
+            y = -Math.sin(angle) * hypotenuse + arrowY;
+            x = -Math.cos(angle) * hypotenuse + arrowX;
             this.ctx.rotate(angle);
             this.ctx.drawImage(this.images["/images/arrow.png"], -size / 2, -size / 2, size, size);
             drawnRects.push({x: arrowX , y: arrowY, width: size * fov, height: size * fov, radius: 0});
@@ -174,6 +176,7 @@ export class MachinePopupDrawer {
             this.ctx.restore();
           }
         }
+      }
 
         this.ctx.save();
         this.ctx.fillStyle = UI_THEME.tertiary;

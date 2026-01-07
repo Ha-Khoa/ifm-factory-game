@@ -61,6 +61,7 @@ export class Machine extends InteractableObject {
   constructor(
     x: number,
     y: number,
+    z: number,
     width: number,
     height: number,
     name: string,
@@ -74,10 +75,10 @@ export class Machine extends InteractableObject {
     // Initialize InteractableObject: position, size, z, img, allowed directions
     super(
       name,
-      new Coordinates(x, y),
+      new Coordinates(x, y, z),
       width,
       height,
-      Gamefield.fieldsize,
+      z,
       accessDirection,
       type,
       imgUnlocked,
@@ -154,8 +155,7 @@ export class Machine extends InteractableObject {
         // The item is not in the inventory yet, add it
         this._inventory.push({product: product, quantity: 1});
       }
-      else
-        inventoryEntry.quantity += 1;
+      else inventoryEntry.quantity += 1;
 
       product.destroy();
       Products.deleteGeneratedProduct(product);
@@ -259,6 +259,7 @@ export class Machine extends InteractableObject {
       tap(() => {
         this._level += 1;
         this._productionRate = Math.max(500, this._productionRate * 0.85); // 15% schneller, min. 0.5s
+        this._productionTimer = this._productionRate / 1000
         console.log(`${this._name} auf Level ${this._level} verbessert! Neue Produktionsrate: ${this._productionRate}ms`);
       }),
       map(() => {
