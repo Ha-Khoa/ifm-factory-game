@@ -37,7 +37,7 @@ export class GameService {
   private gamefield!: Gamefield;
   private player!: Player;
   private player2?: Player;
-  private _twoPlayerMode: boolean = false; // Initialize to false
+  private _twoPlayerMode!: boolean;
   private interactableManager!: InteractableManager;
   private conveyorBeltManager!: ConveyorBeltManager;
   private prepMachine!: PrepMachineManager;

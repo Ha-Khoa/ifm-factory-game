@@ -96,7 +96,7 @@ export class Player {
        const angle = RenderingService.instance().angle
        const rotationZ = (window.innerHeight / 2 - window.innerHeight / 2 * Math.cos(angle)) / 60
        if(Player._camera) this._id = 1; else this._id = 0;
-       Player._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2), window.innerHeight / 1080 * 60);
+       if (!Player._camera) Player._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2), window.innerHeight / 1080 * 60);
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        const height = this._hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI);
        this._renderingObject = new RenderObject(
@@ -133,7 +133,7 @@ export class Player {
    }
 
 
-   
+
    updateProductInHand() {
 
         if (this._inventory === null) { return }
@@ -321,7 +321,7 @@ export class Player {
         }
         Player._camera.setCameraInBounds();
        }
-   
+
 }
 
     updatePlayerAnimation()
@@ -329,7 +329,7 @@ export class Player {
 
         if(this._directionPressed && !this._isBoosting)
         {
-            
+
             this._renderingObject.type = RenderType.GIF
             this._renderingObject.img = this._img;
             if(this._inventory !== null)
@@ -397,7 +397,7 @@ export class Player {
               this.thoughts = PlayerThoughtsType.NOT_ENOUGH_MONEY;
               setTimeout(() => {
                 this.thoughts = PlayerThoughtsType.NONE;
-              }, 1000);              
+              }, 1000);
               return null; // Ausführung stoppen
 
             }
@@ -585,7 +585,7 @@ export class Player {
         return nearestMachine;
    }
    /**
-    * 
+    *
     * @returns boolean - ob eine Interaktion mit der PrepMachine stattgefunden hat
     */
    private handlePrepMachineInteraction(): boolean {
@@ -624,7 +624,7 @@ export class Player {
                 return true;
             }
 
-            
+
         }
         return false;
    }
