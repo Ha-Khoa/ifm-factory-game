@@ -273,32 +273,22 @@ export class InteractableManager {
     // Produkt-Eingabe nur wenn E gedrückt, Maschine freigeschaltet und Spieler trägt was
     if (player.pressedInteract === true && machine.unlocked && player.inventory instanceof Product) {
       const product: Product = player.inventory;
-      player.inventory = null;
       let result;
 
       if (product && !Products.checkItemOnTable(machine.renderObject, product) && !machine.isProducing && !player.hasPicked()) {
-        console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
-The product is not already on the machine and the machine is not currently producing.`);
+       // console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
+//The product is not already on the machine and the machine is not currently producing.`);
         result = await machine.addProduct(product);
 
         console.log(`The result of ading the product ${product.name} to the machine ${machine.name} is:`, result)
       }
       else {
-        console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
-The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' : 'not ' }already on the machine and the machine is currently ${machine.isProducing ? '' : 'not '}producing.`);
+        //console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
+//The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' : 'not ' }already on the machine and the machine is currently ${machine.isProducing ? '' : 'not '}producing.`);
         result = false;
       }
-      // Produktion abgeschlossen
-      if (result instanceof Object ) {
-        const produced = result as Product;
-        product.destroy();
-        Products.deleteGeneratedProduct(product);
-        console.log("Produkt produziert:", produced.name);
-        produced.z = machine.z;
-        Products.addProduct(produced, new Coordinates(machine.x + Gamefield.fieldsize / 2 - produced.size / 2, machine.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
-      }
       // Zutat erfolgreich hinzugefügt, warte auf weitere
-      else if (result === true) {
+      if (result === true) {
         // Remove product visuals and from global pool
         product.destroy();
         Products.deleteGeneratedProduct(product);
@@ -308,7 +298,8 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
       // Zutat nicht benötigt, zurücklegen
       else if (result === false) {
         if (product && product.position) {
-          player.inventory = product;
+          //player.inventory = product;
+          //ddplayer.dropProduct();
           //Products.addProduct(product, product.position);
         }
         console.log("Zutat nicht benötigt, zurückgelegt");

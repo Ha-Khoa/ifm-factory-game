@@ -127,6 +127,9 @@ export class Machine extends InteractableObject {
           this._productionTimer = this._productionRate / 1000;
           this._inventory = [];
           this._producting = false;
+          const produced = this._outputProduct.copy();
+          produced.z = this.z;
+          Products.addProduct(produced, new Coordinates(this.x + Gamefield.fieldsize / 2 - produced.size / 2, this.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
           resolve(this._outputProduct);
         }
       }, intervalMs);
@@ -138,7 +141,7 @@ export class Machine extends InteractableObject {
    *
    * @returns true = Produkt hinzugefügt, false = nicht benötigt, Product = Produktion abgeschlossen
    */
-  async addProduct(product: Product): Promise<boolean | Product> {
+  async addProduct(product: Product): Promise<boolean> {
     return new Promise((resolve) => {
       const requiredProduct = this.inputRequirements.find(req => req.product.id === product.id);
 
@@ -148,14 +151,19 @@ export class Machine extends InteractableObject {
       }
 
       const inventoryEntry = this._inventory.find(inv => {
-        return inv.product.id === product.id && inv.quantity < requiredProduct.quantity
+        return inv.product.id === product.id
       });
+
+      if(inventoryEntry && inventoryEntry.quantity === requiredProduct.quantity) return resolve(false);
 
       if(!inventoryEntry) {
         // The item is not in the inventory yet, add it
         this._inventory.push({product: product, quantity: 1});
       }
-      else inventoryEntry.quantity += 1;
+      else {
+        inventoryEntry.quantity += 1;
+        console.log("test", inventoryEntry, requiredProduct)
+        }
 
       product.destroy();
       Products.deleteGeneratedProduct(product);
@@ -175,7 +183,8 @@ export class Machine extends InteractableObject {
           invItem.product.destroy();
           Products.deleteGeneratedProduct(invItem.product);
         });
-        resolve(this.produce());
+        resolve(true);
+        this.produce();
       } else {
         resolve(true);
       }
