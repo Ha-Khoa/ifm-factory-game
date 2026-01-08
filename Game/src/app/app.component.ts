@@ -116,4 +116,8 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
       this.alignSubscription.unsubscribe();
     }, 2000);
   }
+
+  onSettingsOpen(): void {
+    this.isSettingsOpen = true;
+  }
 }
