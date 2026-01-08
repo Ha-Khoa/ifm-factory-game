@@ -100,7 +100,7 @@ export class Player {
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        const height = this._hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI);
        this._renderingObject = new RenderObject(
-           "player",
+           "player" + this._id,
            RenderType.GIF,
            this._position.x,
            this._position.y,

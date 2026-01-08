@@ -370,11 +370,8 @@ export class GameService {
       }
     } else {
       if (this.player2) {
-        const index = Player.players.findIndex(p => p === this.player2);
-        if (index > -1) {
-          Player.players.splice(index, 1);
-        }
         this.player2 = undefined;
+        RenderingService.instance().deleteRenderingObjektByName("player1")
       }
     }
   }
