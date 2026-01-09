@@ -78,7 +78,6 @@ export class Machine extends InteractableObject {
       new Coordinates(x, y, z),
       width,
       height,
-      z,
       accessDirection,
       type,
       imgUnlocked,

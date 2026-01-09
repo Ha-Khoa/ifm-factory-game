@@ -493,11 +493,10 @@ export class Player {
 
    getConveyorBeltProduct(): Product | Package | null{
      const conveyor = ConveyorBeltManager.getConveyorAt(
-       this._hitbox.x,
-       this._hitbox.y,
-       this._hitbox.width,
-       this._hitbox.height
+       this._hitbox.x + this._hitbox.width / 2,
+       this._hitbox.y + this._hitbox.height / 2
      );
+     console.log(conveyor)
      if (!conveyor)
        return null;
 
@@ -511,10 +510,8 @@ export class Player {
    takeProductFromConveyor(): Product | Package |null {
        //console.log('Checking for conveyor at player position:', this._hitbox.x, this._hitbox.y, 'size:', this._hitbox.width, this._hitbox.height);
        const conveyor = ConveyorBeltManager.getConveyorAt(
-           this._hitbox.x,
-           this._hitbox.y,
-           this._hitbox.width,
-           this._hitbox.height
+           this._hitbox.x + this._hitbox.width / 2,
+            this._hitbox.y + this._hitbox.height / 2
        );
        if (conveyor) {
            const playerCenterX = this._hitbox.x + this._hitbox.width / 2;
@@ -528,9 +525,11 @@ export class Player {
            /*if (!product) {
                product = conveyor.takeItem();
            }*/
+          
 
            if (product) {
            //console.log(`Produkt ${product.name} vom Förderband ${conveyor.getConveyorId()} aufgenommen.`);
+           
                return product;
            } else {
                //console.log('kein Produkt zum Aufnehmen gefunden auf dem Förderband');

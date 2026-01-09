@@ -219,7 +219,7 @@ export class RenderingService {
           }
           Obj.singleFrameCount++;
           this._ctx.drawImage(
-            this._images[Obj.nextFrame],
+            this._images[Obj.nextFrame!],
             mirror * Math.round(xObj),
             yProjection,
             objWidth * mirror,
@@ -244,6 +244,34 @@ export class RenderingService {
           objWidth,
           this._fov * Obj.height * Math.cos(this._angle) + this._fov * Obj.z * Math.sin(this._angle)
         );
+      }
+      //Flat GIF
+      else if (Obj.type === RenderType.FLAT_GIF)
+      {
+        if (Obj.frames && Obj.framesPerSecond && Obj.nextFrame) {
+          let mirror = 1;
+          this._ctx.save();
+          if (Obj.animationDirection === Direction.LEFT) {
+            mirror = -1;
+            this._ctx.scale(-1, 1);
+          }
+          const maxOneFrame = Math.round(this._fps / Obj.framesPerSecond)
+          if (maxOneFrame < Obj.singleFrameCount) {
+            Obj.nextFrame = Obj.frames[(Obj.frameNumber + 1) % Obj.frames.length]
+            Obj.frameNumber++;
+            Obj.singleFrameCount = 0;
+          }
+          Obj.singleFrameCount++;
+          this._ctx.drawImage(
+            this._images[Obj.nextFrame],
+            mirror * Math.round(xObj),
+            yProjection,
+            objWidth * mirror,
+            this._fov * Obj.height * Math.cos(this._angle) + 3
+          )
+          this._ctx.restore();
+
+        }
       }
     }
     );
@@ -386,4 +414,5 @@ export class RenderingService {
   get fps(): number {return this._fps }
 
   get camera(): Camera { return this._camera }
+
 }

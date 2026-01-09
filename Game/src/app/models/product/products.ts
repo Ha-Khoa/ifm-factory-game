@@ -172,7 +172,7 @@ export class Products {
    */
   public static checkForInteraction(player: Hitbox): Product | Package | null {
     const productToInteract = this.shortestProductDistance(player);
-    if (productToInteract && productToInteract.distance <= Gamefield.fieldsize + 50) {
+    if (productToInteract && productToInteract.distance <= Gamefield.fieldsize) {
       return productToInteract.product;
     }
     return null;

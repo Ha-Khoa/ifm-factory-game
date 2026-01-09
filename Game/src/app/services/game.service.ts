@@ -90,7 +90,12 @@ export class GameService {
 
 
 
-
+    const conveyorImages =[
+      "/images/conveyorBelt/conveyorbelt-1.jpg",
+      "/images/conveyorBelt/conveyorbelt-2.jpg",
+      "/images/conveyorBelt/conveyorbelt-3.jpg",
+      "/images/conveyorBelt/conveyorbelt-4.jpg"
+    ]
 
     // Lade benötigte Texturen vor
     const baseImages = ["/images/StoneFloorTexture.png",
@@ -102,7 +107,11 @@ export class GameService {
       "/images/machine.png",
       "/images/truck_roof.png",
       "/images/truck_back.png",
-      "/images/arrow.png"];
+      "/images/arrow.png",
+      "/images/conveyorBelt/conveyorbelt-front-1.jpg",
+      "/images/conveyorBelt/conveyorbelt-front-2.jpg",
+      "/images/conveyorBelt/conveyorbelt-front-3.jpg",
+      "/images/conveyorBelt/conveyorbelt-front-4.jpg"];
     const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
     const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
     const foxImages = [
@@ -184,7 +193,7 @@ export class GameService {
       "/images/KeyBindings/keyBindings_Controller_Button_5.png",
       "/images/KeyBindings/keyBindings_Controller_Button_6.png",
     ]
-    const allImages = [...new Set([...baseImages, ...machineImages, ...productImages, ...foxImages, ...foxCoinImages, ...keyBindingImages, ...slotMachineImages, ...prepMachineImages])];
+    const allImages = [...new Set([...conveyorImages, ...baseImages, ...machineImages, ...productImages, ...foxImages, ...foxCoinImages, ...keyBindingImages, ...slotMachineImages, ...prepMachineImages])];
     await this.preloadImages(allImages);
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
@@ -259,7 +268,6 @@ export class GameService {
       }
 
       this.conveyorBeltManager.update();
-      this.conveyorBeltManager.refreshGamefield();
 
       const workingPrepMachine = this.player.getWorkingPrepMachine();
       this.prepMachine.setWorkingMachine(workingPrepMachine);

@@ -200,12 +200,13 @@ export class Gamefield {
 
         //Fügt die aktuellen Förderbänder hinzu
         conveyorBelts.forEach(conveyor =>{
-            this.interactableObjects.push(conveyor)
-            // Stelle sicher, dass neue Förderbänder auch im Renderer landen
-            if (!RenderingService.instance().getRenderingObjektByName(conveyor.name)) {
-                RenderingService.instance().addRenderObject(conveyor);
+            const newObjs = conveyor.renderParts
+            for(let obj of newObjs)
+            {
+                this.interactableObjects.push(obj)
             }
         });
+        console.log(this.interactableObjects.length)
     }
 
     updatePrepMachines(prepMachines: PrepMachine[]): void {
