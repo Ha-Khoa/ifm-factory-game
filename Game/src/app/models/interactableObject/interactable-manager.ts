@@ -438,5 +438,13 @@ export class InteractableManager {
     return this._submissionArea;
   }
 
+  public getAllRenderObjects(): RenderObject[] {
+    const renderObjects: RenderObject[] = [];
+    this.machines.forEach(machine => renderObjects.push(machine.renderObject));
+    renderObjects.push(this._slotMachine.renderObject);
+    renderObjects.push(this._submissionArea.renderObject);
+    return renderObjects;
+  }
+
   }
 

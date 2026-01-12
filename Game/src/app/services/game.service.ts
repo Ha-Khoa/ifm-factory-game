@@ -16,6 +16,7 @@ import { Subject } from 'rxjs';
 import {Orders} from '../models/orders/orders';
 import {PlayerService} from './player.service';
 import {PrepMachineManager} from "../models/preProcess/prep-machine-manager";
+import { RenderObject } from '../models/rendering/render-object';
 
 @Injectable({
   providedIn: 'root'
@@ -80,113 +81,60 @@ export class GameService {
         RenderingService.instance().convertToCameraPOV(this.player.camera);
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs, this.playerService);
 
+    // 1. Sammle alle RenderObject-Instanzen aus allen relevanten Quellen.
+    const allRenderObjects: RenderObject[] = [];
+    allRenderObjects.push(...this.interactableManager.getAllRenderObjects());
+    allRenderObjects.push(...this.gamefield.getAllRenderObjects());
 
+    // 2. Extrahiere alle Bild-Pfade aus den RenderObjects, Produkten und dem Spieler.
+    const dynamicImagePaths = allRenderObjects.flatMap(obj => this.getImagePathsFromRenderObject(obj));
+    const productImages = Products.getAllProducts().map(p => p.img).filter((img): img is string => !!img);
+    const playerImages = this.player.getAllImagePaths();
 
-    const conveyorImages =[
-      "/images/conveyorBelt/conveyorbelt-1.jpg",
-      "/images/conveyorBelt/conveyorbelt-2.jpg",
-      "/images/conveyorBelt/conveyorbelt-3.jpg",
-      "/images/conveyorBelt/conveyorbelt-4.jpg"
-    ]
-
-    // Lade benötigte Texturen vor
-    const baseImages = ["/images/StoneFloorTexture.png",
-      "/images/wall.png",
-      "/images/Concrete-Floor-Tile.png",
+    // 3. Statische Liste für UI-Bilder, Partikel-Effekte und andere nicht-dynamische Assets.
+    const staticImagePaths = [
+      // Base & UI
       "/images/package.png",
-      "/images/Brick_01-512x512.png",
       "/images/interaction-field.png",
-      "/images/machine.png",
       "/images/truck_roof.png",
       "/images/truck_back.png",
       "/images/arrow.png",
+      // Conveyor
+      "/images/conveyorBelt/conveyorbelt-1.jpg",
+      "/images/conveyorBelt/conveyorbelt-2.jpg",
+      "/images/conveyorBelt/conveyorbelt-3.jpg",
+      "/images/conveyorBelt/conveyorbelt-4.jpg",
       "/images/conveyorBelt/conveyorbelt-front-1.jpg",
       "/images/conveyorBelt/conveyorbelt-front-2.jpg",
       "/images/conveyorBelt/conveyorbelt-front-3.jpg",
-      "/images/conveyorBelt/conveyorbelt-front-4.jpg"];
-    const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
-    const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
-    const foxImages = [
-      "/images/fox/walking_1.png",
-      "/images/fox/walking_2.png",
-      "/images/fox/walking_3.png",
-      "/images/fox/walking_4.png",
-      "/images/fox/fox.png",
-      "/images/fox/sitting.png",
-      "/images/fox/1-fox-holding.png",
-      "/images/fox/2-fox-holding.png",
-      "/images/fox/3-fox-holding.png",
-      "/images/fox/4-fox-holding.png",
-      "/images/fox/walking_5.png",
-      "/images/fox/fox-sprint.png"
-    ]
-    const foxCoinImages = [
+      "/images/conveyorBelt/conveyorbelt-front-4.jpg",
+      // Fox Coin
       "/images/fox/fox-coin.png",
       "/images/fox/no-fox-coin.png",
-    ]
-    const slotMachineImages = ["/images/slotMachine/cherry.png", "/images/slotMachine/Bar.png", "/images/slotMachine/seven.png", "/images/slotMachine/diamond.png", "/images/slotMachine/lemon.png", "/images/slotMachine/ifm.png", "/images/slotMachine/manure.png", "/images/slotMachine/squirrel.png", "/images/slotMachine/slot-machine.png"];
-    const prepMachineImages = [
+      // Slot Machine
+      "/images/slotMachine/cherry.png",
+      "/images/slotMachine/Bar.png",
+      "/images/slotMachine/seven.png",
+      "/images/slotMachine/diamond.png",
+      "/images/slotMachine/lemon.png",
+      "/images/slotMachine/ifm.png",
+      "/images/slotMachine/manure.png",
+      "/images/slotMachine/squirrel.png",
+      "/images/slotMachine/slot-machine.png",
+      // Prep Machine
       "/images/Products/prep-machine/frame_1.png",
       "/images/Products/prep-machine/frame_2.png",
       "/images/Products/prep-machine/frame_3.png",
-      "/images/Products/prep-machine/frame_4.png"
+      "/images/Products/prep-machine/frame_4.png",
+      // Key Bindings
+      "/images/KeyBindings/keyBindings_,.png", "/images/KeyBindings/keyBindings_..png", "/images/KeyBindings/keyBindings_0.png", "/images/KeyBindings/keyBindings_1.png", "/images/KeyBindings/keyBindings_2.png", "/images/KeyBindings/keyBindings_3.png", "/images/KeyBindings/keyBindings_4.png", "/images/KeyBindings/keyBindings_5.png", "/images/KeyBindings/keyBindings_6.png", "/images/KeyBindings/keyBindings_7.png", "/images/KeyBindings/keyBindings_8.png", "/images/KeyBindings/keyBindings_9.png", "/images/KeyBindings/keyBindings_A.png", "/images/KeyBindings/keyBindings_B.png", "/images/KeyBindings/keyBindings_C.png", "/images/KeyBindings/keyBindings_D.png", "/images/KeyBindings/keyBindings_E.png", "/images/KeyBindings/keyBindings_F.png", "/images/KeyBindings/keyBindings_G.png", "/images/KeyBindings/keyBindings_H.png", "/images/KeyBindings/keyBindings_I.png", "/images/KeyBindings/keyBindings_J.png", "/images/KeyBindings/keyBindings_K.png", "/images/KeyBindings/keyBindings_L.png", "/images/KeyBindings/keyBindings_M.png", "/images/KeyBindings/keyBindings_N.png", "/images/KeyBindings/keyBindings_O.png", "/images/KeyBindings/keyBindings_P.png", "/images/KeyBindings/keyBindings_Q.png", "/images/KeyBindings/keyBindings_R.png", "/images/KeyBindings/keyBindings_S.png", "/images/KeyBindings/keyBindings_T.png", "/images/KeyBindings/keyBindings_U.png", "/images/KeyBindings/keyBindings_V.png", "/images/KeyBindings/keyBindings_W.png", "/images/KeyBindings/keyBindings_X.png", "/images/KeyBindings/keyBindings_Y.png", "/images/KeyBindings/keyBindings_Z.png", "/images/KeyBindings/keyBindings_Left.png", "/images/KeyBindings/keyBindings_Right.png", "/images/KeyBindings/keyBindings_Up.png", "/images/KeyBindings/keyBindings_Down.png", "/images/KeyBindings/keyBindings_Controller_Left.png", "/images/KeyBindings/keyBindings_Controller_Right.png", "/images/KeyBindings/keyBindings_Controller_Up.png", "/images/KeyBindings/keyBindings_Controller_Down.png", "/images/KeyBindings/keyBindings_Controller_Button_1.png", "/images/KeyBindings/keyBindings_Controller_Button_2.png", "/images/KeyBindings/keyBindings_Controller_Button_3.png", "/images/KeyBindings/keyBindings_Controller_Button_4.png", "/images/KeyBindings/keyBindings_Controller_Button_5.png", "/images/KeyBindings/keyBindings_Controller_Button_6.png",
     ];
-    const keyBindingImages = [
-      "/images/KeyBindings/keyBindings_,.png",
-      "/images/KeyBindings/keyBindings_..png",
-      "/images/KeyBindings/keyBindings_0.png",
-      "/images/KeyBindings/keyBindings_1.png",
-      "/images/KeyBindings/keyBindings_2.png",
-      "/images/KeyBindings/keyBindings_3.png",
-      "/images/KeyBindings/keyBindings_4.png",
-      "/images/KeyBindings/keyBindings_5.png",
-      "/images/KeyBindings/keyBindings_6.png",
-      "/images/KeyBindings/keyBindings_7.png",
-      "/images/KeyBindings/keyBindings_8.png",
-      "/images/KeyBindings/keyBindings_9.png",
-      "/images/KeyBindings/keyBindings_A.png",
-      "/images/KeyBindings/keyBindings_B.png",
-      "/images/KeyBindings/keyBindings_C.png",
-      "/images/KeyBindings/keyBindings_D.png",
-      "/images/KeyBindings/keyBindings_E.png",
-      "/images/KeyBindings/keyBindings_F.png",
-      "/images/KeyBindings/keyBindings_G.png",
-      "/images/KeyBindings/keyBindings_H.png",
-      "/images/KeyBindings/keyBindings_I.png",
-      "/images/KeyBindings/keyBindings_J.png",
-      "/images/KeyBindings/keyBindings_K.png",
-      "/images/KeyBindings/keyBindings_L.png",
-      "/images/KeyBindings/keyBindings_M.png",
-      "/images/KeyBindings/keyBindings_N.png",
-      "/images/KeyBindings/keyBindings_O.png",
-      "/images/KeyBindings/keyBindings_P.png",
-      "/images/KeyBindings/keyBindings_Q.png",
-      "/images/KeyBindings/keyBindings_R.png",
-      "/images/KeyBindings/keyBindings_S.png",
-      "/images/KeyBindings/keyBindings_T.png",
-      "/images/KeyBindings/keyBindings_U.png",
-      "/images/KeyBindings/keyBindings_V.png",
-      "/images/KeyBindings/keyBindings_W.png",
-      "/images/KeyBindings/keyBindings_X.png",
-      "/images/KeyBindings/keyBindings_Y.png",
-      "/images/KeyBindings/keyBindings_Z.png",
-      "/images/KeyBindings/keyBindings_Left.png",
-      "/images/KeyBindings/keyBindings_Right.png",
-      "/images/KeyBindings/keyBindings_Up.png",
-      "/images/KeyBindings/keyBindings_Down.png",
-      "/images/KeyBindings/keyBindings_Controller_Left.png",
-      "/images/KeyBindings/keyBindings_Controller_Right.png",
-      "/images/KeyBindings/keyBindings_Controller_Up.png",
-      "/images/KeyBindings/keyBindings_Controller_Down.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_1.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_2.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_3.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_4.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_5.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_6.png",
-    ]
-    const allImages = [...new Set([...conveyorImages, ...baseImages, ...machineImages, ...productImages, ...foxImages, ...foxCoinImages, ...keyBindingImages, ...slotMachineImages, ...prepMachineImages])];
-    await this.preloadImages(allImages);
+
+    // 4. Kombiniere alle Pfade und entferne Duplikate
+    const allImagesToLoad = [...new Set([...dynamicImagePaths, ...productImages, ...playerImages, ...staticImagePaths])];
+
+    // 5. Lade alle Bilder vor
+    await this.preloadImages(allImagesToLoad);
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
     this.interactableManager.addToInteractableObjects();
@@ -195,6 +143,27 @@ export class GameService {
     this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
     this.prepMachine = new PrepMachineManager(this.gamefield);
     Products.generateProducts();
+  }
+
+  /**
+   * Extrahiert alle Bild-Pfade von einem RenderObject.
+   * @param renderObject Das Objekt, aus dem die Pfade extrahiert werden sollen.
+   * @returns Ein Array von Bild-Pfaden.
+   */
+  private getImagePathsFromRenderObject(renderObject: RenderObject): string[] {
+    const paths: string[] = [];
+
+    if (renderObject.img) {
+      paths.push(renderObject.img);
+    }
+    if (renderObject.imgWall) {
+      paths.push(renderObject.imgWall);
+    }
+    if (renderObject.frames && renderObject.frames.length > 0) {
+      paths.push(...renderObject.frames);
+    }
+
+    return paths;
   }
 
   /**

@@ -669,4 +669,16 @@ export class Player {
   get pressedInteract(): boolean { return this._pressedInteract; }
 
   get id(): number { return this._id; }
+
+  public getAllImagePaths(): string[] {
+    const imagePaths = [
+      this._img,
+      "/images/fox/sitting.png",
+      "/images/fox/fox-sprint.png",
+      ...this._walkingAnimation,
+      ...this._holdingAnimation
+    ];
+    // Return unique paths
+    return [...new Set(imagePaths)];
+  }
 }

@@ -228,6 +228,10 @@ export class Gamefield {
         console.log('Total interactable objects:', this.interactableObjects.length);
     }
 
+    public getAllRenderObjects(): RenderObject[] {
+        return [...this.environmetObjects, ...this.interactableObjects];
+    }
+
 
 }
  
