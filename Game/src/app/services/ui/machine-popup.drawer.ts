@@ -26,7 +26,7 @@ export class MachinePopupDrawer {
    * @param machine The machine to display.
    * @returns An array of Rects for later clearing.
    */
-  public drawDetails(machine: Machine): Rect[] {
+  public drawDetails(machine: Machine, player: Player): Rect[] {
     this.ctx.save();
 
     // Check ob es sich um eine PrepMachine handelt
@@ -45,7 +45,9 @@ export class MachinePopupDrawer {
       lineHeight: lineHeight - 3,
     };
 
-    const x = window.innerWidth * 0.98 - popupConfig.width;
+    const xPlayer1 = window.innerWidth * 0.02
+    const xPlayer2 = window.innerWidth * 0.98 - popupConfig.width;
+    const x = player.id === 0 ? xPlayer1 : xPlayer2;
     const y = 100;
 
     CanvasHelper.drawStyledPopupBackground(this.ctx, x, y, popupConfig, isPrepMachine ? true : machine.unlocked);
@@ -58,7 +60,7 @@ export class MachinePopupDrawer {
     currentY = this.drawInfoText(centerX, currentY, machine, popupConfig.lineHeight);
     CanvasHelper.drawSeparator(this.ctx, centerX, currentY - 10, popupConfig.width * 0.85);
     currentY += 15;
-    
+
     // if (isPrepMachine) {
     //   const prepMachine = machine as PrepMachine;
     //   // Zeigt nur die Animationsframes an, wenn die PrepMachine aktiv ist
@@ -75,13 +77,13 @@ export class MachinePopupDrawer {
     //     }
     //   }
     // }
-    
+
     if (!isPrepMachine) {
       currentY = this.drawRequirements(centerX, currentY, machine, popupConfig.lineHeight);
     }
-    
+
     this.drawProgressBar(x, currentY, machine, popupConfig);
-    
+
     if (!isPrepMachine) {
       this.drawUpgradeButton(x, currentY + 15, machine, popupConfig);
     }
@@ -93,8 +95,8 @@ export class MachinePopupDrawer {
 
     this.ctx.restore();
 
-    const mainRect: Rect = { x: x - 10, y: y - 10, width: popupConfig.width + 20, height: popupConfig.height + 20, radius: popupConfig.radius };
-    const buttonRect: Rect = { x: popupConfig.width + x - 25, y: popupConfig.height + y - 25, width: 40, height: 40, radius: 0 };
+    const mainRect: Rect = { x: x - 10, y: y - 10, width: popupConfig.width + 20, height: popupConfig.height + 20, radius: popupConfig.radius};
+    const buttonRect: Rect = { x: popupConfig.width + x - 25, y: popupConfig.height + y - 25, width: 40, height: 40, radius: 0};
 
     return [mainRect, buttonRect];
   }
@@ -134,7 +136,7 @@ export class MachinePopupDrawer {
           ? fov * machine.position.x + offset + offsetCamera[0]
           : fov * machine.position.x + ((size + gap) * (neededItems.indexOf(item) % 2 === 0 ? -1 : 1)) + offset + offsetCamera[0];
 
-        
+
 
         if(neededItems.length % 2 === 0)
           x -= size / 2 + gap/2;
@@ -144,7 +146,7 @@ export class MachinePopupDrawer {
           const playerInventory = players![i].inventory;
           if(playerInventory instanceof Product && playerInventory.id === item.id) {
             const isOutOfBounds = x < 0 || x > window.innerWidth - size || y < 0 || y > window.innerHeight - size;
-            
+
             if(isOutOfBounds) {
               let arrowY = this.clamp(y, 0, window.innerHeight - size);
             let arrowX = this.clamp(x, 0, window.innerWidth - size);
@@ -155,13 +157,13 @@ export class MachinePopupDrawer {
             const camera = RenderingService.instance().camera;
             const hypotenuse = 80;
             let angle: number;
-            
+
             if(playerInventory.position.x - machine.position.x === 0) {
               angle = Math.PI / 2;
             } else {
               angle = Math.atan((machine.position.y - playerInventory.position.y) / (machine.position.x - playerInventory.position.x));
             }
-            
+
             if(machine.position.x - playerInventory.position.x < 0) {
               angle += Math.PI;
             }
@@ -233,7 +235,7 @@ export class MachinePopupDrawer {
         const fontSize = 16 * fov / 2.5;
 
         this.ctx.save();
-        this.ctx.lineWidth = ringWidth; 
+        this.ctx.lineWidth = ringWidth;
         this.ctx.lineCap = 'round';
 
         // Background Ring
@@ -266,20 +268,20 @@ export class MachinePopupDrawer {
   private drawInfoText(x: number, y: number, machine: Machine, lineHeight: number): number {
     let currentY = y;
     const isPrepMachine = machine instanceof PrepMachine;
-    
+
     this.ctx.font = `bold 16px ${UI_THEME.fontFamily}`;
     this.ctx.fillText(machine.name, x, currentY);
     currentY += lineHeight;
 
     this.ctx.font = `12px ${UI_THEME.fontFamily}`;
     this.ctx.fillStyle = '#6d4c41';
-    
+
     if (isPrepMachine) {
       this.ctx.fillText(`PrepMachine`, x, currentY - 5);
     } else {
       this.ctx.fillText(`Level ${machine.level}`, x, currentY - 5);
     }
-    
+
     this.ctx.fillStyle = UI_THEME.textColor;
     currentY += lineHeight - 5;
 
@@ -288,7 +290,7 @@ export class MachinePopupDrawer {
       this.ctx.font = `italic 14px ${UI_THEME.fontFamily}`;
       this.ctx.fillText("Manuelle Verarbeitung", x, currentY);
       currentY += lineHeight;
-      
+
       this.ctx.font = `14px ${UI_THEME.fontFamily}`;
       this.ctx.fillText("Drückt 'E' zum Arbeiten", x, currentY);
       currentY += lineHeight;
@@ -307,7 +309,7 @@ export class MachinePopupDrawer {
       this.ctx.fillText(`Dauer: ${productionTime.toFixed(2)}s`, x, currentY);
       currentY += lineHeight;
     }
-    
+
     return currentY;
   }
 
@@ -344,7 +346,7 @@ export class MachinePopupDrawer {
     const barWidth = config.width * 0.8;
     const barHeight = 12;
     const barX = x + (config.width - barWidth) / 2;
-    
+
     let progressValue = 0;
     let isActive = false;
 

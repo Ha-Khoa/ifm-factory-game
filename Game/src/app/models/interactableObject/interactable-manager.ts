@@ -310,7 +310,7 @@ export class InteractableManager {
     // Visuelles Feedback: Maschine grün färben
     machine.renderObject.rectColor = "rgba(81, 255, 81, 1)";
     machine.renderObject.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
-    this.ui.drawMachinePopUp(machine);
+    this.ui.drawMachinePopUp(machine, player);
   }
 
   upgradeMachineOnInteraction(player: Player) {
@@ -335,7 +335,7 @@ export class InteractableManager {
     prepMachine.rectColor = "rgba(81, 255, 81, 1)";
     prepMachine.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
     // Cast to Machine for UI compatibility
-    this.ui.drawMachinePopUp(prepMachine as any);
+    this.ui.drawMachinePopUp(prepMachine as any, player);
   }
 
   /**
