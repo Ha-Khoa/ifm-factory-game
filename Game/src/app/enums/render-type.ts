@@ -5,5 +5,6 @@ export enum RenderType {
   THREE_D_IMG = "3d img",
   GIF = "gif",
   PARTICLE = "particle",
-  SLOT_MACHINE = "slot machine"
+  SLOT_MACHINE = "slot machine",
+  FLAT_GIF = "flat gif"
 }

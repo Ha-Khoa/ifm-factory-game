@@ -135,10 +135,10 @@ export class ConveyorBeltManager {
    }
 
 
-   static getConveyorAt(x: number, y: number, width: number, height: number): ConveyorBelt | null {
+   static getConveyorAt(x: number, y: number): ConveyorBelt | null {
        return this.conveyorBelts.find(conveyor =>
-           x <= conveyor.x + conveyor.width && x + width >= conveyor.x &&
-           y <= conveyor.y + conveyor.height && y + height >= conveyor.y
+           x <= conveyor.x + conveyor.width + 20 && x >= conveyor.x - 20 &&
+           y <= conveyor.y + conveyor.height + 20 && y >= conveyor.y - 20
        ) || null;
    }
 
@@ -148,8 +148,8 @@ export class ConveyorBeltManager {
    }
 
 
-   static getConveyorRenderObjects(): RenderObject[] {
-       return this.conveyorBelts.map(conveyor => conveyor as RenderObject);
+   static getConveyorRenderObjects(): RenderObject[][] {
+       return this.conveyorBelts.map(conveyor => conveyor.renderParts);
    }
 
 

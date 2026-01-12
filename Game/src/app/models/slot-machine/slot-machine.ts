@@ -17,7 +17,6 @@ export class SlotMachine extends InteractableObject {
 			new Coordinates(x, y, Gamefield.fieldsize),
 			Gamefield.fieldsize,
 			Gamefield.fieldsize / 2,
-			z,
 			[Direction.DOWN],
 			RenderType.RECT,
 			undefined,

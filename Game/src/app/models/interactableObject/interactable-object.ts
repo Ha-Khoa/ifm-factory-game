@@ -20,7 +20,6 @@ export class InteractableObject {
         position: Coordinates,
         width: number,
         height: number,
-        z: number,
         directions: Direction[],
         type: RenderType,
         img?: string,

@@ -8,6 +8,7 @@ import { Camera } from "../models/camera/camera";
 import { Gamefield } from "../models/gamefield/gamefield";
 import { SlotMachine } from "../models/slot-machine/slot-machine";
 import { SlotMachineService } from "./slot-machine.service";
+import { PrepMachine } from "../models/preProcess/prep-machine";
 
 
 /**
@@ -165,6 +166,31 @@ export class RenderingService {
         );
         this._ctx.fill();
 
+        // Render Produkt auf PrepMachine
+        if (Obj instanceof PrepMachine) {
+          const prepMachine = Obj as PrepMachine;
+          const visualState = prepMachine.getVisualState();
+          
+          if ((visualState.isActive || visualState.hasOutput) && prepMachine.prepNextFrame) {
+            // Zeichne das Animationsbild
+            const frameImage = this._images[prepMachine.prepNextFrame];
+            if (frameImage) {
+              // Berechne die Position und Größe der Animation relativ zur Maschine
+              const animWidth = objWidth * 0.7; // Mache die Animation 70% der Maschinengröße
+              const animHeight = animWidth; // Behalte das quadratische Seitenverhältnis bei
+              const xCenter = Math.round(xObj + (objWidth - animWidth) / 2);
+              const yCenter = yProjection + (objHeight * Math.cos(this._angle) - animHeight) / 2;
+              
+              this._ctx.drawImage(
+                frameImage,
+                xCenter,
+                yCenter,
+                animWidth,
+                animHeight
+              );
+            }
+          }
+        }
       }
       // Bild mit Wand
       else if (Obj.type === RenderType.IMG) {
@@ -219,7 +245,7 @@ export class RenderingService {
           }
           Obj.singleFrameCount++;
           this._ctx.drawImage(
-            this._images[Obj.nextFrame],
+            this._images[Obj.nextFrame!],
             mirror * Math.round(xObj),
             yProjection,
             objWidth * mirror,
@@ -244,6 +270,34 @@ export class RenderingService {
           objWidth,
           this._fov * Obj.height * Math.cos(this._angle) + this._fov * Obj.z * Math.sin(this._angle)
         );
+      }
+      //Flat GIF
+      else if (Obj.type === RenderType.FLAT_GIF)
+      {
+        if (Obj.frames && Obj.framesPerSecond && Obj.nextFrame) {
+          let mirror = 1;
+          this._ctx.save();
+          if (Obj.animationDirection === Direction.LEFT) {
+            mirror = -1;
+            this._ctx.scale(-1, 1);
+          }
+          const maxOneFrame = Math.round(this._fps / Obj.framesPerSecond)
+          if (maxOneFrame < Obj.singleFrameCount) {
+            Obj.nextFrame = Obj.frames[(Obj.frameNumber + 1) % Obj.frames.length]
+            Obj.frameNumber++;
+            Obj.singleFrameCount = 0;
+          }
+          Obj.singleFrameCount++;
+          this._ctx.drawImage(
+            this._images[Obj.nextFrame],
+            mirror * Math.round(xObj),
+            yProjection,
+            objWidth * mirror,
+            this._fov * Obj.height * Math.cos(this._angle) + 3
+          )
+          this._ctx.restore();
+
+        }
       }
     }
     );
@@ -386,4 +440,5 @@ export class RenderingService {
   get fps(): number {return this._fps }
 
   get camera(): Camera { return this._camera }
+
 }

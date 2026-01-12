@@ -28,13 +28,15 @@ export class InteractableManager {
     private playerService: PlayerService;
     private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, 50,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine.png", "/images/wall.png",
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine1.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(6)!, RenderType.THREE_D_IMG),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, 50,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/machine2.png", "/images/wall.png",
+      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/machine2.png", "/images/wall.png",
                   [Direction.UP], Products.getProductById(4)!, RenderType.THREE_D_IMG,10000),
-      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/Machine3.png", "/images/wall.png",
-                  [Direction.DOWN], Products.getProductById(5)!, RenderType.THREE_D_IMG)
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/machine3.png", "/images/wall.png",
+                  [Direction.DOWN], Products.getProductById(5)!, RenderType.THREE_D_IMG),
+      new Machine(Gamefield.fieldsize * 7, Gamefield.fieldsize * 8, 40,Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Circuit Board", "/images/machine4.png", "/images/wall.png",
+                  [Direction.LEFT], Products.getProductById(5)!, RenderType.THREE_D_IMG)
     ];
     private _slotMachine!: SlotMachine;
 
@@ -273,32 +275,22 @@ export class InteractableManager {
     // Produkt-Eingabe nur wenn E gedrückt, Maschine freigeschaltet und Spieler trägt was
     if (player.pressedInteract === true && machine.unlocked && player.inventory instanceof Product) {
       const product: Product = player.inventory;
-      player.inventory = null;
       let result;
 
       if (product && !Products.checkItemOnTable(machine.renderObject, product) && !machine.isProducing && !player.hasPicked()) {
-        console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
-The product is not already on the machine and the machine is not currently producing.`);
+       // console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
+//The product is not already on the machine and the machine is not currently producing.`);
         result = await machine.addProduct(product);
 
         console.log(`The result of ading the product ${product.name} to the machine ${machine.name} is:`, result)
       }
       else {
-        console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
-The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' : 'not ' }already on the machine and the machine is currently ${machine.isProducing ? '' : 'not '}producing.`);
+        //console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
+//The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' : 'not ' }already on the machine and the machine is currently ${machine.isProducing ? '' : 'not '}producing.`);
         result = false;
       }
-      // Produktion abgeschlossen
-      if (result instanceof Object ) {
-        const produced = result as Product;
-        product.destroy();
-        Products.deleteGeneratedProduct(product);
-        console.log("Produkt produziert:", produced.name);
-        produced.z = machine.z;
-        Products.addProduct(produced, new Coordinates(machine.x + Gamefield.fieldsize / 2 - produced.size / 2, machine.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
-      }
       // Zutat erfolgreich hinzugefügt, warte auf weitere
-      else if (result === true) {
+      if (result === true) {
         // Remove product visuals and from global pool
         product.destroy();
         Products.deleteGeneratedProduct(product);
@@ -308,7 +300,8 @@ The product is ${Products.checkItemOnTable(machine.renderObject, product) ? '' :
       // Zutat nicht benötigt, zurücklegen
       else if (result === false) {
         if (product && product.position) {
-          player.inventory = product;
+          //player.inventory = product;
+          //ddplayer.dropProduct();
           //Products.addProduct(product, product.position);
         }
         console.log("Zutat nicht benötigt, zurückgelegt");

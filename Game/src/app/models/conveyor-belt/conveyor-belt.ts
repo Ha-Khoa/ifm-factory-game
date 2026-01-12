@@ -4,6 +4,8 @@ import {RenderObject} from "../rendering/render-object";
 import {Products} from "../product/products";
 import {Package} from "../package/package";
 import {Gamefield} from "../gamefield/gamefield";
+import { RenderType } from "../../enums/render-type";
+import { RenderingService } from "../../services/rendering.service";
 
 export enum ConveyorType {
     RAW_MATERIALS = "raw_materials",
@@ -15,9 +17,29 @@ export enum ConveyorType {
 }
 
 
-export class ConveyorBelt extends RenderObject{
+export class ConveyorBelt {
     private static lastId = 0;
     private conveyorId: number;
+    // render-object-like fields (replacing inheritance)
+    private _id: number;
+    private _name: string;
+    private _type: string;
+    private _x: number;
+    private _y: number;
+    private _z: number;
+    private _priority: number;
+    private _width: number;
+    private _height: number;
+    private _img?: string;
+    private _imgWall?: string;
+    private _rectColor?: string;
+    private _rectLayers?: string[];
+    private _frames?: string[];
+    private _framesPerSecond?: number;
+    private _nextFrame?: string;
+    private _singleFrameCount: number = 1;
+    private _frameNumber: number = 0;
+    private _renderParts: RenderObject[] = [];
     private _direction: 'left' | 'right' | 'up' | 'down';
     private _speed: number;
     private _items: Array<{items: Product | Package, progress: number, renderId: string, type: 'product' | 'package'}> = [];
@@ -52,20 +74,27 @@ export class ConveyorBelt extends RenderObject{
        //Förderband Typ
        conveyorType: ConveyorType = ConveyorType.RAW_MATERIALS
    ){
-       super(
-           `conveyor-${ConveyorBelt.lastId}`,
-           "rect",
-           x,
-           y,
-           30,
-           width,
-           height,
-           0,
-           undefined,
-           undefined,
-           '#5a5a5aff',
-           ["#3f3f3fff", "#252525ff"]
-       );
+             // initialize own render-like fields (used by other code as this.x / this.width etc.)
+             this._id = ConveyorBelt.lastId;
+             this._name = `conveyor-${ConveyorBelt.lastId}`;
+             this._type = RenderType.FLAT_GIF;
+             this._x = x;
+             this._y = y;
+             this._z = 30;
+             this._width = width;
+             this._height = height;
+             this._priority = 0;
+             this._img = undefined;
+             this._imgWall = undefined;
+             this._rectColor = '#5a5a5aff';
+             this._rectLayers = ["#3f3f3fff", "#252525ff"];
+             this._frames = [
+                "/images/conveyorBelt/conveyorbelt-1.jpg",
+                "/images/conveyorBelt/conveyorbelt-2.jpg",
+                "/images/conveyorBelt/conveyorbelt-3.jpg",
+                "/images/conveyorBelt/conveyorbelt-4.jpg"
+             ];
+             this._framesPerSecond = 10;
        this.conveyorId = ConveyorBelt.lastId++;
        this._direction = direction;
        this._speed = speed;
@@ -73,11 +102,122 @@ export class ConveyorBelt extends RenderObject{
        this._spawnRate = spawnRate;
        this._maxItems = maxItems;
        this._conveyorType = conveyorType;
+       // create render parts (subdivide width/height into square RenderObject parts)
+       this.createRenderParts();
        // Randomize initial spawn time to prevent all conveyors spawning simultaneously
        if (canSpawnItems) {
            this._lastSpawnTime = Date.now() - Math.random() * spawnRate;
        }
    }
+
+    // Create multiple RenderObject parts that visually represent the conveyor
+    private createRenderParts(): void{
+        this._renderParts = [];
+        if (this._direction === 'up' || this._direction === 'down'){
+            // vertical movement -> subdivide along height using square size = width
+            const square = Math.max(1, Math.round(this._width));
+            const count = Math.ceil(this._height / square);
+            for (let i = 0; i < count; i++){
+                const partX = this._x;
+                const partY = this._y + i * square;
+                const part = new RenderObject(
+                    `${this._name}-part-${i}`,
+                    RenderType.FLAT_GIF,
+                    partX,
+                    partY,
+                    this._z,
+                    square,
+                    square,
+                    this._priority,
+                    undefined,
+                    undefined,
+                    this._rectColor,
+                    this._rectLayers,
+                    this._frames,
+                    this._framesPerSecond
+                );
+                this._renderParts.push(part);
+            }
+        } else {
+            // horizontal movement -> subdivide along width using square size = height
+            const square = Math.max(1, Math.round(this._height));
+            const count = Math.ceil(this._width / square);
+            for (let i = 0; i < count; i++){
+                const partX = this._x + i * square;
+                const partY = this._y;
+                const part = new RenderObject(
+                    `${this._name}-part-${i}`,
+                    RenderType.FLAT_GIF,
+                    partX,
+                    partY,
+                    this._z,
+                    square,
+                    square,
+                    this._priority,
+                    undefined,
+                    undefined,
+                    this._rectColor,
+                    this._rectLayers,
+                    this._frames,
+                    this._framesPerSecond
+                );
+                this._renderParts.push(part);
+            }
+        }
+        const frontPart = new RenderObject(
+            "front-part",
+            RenderType.GIF,
+            this._x,
+            this._y + this._height,
+            this._z,
+            this._width,
+            10,
+            100,
+            "/images/conveyorBelt/conveyorbelt-1.jpg",
+            undefined,
+            undefined,
+            undefined,
+            [
+        "/images/conveyorBelt/conveyorbelt-front-1.jpg",
+      "/images/conveyorBelt/conveyorbelt-front-2.jpg",
+      "/images/conveyorBelt/conveyorbelt-front-3.jpg",
+      "/images/conveyorBelt/conveyorbelt-front-4.jpg"
+            ],
+            10
+        )
+        const legLeft = new RenderObject(
+            "legLeft",
+            RenderType.RECT,
+            this._x + 5,
+            this._y + this._height - 25,
+            this._z,
+            5, 
+            this._z  ,
+            -100,
+            undefined,
+            undefined,
+            "",
+            ["#6b6b6bff"]
+        )
+        const legRight = new RenderObject(
+            "legRight",
+            RenderType.RECT,
+            this._x + this._width - 10,
+            this._y + this._height - 25,
+            this._z,
+            5, 
+            this._z ,
+            -100,
+            undefined,
+            undefined,
+            "",
+            ["#6b6b6bff"]
+        )
+        RenderingService.instance().addRenderObject(legLeft)
+        RenderingService.instance().addRenderObject(legRight)
+        this._renderParts.push(frontPart)
+        RenderingService.instance().addRenderObjects(this._renderParts)
+    }
 
 
    update(deltaTime: number): void{
@@ -419,7 +559,7 @@ export class ConveyorBelt extends RenderObject{
                const dy = productCenterY - position.y;
                const distance = Math.sqrt(dx * dx + dy * dy);
                //console.log(`  Product ${i}: pos(${productPos.x.toFixed(1)}, ${productPos.y.toFixed(1)}), center(${productCenterX.toFixed(1)}, ${productCenterY.toFixed(1)}), dist: ${distance.toFixed(2)}px`);
-
+                console.log(distance)
                if (distance <= Gamefield.fieldsize){
                    this._items.splice(i, 1);
                    //productData.items.destroy();
@@ -434,6 +574,23 @@ export class ConveyorBelt extends RenderObject{
 
 
    getConveyorId(): number{return this.conveyorId;}
+    // RenderObject-compatible accessors
+    get x(): number { return this._x; }
+    set x(v: number) { this._x = v; }
+
+    get y(): number { return this._y; }
+    set y(v: number) { this._y = v; }
+
+    get z(): number { return this._z; }
+    set z(v: number) { this._z = v; }
+
+    get width(): number { return this._width; }
+    set width(v: number) { this._width = v; }
+
+    get height(): number { return this._height; }
+    set height(v: number) { this._height = v; }
+
+    get renderParts(): RenderObject[] { return this._renderParts; }
    getDirection(): string{return this._direction;}
    getSpeed(): number{return this._speed;}
    getItems(): Array<{items: Product | Package, progress: number, renderId: string, type: string}>{return this._items;}
