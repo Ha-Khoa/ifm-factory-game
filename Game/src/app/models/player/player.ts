@@ -401,6 +401,7 @@ export class Player {
               return null; // Ausführung stoppen
 
             }
+            
          }
 
            //versuche zuerst ein Produkt vom Förderband aufzunehmen
