@@ -120,7 +120,6 @@ export class GameService {
       "/images/slotMachine/ifm.png",
       "/images/slotMachine/manure.png",
       "/images/slotMachine/squirrel.png",
-      "/images/slotMachine/slot-machine.png",
       // Prep Machine
       "/images/Products/prep-machine/frame_1.png",
       "/images/Products/prep-machine/frame_2.png",
