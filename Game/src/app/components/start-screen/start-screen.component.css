@@ -34,7 +34,7 @@ canvas {
 	--width: 3px;
 }
 
-#phone::after{
+/* #phone::after{
 	content: "";
 	height: var(--after-height);
 	width: var(--width);
@@ -57,11 +57,11 @@ canvas {
 	transform: translatex(100%);
 	border-top-right-radius: 100vmax;
 	border-bottom-right-radius: 0vmax;
-}
+} */
 
 #phone #top-section,
 #phone #bottom-section{
-	--radius: 20px;
+	/* --radius: 20px; */
 	corner-shape: squircle;
 }
 

@@ -37,7 +37,7 @@ export class StartScreenComponent implements OnInit {
   private playerModeButtonRect = { x: 0, y: 0, width: 0, height: 0 };
   private settingsButtonRect = { x: 0, y: 0, width: 0, height: 0 };
   private highScores: PlayerInterface[] = [];
-
+  private backgroundImage!: HTMLImageElement;
   private selectedButtonIndex = 0; // 0: START, 1: Spielermodus, 2: EINSTELLUNGEN
   public isHidden = false; // Steuert die Sichtbarkeit der Komponente
 
@@ -54,7 +54,17 @@ export class StartScreenComponent implements OnInit {
     loadTheme();
     this.ctx = this.canvasRef.nativeElement.getContext('2d')!;
     this.setCanvasSize();
-    this.draw(); // Initiales Zeichnen ohne Scores
+
+    this.backgroundImage = new Image();
+    this.backgroundImage.src = "/images/background.png";
+    this.backgroundImage.onload = () => {
+      this.draw(); // Draw once the image is loaded
+    };
+    this.backgroundImage.onerror = () => {
+      console.error("Failed to load background image.");
+      this.draw(); // Still draw, but background might be missing
+    };
+
     this.loadHighScores();
   }
 
@@ -85,8 +95,12 @@ export class StartScreenComponent implements OnInit {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
     // Hintergrund zeichnen
-    this.ctx.fillStyle = UI_THEME.bgColor;
-    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    if (this.backgroundImage && this.backgroundImage.complete) {
+      this.ctx.drawImage(this.backgroundImage, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    } else {
+      this.ctx.fillStyle = UI_THEME.bgColor;
+      this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    }
 
     // Scoreboards zeichnen
     this.drawScoreboards();
@@ -326,6 +340,8 @@ export class StartScreenComponent implements OnInit {
     style.setProperty('width', window.innerWidth + 'px');
     style.setProperty('height', window.innerHeight + 'px');
     style.setProperty('pointer-events', 'none');
+    style.setProperty('background-color', 'none');
+    style.setProperty('--radius', '20px')
   }
 
   /**
@@ -349,7 +365,6 @@ export class StartScreenComponent implements OnInit {
 
     const startingFov = 60; // Basis-FOV für Berechnungen
     const fovRatio = fov / startingFov; // Skalierungsfaktor basierend auf dem FOV
-
     // Neue Dimensionen basierend auf dem Zoom berechnen
     const newWidth = this.width * fovRatio;
     const newHeight = this.height * fovRatio;
@@ -372,16 +387,16 @@ export class StartScreenComponent implements OnInit {
     screenContainerStyle.setProperty('border-left', `${edgeWidth}px solid black`);
 
     // Skalierung und Positionierung der Handy-Seitentasten-Imitationen
-    const phoneBeforeY = fovRatio * 50;
-    const phoneAfterY = fovRatio * 120;
-    const phoneBeforeSize = fovRatio * 30;
-    const phoneAfterSize = fovRatio * 50;
-    const widthPhone = fovRatio * 3;
-    phoneStyle.setProperty('--width', `${widthPhone}px`);
-    phoneStyle.setProperty('--before-height', `${phoneBeforeSize}px`);
-    phoneStyle.setProperty('--after-height', `${phoneAfterSize}px`);
-    phoneStyle.setProperty('--before-top', `${phoneBeforeY}px`);
-    phoneStyle.setProperty('--after-top', `${phoneAfterY}px`);
+    // const phoneBeforeY = fovRatio * 50;
+    // const phoneAfterY = fovRatio * 120;
+    // const phoneBeforeSize = fovRatio * 30;
+    // const phoneAfterSize = fovRatio * 50;
+    // const widthPhone = fovRatio * 3;
+    // phoneStyle.setProperty('--width', `${widthPhone}px`);
+    // phoneStyle.setProperty('--before-height', `${phoneBeforeSize}px`);
+    // phoneStyle.setProperty('--after-height', `${phoneAfterSize}px`);
+    // phoneStyle.setProperty('--before-top', `${phoneBeforeY}px`);
+    // phoneStyle.setProperty('--after-top', `${phoneAfterY}px`);
 
     // Home-Button und Kamera-Icon skalieren
     const homeButtonSize = fov / (window.innerHeight / 1080 * 60) * 50;
