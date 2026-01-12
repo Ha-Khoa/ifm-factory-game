@@ -220,23 +220,35 @@ export class StartScreenComponent implements OnInit {
    * @param isSelected Gibt an, ob der Button aktuell ausgewählt ist.
    */
   private drawButton(text: string, rect: { x: number, y: number, width: number, height: number }, isSelected: boolean): void {
-    // Hintergrund des Buttons
-    this.ctx.fillStyle = isSelected ? UI_THEME.highlightColor : UI_THEME.primary;
-    this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    // Wenn ausgewählt, machen wir den Button 5% größer (Zoom-Effekt)
+    const scale = isSelected ? 1.05 : 1.0;
+    
+    // Neue Größe und Position berechnen, damit er zentriert wächst
+    const w = rect.width * scale;
+    const h = rect.height * scale;
+    const x = rect.x - (w - rect.width) / 2;
+    const y = rect.y - (h - rect.height) / 2;
 
-    // Rand für ausgewählten Button
+    // Hintergrund
+    this.ctx.fillStyle = isSelected ? UI_THEME.highlightColor : UI_THEME.primary;
+    this.ctx.fillRect(x, y, w, h);
+
+    // Rand (optional dicker machen bei Hover)
     if (isSelected) {
       this.ctx.strokeStyle = UI_THEME.textColor;
       this.ctx.lineWidth = 5;
-      this.ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+      this.ctx.strokeRect(x, y, w, h);
     }
 
-    // Text des Buttons
+    // Text
     this.ctx.fillStyle = UI_THEME.textColor;
-    this.ctx.font = `40px ${UI_THEME.fontFamily}`;
+    // Schriftgröße auch leicht anpassen für mehr Impact? Let's go:
+    const fontSize = isSelected ? 42 : 40; 
+    this.ctx.font = `${fontSize}px ${UI_THEME.fontFamily}`;
+    
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
-    this.ctx.fillText(text, rect.x + rect.width / 2, rect.y + rect.height / 2);
+    this.ctx.fillText(text, x + w / 2, y + h / 2);
   }
 
   /**
