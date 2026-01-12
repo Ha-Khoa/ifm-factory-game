@@ -74,7 +74,7 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
     {
       RenderingService.instance().camera.setCameraInBounds();
     })
-    
+
     this.gameLoopSubscription = this.game.gameLoopTick$.subscribe(() => {
       if (this.startScreen && this.startScreen.isHidden) {
         this.startScreen.updatePosition();
@@ -85,7 +85,7 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
 
   @HostListener('window:keydown', ['$event']) // später durch richtige taste ersetzen
   onKeyDown(event: KeyboardEvent): void {
-    if (this.showStartScreen) return; // Ignore input if start screen is active
+    if (this.showStartScreen && !(event.key === 'Escape')) return; // Ignore input if start screen is active
 
     if (event.key === 'Escape') {
       if(this.isSettingsOpen) this.settingsMenu?.closeSettingsMenu();
@@ -97,7 +97,7 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
 
   @HostListener('window:keyup', ['$event'])
   onKeyUp(event: KeyboardEvent): void {
-    if (this.showStartScreen) return; // Ignore input if start screen is active
+    if (this.showStartScreen && !(event.key === 'Escape')) return; // Ignore input if start screen is active
     this.game.setInput(event.key.toLowerCase(), false);
   }
 
