@@ -277,6 +277,7 @@ export class GameService {
       this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
 
       // Orders
+      Orders.updateOrderTime();
 
 
       if (this.player.inventory === null) {

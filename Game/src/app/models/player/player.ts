@@ -474,7 +474,6 @@ export class Player {
            this._inventory = null;
            this._canInteractProduct = false;
            this._hasPicked = false;
-           console.log(this._inventory)
 
            if (droppedProduct instanceof Package) {
               Products.addPackage(droppedProduct);
@@ -497,7 +496,6 @@ export class Player {
        this._hitbox.x + this._hitbox.width / 2,
        this._hitbox.y + this._hitbox.height / 2
      );
-     console.log(conveyor)
      if (!conveyor)
        return null;
 

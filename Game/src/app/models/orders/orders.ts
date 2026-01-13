@@ -3,6 +3,8 @@ import {Products} from '../product/products';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {Product} from '../product/product';
+import { take } from 'rxjs';
+import { RenderingService } from '../../services/rendering.service';
 
 
 export class Orders {
@@ -83,7 +85,10 @@ export class Orders {
     const totals = this.calculateOrderTotals(items);
 
     let id = this.getNextOrderId();
-    return { status: false , id: id, items: items, ...totals,};
+    const minTime = 30000
+    let time = totals.reward * 200
+    if(time < minTime) time = minTime
+    return { status: false , id: id, items: items, ...totals, time: time};
   }
 
   /**
@@ -94,6 +99,24 @@ export class Orders {
   private static getNextOrderId(): number {
     this.maxOderId += 1;
     return this.maxOderId;
+  }
+
+  public static updateOrderTime()
+  {
+    this.activeOrders$.pipe(take(1)).subscribe( orders => {
+      for (const order of orders)
+      {
+        let dt = RenderingService.instance().deltaTime
+        if(!dt) dt = 0.5;
+        order.time -= dt;
+        order.timeSeconds = Math.round(order.time / 1000 + 0.5);
+        if(order.time <= 0) 
+        {
+          this.completeOrder(order.id);
+          this.generateRandomOrder();
+        }
+      }
+  })
   }
 
   /**
