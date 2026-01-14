@@ -39,6 +39,7 @@ export class Products {
     new Product(6, "Basic Sensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png"),
     new Product(7, "Iron Ingot", 30, 50, 20, true, "/images/Products/iron-ingot.png"),
     new Product(8, "Iron Gear", 60, 100, [{productId: 7, quantity: 1}], true, "/images/Products/iron-gear.png"),
+    new Product(9, "Electric Motor", 200, 300, [{productId: 3, quantity: 2}, {productId: 8, quantity: 1}], true, "/images/Products/electric-motor.png")
   ]
 
   /**
