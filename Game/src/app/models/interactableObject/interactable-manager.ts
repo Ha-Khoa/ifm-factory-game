@@ -38,7 +38,7 @@ export class InteractableManager {
       new Machine(Gamefield.fieldsize * 7, Gamefield.fieldsize * 8, 40,Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Circuit Board", "/images/machine4.png", "/images/wall.png",
                   [Direction.LEFT], Products.getProductById(5)!, RenderType.THREE_D_IMG),
       // Electric Motor-Maschine (benötigt Copper Wire x2 + Iron Gear x1)
-      new Machine(Gamefield.fieldsize * 5, Gamefield.fieldsize * 4, 40, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Electric Motor", "/images/machine1.png", "/images/wall.png",
+      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 4, 40, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Electric Motor", "/images/machine1.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(9)!, RenderType.THREE_D_IMG, 8000)
     ];
     private _slotMachine!: SlotMachine;
@@ -61,6 +61,7 @@ export class InteractableManager {
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
     this.updateUnlockedMachine(2);
+    this.updateUnlockedMachine(4);
     this.machines.forEach((machine) => {
       this.generateInteractionField(machine)
       this.addParticleField(machine)
