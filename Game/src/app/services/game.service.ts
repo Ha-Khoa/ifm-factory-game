@@ -42,7 +42,6 @@ export class GameService {
   private interactableManager!: InteractableManager;
   private conveyorBeltManager!: ConveyorBeltManager;
   private prepMachine!: PrepMachineManager;
-  private lastFrameTimestamp: number = performance.now();
 
   // Input und Assets
   private inputs: Record<string, boolean> = {};
@@ -199,9 +198,6 @@ export class GameService {
     Orders.initializeOrders();
     const loop = () => {
       if (!this.GameRunning) return;
-      const now = performance.now();
-      const deltaMs = now - this.lastFrameTimestamp;
-      this.lastFrameTimestamp = now;
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
@@ -231,7 +227,7 @@ export class GameService {
 
       const workingPrepMachine = this.player.getWorkingPrepMachine();
       this.prepMachine.setWorkingMachine(workingPrepMachine);
-      this.prepMachine.update(deltaMs);
+      this.prepMachine.update(RenderingService.instance().deltaTime);
 
       this.player.render();
       this.player.updateProductInHand();

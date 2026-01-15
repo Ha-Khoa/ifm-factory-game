@@ -371,7 +371,7 @@ export class StartScreenComponent implements OnInit {
     const width = `${newWidth}px`;
     const height = `${newHeight}px`;
 
-    // Hauptcontainer und Canvas-Größe anpassen
+    // Hauptcontainer und Canvas-Größe anpassenU
     style.setProperty('width', width);
     style.setProperty('height', height);
     styleCanvas.setProperty('height', height);
