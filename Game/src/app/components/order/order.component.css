@@ -1,92 +1,97 @@
 .orders {
+  position: relative;
   width: fit-content;
   display: flex;
   flex-direction: row;
   gap: var(--gap-large);
   margin-left: var(--gap-large);
-  transition: 0.5s ease-out, transform 0.5s ease-out;
   opacity: 1;
-  position: absolute;
   top: var(--gap-large);
   z-index: 100;
+
+  &.hidden {
+
+    .order:not(:first-of-type){
+      transform: translateY(-95%);
+    }
+  }
+
+  .order {
+    transition: 0.5s ease-out, transform 0.5s ease-out;
+    transform: translateY(0%);
+    display: flex;
+    flex-direction: column;
+    border-radius: 60px; /* 60px für den squircle Radius! Hierfür gibt es keine definierte Variable */
+    corner-shape: squircle; /* Kein Error, nicht ändern */
+    overflow: hidden;
+    filter: drop-shadow(var(--box-shadow-level-1));
+
+    * {
+      .icon {
+        width: 24px;
+        aspect-ratio: 1/1;
+        filter: drop-shadow(var(--box-shadow-level-1));
+      }
+    }
+
+    div {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-small);
+    }
+
+    .title {
+      background: var(--primary);
+      padding: var(--gap-large);
+      corner-shape: squircle squircle scoop scoop; /* Kein Error, nicht ändern */
+      border-radius: var(--border-radius-small);
+      border-bottom: 1px dashed rgba(0 0 0 / .2);
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+    }
+
+    .elements {
+      corner-shape: scoop scoop round round; /* Kein Error, nicht ändern */
+      border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
+      background: var(--primary);
+      display: flex;
+      flex-direction: column;
+      padding: var(--gap-large);
+      flex-grow: 1;
+
+      .element {
+        border-bottom: 1px solid rgba(0 0 0 / 0.1);
+        padding-bottom: var(--gap-small);
+
+        &:last-of-type {
+          border: none;
+          padding-bottom: var(--gap-none);
+        }
+      }
+    }
+
+    .costs {
+      background: var(--primary);
+      padding: 8px 16px;
+    }
+
+
+    .timer {
+      background: var(--primary);
+      padding: 8px 16px;
+      color: #000000
+    }
+
+    .rewards {
+      background: var(--tertiary);
+      color: var(--secondary);
+      padding: var(--gap-large);
+      border-radius: var(--border-radius-none);
+      border-top: 1px solid rgba(0 0 0 / .2);
+      display: flex;
+      justify-content: space-around
+    }
+  }
 }
 
-.orders.hidden {
-  position: relative;
-  top: 0;
-  transform: translateY(-95%);
-}
-
-.orders .order * .icon {
-  width: 24px;
-  aspect-ratio: 1/1;
-  filter: drop-shadow(var(--box-shadow-level-1));
-}
-
-.orders .order {
-  display: flex;
-  flex-direction: column;
-  border-radius: 60px; /* 60px für den squircle Radius! Hierfür gibt es keine definierte Variable */
-  corner-shape: squircle; /* Kein Error, nicht ändern */
-  overflow: hidden;
-  filter: drop-shadow(var(--box-shadow-level-1));
-}
-
-.orders .order div {
-  display: flex;
-  align-items: center;
-  gap: var(--gap-small);
-}
-
-.orders .order .title {
-  background: var(--primary);
-  padding: var(--gap-large);
-  corner-shape: squircle squircle scoop scoop; /* Kein Error, nicht ändern */
-  border-radius: var(--border-radius-small);
-  border-bottom: 1px dashed rgba(0 0 0 / .2);
-  font-weight: bold;
-  display: flex;
-  justify-content: center;
-}
-
-
-.orders .order .elements {
-  corner-shape: scoop scoop round round; /* Kein Error, nicht ändern */
-  border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
-  background: var(--primary);
-  display: flex;
-  flex-direction: column;
-  padding: var(--gap-large);
-  flex-grow: 1;
-}
-
-.orders .order .elements .element {
-  border-bottom: 1px solid rgba(0 0 0 / 0.1);
-  padding-bottom: var(--gap-small);
-}
-
-.orders .order .elements .element:last-of-type {
-  border: none;
-  padding-bottom: var(--gap-none);
-}
-
-.orders .order .costs {
-  background: var(--primary);
-  padding: 8px 16px;
-}
-
-.timer {
-  background: var(--primary);
-  padding: 8px 16px;
-  color: #000000
-}
-
-.orders .order .rewards {
-  background: var(--tertiary);
-  color: var(--secondary);
-  padding: var(--gap-large);
-  border-radius: var(--border-radius-none);
-  border-top: 1px solid rgba(0 0 0 / .2);
-  display: flex;
-  justify-content: space-around
-}
