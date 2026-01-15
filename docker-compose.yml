@@ -1,0 +1,40 @@
+services:
+  frontend:
+    image: game
+    build:
+      context: ./Game
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "80:80"
+
+  api:
+    image: api
+    build:
+      context: ./API
+      dockerfile: Dockerfile.backend
+    ports:
+      - "5077:5077"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=GameDB;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=GameDB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d GameDB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
