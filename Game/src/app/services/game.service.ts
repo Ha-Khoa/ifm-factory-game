@@ -16,6 +16,7 @@ import { Subject } from 'rxjs';
 import {Orders} from '../models/orders/orders';
 import {PlayerService} from './player.service';
 import {PrepMachineManager} from "../models/preProcess/prep-machine-manager";
+import { RenderObject } from '../models/rendering/render-object';
 
 @Injectable({
   providedIn: 'root'
@@ -36,12 +37,11 @@ export class GameService {
   // Spielobjekte
   private gamefield!: Gamefield;
   private player!: Player;
-  private player2!: Player;
-  private towPlayerMode!: boolean;
+  private player2?: Player;
+  private _twoPlayerMode!: boolean;
   private interactableManager!: InteractableManager;
   private conveyorBeltManager!: ConveyorBeltManager;
   private prepMachine!: PrepMachineManager;
-  private lastFrameTimestamp: number = performance.now();
 
   // Input und Assets
   private inputs: Record<string, boolean> = {};
@@ -58,7 +58,7 @@ export class GameService {
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D, TwoPlayerMode: boolean = false) {
     // Initialisiere UI Service
        this.gamefield = new Gamefield();
-    this.towPlayerMode = TwoPlayerMode;
+
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
     this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
@@ -76,125 +76,63 @@ export class GameService {
       this.gamefield,
       this.playerService
     );
-    if(TwoPlayerMode)
-    {
-      this.player2 = new Player(
-        new Hitbox(new Coordinates(300, 250), Gamefield.fieldsize * 4/5 , Gamefield.fieldsize * 2/5),
-        this.playerVelocity,
-        this.gamefield,
-        this.playerService
-      );
-    }
+    this.twoPlayerMode = TwoPlayerMode;
         RenderingService.instance().convertToCameraPOV(this.player.camera);
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs, this.playerService);
 
+    // 1. Sammle alle RenderObject-Instanzen aus allen relevanten Quellen.
+    const allRenderObjects: RenderObject[] = [];
+    allRenderObjects.push(...this.interactableManager.getAllRenderObjects());
+    allRenderObjects.push(...this.gamefield.getAllRenderObjects());
 
+    // 2. Extrahiere alle Bild-Pfade aus den RenderObjects, Produkten und dem Spieler.
+    const dynamicImagePaths = allRenderObjects.flatMap(obj => this.getImagePathsFromRenderObject(obj));
+    const productImages = Products.getAllProducts().map(p => p.img).filter((img): img is string => !!img);
+    const playerImages = this.player.getAllImagePaths();
 
-    const conveyorImages =[
-      "/images/conveyorBelt/conveyorbelt-1.jpg",
-      "/images/conveyorBelt/conveyorbelt-2.jpg",
-      "/images/conveyorBelt/conveyorbelt-3.jpg",
-      "/images/conveyorBelt/conveyorbelt-4.jpg"
-    ]
-
-    // Lade benötigte Texturen vor
-    const baseImages = ["/images/StoneFloorTexture.png",
-      "/images/wall.png",
-      "/images/Concrete-Floor-Tile.png",
+    // 3. Statische Liste für UI-Bilder, Partikel-Effekte und andere nicht-dynamische Assets.
+    const staticImagePaths = [
+      // Base & UI
       "/images/package.png",
-      "/images/Brick_01-512x512.png",
       "/images/interaction-field.png",
-      "/images/machine.png",
       "/images/truck_roof.png",
       "/images/truck_back.png",
       "/images/arrow.png",
+      // Conveyor
+      "/images/conveyorBelt/conveyorbelt-1.jpg",
+      "/images/conveyorBelt/conveyorbelt-2.jpg",
+      "/images/conveyorBelt/conveyorbelt-3.jpg",
+      "/images/conveyorBelt/conveyorbelt-4.jpg",
       "/images/conveyorBelt/conveyorbelt-front-1.jpg",
       "/images/conveyorBelt/conveyorbelt-front-2.jpg",
       "/images/conveyorBelt/conveyorbelt-front-3.jpg",
-      "/images/conveyorBelt/conveyorbelt-front-4.jpg"];
-    const machineImages = this.interactableManager.getMachines().map(m => m.imgUnlocked);
-    const productImages = Products.getAllProducts().map(m => m.img).filter((img): img is string => img !== undefined);
-    const foxImages = [
-      "/images/fox/walking_1.png",
-      "/images/fox/walking_2.png",
-      "/images/fox/walking_3.png",
-      "/images/fox/walking_4.png",
-      "/images/fox/fox.png",
-      "/images/fox/sitting.png",
-      "/images/fox/1-fox-holding.png",
-      "/images/fox/2-fox-holding.png",
-      "/images/fox/3-fox-holding.png",
-      "/images/fox/4-fox-holding.png",
-      "/images/fox/walking_5.png",
-      "/images/fox/fox-sprint.png"
-    ]
-    const foxCoinImages = [
+      "/images/conveyorBelt/conveyorbelt-front-4.jpg",
+      // Fox Coin
       "/images/fox/fox-coin.png",
       "/images/fox/no-fox-coin.png",
-    ]
-    const slotMachineImages = ["/images/slotMachine/cherry.png", "/images/slotMachine/Bar.png", "/images/slotMachine/seven.png", "/images/slotMachine/diamond.png", "/images/slotMachine/lemon.png", "/images/slotMachine/ifm.png", "/images/slotMachine/manure.png", "/images/slotMachine/squirrel.png", "/images/slotMachine/slot-machine.png"];
-    const prepMachineImages = [
+      // Slot Machine
+      "/images/slotMachine/cherry.png",
+      "/images/slotMachine/Bar.png",
+      "/images/slotMachine/seven.png",
+      "/images/slotMachine/diamond.png",
+      "/images/slotMachine/lemon.png",
+      "/images/slotMachine/ifm.png",
+      "/images/slotMachine/manure.png",
+      "/images/slotMachine/squirrel.png",
+      // Prep Machine
       "/images/Products/prep-machine/frame_1.png",
       "/images/Products/prep-machine/frame_2.png",
       "/images/Products/prep-machine/frame_3.png",
-      "/images/Products/prep-machine/frame_4.png"
+      "/images/Products/prep-machine/frame_4.png",
+      // Key Bindings
+      "/images/KeyBindings/keyBindings_,.png", "/images/KeyBindings/keyBindings_..png", "/images/KeyBindings/keyBindings_0.png", "/images/KeyBindings/keyBindings_1.png", "/images/KeyBindings/keyBindings_2.png", "/images/KeyBindings/keyBindings_3.png", "/images/KeyBindings/keyBindings_4.png", "/images/KeyBindings/keyBindings_5.png", "/images/KeyBindings/keyBindings_6.png", "/images/KeyBindings/keyBindings_7.png", "/images/KeyBindings/keyBindings_8.png", "/images/KeyBindings/keyBindings_9.png", "/images/KeyBindings/keyBindings_A.png", "/images/KeyBindings/keyBindings_B.png", "/images/KeyBindings/keyBindings_C.png", "/images/KeyBindings/keyBindings_D.png", "/images/KeyBindings/keyBindings_E.png", "/images/KeyBindings/keyBindings_F.png", "/images/KeyBindings/keyBindings_G.png", "/images/KeyBindings/keyBindings_H.png", "/images/KeyBindings/keyBindings_I.png", "/images/KeyBindings/keyBindings_J.png", "/images/KeyBindings/keyBindings_K.png", "/images/KeyBindings/keyBindings_L.png", "/images/KeyBindings/keyBindings_M.png", "/images/KeyBindings/keyBindings_N.png", "/images/KeyBindings/keyBindings_O.png", "/images/KeyBindings/keyBindings_P.png", "/images/KeyBindings/keyBindings_Q.png", "/images/KeyBindings/keyBindings_R.png", "/images/KeyBindings/keyBindings_S.png", "/images/KeyBindings/keyBindings_T.png", "/images/KeyBindings/keyBindings_U.png", "/images/KeyBindings/keyBindings_V.png", "/images/KeyBindings/keyBindings_W.png", "/images/KeyBindings/keyBindings_X.png", "/images/KeyBindings/keyBindings_Y.png", "/images/KeyBindings/keyBindings_Z.png", "/images/KeyBindings/keyBindings_Left.png", "/images/KeyBindings/keyBindings_Right.png", "/images/KeyBindings/keyBindings_Up.png", "/images/KeyBindings/keyBindings_Down.png", "/images/KeyBindings/keyBindings_Controller_Left.png", "/images/KeyBindings/keyBindings_Controller_Right.png", "/images/KeyBindings/keyBindings_Controller_Up.png", "/images/KeyBindings/keyBindings_Controller_Down.png", "/images/KeyBindings/keyBindings_Controller_Button_1.png", "/images/KeyBindings/keyBindings_Controller_Button_2.png", "/images/KeyBindings/keyBindings_Controller_Button_3.png", "/images/KeyBindings/keyBindings_Controller_Button_4.png", "/images/KeyBindings/keyBindings_Controller_Button_5.png", "/images/KeyBindings/keyBindings_Controller_Button_6.png",
     ];
-    const keyBindingImages = [
-      "/images/KeyBindings/keyBindings_,.png",
-      "/images/KeyBindings/keyBindings_..png",
-      "/images/KeyBindings/keyBindings_0.png",
-      "/images/KeyBindings/keyBindings_1.png",
-      "/images/KeyBindings/keyBindings_2.png",
-      "/images/KeyBindings/keyBindings_3.png",
-      "/images/KeyBindings/keyBindings_4.png",
-      "/images/KeyBindings/keyBindings_5.png",
-      "/images/KeyBindings/keyBindings_6.png",
-      "/images/KeyBindings/keyBindings_7.png",
-      "/images/KeyBindings/keyBindings_8.png",
-      "/images/KeyBindings/keyBindings_9.png",
-      "/images/KeyBindings/keyBindings_A.png",
-      "/images/KeyBindings/keyBindings_B.png",
-      "/images/KeyBindings/keyBindings_C.png",
-      "/images/KeyBindings/keyBindings_D.png",
-      "/images/KeyBindings/keyBindings_E.png",
-      "/images/KeyBindings/keyBindings_F.png",
-      "/images/KeyBindings/keyBindings_G.png",
-      "/images/KeyBindings/keyBindings_H.png",
-      "/images/KeyBindings/keyBindings_I.png",
-      "/images/KeyBindings/keyBindings_J.png",
-      "/images/KeyBindings/keyBindings_K.png",
-      "/images/KeyBindings/keyBindings_L.png",
-      "/images/KeyBindings/keyBindings_M.png",
-      "/images/KeyBindings/keyBindings_N.png",
-      "/images/KeyBindings/keyBindings_O.png",
-      "/images/KeyBindings/keyBindings_P.png",
-      "/images/KeyBindings/keyBindings_Q.png",
-      "/images/KeyBindings/keyBindings_R.png",
-      "/images/KeyBindings/keyBindings_S.png",
-      "/images/KeyBindings/keyBindings_T.png",
-      "/images/KeyBindings/keyBindings_U.png",
-      "/images/KeyBindings/keyBindings_V.png",
-      "/images/KeyBindings/keyBindings_W.png",
-      "/images/KeyBindings/keyBindings_X.png",
-      "/images/KeyBindings/keyBindings_Y.png",
-      "/images/KeyBindings/keyBindings_Z.png",
-      "/images/KeyBindings/keyBindings_Left.png",
-      "/images/KeyBindings/keyBindings_Right.png",
-      "/images/KeyBindings/keyBindings_Up.png",
-      "/images/KeyBindings/keyBindings_Down.png",
-      "/images/KeyBindings/keyBindings_Controller_Left.png",
-      "/images/KeyBindings/keyBindings_Controller_Right.png",
-      "/images/KeyBindings/keyBindings_Controller_Up.png",
-      "/images/KeyBindings/keyBindings_Controller_Down.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_1.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_2.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_3.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_4.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_5.png",
-      "/images/KeyBindings/keyBindings_Controller_Button_6.png",
-    ]
-    const allImages = [...new Set([...conveyorImages, ...baseImages, ...machineImages, ...productImages, ...foxImages, ...foxCoinImages, ...keyBindingImages, ...slotMachineImages, ...prepMachineImages])];
-    await this.preloadImages(allImages);
+
+    // 4. Kombiniere alle Pfade und entferne Duplikate
+    const allImagesToLoad = [...new Set([...dynamicImagePaths, ...productImages, ...playerImages, ...staticImagePaths])];
+
+    // 5. Lade alle Bilder vor
+    await this.preloadImages(allImagesToLoad);
 
     // Füge Spielfeld zum Rendering-Buffer hinzu
     this.interactableManager.addToInteractableObjects();
@@ -203,6 +141,27 @@ export class GameService {
     this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
     this.prepMachine = new PrepMachineManager(this.gamefield);
     Products.generateProducts();
+  }
+
+  /**
+   * Extrahiert alle Bild-Pfade von einem RenderObject.
+   * @param renderObject Das Objekt, aus dem die Pfade extrahiert werden sollen.
+   * @returns Ein Array von Bild-Pfaden.
+   */
+  private getImagePathsFromRenderObject(renderObject: RenderObject): string[] {
+    const paths: string[] = [];
+
+    if (renderObject.img) {
+      paths.push(renderObject.img);
+    }
+    if (renderObject.imgWall) {
+      paths.push(renderObject.imgWall);
+    }
+    if (renderObject.frames && renderObject.frames.length > 0) {
+      paths.push(...renderObject.frames);
+    }
+
+    return paths;
   }
 
   /**
@@ -239,46 +198,43 @@ export class GameService {
     Orders.initializeOrders();
     const loop = () => {
       if (!this.GameRunning) return;
-      const now = performance.now();
-      const deltaMs = now - this.lastFrameTimestamp;
-      this.lastFrameTimestamp = now;
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-                  
+
 
       // Update-Phase
       this.uiService.clearMachinePopUp();
       RenderingService.instance().updateFPS()
       this.player.changeVelocity();
-      this.player.updatePlayer(this.towPlayerMode);
+      this.player.updatePlayer(this._twoPlayerMode);
       this.interactableManager.checkForInteraction(this.player);
       this.player.pickProduct();
       this.player.dropProduct();
-            
-      if(this.towPlayerMode)
+
+      if(this._twoPlayerMode && this.player2)
       {
         this.player2.changeVelocity();
-        this.player2.updatePlayer(this.towPlayerMode);
+        this.player2.updatePlayer(this._twoPlayerMode);
         this.interactableManager.checkForInteraction(this.player2);
         this.player2.pickProduct();
         this.player2.dropProduct();
         this.player2.render();
         this.player2.updateProductInHand();
-        
+
       }
 
       this.conveyorBeltManager.update();
 
       const workingPrepMachine = this.player.getWorkingPrepMachine();
       this.prepMachine.setWorkingMachine(workingPrepMachine);
-      this.prepMachine.update(deltaMs);
-      
+      this.prepMachine.update(RenderingService.instance().deltaTime);
+
       this.player.render();
       this.player.updateProductInHand();
 
       let playerInteractSlotMachine = this.interactableManager.checkPlayerInSlotMachineArea(this.player)
-      playerInteractSlotMachine = !playerInteractSlotMachine && this.towPlayerMode ? this.interactableManager.checkPlayerInSlotMachineArea(this.player2) : playerInteractSlotMachine;  
-      
+      playerInteractSlotMachine = !playerInteractSlotMachine && this._twoPlayerMode && this.player2 ? this.interactableManager.checkPlayerInSlotMachineArea(this.player2) : playerInteractSlotMachine;
+
       if(playerInteractSlotMachine)
       {
         this.player.cameraFix = false;
@@ -304,7 +260,7 @@ export class GameService {
       this.interactableManager.checkPackageInHand(this.player);
       this.interactableManager.checkMachineNeedsProduct(this.player);
 
-      if(this.towPlayerMode){
+      if(this._twoPlayerMode && this.player2){
       this.interactableManager.checkMachineNeedsProduct(this.player2);
       this.interactableManager.checkPackageInHand(this.player2);
       }
@@ -315,8 +271,9 @@ export class GameService {
       else this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov, null);
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
       this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
-                  
+
       // Orders
+      Orders.updateOrderTime();
 
 
       if (this.player.inventory === null) {
@@ -347,16 +304,16 @@ export class GameService {
 
   setInput(key: string, pressed: boolean) {
     this.inputs[key] = pressed;
-    this.player.setInput(this.inputs)     
+    this.player.setInput(this.inputs)
     if(this.interactableManager.checkPlayerInSlotMachineArea(this.player))
-      {   
+      {
     SlotMachineService.instance().setInput(this.inputs, this.player);
       }
       else if(this.player2 && this.interactableManager.checkPlayerInSlotMachineArea(this.player2))
       {
     SlotMachineService.instance().setInput(this.inputs, this.player2);
       }
-    if(this.towPlayerMode)
+    if(this._twoPlayerMode && this.player2)
     {
       this.player2.setInput(this.inputs);
     }
@@ -365,4 +322,31 @@ export class GameService {
     this.interactableManager.upgradeMachineOnInteraction(this.player);
     }
   }
+
+  get twoPlayerMode(): boolean {
+    return this._twoPlayerMode;
+  }
+  set twoPlayerMode(value: boolean) {
+    if (this._twoPlayerMode === value) {
+      return;
+    }
+    this._twoPlayerMode = value;
+
+    if (value) {
+      if (!this.player2) {
+        this.player2 = new Player(
+          new Hitbox(new Coordinates(300, 250), Gamefield.fieldsize * 4 / 5, Gamefield.fieldsize * 2 / 5),
+          this.playerVelocity,
+          this.gamefield,
+          this.playerService
+        );
+      }
+    } else {
+      if (this.player2) {
+        this.player2 = undefined;
+        RenderingService.instance().deleteRenderingObjektByName("player1")
+      }
+    }
+  }
+
 }

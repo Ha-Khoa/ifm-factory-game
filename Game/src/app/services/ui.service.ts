@@ -73,9 +73,8 @@ export class UIService {
   }
 
   /** Draws the detailed information popup for a machine. */
-  public drawMachinePopUp(machine: Machine): void {
-    this.clearMachinePopUp();
-    this.machinePopups = this.machinePopupDrawer.drawDetails(machine);
+  public drawMachinePopUp(machine: Machine, player: Player): void {
+    this.machinePopups.push(...this.machinePopupDrawer.drawDetails(machine, player));
   }
 
   /** Clears the currently visible machine detail popup. */

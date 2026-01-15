@@ -8,6 +8,7 @@ import { Camera } from "../models/camera/camera";
 import { Gamefield } from "../models/gamefield/gamefield";
 import { SlotMachine } from "../models/slot-machine/slot-machine";
 import { SlotMachineService } from "./slot-machine.service";
+import { PrepMachine } from "../models/preProcess/prep-machine";
 
 
 /**
@@ -165,6 +166,31 @@ export class RenderingService {
         );
         this._ctx.fill();
 
+        // Render Produkt auf PrepMachine
+        if (Obj instanceof PrepMachine) {
+          const prepMachine = Obj as PrepMachine;
+          const visualState = prepMachine.getVisualState();
+          
+          if ((visualState.isActive || visualState.hasOutput) && prepMachine.prepNextFrame) {
+            // Zeichne das Animationsbild
+            const frameImage = this._images[prepMachine.prepNextFrame];
+            if (frameImage) {
+              // Berechne die Position und Größe der Animation relativ zur Maschine
+              const animWidth = objWidth * 0.7; // Mache die Animation 70% der Maschinengröße
+              const animHeight = animWidth; // Behalte das quadratische Seitenverhältnis bei
+              const xCenter = Math.round(xObj + (objWidth - animWidth) / 2);
+              const yCenter = yProjection + (objHeight * Math.cos(this._angle) - animHeight) / 2;
+              
+              this._ctx.drawImage(
+                frameImage,
+                xCenter,
+                yCenter,
+                animWidth,
+                animHeight
+              );
+            }
+          }
+        }
       }
       // Bild mit Wand
       else if (Obj.type === RenderType.IMG) {

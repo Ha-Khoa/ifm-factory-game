@@ -49,6 +49,7 @@
   justify-content: center;
 }
 
+
 .orders .order .elements {
   corner-shape: scoop scoop round round; /* Kein Error, nicht ändern */
   border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
@@ -73,6 +74,13 @@
   background: var(--primary);
   padding: 8px 16px;
 }
+
+.timer {
+  background: var(--primary);
+  padding: 8px 16px;
+  color: #000000
+}
+
 .orders .order .rewards {
   background: var(--tertiary);
   color: var(--secondary);

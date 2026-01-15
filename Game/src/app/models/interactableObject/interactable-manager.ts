@@ -36,7 +36,10 @@ export class InteractableManager {
       new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/machine3.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(5)!, RenderType.THREE_D_IMG),
       new Machine(Gamefield.fieldsize * 7, Gamefield.fieldsize * 8, 40,Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Circuit Board", "/images/machine4.png", "/images/wall.png",
-                  [Direction.LEFT], Products.getProductById(5)!, RenderType.THREE_D_IMG)
+                  [Direction.LEFT], Products.getProductById(5)!, RenderType.THREE_D_IMG),
+      // Electric Motor-Maschine (benötigt Copper Wire x2 + Iron Gear x1)
+      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 4, 40, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Electric Motor", "/images/machine1.png", "/images/wall.png",
+                  [Direction.DOWN], Products.getProductById(9)!, RenderType.THREE_D_IMG, 8000)
     ];
     private _slotMachine!: SlotMachine;
 
@@ -58,6 +61,7 @@ export class InteractableManager {
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
     this.updateUnlockedMachine(2);
+    this.updateUnlockedMachine(4);
     this.machines.forEach((machine) => {
       this.generateInteractionField(machine)
       this.addParticleField(machine)
@@ -310,7 +314,7 @@ export class InteractableManager {
     // Visuelles Feedback: Maschine grün färben
     machine.renderObject.rectColor = "rgba(81, 255, 81, 1)";
     machine.renderObject.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
-    this.ui.drawMachinePopUp(machine);
+    this.ui.drawMachinePopUp(machine, player);
   }
 
   upgradeMachineOnInteraction(player: Player) {
@@ -335,7 +339,7 @@ export class InteractableManager {
     prepMachine.rectColor = "rgba(81, 255, 81, 1)";
     prepMachine.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
     // Cast to Machine for UI compatibility
-    this.ui.drawMachinePopUp(prepMachine as any);
+    this.ui.drawMachinePopUp(prepMachine as any, player);
   }
 
   /**
@@ -436,6 +440,14 @@ export class InteractableManager {
   get submissionArea(): SubmissionArea
   {
     return this._submissionArea;
+  }
+
+  public getAllRenderObjects(): RenderObject[] {
+    const renderObjects: RenderObject[] = [];
+    this.machines.forEach(machine => renderObjects.push(machine.renderObject));
+    renderObjects.push(this._slotMachine.renderObject);
+    renderObjects.push(this._submissionArea.renderObject);
+    return renderObjects;
   }
 
   }
