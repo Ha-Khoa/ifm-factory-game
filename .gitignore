@@ -492,3 +492,5 @@ Game/.vscode
 Game/.vscode/
 .vscode
 .vscode/
+
+*.tar
