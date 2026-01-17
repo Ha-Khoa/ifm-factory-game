@@ -1,5 +1,5 @@
 services:
-  frontend:
+  game:
     image: game
     build:
       context: ./Game
