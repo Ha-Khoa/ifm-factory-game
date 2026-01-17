@@ -19,7 +19,8 @@ namespace API.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "varchar(100)", nullable: false),
                     Score = table.Column<int>(type: "int", nullable: false),
-                    Money = table.Column<int>(type: "int", nullable: false)
+                    Money = table.Column<int>(type: "int", nullable: false),
+                    TwoPlayerMode = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {

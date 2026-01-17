@@ -50,6 +50,25 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/Player/${identifier}`);
   }
 
+  // TwoPlayerMode Management
+  getTwoPlayerMode(identifier: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.baseUrl}/Player/${identifier}/TwoPlayerMode`).pipe(
+      catchError(error => {
+        console.error('Error fetching TwoPlayerMode status:', error);
+        return of(false); // Default to false on error.
+      })
+    );
+  }
+
+  setTwoPlayerMode(identifier: string, isTwoPlayerMode: boolean): Observable<PlayerInterface> {
+    return this.http.patch<PlayerInterface>(`${this.baseUrl}/Player/${identifier}/TwoPlayerMode/${isTwoPlayerMode}`, {}).pipe(
+      catchError(error => {
+        console.error('Error setting TwoPlayerMode status:', error);
+        throw error; // Re-throw the error for component to handle.
+      })
+    );
+  }
+
   // Score Management
   getScore(identifier: string): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/Score/${identifier}`);
@@ -98,3 +117,4 @@ export class ApiService {
     return this.http.get<Factory>(`${this.baseUrl}/Factory/${factoryId}`);
   }
 }
+

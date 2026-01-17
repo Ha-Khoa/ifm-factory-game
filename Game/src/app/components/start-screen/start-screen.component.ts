@@ -36,7 +36,8 @@ export class StartScreenComponent implements OnInit {
   private buttonRect = { x: 0, y: 0, width: 0, height: 0 };
   private playerModeButtonRect = { x: 0, y: 0, width: 0, height: 0 };
   private settingsButtonRect = { x: 0, y: 0, width: 0, height: 0 };
-  private highScores: PlayerInterface[] = [];
+  private onePlayerHighScores: PlayerInterface[] = [];
+  private twoPlayerHighScores: PlayerInterface[] = [];
   private backgroundImage!: HTMLImageElement;
   private selectedButtonIndex = 0; // 0: START, 1: Spielermodus, 2: EINSTELLUNGEN
   public isHidden = false; // Steuert die Sichtbarkeit der Komponente
@@ -73,9 +74,16 @@ export class StartScreenComponent implements OnInit {
    */
   private loadHighScores(): void {
     this.apiService.getPlayers().subscribe(players => {
-      this.highScores = players
+      this.onePlayerHighScores = players
+        .filter(p => !p.twoPlayerMode)
         .sort((a, b) => b.score - a.score)
         .slice(0, 10);
+
+      this.twoPlayerHighScores = players
+        .filter(p => p.twoPlayerMode)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10);
+
       this.draw(); // Neuzeichnen mit den Highscore-Daten
     });
   }
@@ -116,8 +124,6 @@ export class StartScreenComponent implements OnInit {
    * Zeichnet die beiden Highscore-Anzeigetafeln links und rechts.
    */
   private drawScoreboards(): void {
-    if (this.highScores.length === 0) return;
-
     const scoreboardWidth = 400;
     const padding = 50;
 
@@ -127,18 +133,21 @@ export class StartScreenComponent implements OnInit {
 
     this.ctx.fillStyle = UI_THEME.textColor;
 
-    this.drawSingleScoreboard('1 Player High Scores', leftBoardX, boardY, scoreboardWidth);
-    this.drawSingleScoreboard('2 Player High Scores', rightBoardX, boardY, scoreboardWidth);
+    this.drawSingleScoreboard('1 Player High Scores', this.onePlayerHighScores, leftBoardX, boardY, scoreboardWidth);
+    this.drawSingleScoreboard('2 Player High Scores', this.twoPlayerHighScores, rightBoardX, boardY, scoreboardWidth);
   }
 
   /**
    * Zeichnet eine einzelne Anzeigetafel mit Titel und einer Liste von Spielständen.
    * @param title Der Titel der Anzeigetafel.
+   * @param highScores Die Liste der Highscores, die angezeigt werden sollen.
    * @param x Die X-Koordinate der linken oberen Ecke.
    * @param y Die Y-Koordinate der linken oberen Ecke.
    * @param width Die Breite der Anzeigetafel.
    */
-  private drawSingleScoreboard(title: string, x: number, y: number, width: number): void {
+  private drawSingleScoreboard(title: string, highScores: PlayerInterface[], x: number, y: number, width: number): void {
+    if (highScores.length === 0) return;
+
     const lineHeight = 40;
     const titleY = y;
     const listY = y + lineHeight + 10;
@@ -154,7 +163,7 @@ export class StartScreenComponent implements OnInit {
     this.ctx.font = `30px ${UI_THEME.fontFamily}`;
 
     // Spielstände zeichnen
-    this.highScores.forEach((player, index) => {
+    highScores.forEach((player, index) => {
       const scoreY = listY + index * lineHeight;
       const rankText = `${index + 1}.`;
       const nameText = player.name;

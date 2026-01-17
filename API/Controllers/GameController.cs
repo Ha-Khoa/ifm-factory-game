@@ -1,4 +1,4 @@
-﻿using API.Data;
+using API.Data;
 using API.Models.Factory;
 using API.Models.User;
 using Microsoft.AspNetCore.Mvc;
@@ -17,8 +17,9 @@ namespace API.Controllers;
 /// </remarks>
 [ApiController]
 [Route("api/[controller]")]
-public class GameController : ControllerBase {
-#region Variables
+public class GameController : ControllerBase
+{
+    #region Variables
     /// <summary>
     /// A private instance of <see cref="ApplicationDbContext"/> used for accessing the database.
     /// </summary>
@@ -27,18 +28,18 @@ public class GameController : ControllerBase {
     /// players, factories, and machines within the application.
     /// </remarks>
     private ApplicationDbContext context;
-#endregion
+    #endregion
 
-#region Services
+    #region Services
     // No Services
-#endregion
+    #endregion
 
-#region Constructors
+    #region Constructors
     public GameController(ApplicationDbContext context) { this.context = context; }
-#endregion
+    #endregion
 
-#region Methods
-# region Player
+    #region Methods
+    #region Player
     /// <summary>
     /// Retrieves a list of players along with their associated factories.
     /// This method queries the database for all players and includes their
@@ -46,7 +47,8 @@ public class GameController : ControllerBase {
     /// </summary>
     /// <returns>Returns an IActionResult containing the list of players with their factories if successful.</returns>
     [HttpGet("Players")]
-    public async Task<IActionResult> GetPlayerList() {
+    public async Task<IActionResult> GetPlayerList()
+    {
         var playersWithFactories = await context.Players
                                           .Include(p => p.Factory)
                                           .ToListAsync();
@@ -64,7 +66,8 @@ public class GameController : ControllerBase {
     /// <param name="identifier">The unique identifier or username of the player to retrieve.</param>
     /// <returns>Returns an IActionResult containing the player if found, or a NotFound result if no match is found.</returns>
     [HttpGet("Player/{identifier}")]
-    public async Task<IActionResult> GetPlayer(string identifier) {
+    public async Task<IActionResult> GetPlayer(string identifier)
+    {
         Player? player = await GetPlayerElementByIdentifier(identifier);
 
         if (player == null)
@@ -82,10 +85,11 @@ public class GameController : ControllerBase {
     /// <param name="username">The username of the player to be added.</param>
     /// <returns>Returns an IActionResult containing the newly created player object if successful, or a BadRequest response if the username already exists.</returns>
     [HttpPost("Player/{username}")]
-    public async Task<IActionResult> AddPlayer(string username) {
+    public async Task<IActionResult> AddPlayer(string username)
+    {
         // Check if player exists already
-        if(await GetPlayerElement(username) != null)
-            return BadRequest( $"Username {username} already exists.");
+        if (await GetPlayerElement(username) != null)
+            return BadRequest($"Username {username} already exists.");
 
         // Create and save player
         Player player = new Player() { Name = username };
@@ -111,7 +115,8 @@ public class GameController : ControllerBase {
     /// <param name="identifier">The unique identifier of the player to be deleted. This can be the player's ID or name.</param>
     /// <returns>Returns an IActionResult indicating the result of the deletion. If successful, a confirmation message is returned. If the player is not found, a NotFound response is returned.</returns>
     [HttpDelete("Player/{identifier}")]
-    public async Task<IActionResult> DeletePlayer(string identifier) {
+    public async Task<IActionResult> DeletePlayer(string identifier)
+    {
         Player? player = await GetPlayerElementByIdentifier(identifier);
 
         if (player == null)
@@ -131,12 +136,16 @@ public class GameController : ControllerBase {
     /// </summary>
     /// <param name="identifier">The identifier of the player, which can be either an integer ID or a username string.</param>
     /// <returns>Returns a Player object if a matching player is found, or null if no match exists.</returns>
-    private async Task<Player?> GetPlayerElementByIdentifier(string identifier) {
+    private async Task<Player?> GetPlayerElementByIdentifier(string identifier)
+    {
         Player? player;
 
-        if (int.TryParse(identifier, out int userId)) {
+        if (int.TryParse(identifier, out int userId))
+        {
             player = await GetPlayerElement(userId);
-        } else {
+        }
+        else
+        {
             player = await GetPlayerElement(identifier);
         }
 
@@ -150,7 +159,8 @@ public class GameController : ControllerBase {
     /// </summary>
     /// <param name="username">The username of the player to retrieve.</param>
     /// <returns>Returns a Player object if a match is found, otherwise null.</returns>
-    private async Task<Player?> GetPlayerElement(string username) {
+    private async Task<Player?> GetPlayerElement(string username)
+    {
         return await context.Players
                             .Include(p => p.Factory)
                             .ThenInclude(f => f.Machines)
@@ -164,15 +174,16 @@ public class GameController : ControllerBase {
     /// </summary>
     /// <param name="playerId">The unique identifier of the player to retrieve.</param>
     /// <returns>Returns the Player object if found, including its related factory and machines; otherwise, null.</returns>
-    private async Task<Player?> GetPlayerElement(int playerId) {
+    private async Task<Player?> GetPlayerElement(int playerId)
+    {
         return await context.Players
                             .Include(p => p.Factory)
                             .ThenInclude(f => f.Machines)
                             .FirstOrDefaultAsync(p => p.Id == playerId);
     }
-# endregion
+    #endregion
 
-# region Score
+    #region Score
     /// <summary>
     /// Updates the score of a specified player.
     /// This method retrieves the player by their unique identifier and updates their score
@@ -182,10 +193,11 @@ public class GameController : ControllerBase {
     /// <param name="score">The new score value to assign to the player.</param>
     /// <returns>Returns an IActionResult indicating the outcome of the operation. If the player is not found, returns a 404 Not Found result. If successful, returns a 200 OK result.</returns>
     [HttpPatch("Score/{identifier}/{score}")]
-    public async Task<IActionResult> UpdatePlayerScore(string identifier, int score) {
+    public async Task<IActionResult> UpdatePlayerScore(string identifier, int score)
+    {
         Player? player = await GetPlayerElementByIdentifier(identifier);
 
-        if ( player == null )
+        if (player == null)
             return NotFound($"Player not found.");
 
         player.Score = score;
@@ -204,10 +216,11 @@ public class GameController : ControllerBase {
     /// <returns>Returns an IActionResult containing the updated score if the operation is successful.
     /// If the player is not found, a NotFound result is returned.</returns>
     [HttpPatch("Score/{identifier}/Add/{score}")]
-    public async Task<IActionResult> AddPlayerScore(string identifier, int score) {
+    public async Task<IActionResult> AddPlayerScore(string identifier, int score)
+    {
         Player? player = await GetPlayerElementByIdentifier(identifier);
 
-        if ( player == null )
+        if (player == null)
             return NotFound($"Player not found.");
 
         player.Score += score;
@@ -224,15 +237,17 @@ public class GameController : ControllerBase {
     /// <param name="score">The amount by which the player's score will be reduced.</param>
     /// <returns>Returns an IActionResult containing the updated score if the operation is successful, or a NotFound result if the player is not found.</returns>
     [HttpPatch("Score/{identifier}/Remove/{score}")]
-    public async Task<IActionResult> RemovePlayerScore(string identifier, int score) {
+    public async Task<IActionResult> RemovePlayerScore(string identifier, int score)
+    {
         Player? player = await GetPlayerElementByIdentifier(identifier);
 
-        if ( player == null )
+        if (player == null)
             return NotFound($"Player not found.");
 
         player.Score -= score;
 
-        if ( player.Score < 0 ) {
+        if (player.Score < 0)
+        {
             player.Score = 0;
         }
 
@@ -249,17 +264,18 @@ public class GameController : ControllerBase {
     /// <param name="identifier">The unique identifier of the player, which could be either their username or ID.</param>
     /// <returns>Returns an IActionResult containing the player's current score if the player is found, or a NotFound result if the player does not exist.</returns>
     [HttpGet("Score/{identifier}")]
-    public async Task<IActionResult> GetPlayerScore(string identifier) {
+    public async Task<IActionResult> GetPlayerScore(string identifier)
+    {
         Player? player = await GetPlayerElementByIdentifier(identifier);
 
-        if ( player == null )
+        if (player == null)
             return NotFound($"Player not found.");
 
         return Ok(player.Score);
     }
-# endregion
+    #endregion
 
-# region Money
+    #region Money
     /// Updates the money value of a specific player.
     /// This method identifies the player using the provided identifier
     /// and sets their money amount to the specified value.
@@ -269,13 +285,14 @@ public class GameController : ControllerBase {
     /// <return>Returns an IActionResult indicating the result of the operation.
     /// If the player is found, an "Ok" response is returned. Otherwise, a "Not Found" response is returned.</return>
     [HttpPatch("Money/{identifier}/{value}")]
-    public async Task<IActionResult> UpdatePlayerMoney(string identifier, int value) {
+    public async Task<IActionResult> UpdatePlayerMoney(string identifier, int value)
+    {
         Player? player = await GetPlayerElementByIdentifier(identifier);
 
-        if ( player == null )
+        if (player == null)
             return NotFound($"Player not found.");
 
-        if( value < 0)
+        if (value < 0)
             return Conflict($"There are no debts in this world! Negative values are not allowed");
 
         player.Money = value;
@@ -291,13 +308,14 @@ public class GameController : ControllerBase {
     /// <param name="value">The amount of money to add to the player's account.</param>
     /// <return>Returns an IActionResult indicating success with the updated money value or failure if the player is not found.</return>
     [HttpPatch("Money/{identifier}/Add/{value}")]
-    public async Task<IActionResult> AddPlayerMoney(string identifier, int value) {
+    public async Task<IActionResult> AddPlayerMoney(string identifier, int value)
+    {
         Player? player = await GetPlayerElementByIdentifier(identifier);
 
-        if ( player == null )
+        if (player == null)
             return NotFound($"Player not found.");
 
-        if( value < 0 )
+        if (value < 0)
             return Conflict("Adding negativ value to the money is not allowed.");
 
         player.Money += value;
@@ -321,16 +339,18 @@ public class GameController : ControllerBase {
     /// - Ok with the updated player balance if the operation is successful.
     /// </returns>
     [HttpPatch("Money/{identifier}/Remove/{value}")]
-    public async Task<IActionResult> RemovePlayerMoney(string identifier, int value) {
+    public async Task<IActionResult> RemovePlayerMoney(string identifier, int value)
+    {
         Player? player = await GetPlayerElementByIdentifier(identifier);
-        if ( player == null )
+        if (player == null)
             return NotFound($"Player not found.");
 
-        if( value < 0 )
+        if (value < 0)
             return Conflict("Removing negativ value from the money is not allowed.");
 
         int money = player.Money;
-        if ( (money - value) < 0 ) {
+        if ((money - value) < 0)
+        {
             return Conflict($"Player has not enough money. Current Money: {money}");
         }
 
@@ -349,17 +369,56 @@ public class GameController : ControllerBase {
     /// <param name="identifier">The unique identifier of the player.</param>
     /// <returns>Returns an IActionResult containing the player's money value if found, or a NotFound response if the player does not exist.</returns>
     [HttpGet("Money/{identifier}")]
-    public async Task<IActionResult> GetPlayerMoney(string identifier) {
+    public async Task<IActionResult> GetPlayerMoney(string identifier)
+    {
         Player? player = await GetPlayerElementByIdentifier(identifier);
 
-        if ( player == null )
+        if (player == null)
             return NotFound("Player not found");
 
         return Ok(player.Money);
     }
-# endregion
+    #endregion
 
-#region Machine
+    #region TwoPlayerMode
+    /// <summary>
+    /// Updates the TwoPlayerMode status for a given player.
+    /// </summary>
+    /// <param name="identifier">The player's identifier (ID or username).</param>
+    /// <param name="isTwoPlayerMode">The new value for TwoPlayerMode.</param>
+    /// <returns>An IActionResult with the updated player object.</returns>
+    [HttpPatch("Player/{identifier}/TwoPlayerMode/{isTwoPlayerMode}")]
+    public async Task<IActionResult> SetTwoPlayerMode(string identifier, bool isTwoPlayerMode)
+    {
+        Player? player = await GetPlayerElementByIdentifier(identifier);
+
+        if (player == null)
+            return NotFound();
+
+        player.TwoPlayerMode = isTwoPlayerMode;
+        await context.SaveChangesAsync();
+
+        return Ok(player);
+    }
+
+    /// <summary>
+    /// Retrieves the TwoPlayerMode status for a given player.
+    /// </summary>
+    /// <param name="identifier">The player's identifier (ID or username).</param>
+    /// <returns>An IActionResult with the boolean status of TwoPlayerMode.</returns>
+    [HttpGet("Player/{identifier}/TwoPlayerMode")]
+    public async Task<IActionResult> GetTwoPlayerMode(string identifier)
+    {
+        Player? player = await GetPlayerElementByIdentifier(identifier);
+
+        if (player == null)
+            return NotFound();
+
+        return Ok(player.TwoPlayerMode);
+    }
+    #endregion
+
+    #region Machine
     /// <summary>
     /// Adds a new machine to the specified factory.
     /// This method creates a new machine instance with an initial level of 1 and associates it
@@ -370,13 +429,15 @@ public class GameController : ControllerBase {
     /// <param name="machineId">The unique identifier of the machine to be added to the factory.</param>
     /// <returns>Returns an IActionResult indicating a successful addition of the machine or a NotFound result if the factory is not found.</returns>
     [HttpPost("Machine/{factoryId}/{machineId}")]
-    public async Task<IActionResult> AddMachine(int factoryId, string machineId) {
+    public async Task<IActionResult> AddMachine(int factoryId, string machineId)
+    {
         Factory? factory = await GetFactoryElement(factoryId);
 
-        if ( factory == null )
+        if (factory == null)
             return NotFound($"Factory with id {factoryId} not found.");
 
-        Machine machine = new Machine() {
+        Machine machine = new Machine()
+        {
             MachineNumber = machineId,
             Level = 1,
         };
@@ -400,19 +461,20 @@ public class GameController : ControllerBase {
     /// - `Ok` if the machine level is successfully updated.
     /// </returns>
     [HttpPatch("Machine/{factoryId}/{machineId}/{level}")]
-    public async Task<IActionResult> UpdateMachineLevel(int factoryId, int machineId, int level) {
+    public async Task<IActionResult> UpdateMachineLevel(int factoryId, string machineId, int level)
+    {
         Factory? factory = await GetFactoryElement(factoryId);
 
-        if ( factory == null )
+        if (factory == null)
             return NotFound($"Factory with id {factoryId} not found.");
 
-        Machine? machine = factory.Machines.FirstOrDefault(m => m.Id == machineId);
+        Machine? machine = factory.Machines.FirstOrDefault(m => m.MachineNumber == machineId);
 
-        if ( machine == null )
+        if (machine == null)
             return NotFound($"Machine with id {machineId} not found.");
 
 
-        if ( level <= machine.Level )
+        if (level <= machine.Level)
             return Conflict($"New machine level must be greater than current machine level. Current machine level: {machine.Level}.");
 
         machine.Level = level;
@@ -430,22 +492,23 @@ public class GameController : ControllerBase {
     /// <param name="machineId">The unique identifier of the machine to retrieve.</param>
     /// <returns>Returns an IActionResult containing the machine details if found, or a NotFound response if the factory or machine does not exist.</returns>
     [HttpGet("Machine/{factoryId}/{machineId}")]
-    public async Task<IActionResult> GetMachine(int factoryId, int machineId) {
+    public async Task<IActionResult> GetMachine(int factoryId, string machineId)
+    {
         Factory? factory = await GetFactoryElement(factoryId);
 
-        if ( factory == null )
+        if (factory == null)
             return NotFound($"Factory with id {factoryId} not found.");
 
-        Machine? machine = factory.Machines.FirstOrDefault(m => m.Id == machineId);
+        Machine? machine = factory.Machines.FirstOrDefault(m => m.MachineNumber == machineId);
 
-        if ( machine == null )
+        if (machine == null)
             return NotFound($"Machine with id {machineId} not found.");
 
         return Ok(machine);
     }
-# endregion
+    #endregion
 
-#region Factories
+    #region Factories
     /// <summary>
     /// Retrieves a specific factory by its unique identifier.
     /// This method queries the database for a factory, including its associated player
@@ -454,10 +517,11 @@ public class GameController : ControllerBase {
     /// <param name="factoryId">The unique identifier of the factory to be retrieved.</param>
     /// <returns>Returns an IActionResult containing the factory details if found or a NotFound result if the factory does not exist.</returns>
     [HttpGet("Factory/{factoryId}")]
-    public async Task<IActionResult> GetFactory(int factoryId) {
+    public async Task<IActionResult> GetFactory(int factoryId)
+    {
         Factory? factory = await GetFactoryElement(factoryId);
 
-        if ( factory == null )
+        if (factory == null)
             return NotFound($"Factory with id {factoryId} not found.");
 
         return Ok(factory);
@@ -469,16 +533,17 @@ public class GameController : ControllerBase {
     /// </summary>
     /// <param name="factoryId">The unique identifier of the factory to be retrieved.</param>
     /// <returns>Returns a Task containing the factory entity if found, or null otherwise.</returns>
-    private async Task<Factory?> GetFactoryElement(int factoryId) {
+    private async Task<Factory?> GetFactoryElement(int factoryId)
+    {
         return await context.Factories
                             .Include(f => f.Player)
                             .Include(f => f.Machines)
                             .FirstOrDefaultAsync(f => f.Id == factoryId);
     }
-#endregion
-#endregion
+    #endregion
+    #endregion
 
-#region Event Handlers
+    #region Event Handlers
     // No Event Handlers
-#endregion
+    #endregion
 }

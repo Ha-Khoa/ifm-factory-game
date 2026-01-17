@@ -111,7 +111,13 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
   async onStartGame(): Promise<void> {
     this.game.startGame();
     this.startScreen?.zoomOut();
-     setTimeout(() => {
+    if (this.game.twoPlayerMode === true) {
+      this.apiService.setTwoPlayerMode(this.playerService.player!.name, true).subscribe({
+        next: () => { /* Successfully updated backend */ },
+        error: (err) => { /* Handle error if needed */ }
+      });
+    }
+    setTimeout(() => {
      this.showStartScreen = false;
       this.alignSubscription.unsubscribe();
     }, 2000);

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Models.User;
@@ -57,6 +57,11 @@ public class Player {
 
     // Navigation Property: Ein Player hat genau eine Factory
     public Factory.Factory? Factory { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the player is in two-player mode.
+    /// </summary>
+    public bool TwoPlayerMode { get; set; } = false;
 #endregion
 
 #region Services
