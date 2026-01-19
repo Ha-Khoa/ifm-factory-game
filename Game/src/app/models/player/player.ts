@@ -238,74 +238,58 @@ export class Player {
   */
    updatePlayer(twoPlayerMode: boolean = true) {
     this.updatePlayerAnimation();
-        if(this._direction === Direction.RIGHT || this._direction === Direction.LEFT)
-       {
-        this._lastDirection = this._direction
-       }
+    if(this._direction === Direction.RIGHT || this._direction === Direction.LEFT) {
+        this._lastDirection = this._direction;
+    }
 
-       let moveVector = new Coordinates(this._input.horizontal, this._input.vertical);
-        if (moveVector.x !== 0 || moveVector.y !== 0) {
-            const magnitude = Math.sqrt(moveVector.x ** 2 + moveVector.y ** 2);
-            if (magnitude > 1) {
-                moveVector.x /= magnitude;
-                moveVector.y /= magnitude;
+    let moveVector = new Coordinates(this._input.horizontal, this._input.vertical);
+    if (moveVector.x !== 0 || moveVector.y !== 0) {
+        const magnitude = Math.sqrt(moveVector.x ** 2 + moveVector.y ** 2);
+        if (magnitude > 1) {
+            moveVector.x /= magnitude;
+            moveVector.y /= magnitude;
+        }
+    }
+   
+    const velocityX = moveVector.x * this._frameVelocity;
+    const velocityY = moveVector.y * this._frameVelocity;
+
+    // --- X-axis movement and collision ---
+    this._position.x += velocityX;
+    for (const obj of this._gamefield.interactableObjects) {
+        const objHitbox = new Hitbox(new Coordinates(obj.x, obj.y), obj.width, obj.height);
+        const collision = Collision.checkCollision(this.hitbox, objHitbox);
+        if (collision) {
+            if (velocityX > 0) { // Moving right
+                this._position.x = collision.x - this.hitbox.width;
+            } else if (velocityX < 0) { // Moving left
+                this._position.x = collision.x + collision.width;
             }
         }
-       
-       const velocityX = moveVector.x * this._frameVelocity;
-       const velocityY = moveVector.y * this._frameVelocity;
+    }
 
-       if(this._directionPressed)
-           {
-       for (const obj of this._gamefield.interactableObjects) {
-           const objHitbox = new Hitbox(new Coordinates(obj.x, obj.y), obj.width, obj.height);
-           const collision = Collision.checkCollisionNextFrame(this._hitbox, objHitbox, velocityX, velocityY);
-           const borderCollision = Collision.checkObjectOutBoarder(this._hitbox, velocityX, velocityY, this._gamefield);
-
-           if (collision) {
-               switch (this._direction) {
-                   case Direction.UP:
-                       this._position.y = collision.y + collision.height;
-                       break;
-                   case Direction.DOWN:
-                       this._position.y = collision.y - this._hitbox.height;
-                       break;
-                   case Direction.LEFT:
-                       this._position.x = collision.x + collision.width;
-                       break;
-                   case Direction.RIGHT:
-                       this._position.x = collision.x - this._hitbox.width;
-                       break;
-               }
-               return;
-           }
-
-           if (borderCollision) {
-               switch (this._direction) {
-                   case Direction.UP:
-                       this._position.y = 0;
-                       break;
-                   case Direction.DOWN:
-                       this._position.y = Gamefield.fieldsize * Gamefield.rows - this.hitbox.height;
-                       break;
-                   case Direction.LEFT:
-                       this._position.x = 0;
-                       break;
-                   case Direction.RIGHT:
-                       this._position.x = Gamefield.fieldsize * Gamefield.cols - this.hitbox.width;
-                       break;
-               }
-               return;
-           }
-
-
-       }
-       // Keine Kollision, bewege den Spieler
-       this._position.x += velocityX;
-       this._position.y += velocityY;
+    // --- Y-axis movement and collision ---
+    this._position.y += velocityY;
+    for (const obj of this._gamefield.interactableObjects) {
+        const objHitbox = new Hitbox(new Coordinates(obj.x, obj.y), obj.width, obj.height);
+        const collision = Collision.checkCollision(this.hitbox, objHitbox);
+        if (collision) {
+            if (velocityY > 0) { // Moving down
+                this._position.y = collision.y - this.hitbox.height;
+            } else if (velocityY < 0) { // Moving up
+                this._position.y = collision.y + collision.height;
+            }
         }
-        if(Player._cameraFix)
-       {
+    }
+    
+    // Border checks
+    if (this._position.x < 0) this._position.x = 0;
+    if (this._position.x + this._hitbox.width > Gamefield.fieldsize * Gamefield.cols) this._position.x = Gamefield.fieldsize * Gamefield.cols - this._hitbox.width;
+    if (this._position.y < 0) this._position.y = 0;
+    if (this._position.y + this._hitbox.height > Gamefield.fieldsize * Gamefield.rows) this._position.y = Gamefield.fieldsize * Gamefield.rows - this._hitbox.height;
+
+    if(Player._cameraFix)
+    {
         Player._playerPositions[this._id].x = this._position.x;
         Player._playerPositions[this._id].y = this._position.y;
         if(!twoPlayerMode)
@@ -319,8 +303,7 @@ export class Player {
             Player._camera.y = (Player._playerPositions[0].y + Player._playerPositions[1].y) / 2;
         }
         Player._camera.setCameraInBounds();
-       }
-
+    }
 }
 
     updatePlayerAnimation()
