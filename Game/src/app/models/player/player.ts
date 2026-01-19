@@ -16,6 +16,7 @@ import { PlayerThoughtsType } from '../../services/ui/player-thoughts.drawer';
 import { PlayerService } from '../../services/player.service';
 import { PrepMachine } from '../preProcess/prep-machine';
 import { firstValueFrom } from 'rxjs';
+import { PlayerInput } from '../../interfaces/player-input';
 
 /**
 * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
@@ -56,7 +57,7 @@ export class Player {
 
    // RenderObject für die Darstellung auf dem Canvas
    private _z!: number;
-   private _input: Record<string, boolean> = {};
+   private _input: PlayerInput = { horizontal: 0, vertical: 0, interact: false, boost: false };
    private _canInteractProduct: boolean = false;
    private _interacted: boolean = false;
    private _renderingObject: RenderObject;
@@ -165,49 +166,38 @@ export class Player {
        inv.z = newZ;
    }
 
+  /**
+   * Setzt die Eingabe-Richtung basierend auf gedrückten Tasten und löst den Boost aus.
+   * @param input Record mit Tastenstatus (z.B. {'w': true, 'a': false})
+   */
+  handleInput(input: PlayerInput) {
+    this._input = input;
+    this._direction = null;
 
-
-    /**
-     * Setzt die Eingabe-Richtung basierend auf gedrückten Tasten und löst den Boost aus.
-     * @param input Record mit Tastenstatus (z.B. {'w': true, 'a': false})
-     */
-    setInput(input: Record<string, boolean>) {
-      this._input  = input;
-      // Handle movement direction
-      if(this._id === 0) this._pressedInteract = input['e']; else this._pressedInteract = input['enter'];
-      let numPressedDirectional = 0;
-      this._direction = null; // Reset direction at the start of each call
-      for (const [key, pressed] of Object.entries(input) ) {
-          if (pressed && key in KEY_TO_DIRECTION && this._id === 0) {
-              this._direction = KEY_TO_DIRECTION[key];
-              numPressedDirectional++
-          }
-        if (pressed && key in KEY_TO_DIRECTION2 && this._id === 1) {
-              this._direction = KEY_TO_DIRECTION2[key];
-              numPressedDirectional++
-          }
-      }
-
-      // If no directional keys are currently pressed, ensure _direction is null and _directionPressed is false
-      if (numPressedDirectional === 0) {
-          this._direction = null;
-          this._directionPressed = false;
+    if (Math.abs(input.horizontal) > 0 || Math.abs(input.vertical) > 0) {
+      this._directionPressed = true;
+      if (Math.abs(input.horizontal) > Math.abs(input.vertical)) {
+        this._direction = input.horizontal > 0 ? Direction.RIGHT : Direction.LEFT;
       } else {
-          this._directionPressed = true;
+        this._direction = input.vertical > 0 ? Direction.DOWN : Direction.UP;
       }
-
-      if (this._direction === Direction.RIGHT) {
-          this._renderingObject.animationDirection = Direction.RIGHT;
-      } else if (this._direction === Direction.LEFT) {
-          this._renderingObject.animationDirection = Direction.LEFT;
-      }
-
-      // Handle shift for boost
-      const now = performance.now();
-      if (input[' '] && !this._isBoosting && (now - this._lastBoostTime > this._boostCooldown) && this._id === 0) {
-        this.activateBoost();
+    } else {
+      this._directionPressed = false;
     }
+
+    if (this._direction === Direction.RIGHT) {
+      this._renderingObject.animationDirection = Direction.RIGHT;
+    } else if (this._direction === Direction.LEFT) {
+      this._renderingObject.animationDirection = Direction.LEFT;
     }
+
+    this._pressedInteract = input.interact;
+
+    const now = performance.now();
+    if (input.boost && !this._isBoosting && (now - this._lastBoostTime > this._boostCooldown)) {
+      this.activateBoost();
+    }
+  }
     /**
      * Aktiviert den Geschwindigkeits-Boost.
      */
@@ -248,65 +238,58 @@ export class Player {
   */
    updatePlayer(twoPlayerMode: boolean = true) {
     this.updatePlayerAnimation();
-        if(this._direction === Direction.RIGHT || this._direction === Direction.LEFT)
-       {
-        this._lastDirection = this._direction
-       }
-       const velocityX = this._direction === Direction.RIGHT ? this._frameVelocity
-                       : this._direction === Direction.LEFT ? -this._frameVelocity : 0;
-       const velocityY = this._direction === Direction.DOWN ? this._frameVelocity
-                       : this._direction === Direction.UP ? -this._frameVelocity : 0;
-       if(this._directionPressed)
-           {
-       for (const obj of this._gamefield.interactableObjects) {
-           const objHitbox = new Hitbox(new Coordinates(obj.x, obj.y), obj.width, obj.height);
-           const collision = Collision.checkCollisionNextFrame(this._hitbox, objHitbox, velocityX, velocityY);
-           const borderCollision = Collision.checkObjectOutBoarder(this._hitbox, velocityX, velocityY, this._gamefield);
+    if(this._direction === Direction.RIGHT || this._direction === Direction.LEFT) {
+        this._lastDirection = this._direction;
+    }
 
-           if (collision) {
-               switch (this._direction) {
-                   case Direction.UP:
-                       this._position.y = collision.y + collision.height;
-                       break;
-                   case Direction.DOWN:
-                       this._position.y = collision.y - this._hitbox.height;
-                       break;
-                   case Direction.LEFT:
-                       this._position.x = collision.x + collision.width;
-                       break;
-                   case Direction.RIGHT:
-                       this._position.x = collision.x - this._hitbox.width;
-                       break;
-               }
-               return;
-           }
-
-           if (borderCollision) {
-               switch (this._direction) {
-                   case Direction.UP:
-                       this._position.y = 0;
-                       break;
-                   case Direction.DOWN:
-                       this._position.y = Gamefield.fieldsize * Gamefield.rows - this.hitbox.height;
-                       break;
-                   case Direction.LEFT:
-                       this._position.x = 0;
-                       break;
-                   case Direction.RIGHT:
-                       this._position.x = Gamefield.fieldsize * Gamefield.cols - this.hitbox.width;
-                       break;
-               }
-               return;
-           }
-
-
-       }
-       // Keine Kollision, bewege den Spieler
-       this._position.x += velocityX;
-       this._position.y += velocityY;
+    let moveVector = new Coordinates(this._input.horizontal, this._input.vertical);
+    if (moveVector.x !== 0 || moveVector.y !== 0) {
+        const magnitude = Math.sqrt(moveVector.x ** 2 + moveVector.y ** 2);
+        if (magnitude > 1) {
+            moveVector.x /= magnitude;
+            moveVector.y /= magnitude;
         }
-        if(Player._cameraFix)
-       {
+    }
+   
+    const velocityX = moveVector.x * this._frameVelocity;
+    const velocityY = moveVector.y * this._frameVelocity;
+
+    // --- X-axis movement and collision ---
+    this._position.x += velocityX;
+    for (const obj of this._gamefield.interactableObjects) {
+        const objHitbox = new Hitbox(new Coordinates(obj.x, obj.y), obj.width, obj.height);
+        const collision = Collision.checkCollision(this.hitbox, objHitbox);
+        if (collision) {
+            if (velocityX > 0) { // Moving right
+                this._position.x = collision.x - this.hitbox.width;
+            } else if (velocityX < 0) { // Moving left
+                this._position.x = collision.x + collision.width;
+            }
+        }
+    }
+
+    // --- Y-axis movement and collision ---
+    this._position.y += velocityY;
+    for (const obj of this._gamefield.interactableObjects) {
+        const objHitbox = new Hitbox(new Coordinates(obj.x, obj.y), obj.width, obj.height);
+        const collision = Collision.checkCollision(this.hitbox, objHitbox);
+        if (collision) {
+            if (velocityY > 0) { // Moving down
+                this._position.y = collision.y - this.hitbox.height;
+            } else if (velocityY < 0) { // Moving up
+                this._position.y = collision.y + collision.height;
+            }
+        }
+    }
+    
+    // Border checks
+    if (this._position.x < 0) this._position.x = 0;
+    if (this._position.x + this._hitbox.width > Gamefield.fieldsize * Gamefield.cols) this._position.x = Gamefield.fieldsize * Gamefield.cols - this._hitbox.width;
+    if (this._position.y < 0) this._position.y = 0;
+    if (this._position.y + this._hitbox.height > Gamefield.fieldsize * Gamefield.rows) this._position.y = Gamefield.fieldsize * Gamefield.rows - this._hitbox.height;
+
+    if(Player._cameraFix)
+    {
         Player._playerPositions[this._id].x = this._position.x;
         Player._playerPositions[this._id].y = this._position.y;
         if(!twoPlayerMode)
@@ -320,8 +303,7 @@ export class Player {
             Player._camera.y = (Player._playerPositions[0].y + Player._playerPositions[1].y) / 2;
         }
         Player._camera.setCameraInBounds();
-       }
-
+    }
 }
 
     updatePlayerAnimation()

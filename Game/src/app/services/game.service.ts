@@ -17,6 +17,7 @@ import {Orders} from '../models/orders/orders';
 import {PlayerService} from './player.service';
 import {PrepMachineManager} from "../models/preProcess/prep-machine-manager";
 import { RenderObject } from '../models/rendering/render-object';
+import { InputService } from './input.service';
 
 @Injectable({
   providedIn: 'root'
@@ -47,7 +48,7 @@ export class GameService {
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
 
-  constructor(private uiService: UIService, private playerService: PlayerService) { }
+  constructor(private uiService: UIService, private playerService: PlayerService, private inputService: InputService) { }
 
 
   /**
@@ -56,6 +57,7 @@ export class GameService {
    * @param ctxUI
    */
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D, TwoPlayerMode: boolean = false) {
+    this.inputService.start();
     // Initialisiere UI Service
        this.gamefield = new Gamefield();
 
@@ -65,8 +67,6 @@ export class GameService {
     RenderingService.instance().init(this.ctx, this.images, this.angle);
     SlotMachineService.instance().init(this.ctx, this.images, this.playerService);
     this.uiService.init(ctxUI, this.angle, this.images);
-    // Initialisiere Eingaben (verwende lowercase keys, passend zu event.key.toLowerCase())
-    this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false, 'arrowup': false, 'arrowleft': false, 'arrowdown': false, 'arrowright': false, 'enter': false, ' ': false };
 
     // Initialisiere Spielobjekte
     this.playerVelocity = Gamefield.fieldsize * 4; // in Pixel pro Sekunde
@@ -78,7 +78,7 @@ export class GameService {
     );
     this.twoPlayerMode = TwoPlayerMode;
         RenderingService.instance().convertToCameraPOV(this.player.camera);
-    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs, this.playerService);
+    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputService.keyboardState, this.playerService);
 
     // 1. Sammle alle RenderObject-Instanzen aus allen relevanten Quellen.
     const allRenderObjects: RenderObject[] = [];
@@ -201,6 +201,22 @@ export class GameService {
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
+      // Handle Inputs
+      const player1Input = this.inputService.getPlayerInput(0);
+      this.player.handleInput(player1Input);
+      if (this.interactableManager.checkPlayerInSlotMachineArea(this.player)) {
+        SlotMachineService.instance().setInput(this.inputService.keyboardState, this.player);
+      }
+      if (this._twoPlayerMode && this.player2) {
+        const player2Input = this.inputService.getPlayerInput(1);
+        this.player2.handleInput(player2Input);
+        if (this.interactableManager.checkPlayerInSlotMachineArea(this.player2)) {
+          SlotMachineService.instance().setInput(this.inputService.keyboardState, this.player2);
+        }
+      }
+      if (this.inputService.keyboardState['u'] === true) {
+        this.interactableManager.upgradeMachineOnInteraction(this.player);
+      }
 
       // Update-Phase
       this.uiService.clearMachinePopUp();
@@ -300,27 +316,7 @@ export class GameService {
 
   stopGame() {
     this.GameRunning = false;
-  }
-
-  setInput(key: string, pressed: boolean) {
-    this.inputs[key] = pressed;
-    this.player.setInput(this.inputs)
-    if(this.interactableManager.checkPlayerInSlotMachineArea(this.player))
-      {
-    SlotMachineService.instance().setInput(this.inputs, this.player);
-      }
-      else if(this.player2 && this.interactableManager.checkPlayerInSlotMachineArea(this.player2))
-      {
-    SlotMachineService.instance().setInput(this.inputs, this.player2);
-      }
-    if(this._twoPlayerMode && this.player2)
-    {
-      this.player2.setInput(this.inputs);
-    }
-    if(this.inputs['u'] === true)
-    {
-    this.interactableManager.upgradeMachineOnInteraction(this.player);
-    }
+    this.inputService.stop();
   }
 
   get twoPlayerMode(): boolean {
