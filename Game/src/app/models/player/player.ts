@@ -173,17 +173,21 @@ export class Player {
   handleInput(input: PlayerInput) {
     this._input = input;
     this._direction = null;
-
+    console.log(input.horizontal, input.vertical)
     if (Math.abs(input.horizontal) > 0 || Math.abs(input.vertical) > 0) {
       this._directionPressed = true;
-      if (Math.abs(input.horizontal) > Math.abs(input.vertical)) {
-        this._direction = input.horizontal > 0 ? Direction.RIGHT : Direction.LEFT;
-      } else {
-        this._direction = input.vertical > 0 ? Direction.DOWN : Direction.UP;
+      this._lastDirection
+      if(input.horizontal > 0)
+      {
+        this._direction = Direction.RIGHT
+      }
+      else if (input.horizontal < 0){
+        this._direction = Direction.LEFT
       }
     } else {
       this._directionPressed = false;
     }
+ 
 
     if (this._direction === Direction.RIGHT) {
       this._renderingObject.animationDirection = Direction.RIGHT;
@@ -239,7 +243,7 @@ export class Player {
    updatePlayer(twoPlayerMode: boolean = true) {
     this.updatePlayerAnimation();
     if(this._direction === Direction.RIGHT || this._direction === Direction.LEFT) {
-        this._lastDirection = this._direction;
+        //this._lastDirection = this._direction;
     }
 
     let moveVector = new Coordinates(this._input.horizontal, this._input.vertical);
