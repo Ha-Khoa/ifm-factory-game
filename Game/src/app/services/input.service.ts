@@ -18,6 +18,7 @@ export class InputService {
   public keyboardState: Record<string, boolean> = {};
   private gamepads: (Gamepad | null)[] = [];
   private isPolling = false;
+  private lastGamepadLogTime = 0;
 
   constructor() {
     window.addEventListener('gamepadconnected', (e: GamepadEvent) => {
@@ -79,6 +80,28 @@ export class InputService {
 
     const gamepad1 = this.gamepads[0];
     if (gamepad1) {
+      const now = performance.now();
+      if (now - this.lastGamepadLogTime > 500) { // Throttle logging to every 500ms
+        const pressedButtons = gamepad1.buttons
+          .map((button, index) => ({ index, pressed: button.pressed }))
+          .filter(b => b.pressed);
+
+        const axesToLog = gamepad1.axes
+            .map((axis, index) => ({ index, value: axis }))
+            .filter(a => Math.abs(a.value) >= 0.1);
+
+        if (axesToLog.length > 0) {
+            console.log('Axes:');
+            axesToLog.forEach(a => {
+                console.log(`  Axis ${a.index}: ${a.value.toFixed(2)}`);
+            });
+        }
+        if (pressedButtons.length > 0) {
+          console.log('Pressed Buttons:', pressedButtons.map(b => b.index));
+        }
+        this.lastGamepadLogTime = now;
+      }
+
       const deadzone = 0.2;
       const axis0 = gamepad1.axes[0];
       const axis1 = gamepad1.axes[1];
@@ -94,7 +117,7 @@ export class InputService {
     let p2Horizontal = (this.keyboardState['arrowright'] ? 1 : 0) - (this.keyboardState['arrowleft'] ? 1 : 0);
     let p2Vertical = (this.keyboardState['arrowdown'] ? 1 : 0) - (this.keyboardState['arrowup'] ? 1 : 0);
     let p2Interact = this.keyboardState['enter'] || false;
-    let p2Boost = this.keyboardState['shift'] || false; 
+    let p2Boost = this.keyboardState['shift'] || false;
 
     const gamepad2 = this.gamepads[1];
     if (gamepad2) {

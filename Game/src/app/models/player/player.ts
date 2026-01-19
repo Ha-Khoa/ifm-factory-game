@@ -173,7 +173,6 @@ export class Player {
   handleInput(input: PlayerInput) {
     this._input = input;
     this._direction = null;
-    console.log(input.horizontal, input.vertical)
     if (Math.abs(input.horizontal) > 0 || Math.abs(input.vertical) > 0) {
       this._directionPressed = true;
       this._lastDirection
@@ -187,7 +186,7 @@ export class Player {
     } else {
       this._directionPressed = false;
     }
- 
+
 
     if (this._direction === Direction.RIGHT) {
       this._renderingObject.animationDirection = Direction.RIGHT;
@@ -254,7 +253,7 @@ export class Player {
             moveVector.y /= magnitude;
         }
     }
-   
+
     const velocityX = moveVector.x * this._frameVelocity;
     const velocityY = moveVector.y * this._frameVelocity;
 
@@ -285,7 +284,7 @@ export class Player {
             }
         }
     }
-    
+
     // Border checks
     if (this._position.x < 0) this._position.x = 0;
     if (this._position.x + this._hitbox.width > Gamefield.fieldsize * Gamefield.cols) this._position.x = Gamefield.fieldsize * Gamefield.cols - this._hitbox.width;
@@ -387,7 +386,7 @@ export class Player {
               return null; // Ausführung stoppen
 
             }
-            
+
          }
 
            //versuche zuerst ein Produkt vom Förderband aufzunehmen
@@ -510,11 +509,11 @@ export class Player {
            /*if (!product) {
                product = conveyor.takeItem();
            }*/
-          
+
 
            if (product) {
            //console.log(`Produkt ${product.name} vom Förderband ${conveyor.getConveyorId()} aufgenommen.`);
-           
+
                return product;
            } else {
                //console.log('kein Produkt zum Aufnehmen gefunden auf dem Förderband');
