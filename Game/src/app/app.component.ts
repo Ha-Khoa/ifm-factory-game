@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, HostListener, OnDestroy, AfterViewInit, OnInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnDestroy, AfterViewInit, OnInit } from '@angular/core';
 import { GameService } from './services/game.service';
 import { HudComponent } from './components/hud/hud.component';
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 import { RenderingService } from './services/rendering.service';
 import { ApiService } from './services/api.service';
 import { PlayerService } from './services/player.service';
+import { InputService } from './services/input.service';
 
 @Component({
   selector: 'app-root',
@@ -39,11 +40,13 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
 
   private gameLoopSubscription!: Subscription;
   private alignSubscription!: Subscription;
+  private escapePressedLastFrame = false;
 
   constructor(
     private game: GameService,
     private apiService: ApiService,
-    private playerService: PlayerService
+    private playerService: PlayerService,
+    private inputService: InputService
   ) { }
 
   ngOnInit(): void {
@@ -79,32 +82,26 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
       if (this.startScreen && this.startScreen.isHidden) {
         this.startScreen.updatePosition();
       }
+
+      const escapePressed = this.inputService.keyboardState['escape'];
+      if (escapePressed && !this.escapePressedLastFrame) {
+        if (!this.showStartScreen) {
+            if (this.isSettingsOpen) this.settingsMenu?.closeSettingsMenu();
+            else this.isSettingsOpen = true;
+        }
+      }
+      this.escapePressedLastFrame = escapePressed;
     });
 
-  }
-
-  @HostListener('window:keydown', ['$event']) // später durch richtige taste ersetzen
-  onKeyDown(event: KeyboardEvent): void {
-    if (this.showStartScreen && !(event.key === 'Escape')) return; // Ignore input if start screen is active
-
-    if (event.key === 'Escape') {
-      if(this.isSettingsOpen) this.settingsMenu?.closeSettingsMenu();
-      else this.isSettingsOpen = true;
-      return;
-    }
-    this.game.setInput(event.key.toLowerCase(), true);
-  }
-
-  @HostListener('window:keyup', ['$event'])
-  onKeyUp(event: KeyboardEvent): void {
-    if (this.showStartScreen && !(event.key === 'Escape')) return; // Ignore input if start screen is active
-    this.game.setInput(event.key.toLowerCase(), false);
   }
 
   ngOnDestroy(): void {
     this.game.stopGame();
     if (this.gameLoopSubscription) {
       this.gameLoopSubscription.unsubscribe();
+    }
+    if (this.alignSubscription) {
+        this.alignSubscription.unsubscribe();
     }
   }
 
