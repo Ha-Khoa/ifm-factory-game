@@ -172,7 +172,7 @@ export class Player {
    */
   handleInput(input: PlayerInput) {
     this._input = input;
-    this._direction = null;
+
     if (Math.abs(input.horizontal) > 0 || Math.abs(input.vertical) > 0) {
       this._directionPressed = true;
       this._lastDirection
