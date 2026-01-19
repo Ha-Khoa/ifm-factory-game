@@ -62,6 +62,7 @@ export class InteractableManager {
     this.updateUnlockedMachine(1);
     this.updateUnlockedMachine(2);
     this.updateUnlockedMachine(4);
+    this.updateUnlockedMachine(3);
     this.machines.forEach((machine) => {
       this.generateInteractionField(machine)
       this.addParticleField(machine)
