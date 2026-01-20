@@ -13,6 +13,7 @@ import { Coordinates } from "../coordinates/coordinates";
 import { UIService } from "../../services/ui.service";
 import { Player } from "../player/player";
 import { SubmissionArea } from "../submission-area/submission-area";
+import { InputService } from "../../services/input.service";
 import { InteractableObject } from "./interactable-object";
 import { Package } from "../package/package";
 import { SlotMachine } from "../slot-machine/slot-machine";
@@ -26,7 +27,6 @@ export class InteractableManager {
     private _gamefield: Gamefield;
     private ui: UIService;
     private playerService: PlayerService;
-    private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine1.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(6)!, RenderType.THREE_D_IMG),
@@ -45,11 +45,10 @@ export class InteractableManager {
 
     private _submissionArea:SubmissionArea;
 
-  constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>, playerService: PlayerService) {
+  constructor(_gamefield: Gamefield, ui: UIService, inputService: InputService, playerService: PlayerService) {
     this._gamefield = _gamefield;
     this.ui = ui;
     this.playerService = playerService;
-    this._inputs = inputs;
     this._slotMachine = new SlotMachine(800, 100, this._gamefield);
     this._submissionArea = new SubmissionArea(
       new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 10),
@@ -403,7 +402,7 @@ export class InteractableManager {
 
   updateSubmissionAreaOnInteraction(player: Player) {
       this._submissionArea.renderObject.rectColor = "#9c0e0eff";
-      if (this._inputs["e"] === true && player.inventory instanceof Package && !player.hasPicked()) {
+      if (player.pressedInteract && player.inventory instanceof Package && !player.hasPicked()) {
 
       const packObj : Package = player.inventory;
 

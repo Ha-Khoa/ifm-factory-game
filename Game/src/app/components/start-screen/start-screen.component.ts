@@ -5,6 +5,8 @@ import { Gamefield } from '../../models/gamefield/gamefield';
 import { GameService } from '../../services/game.service';
 import { ApiService } from '../../services/api.service';
 import { PlayerInterface } from '../../interfaces/ui/playerInterface';
+import { InputService } from '../../services/input.service';
+import { Subscription } from 'rxjs';
 
 /**
  * Komponente für den Startbildschirm des Spiels.
@@ -46,7 +48,10 @@ export class StartScreenComponent implements OnInit {
   private height: number = 1080;
   private width: number = this.height * window.innerWidth / window.innerHeight;
 
-  constructor(private gameService: GameService, private apiService: ApiService) { }
+  private inputSubscriptions: Subscription[] = [];
+  private lastInputTime = 0;
+
+  constructor(private gameService: GameService, private apiService: ApiService, private inputService: InputService) { }
 
   /**
    * Initialisiert die Komponente nach dem Laden.
@@ -67,6 +72,41 @@ export class StartScreenComponent implements OnInit {
     };
 
     this.loadHighScores();
+    this.setupInputHandlers();
+  }
+
+  ngOnDestroy(): void {
+    this.inputSubscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  private setupInputHandlers(): void {
+    this.inputService.setInputState('menu');
+    this.inputSubscriptions.push(
+      this.inputService.menuUp$.subscribe(() => this.handleMenuNavigation('up')),
+      this.inputService.menuDown$.subscribe(() => this.handleMenuNavigation('down')),
+      this.inputService.menuConfirm$.subscribe(() => this.handleMenuNavigation('confirm'))
+    );
+  }
+
+  private handleMenuNavigation(action: 'up' | 'down' | 'confirm'): void {
+    if (this.isHidden) return;
+    const now = Date.now();
+    if (now - this.lastInputTime < 200) return; // 200ms debounce
+    this.lastInputTime = now;
+
+    switch (action) {
+      case 'up':
+        this.selectedButtonIndex = (this.selectedButtonIndex - 1 + 3) % 3;
+        this.draw();
+        break;
+      case 'down':
+        this.selectedButtonIndex = (this.selectedButtonIndex + 1) % 3;
+        this.draw();
+        break;
+      case 'confirm':
+        this.handleSelection();
+        break;
+    }
   }
 
   /**
@@ -285,43 +325,20 @@ export class StartScreenComponent implements OnInit {
     const y = (event.clientY - rect.top) * scaleY;
 
     if (this.isPointInRect(x, y, this.buttonRect)) {
-      this.startClicked.emit();
+      this.handleSelection(0);
     } else if (this.isPointInRect(x, y, this.playerModeButtonRect)) {
-      this.gameService.twoPlayerMode = !this.gameService.twoPlayerMode;
-      this.draw();
+      this.handleSelection(1);
     } else if (this.isPointInRect(x, y, this.settingsButtonRect)) {
-      this.settingsClicked.emit();
-    }
-  }
-
-  /**
-   * Verarbeitet Tastatureingaben zur Steuerung des Menüs.
-   * @param event Das Keyboard-Event.
-   */
-  @HostListener('window:keydown', ['$event'])
-  onKeyDown(event: KeyboardEvent): void {
-    if (this.isHidden) return;
-
-    switch (event.key.toLowerCase()) {
-      case 'w': // Nach oben navigieren
-        this.selectedButtonIndex = (this.selectedButtonIndex - 1 + 3) % 3;
-        this.draw();
-        break;
-      case 's': // Nach unten navigieren
-        this.selectedButtonIndex = (this.selectedButtonIndex + 1) % 3;
-        this.draw();
-        break;
-      case 'e': // Auswahl bestätigen
-        this.handleSelection();
-        break;
+      this.handleSelection(2);
     }
   }
 
   /**
    * Führt die Aktion für den aktuell ausgewählten Button aus.
    */
-  private handleSelection(): void {
-    switch (this.selectedButtonIndex) {
+  private handleSelection(index?: number): void {
+    const selection = index ?? this.selectedButtonIndex;
+    switch (selection) {
       case 0: // START
         this.startClicked.emit();
         break;
@@ -341,6 +358,7 @@ export class StartScreenComponent implements OnInit {
    */
   public zoomOut() {
     this.isHidden = true;
+    this.inputSubscriptions.forEach(sub => sub.unsubscribe());
     const style = this.containerRef.nativeElement.style;
 
     // Position auf Vollbild setzen
