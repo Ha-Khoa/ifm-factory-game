@@ -116,12 +116,12 @@ export class UIService {
     this.ctxUI.clearRect(0, 0, this.ctxUI.canvas.width, this.ctxUI.canvas.height)
   }
 
-  public drawTimer()
+  public drawTimer() : boolean
   {
-    this.timerText.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 0, true))
+    //this.timerText.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 0, true))
     this.timerText = [];
     this.timerText = this.gameTimer.drawTimer();
-    this.gameTimer.updateTimer();
+    return this.gameTimer.updateTimer();
   }
 
   /**

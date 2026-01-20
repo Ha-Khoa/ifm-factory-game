@@ -65,7 +65,7 @@ export class Player {
    private _holdingAnimation: string[];
    private static _camera: Camera;
    private static _playerPositions: Coordinates[] = [new Coordinates(0, 0), new Coordinates(0, 0)];
-   private static _cameraFix: boolean = false;
+   public static _cameraFix: boolean = false;
 
    // Speed boost properties
    private _baseVelocity: number;

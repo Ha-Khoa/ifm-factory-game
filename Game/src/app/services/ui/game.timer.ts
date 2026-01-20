@@ -2,8 +2,8 @@ import { RenderingService } from "../rendering.service";
 
 export class GameTimer {
 
-    private timerMinutes: number = 15;
-    private timerSeconds: number = 0;
+    private timerMinutes: number = 0;
+    private timerSeconds: number = 5;
     private time!: number;
 
       constructor(
@@ -28,12 +28,11 @@ export class GameTimer {
   {
     let dt = RenderingService.instance().deltaTime;
     if(!dt) dt = 1;
-    this.time -= dt;
+    this.time = this.time - dt <= 0 ? 0 : this.time - dt;
     const newMinutes = Math.round(this.time / 60000 - 0.5);
     const newSeconds = Math.round(this.time % 60000 / 1000 -0.5);
     this.timerMinutes = newMinutes;
     this.timerSeconds = newSeconds;
-    console.log(this.time, Math.round(0.9))
     if(this.time <= 0) return true;
     else return false
   }

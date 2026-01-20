@@ -18,6 +18,7 @@ import {PlayerService} from './player.service';
 import {PrepMachineManager} from "../models/preProcess/prep-machine-manager";
 import { RenderObject } from '../models/rendering/render-object';
 import { InputService } from './input.service';
+import { GameOverScreen } from './ui/gameover.screen';
 
 @Injectable({
   providedIn: 'root'
@@ -44,6 +45,11 @@ export class GameService {
   private conveyorBeltManager!: ConveyorBeltManager;
   private prepMachine!: PrepMachineManager;
 
+  private gameEnd: boolean = false;
+  // GameOver Screen
+  private gameOverScreen: GameOverScreen | null = null;
+  private ctxUI!: CanvasRenderingContext2D;
+
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
@@ -59,7 +65,8 @@ export class GameService {
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D, TwoPlayerMode: boolean = false) {
     this.inputService.start();
     // Initialisiere UI Service
-       this.gamefield = new Gamefield();
+    this.ctxUI = ctxUI;
+    this.gamefield = new Gamefield();
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
@@ -94,6 +101,7 @@ export class GameService {
     const staticImagePaths = [
       // Base & UI
       "/images/package.png",
+      "/images/ifm-gameover-background.png",
       "/images/interaction-field.png",
       "/images/truck_roof.png",
       "/images/truck_back.png",
@@ -201,6 +209,16 @@ export class GameService {
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
       this.uiService.clearAll();
+      if(this.gameEnd || this.uiService.drawTimer())
+      {
+        this.gameEnd = true;
+        Player._cameraFix = false;
+        if(this.interactableManager.submissionArea.finishGameAnimation())
+        {
+          this.startGameOverLoop();
+          return;
+        }
+      }
 
       // Handle Inputs
       const player1Input = this.inputService.getPlayerInput(0);
@@ -239,7 +257,6 @@ export class GameService {
         this.player2.updateProductInHand();
 
       }
-      this.uiService.drawTimer();
 
       this.conveyorBeltManager.update();
 
@@ -348,6 +365,37 @@ export class GameService {
         RenderingService.instance().deleteRenderingObjektByName("player1")
       }
     }
+  }
+
+  /**
+   * Startet die GameOver-Loop nachdem das Spiel beendet ist.
+   * Rendert den GameOverScreen mit Score und verdientem Geld.
+   */
+  private startGameOverLoop(): void {
+    this.gameOverScreen = new GameOverScreen(this.ctx, this.ctx.canvas.width, this.ctx.canvas.height, this.playerService, this.images);
+
+    this.gameOverScreen.setBackgroundImage("/images/ifm-gameover-background.png")
+
+    // GameOver Loop
+    const gameOverLoop = () => {
+      if (!this.GameRunning) return;
+
+      // Loesche GameCanvas
+      this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+      // Rendere GameOverScreen
+      this.gameOverScreen?.renderGameOverScreen();
+
+      // Prüfe auf Space-Taste zum Fortfahren
+      if (this.inputService.keyboardState[' '] === true || this.inputService.keyboardState['e'] === true) {
+        this.GameRunning = false;
+        return;
+      }
+
+      requestAnimationFrame(gameOverLoop);
+    };
+
+    requestAnimationFrame(gameOverLoop);
   }
 
 }
