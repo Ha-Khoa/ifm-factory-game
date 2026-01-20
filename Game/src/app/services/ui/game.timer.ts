@@ -16,7 +16,7 @@ export class GameTimer {
   drawTimer()
   {
     let extraZero = this.timerSeconds < 10 ? 0 : "";
-    const time = this.timerMinutes + ":" + extraZero + this.timerSeconds 
+    const time = this.timerMinutes + ":" + extraZero + this.timerSeconds
     const size = 100;
     this.ctx.fillStyle = "#053c85bb"
     this.ctx.font = `italic small-caps bold ${size}px arial`;
