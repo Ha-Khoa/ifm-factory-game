@@ -177,7 +177,7 @@ export class RenderingService {
             if (frameImage) {
               // Berechne die Position und Größe der Animation relativ zur Maschine
               const animWidth = objWidth * 0.7; // Mache die Animation 70% der Maschinengröße
-              const animHeight = animWidth; // Behalte das quadratische Seitenverhältnis bei
+              const animHeight = animWidth * Math.cos(this._angle); // Behalte das quadratische Seitenverhältnis bei
               const xCenter = Math.round(xObj + (objWidth - animWidth) / 2);
               const yCenter = yProjection + (objHeight * Math.cos(this._angle) - animHeight) / 2;
               
@@ -387,7 +387,10 @@ export class RenderingService {
   {
     if(this._fov - 0.1 > this._gameFov || this.fov  + 0.1 < this._gameFov)
     {
-    const df = (this._fov - this._gameFov) * 0.01 / Math.abs(this._fov - this._gameFov) * Math.abs(this._fov)
+      let dt;
+      if(!this._deltaTime) dt = 1;
+      else dt = this._deltaTime
+    const df = (this._fov - this._gameFov) * 0.01 / Math.abs(this._fov - this._gameFov) * Math.abs(this._fov) * dt / 5
     this._fov -= df
     this._camera.fov = this._fov
     }

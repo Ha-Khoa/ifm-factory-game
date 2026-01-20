@@ -172,18 +172,21 @@ export class Player {
    */
   handleInput(input: PlayerInput) {
     this._input = input;
-    this._direction = null;
 
     if (Math.abs(input.horizontal) > 0 || Math.abs(input.vertical) > 0) {
       this._directionPressed = true;
-      if (Math.abs(input.horizontal) > Math.abs(input.vertical)) {
-        this._direction = input.horizontal > 0 ? Direction.RIGHT : Direction.LEFT;
-      } else {
-        this._direction = input.vertical > 0 ? Direction.DOWN : Direction.UP;
+      this._lastDirection
+      if(input.horizontal > 0)
+      {
+        this._direction = Direction.RIGHT
+      }
+      else if (input.horizontal < 0){
+        this._direction = Direction.LEFT
       }
     } else {
       this._directionPressed = false;
     }
+
 
     if (this._direction === Direction.RIGHT) {
       this._renderingObject.animationDirection = Direction.RIGHT;
@@ -239,7 +242,7 @@ export class Player {
    updatePlayer(twoPlayerMode: boolean = true) {
     this.updatePlayerAnimation();
     if(this._direction === Direction.RIGHT || this._direction === Direction.LEFT) {
-        this._lastDirection = this._direction;
+        //this._lastDirection = this._direction;
     }
 
     let moveVector = new Coordinates(this._input.horizontal, this._input.vertical);
@@ -250,7 +253,7 @@ export class Player {
             moveVector.y /= magnitude;
         }
     }
-   
+
     const velocityX = moveVector.x * this._frameVelocity;
     const velocityY = moveVector.y * this._frameVelocity;
 
@@ -281,7 +284,7 @@ export class Player {
             }
         }
     }
-    
+
     // Border checks
     if (this._position.x < 0) this._position.x = 0;
     if (this._position.x + this._hitbox.width > Gamefield.fieldsize * Gamefield.cols) this._position.x = Gamefield.fieldsize * Gamefield.cols - this._hitbox.width;
@@ -383,7 +386,7 @@ export class Player {
               return null; // Ausführung stoppen
 
             }
-            
+
          }
 
            //versuche zuerst ein Produkt vom Förderband aufzunehmen
@@ -506,11 +509,11 @@ export class Player {
            /*if (!product) {
                product = conveyor.takeItem();
            }*/
-          
+
 
            if (product) {
            //console.log(`Produkt ${product.name} vom Förderband ${conveyor.getConveyorId()} aufgenommen.`);
-           
+
                return product;
            } else {
                //console.log('kein Produkt zum Aufnehmen gefunden auf dem Förderband');
