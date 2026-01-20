@@ -200,6 +200,7 @@ export class GameService {
       if (!this.GameRunning) return;
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      this.uiService.clearAll();
 
       // Handle Inputs
       const player1Input = this.inputService.getPlayerInput(0);
@@ -238,6 +239,7 @@ export class GameService {
         this.player2.updateProductInHand();
 
       }
+      this.uiService.drawTimer();
 
       this.conveyorBeltManager.update();
 
@@ -306,6 +308,9 @@ export class GameService {
         // Wenn wir was tragen: Sicherstellen, dass das Popup weg ist!
         this.uiService.clearItemPopup();
       }
+
+
+
       this.gameLoopTick.next();
 
       requestAnimationFrame(loop);
