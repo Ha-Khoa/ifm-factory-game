@@ -16,7 +16,7 @@ export class GameTimer {
   drawTimer()
   {
     let extraZero = this.timerSeconds < 10 ? 0 : "";
-    const time = this.timerMinutes + ":" + extraZero + this.timerSeconds 
+    const time = this.timerMinutes + ":" + extraZero + this.timerSeconds
     const size = 100;
     this.ctx.fillStyle = "#053c85bb"
     this.ctx.font = `italic small-caps bold ${size}px arial`;
@@ -33,7 +33,6 @@ export class GameTimer {
     const newSeconds = Math.round(this.time % 60000 / 1000 -0.5);
     this.timerMinutes = newMinutes;
     this.timerSeconds = newSeconds;
-    console.log(this.time, Math.round(0.9))
     if(this.time <= 0) return true;
     else return false
   }
