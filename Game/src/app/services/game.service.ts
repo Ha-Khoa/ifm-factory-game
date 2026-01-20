@@ -12,7 +12,7 @@ import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
 import { SlotMachineService } from './slot-machine.service';
 
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import {Orders} from '../models/orders/orders';
 import {PlayerService} from './player.service';
 import {PrepMachineManager} from "../models/preProcess/prep-machine-manager";
@@ -47,6 +47,7 @@ export class GameService {
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
+  private inputSubscription!: Subscription;
 
   constructor(private uiService: UIService, private playerService: PlayerService, private inputService: InputService) { }
 
@@ -78,7 +79,14 @@ export class GameService {
     );
     this.twoPlayerMode = TwoPlayerMode;
         RenderingService.instance().convertToCameraPOV(this.player.camera);
-    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputService.keyboardState, this.playerService);
+    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputService, this.playerService);
+
+    this.inputSubscription = this.inputService.upgrade$.subscribe(playerIndex => {
+      const player = playerIndex === 0 ? this.player : this.player2;
+      if (player) {
+        this.interactableManager.upgradeMachineOnInteraction(player);
+      }
+    });
 
     // 1. Sammle alle RenderObject-Instanzen aus allen relevanten Quellen.
     const allRenderObjects: RenderObject[] = [];
@@ -193,6 +201,7 @@ export class GameService {
    */
   startGame() {
     this.GameRunning = true;
+    this.inputService.setInputState('game');
     this.ctx.imageSmoothingEnabled = true;
     // Initialize the first orders
     Orders.initializeOrders();
@@ -206,17 +215,14 @@ export class GameService {
       const player1Input = this.inputService.getPlayerInput(0);
       this.player.handleInput(player1Input);
       if (this.interactableManager.checkPlayerInSlotMachineArea(this.player)) {
-        SlotMachineService.instance().setInput(this.inputService.keyboardState, this.player);
+        SlotMachineService.instance().handleInput(player1Input, this.player);
       }
       if (this._twoPlayerMode && this.player2) {
         const player2Input = this.inputService.getPlayerInput(1);
         this.player2.handleInput(player2Input);
         if (this.interactableManager.checkPlayerInSlotMachineArea(this.player2)) {
-          SlotMachineService.instance().setInput(this.inputService.keyboardState, this.player2);
+          SlotMachineService.instance().handleInput(player2Input, this.player2);
         }
-      }
-      if (this.inputService.keyboardState['u'] === true) {
-        this.interactableManager.upgradeMachineOnInteraction(this.player);
       }
 
       // Update-Phase
@@ -322,6 +328,10 @@ export class GameService {
   stopGame() {
     this.GameRunning = false;
     this.inputService.stop();
+    this.inputService.setInputState('menu');
+    if (this.inputSubscription) {
+      this.inputSubscription.unsubscribe();
+    }
   }
 
   get twoPlayerMode(): boolean {
