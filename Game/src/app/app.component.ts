@@ -14,8 +14,8 @@ import { InputService } from './services/input.service';
 
 @Component({
   selector: 'app-root',
-  standalone: true, // Assuming standalone based on `imports` usage
-  imports: [HudComponent, TutorialComponent, SettingsComponent, CommonModule, OrderComponent, StartScreenComponent], // Add StartScreenComponent
+  standalone: true, 
+  imports: [HudComponent, TutorialComponent, SettingsComponent, CommonModule, OrderComponent, StartScreenComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

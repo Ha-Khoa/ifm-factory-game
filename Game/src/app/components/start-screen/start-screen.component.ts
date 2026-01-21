@@ -399,7 +399,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     const y = (event.clientY - rect.top) * scaleY;
 
     if (this.isPointInRect(x, y, this.buttonRect)) {
-      this.handleSelection(0);
+      this.handleSelection();
     } else if (this.isPointInRect(x, y, this.playerModeButtonRect)) {
       this.gameService.twoPlayerMode = !this.gameService.twoPlayerMode;
     } else if (this.isPointInRect(x, y, this.settingsButtonRect)) {
@@ -455,7 +455,6 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     this.inputSubscriptions.forEach(sub => sub.unsubscribe());
     const style = this.containerRef.nativeElement.style;
 
-    const style = this.containerRef.nativeElement.style;
     style.setProperty('top', '0px');
     style.setProperty('left', '0px');
     style.setProperty('width', window.innerWidth + 'px');
