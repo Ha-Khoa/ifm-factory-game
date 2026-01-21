@@ -74,44 +74,71 @@ export class Gamefield {
 
     generateEnvironment()
     {
+        // Generate procedural floor with a checkerboard pattern
         for(let i = 0; i < Gamefield.rows + 1; i++)
         {
             for(let j = 0; j < Gamefield.cols; j++)
             {
+                // Use two slightly different shades of grey for a subtle tile effect
+                const tileColor = (i + j) % 2 === 0 ? '#3a3a3a' : '#404040';
                 this.environmetObjects.push(new RenderObject(
                     `floor-${i}-${j}`,
                     RenderType.RECT,
                     j * Gamefield.fieldsize,
                     i * Gamefield.fieldsize,
-                    0,
+                    0, // z-index for the floor
                     Gamefield.fieldsize,
                     Gamefield.fieldsize,
-                    -1000,
-                    "/images/Metal_16-512x512.png",
+                    -1000, // Draw priority
+                    undefined, // No image path
                     undefined,
-                    "#464646ff",
+                    tileColor, // Assign procedural color
                     []
-                ))
+                ));
             }
         }
-        for(let i = 0; i < (Gamefield.rows + 1) * 8; i++)
-        {
 
-                this.environmetObjects.push(new RenderObject(
-                    `floor2-${i}`,
-                    RenderType.RECT,
-                    0,
-                    i * Gamefield.fieldsize / 8,
-                    0,
-                    (Gamefield.cols - 5) * Gamefield.fieldsize,
-                    0.1,
-                    -1000,
-                    "/images/Metal_16-512x512.png",
-                    undefined,
-                    "#686767ff",
-                    []
-                ))
+        const lineColor = '#2a2a2a'; // Dark color for the "seams"
+
+        // Generate horizontal grid lines
+        for(let i = 0; i < Gamefield.rows + 1; i++)
+        {
+            this.environmetObjects.push(new RenderObject(
+                `line-h-${i}`,
+                RenderType.RECT,
+                0,
+                i * Gamefield.fieldsize,
+                1, // z-index slightly above the floor to ensure visibility
+                Gamefield.cols * Gamefield.fieldsize,
+                2, // Line thickness
+                -999,
+                undefined,
+                undefined,
+                lineColor,
+                []
+            ));
         }
+
+        // Generate vertical grid lines
+        for(let j = 0; j < Gamefield.cols + 1; j++)
+        {
+            this.environmetObjects.push(new RenderObject(
+                `line-v-${j}`,
+                RenderType.RECT,
+                j * Gamefield.fieldsize,
+                0,
+                1, // z-index slightly above the floor
+                2, // Line thickness
+                (Gamefield.rows + 1) * Gamefield.fieldsize,
+                -999,
+                undefined,
+                undefined,
+                lineColor,
+                []
+            ));
+        }
+
+        // Generate the back wall without an image
         for(let i = 0; i < Gamefield.cols; i++)
         {
             this.environmetObjects.push(new RenderObject(
@@ -123,11 +150,11 @@ export class Gamefield {
                     Gamefield.fieldsize,
                     0.1,
                     -2280,
-                    "/images/Metal_16-512x512.png",
+                    undefined, // No image
                     undefined,
-                    "#686767ff",
-                    ["#686767ff"]
-                ))
+                    "#202020", // Dark solid color for the wall
+                    ["#181818"]
+                ));
         }
     }
 
