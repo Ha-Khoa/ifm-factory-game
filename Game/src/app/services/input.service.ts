@@ -1,4 +1,4 @@
-
+﻿
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
@@ -21,7 +21,7 @@ export class InputService {
   private isPolling = false;
   private lastGamepadLogTime = 0;
 
-  private inputState: 'game' | 'menu' = 'menu';
+  private inputState: 'game' | 'menu' | 'tutorial' = 'menu';
 
   private menuUpSubject = new Subject<void>();
   public menuUp$ = this.menuUpSubject.asObservable();
@@ -32,12 +32,25 @@ export class InputService {
   private menuConfirmSubject = new Subject<void>();
   public menuConfirm$ = this.menuConfirmSubject.asObservable();
 
+  private tutorialNextSubject = new Subject<void>();
+  public tutorialNext$ = this.tutorialNextSubject.asObservable();
+
+  private tutorialPrevSubject = new Subject<void>();
+  public tutorialPrev$ = this.tutorialPrevSubject.asObservable();
+
+  private tutorialCloseSubject = new Subject<void>();
+  public tutorialClose$ = this.tutorialCloseSubject.asObservable();
+
   private upgradeSubject = new Subject<number>();
   public upgrade$ = this.upgradeSubject.asObservable();
 
   private lastMenuUp = false;
   private lastMenuDown = false;
   private lastMenuConfirm = false;
+
+  private lastTutorialNext = false;
+  private lastTutorialPrev = false;
+  private lastTutorialClose = false;
 
   constructor() {
     window.addEventListener('gamepadconnected', (e: GamepadEvent) => {
@@ -66,7 +79,7 @@ export class InputService {
     this.isPolling = false;
   }
 
-  public setInputState(state: 'game' | 'menu') {
+  public setInputState(state: 'game' | 'menu' | 'tutorial') {
     this.inputState = state;
   }
 
@@ -97,9 +110,38 @@ export class InputService {
   private processInputs() {
     if (this.inputState === 'menu') {
       this.processMenuInputs();
+    } else if (this.inputState === 'tutorial') {
+      this.processTutorialInputs();
     } else {
       this.processGameInputs();
     }
+  }
+
+    private processTutorialInputs() {
+    // Reset game inputs
+    this.player1Input = { horizontal: 0, vertical: 0, interact: false, boost: false };
+    this.player2Input = { horizontal: 0, vertical: 0, interact: false, boost: false };
+
+    let tutorialNext = this.keyboardState['d'] || this.keyboardState['arrowright'];
+    let tutorialPrev = this.keyboardState['a'] || this.keyboardState['arrowleft'];
+    let tutorialClose = this.keyboardState['e'] || this.keyboardState['escape'] || this.keyboardState['enter'];
+
+    const gamepad1 = this.gamepads[0];
+    if (gamepad1) {
+      const deadzone = 0.5;
+      const axisX = gamepad1.axes[0];
+      tutorialNext = tutorialNext || gamepad1.buttons[15].pressed || axisX > deadzone;
+      tutorialPrev = tutorialPrev || gamepad1.buttons[14].pressed || axisX < -deadzone;
+      tutorialClose = tutorialClose || gamepad1.buttons[0].pressed || gamepad1.buttons[1].pressed;
+    }
+
+    if (tutorialNext && !this.lastTutorialNext) this.tutorialNextSubject.next();
+    if (tutorialPrev && !this.lastTutorialPrev) this.tutorialPrevSubject.next();
+    if (tutorialClose && !this.lastTutorialClose) this.tutorialCloseSubject.next();
+
+    this.lastTutorialNext = tutorialNext;
+    this.lastTutorialPrev = tutorialPrev;
+    this.lastTutorialClose = tutorialClose;
   }
 
   private processMenuInputs() {

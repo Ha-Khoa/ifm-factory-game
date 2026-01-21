@@ -9,7 +9,7 @@
                 (closeSettingsRequest)="isSettingsOpen = false"></app-settings>
   <app-order></app-order>
 </div>
-<app-tutorial 
-      *ngIf="isTutorialOpen" 
-      (closeRequest)="isTutorialOpen = false">
+<app-tutorial
+      *ngIf="isTutorialOpen"
+      (closeRequest)="onTutorialClose()">
   </app-tutorial>

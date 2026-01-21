@@ -1,5 +1,7 @@
-import { Component, EventEmitter, HostListener, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { InputService } from '../../services/input.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-tutorial',
@@ -8,7 +10,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './tutorial.component.html',
   styleUrls: ['./tutorial.component.css']
 })
-export class TutorialComponent {
+export class TutorialComponent implements OnInit, OnDestroy {
   @Output() closeRequest = new EventEmitter<void>();
 
 
@@ -21,18 +23,45 @@ export class TutorialComponent {
   
   currentSlide = 0;
 
-  @HostListener('window:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    const key = event.key.toLowerCase();
+  private subscriptions: Subscription[] = [];
+  private lastInputTime = 0;
+  private timeOpened = 0;
 
-    if (key === 'd' || key === 'arrowright') {
-      this.nextSlide();
-    } 
-    else if (key === 'a' || key === 'arrowleft') {
-      this.prevSlide();
-    } 
-    else if (key === 'e' || key === 'enter' || key === 'escape') {
-      this.closeRequest.emit();
+  constructor(private inputService: InputService) {}
+
+  ngOnInit(): void {
+    this.timeOpened = Date.now();
+    this.inputService.setInputState('tutorial');
+    this.subscriptions.push(
+      this.inputService.tutorialNext$.subscribe(() => this.handleNavigation('next')),
+      this.inputService.tutorialPrev$.subscribe(() => this.handleNavigation('prev')),
+      this.inputService.tutorialClose$.subscribe(() => this.handleNavigation('close'))
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  private handleNavigation(action: 'next' | 'prev' | 'close'): void {
+    const now = Date.now();
+    if (now - this.lastInputTime < 200) return; // 200ms debounce
+    this.lastInputTime = now;
+
+    if (action === 'close' && now - this.timeOpened < 250) {
+      return;
+    }
+
+    switch (action) {
+      case 'next':
+        this.nextSlide();
+        break;
+      case 'prev':
+        this.prevSlide();
+        break;
+      case 'close':
+        this.closeRequest.emit();
+        break;
     }
   }
 

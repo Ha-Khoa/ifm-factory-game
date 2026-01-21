@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnDestroy, AfterViewInit, OnInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnDestroy, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/core';
 import { GameService } from './services/game.service';
 import { HudComponent } from './components/hud/hud.component';
 import { CommonModule } from '@angular/common';
@@ -9,12 +9,12 @@ import { Subscription } from 'rxjs';
 import { RenderingService } from './services/rendering.service';
 import { ApiService } from './services/api.service';
 import { PlayerService } from './services/player.service';
-import { TutorialComponent } from './components/tutorial/tutorial.component'; 
+import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { InputService } from './services/input.service';
 
 @Component({
   selector: 'app-root',
-  standalone: true, 
+  standalone: true,
   imports: [HudComponent, TutorialComponent, SettingsComponent, CommonModule, OrderComponent, StartScreenComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -49,9 +49,9 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
     private game: GameService,
     private apiService: ApiService,
     private playerService: PlayerService,
-    private inputService: InputService
+    private inputService: InputService,
+    private cdr: ChangeDetectorRef
   ) { }
-
   ngOnInit(): void {
     this.apiService.getPlayers().subscribe(players => {
       if (players.length === 0) {
@@ -129,5 +129,12 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
 
   onTutorialOpen(): void {
     this.isTutorialOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  onTutorialClose(): void {
+    this.isTutorialOpen = false;
+    this.inputService.setInputState('menu');
+    this.cdr.detectChanges();
   }
 }

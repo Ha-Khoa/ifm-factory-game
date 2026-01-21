@@ -44,7 +44,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   private tutorialButtonRect = { x: 0, y: 0, width: 0, height: 0 };
   private highScores: PlayerInterface[] = [];
   private backgroundVideo!: HTMLVideoElement;
-  
+
   // ID für den Animations-Loop (wichtig zum Beenden)
   private animationFrameId: number | null = null;
 
@@ -72,16 +72,18 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     loadTheme();
     this.ctx = this.canvasRef.nativeElement.getContext('2d')!;
     this.setCanvasSize();
+    this.setupInputHandlers();
 
     // Hintergrundvideo initialisieren
     this.backgroundVideo = document.createElement('video');
-    this.backgroundVideo.src = "/images/background.mp4"; 
+    this.backgroundVideo.src = "/images/background.mp4";
     this.backgroundVideo.loop = true;
     this.backgroundVideo.muted = true; // Notwendig für Autoplay ohne Benutzerinteraktion
     this.backgroundVideo.play();
 
     this.loadHighScores();
-    this.animate(); 
+    this.animate();
+
   }
 
   /**
@@ -107,7 +109,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   private handleMenuNavigation(action: 'up' | 'down' | 'confirm'): void {
     if (this.isHidden) return;
     const now = Date.now();
-    if (now - this.lastInputTime < 200) return; // 200ms debounce
+    if (now - this.lastInputTime < 150) return; // 150ms debounce
     this.lastInputTime = now;
 
     switch (action) {
@@ -175,7 +177,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
     // Video-Hintergrund zeichnen, falls bereit
-    if (this.backgroundVideo.readyState >= 2) { 
+    if (this.backgroundVideo.readyState >= 2) {
       this.ctx.drawImage(this.backgroundVideo, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     } else {
       // Fallback-Hintergrundfarbe
@@ -201,7 +203,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     this.ctx.lineWidth = 2;
     // Animations-Offset für den Bewegungseffekt
     const offset = (time / 40) % 60;
-    
+
     // Horizontale Linien zeichnen
     for(let y = 0; y < this.height; y += 60) {
       this.ctx.beginPath();
@@ -228,9 +230,9 @@ export class StartScreenComponent implements OnInit, OnDestroy {
 
     this.drawSingleScoreboard('1 Player High Scores', this.onePlayerHighScores, leftBoardX, boardY, scoreboardWidth);
     this.drawSingleScoreboard('2 Player High Scores', this.twoPlayerHighScores, rightBoardX, boardY, scoreboardWidth);
-    
+
     // Schatten zurücksetzen
-    this.ctx.shadowBlur = 0;    
+    this.ctx.shadowBlur = 0;
   }
 
   /**
@@ -262,7 +264,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     highScores.forEach((player, index) => {
       const scoreY = listY + index * lineHeight;
       // Goldene Farbe für den ersten Platz
-      if(index === 0) this.ctx.fillStyle = "#FFFF00"; 
+      if(index === 0) this.ctx.fillStyle = "#FFFF00";
       else this.ctx.fillStyle = "#fff";
 
       this.ctx.textAlign = 'left';
@@ -288,7 +290,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     this.ctx.font = `italic 900 100px "Courier New", monospace`;
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
-    
+
     // Leichter Zoom-Effekt im Takt
     const scale = 1 + Math.sin(time / 200) * 0.05;
     this.ctx.save();
@@ -296,7 +298,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     this.ctx.scale(scale, scale);
     this.ctx.fillText(title, 0, 0);
     this.ctx.restore();
-    
+
     this.ctx.shadowBlur = 0;
   }
 
@@ -306,11 +308,11 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   private drawButtons(pulse: number): void {
     const buttonWidth = 350;
     const buttonHeight = 70;
-    const buttonGap = 20; 
+    const buttonGap = 20;
     const buttonX = this.ctx.canvas.width / 2 - buttonWidth / 2;
 
     const totalHeight = (buttonHeight * 4) + (buttonGap * 3);
-    const startY = (this.ctx.canvas.height - totalHeight) / 2 + 150; 
+    const startY = (this.ctx.canvas.height - totalHeight) / 2 + 150;
 
 
     this.buttonRect = { x: buttonX, y: startY, width: buttonWidth, height: buttonHeight };
@@ -341,7 +343,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     this.ctx.fillStyle = isSelected ? "rgba(255, 0, 255, 0.2)" : "rgba(0, 0, 0, 0.8)";
     this.ctx.strokeStyle = isSelected ? "#ff00de" : "#555";
     this.ctx.lineWidth = 4;
-    
+
     // Leuchteffekt bei Auswahl
     if (isSelected) {
       this.ctx.shadowBlur = 20;
@@ -357,12 +359,12 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     this.ctx.font = `bold 35px "Courier New", monospace`;
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
-    
+
     // Schnelles Blinken des Textes bei Auswahl
     if (isSelected && Math.floor(Date.now() / 100) % 2 === 0) {
       this.ctx.fillStyle = "#ff00de";
     }
-    
+
     this.ctx.fillText(text, x + w / 2, y + h / 2);
     this.ctx.shadowBlur = 0;
   }
@@ -390,60 +392,47 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   onClick(event: MouseEvent): void {
     if (this.isHidden) return;
     const rect = this.canvasRef.nativeElement.getBoundingClientRect();
-    
+
     // Skalierungsfaktor berechnen (falls Canvas CSS-Größe != interne Größe)
     const scaleX = this.canvasRef.nativeElement.width / rect.width;
     const scaleY = this.canvasRef.nativeElement.height / rect.height;
-    
+
     const x = (event.clientX - rect.left) * scaleX;
     const y = (event.clientY - rect.top) * scaleY;
 
     if (this.isPointInRect(x, y, this.buttonRect)) {
-      this.handleSelection();
+      this.handleSelection(0);
     } else if (this.isPointInRect(x, y, this.playerModeButtonRect)) {
-      this.gameService.twoPlayerMode = !this.gameService.twoPlayerMode;
+      this.handleSelection(1)
     } else if (this.isPointInRect(x, y, this.settingsButtonRect)) {
-      this.settingsClicked.emit();
+      this.handleSelection(3)
     } else if (this.isPointInRect(x, y, this.tutorialButtonRect)) {
-      this.tutorialClicked.emit();
+      this.handleSelection(2)
     }
-    
+
   }
 
   /**
-   * Tastatursteuerung für die Menü-Navigation (Pfeiltasten/WASD + Enter/E).
+   * Führt die Aktion für den aktuell ausgewählten Button aus.
    */
-  @HostListener('window:keydown', ['$event'])
-  onKeyDown(event: KeyboardEvent): void {
-    if (this.isHidden) return;
-    switch (event.key.toLowerCase()) {
-      case 'w':
-      case 'arrowup':
-        // Modulo 4 für 4 Buttons
-        this.selectedButtonIndex = (this.selectedButtonIndex - 1 + 4) % 4;
+  private handleSelection(index?: number): void {
+    const selection = index ?? this.selectedButtonIndex;
+    switch (selection) {
+      case 0: // START
+        this.startClicked.emit();
         break;
-      case 's':
-      case 'arrowdown':
-        this.selectedButtonIndex = (this.selectedButtonIndex + 1) % 4;
+      case 1: // Spielermodus
+        this.gameService.twoPlayerMode = !this.gameService.twoPlayerMode;
+        this.draw();
         break;
-      case 'e':
-      case 'enter':
-        this.handleSelection();
-        break;
-  }
-}
+      case 2:
+        this.tutorialClicked.emit()
+        break
+      case 3: // EINSTELLUNGEN
+        this.settingsClicked.emit();
+        break
+    }}
 
-  /**
-   * Führt die Aktion des aktuell ausgewählten Buttons aus.
-   */
-  private handleSelection(): void {
-    switch (this.selectedButtonIndex) {
-      case 0: this.startClicked.emit(); break;
-      case 1: this.gameService.twoPlayerMode = !this.gameService.twoPlayerMode; break;
-      case 2: this.tutorialClicked.emit(); break; // Neuer Case
-      case 3: this.settingsClicked.emit(); break;
-    }
-  }
 
   /**
    * Startet die Zoom-Out Animation beim Spielstart.
