@@ -1,6 +1,7 @@
-<app-start-screen (startClicked)="onStartGame()" (settingsClicked)="onSettingsOpen()"></app-start-screen>
+<app-start-screen (startClicked)="onStartGame()" (settingsClicked)="onSettingsOpen()" (tutorialClicked)="onTutorialOpen()"></app-start-screen>
 
 <div #gameContainer class="game-container">
+  
   <canvas #game width="{{ cwidth }}" height="{{ cheight }}"></canvas>
   <canvas #ui width="{{ cwidth }}" height="{{ cheight }}" class="ui"></canvas>
   <app-hud *ngIf="!showStartScreen"></app-hud>
@@ -8,3 +9,7 @@
                 (closeSettingsRequest)="isSettingsOpen = false"></app-settings>
   <app-order></app-order>
 </div>
+<app-tutorial 
+      *ngIf="isTutorialOpen" 
+      (closeRequest)="isTutorialOpen = false">
+  </app-tutorial>

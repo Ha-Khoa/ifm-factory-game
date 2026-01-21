@@ -32,12 +32,14 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   // --- Ereignisse (Outputs) ---
   @Output() startClicked = new EventEmitter<void>();
   @Output() settingsClicked = new EventEmitter<void>();
+  @Output() tutorialClicked = new EventEmitter<void>();
 
   // --- Interne Zustandsvariablen ---
   private ctx!: CanvasRenderingContext2D;
   private buttonRect = { x: 0, y: 0, width: 0, height: 0 };
   private playerModeButtonRect = { x: 0, y: 0, width: 0, height: 0 };
   private settingsButtonRect = { x: 0, y: 0, width: 0, height: 0 };
+  private tutorialButtonRect = { x: 0, y: 0, width: 0, height: 0 };
   private highScores: PlayerInterface[] = [];
   private backgroundVideo!: HTMLVideoElement;
   private selectedButtonIndex = 0;
@@ -243,26 +245,32 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Zeichnet das Hauptmenü (Start, Modus, Einstellungen).
+   * Zeichnet das Hauptmenü (Start, Modus, Einstellungen, tutorial).
    */
   private drawButtons(pulse: number): void {
     const buttonWidth = 350;
     const buttonHeight = 70;
-    const buttonGap = 30;
+    const buttonGap = 20; 
     const buttonX = this.ctx.canvas.width / 2 - buttonWidth / 2;
-    const totalHeight = (buttonHeight * 3) + (buttonGap * 2);
-    const startY = (this.ctx.canvas.height - totalHeight) / 2 + 180;
 
-    // Klickbereiche definieren
+    const totalHeight = (buttonHeight * 4) + (buttonGap * 3);
+    const startY = (this.ctx.canvas.height - totalHeight) / 2 + 150; 
+
+
     this.buttonRect = { x: buttonX, y: startY, width: buttonWidth, height: buttonHeight };
     this.playerModeButtonRect = { x: buttonX, y: startY + buttonHeight + buttonGap, width: buttonWidth, height: buttonHeight };
-    this.settingsButtonRect = { x: buttonX, y: startY + (buttonHeight + buttonGap) * 2, width: buttonWidth, height: buttonHeight };
+
+    this.tutorialButtonRect = { x: buttonX, y: startY + (buttonHeight + buttonGap) * 2, width: buttonWidth, height: buttonHeight };
+
+    this.settingsButtonRect = { x: buttonX, y: startY + (buttonHeight + buttonGap) * 3, width: buttonWidth, height: buttonHeight };
+
 
     this.drawArcadeButton('START', this.buttonRect, this.selectedButtonIndex === 0);
     const playerModeText = this.gameService.twoPlayerMode ? '2 PLAYERS' : '1 PLAYER';
     this.drawArcadeButton(playerModeText, this.playerModeButtonRect, this.selectedButtonIndex === 1);
-    this.drawArcadeButton('SETTINGS', this.settingsButtonRect, this.selectedButtonIndex === 2);
-  }
+    this.drawArcadeButton('TUTORIAL', this.tutorialButtonRect, this.selectedButtonIndex === 2);
+    this.drawArcadeButton('SETTINGS', this.settingsButtonRect, this.selectedButtonIndex === 3);
+}
 
   /**
    * Hilfsfunktion zum Zeichnen eines einzelnen Menü-Buttons im Arcade-Stil.
@@ -340,7 +348,10 @@ export class StartScreenComponent implements OnInit, OnDestroy {
       this.gameService.twoPlayerMode = !this.gameService.twoPlayerMode;
     } else if (this.isPointInRect(x, y, this.settingsButtonRect)) {
       this.settingsClicked.emit();
+    } else if (this.isPointInRect(x, y, this.tutorialButtonRect)) {
+      this.tutorialClicked.emit();
     }
+    
   }
 
   /**
@@ -352,18 +363,19 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     switch (event.key.toLowerCase()) {
       case 'w':
       case 'arrowup':
-        this.selectedButtonIndex = (this.selectedButtonIndex - 1 + 3) % 3;
+        // Modulo 4 für 4 Buttons
+        this.selectedButtonIndex = (this.selectedButtonIndex - 1 + 4) % 4;
         break;
       case 's':
       case 'arrowdown':
-        this.selectedButtonIndex = (this.selectedButtonIndex + 1) % 3;
+        this.selectedButtonIndex = (this.selectedButtonIndex + 1) % 4;
         break;
       case 'e':
       case 'enter':
         this.handleSelection();
         break;
-    }
   }
+}
 
   /**
    * Führt die Aktion des aktuell ausgewählten Buttons aus.
@@ -372,7 +384,8 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     switch (this.selectedButtonIndex) {
       case 0: this.startClicked.emit(); break;
       case 1: this.gameService.twoPlayerMode = !this.gameService.twoPlayerMode; break;
-      case 2: this.settingsClicked.emit(); break;
+      case 2: this.tutorialClicked.emit(); break; // Neuer Case
+      case 3: this.settingsClicked.emit(); break;
     }
   }
 

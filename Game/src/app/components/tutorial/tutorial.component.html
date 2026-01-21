@@ -1,0 +1,16 @@
+<div class="tutorial-overlay">
+      <div class="tutorial-content">
+        <h2>Wie das Spiel funktioniert:</h2>
+        
+        <div class="slide-container">
+            <img [src]="slides[currentSlide]" class="slide-image" alt="Tutorial Slide">
+        </div>
+
+        <div class="controls">
+          <span>< ZURÜCK (A)</span>
+          <span class="page-indicator">{{currentSlide + 1}} / {{slides.length}}</span>
+          <span>WEITER (D) ></span>
+        </div>
+        <div class="close-hint">DRÜCKE 'E' ODER 'ESC' ZUM SCHLIEßEN</div>
+      </div>
+    </div>
