@@ -10,6 +10,7 @@ import {MachinePopupDrawer} from './ui/machine-popup.drawer';
 import {Player} from '../models/player/player';
 import {PlayerThoughtsDrawer, PlayerThoughtsType} from './ui/player-thoughts.drawer';
 import {Coordinates} from '../models/coordinates/coordinates';
+import { GameTimer } from './ui/game.timer';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,7 @@ export class UIService {
   private itemPopupDrawer!: ItemPopupDrawer;
   private machinePopupDrawer!: MachinePopupDrawer;
   private playerThoughtsDrawer!: PlayerThoughtsDrawer;
+  private gameTimer!: GameTimer;
 
   // State management for drawn elements that need clearing
   private machinePopups: Rect[] = [];
@@ -30,6 +32,7 @@ export class UIService {
   private neededItemPopups: Rect[] = [];
   private producingPopups: Rect[] = [];
   private playerThoughtsPopups: Rect[] = [];
+  private timerText: Rect[] = [];
 
   constructor() {}
 
@@ -54,6 +57,7 @@ export class UIService {
     this.itemPopupDrawer = new ItemPopupDrawer(this.ctxUI, this.images);
     this.machinePopupDrawer = new MachinePopupDrawer(this.ctxUI, this.images);
     this.playerThoughtsDrawer = new PlayerThoughtsDrawer(this.ctxUI, this.images);
+    this.gameTimer = new GameTimer(this.ctxUI, this.images);
   }
 
   // ==========================================================================
@@ -68,38 +72,36 @@ export class UIService {
 
   /** Clears the currently visible item popup. */
   public clearItemPopup(): void {
-    this.itemPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
+    //this.itemPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
     this.itemPopups = [];
   }
 
   /** Draws the detailed information popup for a machine. */
-  public drawMachinePopUp(machine: Machine): void {
-    this.clearMachinePopUp();
-    this.machinePopups = this.machinePopupDrawer.drawDetails(machine);
+  public drawMachinePopUp(machine: Machine, player: Player): void {
+    this.machinePopups.push(...this.machinePopupDrawer.drawDetails(machine, player));
   }
 
   /** Clears the currently visible machine detail popup. */
   public clearMachinePopUp(): void {
-    this.machinePopups.forEach(popUp => CanvasHelper.clearRectRounded(this.ctxUI, popUp, popUp.radius ?? 10, true));
+    //this.machinePopups.forEach(popUp => CanvasHelper.clearRectRounded(this.ctxUI, popUp, popUp.radius ?? 10, true));
     this.machinePopups = [];
   }
 
   /** Draws indicators for items needed by machines. */
   public drawMachineNeedsPopup(machines: Machine[], offsetCamera: [number, number], fov: number, players: Player[] | null): void {
-    this.neededItemPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
+    //this.neededItemPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
     this.neededItemPopups = [];
     this.neededItemPopups = this.machinePopupDrawer.drawNeeds(machines, offsetCamera, fov, players);
   }
 
   /** Draws progress rings for machines that are currently producing. */
   public drawMachineProducingPopup(machines: Machine[], offsetCamera: [number, number], fov: number): void {
-    this.producingPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 100, true));
     this.producingPopups = [];
     this.producingPopups = this.machinePopupDrawer.drawProductionProgress(machines, offsetCamera, fov);
   }
 
   public drawPlayerThoughts(player: Player, offsetCamera: [number, number], fov: number): void {
-    this.playerThoughtsPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
+    //this.playerThoughtsPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
     this.playerThoughtsPopups = [];
     switch (player.thoughts) {
       case PlayerThoughtsType.NOT_ENOUGH_MONEY:
@@ -107,6 +109,19 @@ export class UIService {
         break;
       default: break;
     }
+  }
+
+  public clearAll()
+  {
+    this.ctxUI.clearRect(0, 0, this.ctxUI.canvas.width, this.ctxUI.canvas.height)
+  }
+
+  public drawTimer() : boolean
+  {
+    //this.timerText.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 0, true))
+    this.timerText = [];
+    this.timerText = this.gameTimer.drawTimer();
+    return this.gameTimer.updateTimer();
   }
 
   /**

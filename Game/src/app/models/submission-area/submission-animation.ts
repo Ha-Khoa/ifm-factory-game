@@ -27,6 +27,9 @@ export class SubmissionAnimation {
 
     private _picked: boolean = false;
 
+    private _standStillTimer: number = 0;
+    private _startLKWTimer: number = 0
+
   constructor(postitionSubArea: Coordinates) {
     this._positionEmployee = new Coordinates(0,0);
     this._positionSubArea = postitionSubArea;
@@ -151,6 +154,52 @@ export class SubmissionAnimation {
     pkg.y = this._positionEmployee.y ;
     pkg.z = packageZ ;
     pkg.priority = 350;
+  }
+
+  finishGameAnimation() : boolean
+  {
+    const camera = RenderingService.instance().camera
+    const fov = RenderingService.instance().fov
+    const dt = RenderingService.instance().deltaTime
+    if(camera.x < Gamefield.cols * Gamefield.fieldsize - window.innerWidth / (2 * fov))
+    {
+      const edge = Gamefield.cols * Gamefield.fieldsize - window.innerWidth / (2 * fov)
+      camera.x = camera.x + 0.3 * dt < edge ? camera.x + 0.3 * dt : edge;
+    }
+    else if(camera.y > window.innerHeight / (2 * fov * Math.cos(RenderingService.instance().angle)))
+    {
+      const edge = window.innerHeight / (2 * fov * Math.cos(RenderingService.instance().angle))
+      camera.y = camera.y - 0.3 * dt > edge ? camera.y - 0.3 * dt : edge;
+    }
+    else if(this._positionEmployee.x > this._submissionCoordinates.x - 1.4 * Gamefield.fieldsize)
+    {
+      this._employeeRenderObj.type = RenderType.GIF
+      this._employeeRenderObj.animationDirection = Direction.LEFT
+      this._positionEmployee.x -= 0.1 * dt
+      this._employeeRenderObj.x = this._positionEmployee.x
+    }
+    else if(this._positionEmployee.y > this._submissionCoordinates.y - 7.5 * Gamefield.fieldsize)
+    {
+      this._positionEmployee.y -= 0.1 * dt;
+      this._employeeRenderObj.y = this._positionEmployee.y + 2/5 * Gamefield.fieldsize / 2;
+    }
+    else if(this._standStillTimer < 2000)
+    {
+      this._employeeRenderObj.type = RenderType.CARD_BOARD
+      this._standStillTimer += dt;
+    }
+    else if(this._startLKWTimer < 2000)
+    {
+      this._employeeRenderObj.render = false;
+      this._startLKWTimer += dt;
+    }
+    else if(this._positionTruck.y > -1000)
+    {
+      this._positionTruck.y -= 0.2 * dt;
+      this._truckRenderObj.y = this._positionTruck.y
+    }
+    else return true
+    return false
   }
 
 }

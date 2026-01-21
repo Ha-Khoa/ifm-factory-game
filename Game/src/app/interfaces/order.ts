@@ -26,6 +26,7 @@ export interface OrderItem{
  * @property {number} costs - The total costs incurred for the order.
  * @property {number} grants - The total grants provided in the order.
  * @property {boolean} status - Indicates whether the order is active or processed.
+ * @property {number} time - Time left for the Order to finish
  */
 export interface Order {
     id: number;
@@ -34,4 +35,6 @@ export interface Order {
     costs: number;
     grants: number;
     status: boolean;
+    time: number;
+    timeSeconds?: number;
 }

@@ -13,6 +13,7 @@ import { Coordinates } from "../coordinates/coordinates";
 import { UIService } from "../../services/ui.service";
 import { Player } from "../player/player";
 import { SubmissionArea } from "../submission-area/submission-area";
+import { InputService } from "../../services/input.service";
 import { InteractableObject } from "./interactable-object";
 import { Package } from "../package/package";
 import { SlotMachine } from "../slot-machine/slot-machine";
@@ -26,7 +27,6 @@ export class InteractableManager {
     private _gamefield: Gamefield;
     private ui: UIService;
     private playerService: PlayerService;
-    private _inputs: Record<string, boolean> = {};
     private machines: Machine[] = [
       new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine1.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(6)!, RenderType.THREE_D_IMG),
@@ -36,17 +36,19 @@ export class InteractableManager {
       new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/machine3.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(5)!, RenderType.THREE_D_IMG),
       new Machine(Gamefield.fieldsize * 7, Gamefield.fieldsize * 8, 40,Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Circuit Board", "/images/machine4.png", "/images/wall.png",
-                  [Direction.LEFT], Products.getProductById(5)!, RenderType.THREE_D_IMG)
+                  [Direction.LEFT], Products.getProductById(5)!, RenderType.THREE_D_IMG),
+      // Electric Motor-Maschine (benötigt Copper Wire x2 + Iron Gear x1)
+      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 4, 40, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Electric Motor", "/images/machine1.png", "/images/wall.png",
+                  [Direction.DOWN], Products.getProductById(9)!, RenderType.THREE_D_IMG, 8000)
     ];
     private _slotMachine!: SlotMachine;
 
     private _submissionArea:SubmissionArea;
 
-  constructor(_gamefield: Gamefield, ui: UIService, inputs: Record<string, boolean>, playerService: PlayerService) {
+  constructor(_gamefield: Gamefield, ui: UIService, inputService: InputService, playerService: PlayerService) {
     this._gamefield = _gamefield;
     this.ui = ui;
     this.playerService = playerService;
-    this._inputs = inputs;
     this._slotMachine = new SlotMachine(800, 100, this._gamefield);
     this._submissionArea = new SubmissionArea(
       new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 10),
@@ -58,6 +60,8 @@ export class InteractableManager {
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
     this.updateUnlockedMachine(2);
+    this.updateUnlockedMachine(4);
+    this.updateUnlockedMachine(3);
     this.machines.forEach((machine) => {
       this.generateInteractionField(machine)
       this.addParticleField(machine)
@@ -310,7 +314,7 @@ export class InteractableManager {
     // Visuelles Feedback: Maschine grün färben
     machine.renderObject.rectColor = "rgba(81, 255, 81, 1)";
     machine.renderObject.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
-    this.ui.drawMachinePopUp(machine);
+    this.ui.drawMachinePopUp(machine, player);
   }
 
   upgradeMachineOnInteraction(player: Player) {
@@ -335,7 +339,7 @@ export class InteractableManager {
     prepMachine.rectColor = "rgba(81, 255, 81, 1)";
     prepMachine.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
     // Cast to Machine for UI compatibility
-    this.ui.drawMachinePopUp(prepMachine as any);
+    this.ui.drawMachinePopUp(prepMachine as any, player);
   }
 
   /**
@@ -398,7 +402,7 @@ export class InteractableManager {
 
   updateSubmissionAreaOnInteraction(player: Player) {
       this._submissionArea.renderObject.rectColor = "#9c0e0eff";
-      if (this._inputs["e"] === true && player.inventory instanceof Package && !player.hasPicked()) {
+      if (player.pressedInteract && player.inventory instanceof Package && !player.hasPicked()) {
 
       const packObj : Package = player.inventory;
 

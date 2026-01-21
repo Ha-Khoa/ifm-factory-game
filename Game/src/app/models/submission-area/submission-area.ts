@@ -102,5 +102,8 @@ export class SubmissionArea extends InteractableObject {
         }
     }
 
+    finishGameAnimation() : boolean{
+        return this._submissionAnimation.finishGameAnimation();
+    }
 
 }

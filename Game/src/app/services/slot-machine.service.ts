@@ -4,6 +4,8 @@ import { PlayerService } from './player.service';
 import { Gamefield } from '../models/gamefield/gamefield';
 import { Player } from '../models/player/player';
 
+import { PlayerInput } from './input.service';
+
 export interface SlotIcon {
   img: string;
   progress: number;
@@ -63,6 +65,7 @@ export class SlotMachineService {
   private _won: number = 0; // last spin total
   private _constFillStyle: string = "#ffff00ff"; // cost text color
   private _canSpin: boolean = true;
+  private lastInteract: boolean = false;
 
   constructor() {}
 
@@ -116,7 +119,31 @@ export class SlotMachineService {
     }
   }
 
+  handleInput(input: PlayerInput, player: Player) {
+    if (input.interact && !this.lastInteract && this._canSpin) {
+      const allReelsStopped = this._stopped.every(s => s);
+      if (allReelsStopped) {
+        this._playerService.removeMoney(10).subscribe({
+          next: () => {
+            this.startSpin();
+          },
+          error: (err) => {
+            console.error("Could not start spin, failed to remove money:", err.message);
+            this._constFillStyle = "#ff0000ff";
+            this._canSpin = false;
+            setTimeout(() => {
+              this._constFillStyle = "#ffff00ff";
+              this._canSpin = true;
+            }, 1000);
+          }
+        });
+      }
+    }
+    this.lastInteract = input.interact;
+  }
+
   /**
+   * @deprecated Use handleInput(input: PlayerInput, player: Player) instead.
    * Handle keyboard/input actions relevant to the slot machine.
    * Expects a map of key -> pressed state.
    */

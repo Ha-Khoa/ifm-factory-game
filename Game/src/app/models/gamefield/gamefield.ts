@@ -112,6 +112,23 @@ export class Gamefield {
                     []
                 ))
         }
+        for(let i = 0; i < Gamefield.cols; i++)
+        {
+            this.environmetObjects.push(new RenderObject(
+                    `wall-${i}`,
+                    RenderType.RECT,
+                    i * Gamefield.fieldsize,
+                    0,
+                    600,
+                    Gamefield.fieldsize,
+                    0.1,
+                    -2280,
+                    "/images/Metal_16-512x512.png",
+                    undefined,
+                    "#686767ff",
+                    ["#686767ff"]
+                ))
+        }
     }
 
     /**

@@ -5,6 +5,8 @@ import { Gamefield } from '../../models/gamefield/gamefield';
 import { GameService } from '../../services/game.service';
 import { ApiService } from '../../services/api.service';
 import { PlayerInterface } from '../../interfaces/ui/playerInterface';
+import { InputService } from '../../services/input.service';
+import { Subscription } from 'rxjs';
 
 /**
  * Die StartScreenComponent stellt den Einstiegsbildschirm des Spiels dar.
@@ -42,17 +44,25 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   private tutorialButtonRect = { x: 0, y: 0, width: 0, height: 0 };
   private highScores: PlayerInterface[] = [];
   private backgroundVideo!: HTMLVideoElement;
-  private selectedButtonIndex = 0;
-  public isHidden = false;
   
   // ID für den Animations-Loop (wichtig zum Beenden)
   private animationFrameId: number | null = null;
 
   // Canvas-Dimensionen (feste Referenzgröße)
+  private onePlayerHighScores: PlayerInterface[] = [];
+  private twoPlayerHighScores: PlayerInterface[] = [];
+  private backgroundImage!: HTMLImageElement;
+  private selectedButtonIndex = 0; // 0: START, 1: Spielermodus, 2: EINSTELLUNGEN
+  public isHidden = false; // Steuert die Sichtbarkeit der Komponente
+
+  // Canvas-Dimensionen
   private height: number = 1080;
   private width: number = this.height * window.innerWidth / window.innerHeight;
 
-  constructor(private gameService: GameService, private apiService: ApiService) { }
+  private inputSubscriptions: Subscription[] = [];
+  private lastInputTime = 0;
+
+  constructor(private gameService: GameService, private apiService: ApiService, private inputService: InputService) { }
 
   /**
    * Initialisierung der Komponente.
@@ -82,6 +92,37 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
+    this.inputSubscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  private setupInputHandlers(): void {
+    this.inputService.setInputState('menu');
+    this.inputSubscriptions.push(
+      this.inputService.menuUp$.subscribe(() => this.handleMenuNavigation('up')),
+      this.inputService.menuDown$.subscribe(() => this.handleMenuNavigation('down')),
+      this.inputService.menuConfirm$.subscribe(() => this.handleMenuNavigation('confirm'))
+    );
+  }
+
+  private handleMenuNavigation(action: 'up' | 'down' | 'confirm'): void {
+    if (this.isHidden) return;
+    const now = Date.now();
+    if (now - this.lastInputTime < 200) return; // 200ms debounce
+    this.lastInputTime = now;
+
+    switch (action) {
+      case 'up':
+        this.selectedButtonIndex = (this.selectedButtonIndex - 1 + 4) % 4;
+        this.draw();
+        break;
+      case 'down':
+        this.selectedButtonIndex = (this.selectedButtonIndex + 1) % 4;
+        this.draw();
+        break;
+      case 'confirm':
+        this.handleSelection();
+        break;
+    }
   }
 
   /**
@@ -90,9 +131,17 @@ export class StartScreenComponent implements OnInit, OnDestroy {
    */
   private loadHighScores(): void {
     this.apiService.getPlayers().subscribe(players => {
-      this.highScores = players
+      this.onePlayerHighScores = players
+        .filter(p => !p.twoPlayerMode)
         .sort((a, b) => b.score - a.score)
         .slice(0, 10);
+
+      this.twoPlayerHighScores = players
+        .filter(p => p.twoPlayerMode)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10);
+
+      this.draw(); // Neuzeichnen mit den Highscore-Daten
     });
   }
 
@@ -166,7 +215,6 @@ export class StartScreenComponent implements OnInit, OnDestroy {
    * Koordiniert das Zeichnen der beiden Highscore-Tafeln.
    */
   private drawScoreboards(): void {
-    if (this.highScores.length === 0) return;
     const scoreboardWidth = 400;
     const padding = 50;
     const leftBoardX = padding;
@@ -178,17 +226,24 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     this.ctx.shadowColor = "#0ff";
     this.ctx.fillStyle = "#0ff";
 
-    this.drawSingleScoreboard('1P HIGH SCORE', leftBoardX, boardY, scoreboardWidth);
-    this.drawSingleScoreboard('2P HIGH SCORE', rightBoardX, boardY, scoreboardWidth);
+    this.drawSingleScoreboard('1 Player High Scores', this.onePlayerHighScores, leftBoardX, boardY, scoreboardWidth);
+    this.drawSingleScoreboard('2 Player High Scores', this.twoPlayerHighScores, rightBoardX, boardY, scoreboardWidth);
     
     // Schatten zurücksetzen
-    this.ctx.shadowBlur = 0;
+    this.ctx.shadowBlur = 0;    
   }
 
   /**
-   * Zeichnet eine einzelne Highscore-Tafel an der angegebenen Position.
+   * Zeichnet eine einzelne Anzeigetafel mit Titel und einer Liste von Spielständen.
+   * @param title Der Titel der Anzeigetafel.
+   * @param highScores Die Liste der Highscores, die angezeigt werden sollen.
+   * @param x Die X-Koordinate der linken oberen Ecke.
+   * @param y Die Y-Koordinate der linken oberen Ecke.
+   * @param width Die Breite der Anzeigetafel.
    */
-  private drawSingleScoreboard(title: string, x: number, y: number, width: number): void {
+  private drawSingleScoreboard(title: string, highScores: PlayerInterface[], x: number, y: number, width: number): void {
+    if (highScores.length === 0) return;
+
     const lineHeight = 40;
     const listY = y + lineHeight + 15;
     const padding = 10;
@@ -203,7 +258,8 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     this.ctx.font = `28px "Courier New", monospace`;
     this.ctx.fillStyle = "#eee";
 
-    this.highScores.forEach((player, index) => {
+    // Spielstände zeichnen
+    highScores.forEach((player, index) => {
       const scoreY = listY + index * lineHeight;
       // Goldene Farbe für den ersten Platz
       if(index === 0) this.ctx.fillStyle = "#FFFF00"; 
@@ -343,7 +399,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     const y = (event.clientY - rect.top) * scaleY;
 
     if (this.isPointInRect(x, y, this.buttonRect)) {
-      this.startClicked.emit();
+      this.handleSelection(0);
     } else if (this.isPointInRect(x, y, this.playerModeButtonRect)) {
       this.gameService.twoPlayerMode = !this.gameService.twoPlayerMode;
     } else if (this.isPointInRect(x, y, this.settingsButtonRect)) {
@@ -396,6 +452,8 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   public zoomOut() {
     this.isHidden = true;
     if(this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+    this.inputSubscriptions.forEach(sub => sub.unsubscribe());
+    const style = this.containerRef.nativeElement.style;
 
     const style = this.containerRef.nativeElement.style;
     style.setProperty('top', '0px');
@@ -433,6 +491,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     const width = `${newWidth}px`;
     const height = `${newHeight}px`;
 
+    // Hauptcontainer und Canvas-Größe anpassenU
     style.setProperty('width', width);
     style.setProperty('height', height);
     styleCanvas.setProperty('height', height);

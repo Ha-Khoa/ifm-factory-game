@@ -83,6 +83,8 @@ namespace API.Migrations
                     b.Property<int>("Score")
                         .HasColumnType("int");
 
+                    b.Property<bool>("TwoPlayerMode");
+
                     b.HasKey("Id");
 
                     b.ToTable("Players", (string)null);

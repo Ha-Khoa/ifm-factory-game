@@ -12,11 +12,13 @@ import { Products } from '../models/product/products';
 import { ConveyorBeltManager } from '../models/conveyor-belt/conveyor-belt-manager';
 import { SlotMachineService } from './slot-machine.service';
 
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import {Orders} from '../models/orders/orders';
 import {PlayerService} from './player.service';
 import {PrepMachineManager} from "../models/preProcess/prep-machine-manager";
 import { RenderObject } from '../models/rendering/render-object';
+import { InputService } from './input.service';
+import { GameOverScreen } from './ui/gameover.screen';
 
 @Injectable({
   providedIn: 'root'
@@ -42,13 +44,18 @@ export class GameService {
   private interactableManager!: InteractableManager;
   private conveyorBeltManager!: ConveyorBeltManager;
   private prepMachine!: PrepMachineManager;
-  private lastFrameTimestamp: number = performance.now();
+
+  private gameEnd: boolean = false;
+  // GameOver Screen
+  private gameOverScreen: GameOverScreen | null = null;
+  private ctxUI!: CanvasRenderingContext2D;
 
   // Input und Assets
   private inputs: Record<string, boolean> = {};
   private images: { [key: string]: HTMLImageElement } = {};
+  private inputSubscription!: Subscription;
 
-  constructor(private uiService: UIService, private playerService: PlayerService) { }
+  constructor(private uiService: UIService, private playerService: PlayerService, private inputService: InputService) { }
 
 
   /**
@@ -57,8 +64,10 @@ export class GameService {
    * @param ctxUI
    */
   async init(ctx: CanvasRenderingContext2D, ctxUI: CanvasRenderingContext2D, TwoPlayerMode: boolean = false) {
+    this.inputService.start();
     // Initialisiere UI Service
-       this.gamefield = new Gamefield();
+    this.ctxUI = ctxUI;
+    this.gamefield = new Gamefield();
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
@@ -66,8 +75,6 @@ export class GameService {
     RenderingService.instance().init(this.ctx, this.images, this.angle);
     SlotMachineService.instance().init(this.ctx, this.images, this.playerService);
     this.uiService.init(ctxUI, this.angle, this.images);
-    // Initialisiere Eingaben (verwende lowercase keys, passend zu event.key.toLowerCase())
-    this.inputs = { 'w': false, 'a': false, 's': false, 'd': false, 'e': false, 'arrowup': false, 'arrowleft': false, 'arrowdown': false, 'arrowright': false, 'enter': false, ' ': false };
 
     // Initialisiere Spielobjekte
     this.playerVelocity = Gamefield.fieldsize * 4; // in Pixel pro Sekunde
@@ -79,7 +86,14 @@ export class GameService {
     );
     this.twoPlayerMode = TwoPlayerMode;
         RenderingService.instance().convertToCameraPOV(this.player.camera);
-    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputs, this.playerService);
+    this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputService, this.playerService);
+
+    this.inputSubscription = this.inputService.upgrade$.subscribe(playerIndex => {
+      const player = playerIndex === 0 ? this.player : this.player2;
+      if (player) {
+        this.interactableManager.upgradeMachineOnInteraction(player);
+      }
+    });
 
     // 1. Sammle alle RenderObject-Instanzen aus allen relevanten Quellen.
     const allRenderObjects: RenderObject[] = [];
@@ -95,6 +109,7 @@ export class GameService {
     const staticImagePaths = [
       // Base & UI
       "/images/package.png",
+      "/images/ifm-gameover-background.png",
       "/images/interaction-field.png",
       "/images/truck_roof.png",
       "/images/truck_back.png",
@@ -120,7 +135,6 @@ export class GameService {
       "/images/slotMachine/ifm.png",
       "/images/slotMachine/manure.png",
       "/images/slotMachine/squirrel.png",
-      "/images/slotMachine/slot-machine.png",
       // Prep Machine
       "/images/Products/prep-machine/frame_1.png",
       "/images/Products/prep-machine/frame_2.png",
@@ -195,17 +209,39 @@ export class GameService {
    */
   startGame() {
     this.GameRunning = true;
+    this.inputService.setInputState('game');
     this.ctx.imageSmoothingEnabled = true;
     // Initialize the first orders
     Orders.initializeOrders();
     const loop = () => {
       if (!this.GameRunning) return;
-      const now = performance.now();
-      const deltaMs = now - this.lastFrameTimestamp;
-      this.lastFrameTimestamp = now;
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      this.uiService.clearAll();
+      if(this.gameEnd || this.uiService.drawTimer())
+      {
+        this.gameEnd = true;
+        Player._cameraFix = false;
+        if(this.interactableManager.submissionArea.finishGameAnimation())
+        {
+          this.startGameOverLoop();
+          return;
+        }
+      }
 
+      // Handle Inputs
+      const player1Input = this.inputService.getPlayerInput(0);
+      this.player.handleInput(player1Input);
+      if (this.interactableManager.checkPlayerInSlotMachineArea(this.player)) {
+        SlotMachineService.instance().handleInput(player1Input, this.player);
+      }
+      if (this._twoPlayerMode && this.player2) {
+        const player2Input = this.inputService.getPlayerInput(1);
+        this.player2.handleInput(player2Input);
+        if (this.interactableManager.checkPlayerInSlotMachineArea(this.player2)) {
+          SlotMachineService.instance().handleInput(player2Input, this.player2);
+        }
+      }
 
       // Update-Phase
       this.uiService.clearMachinePopUp();
@@ -232,7 +268,7 @@ export class GameService {
 
       const workingPrepMachine = this.player.getWorkingPrepMachine();
       this.prepMachine.setWorkingMachine(workingPrepMachine);
-      this.prepMachine.update(deltaMs);
+      this.prepMachine.update(RenderingService.instance().deltaTime);
 
       this.player.render();
       this.player.updateProductInHand();
@@ -278,6 +314,7 @@ export class GameService {
       this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
 
       // Orders
+      Orders.updateOrderTime();
 
 
       if (this.player.inventory === null) {
@@ -294,6 +331,9 @@ export class GameService {
         // Wenn wir was tragen: Sicherstellen, dass das Popup weg ist!
         this.uiService.clearItemPopup();
       }
+
+
+
       this.gameLoopTick.next();
 
       requestAnimationFrame(loop);
@@ -304,26 +344,10 @@ export class GameService {
 
   stopGame() {
     this.GameRunning = false;
-  }
-
-  setInput(key: string, pressed: boolean) {
-    this.inputs[key] = pressed;
-    this.player.setInput(this.inputs)
-    if(this.interactableManager.checkPlayerInSlotMachineArea(this.player))
-      {
-    SlotMachineService.instance().setInput(this.inputs, this.player);
-      }
-      else if(this.player2 && this.interactableManager.checkPlayerInSlotMachineArea(this.player2))
-      {
-    SlotMachineService.instance().setInput(this.inputs, this.player2);
-      }
-    if(this._twoPlayerMode && this.player2)
-    {
-      this.player2.setInput(this.inputs);
-    }
-    if(this.inputs['u'] === true)
-    {
-    this.interactableManager.upgradeMachineOnInteraction(this.player);
+    this.inputService.stop();
+    this.inputService.setInputState('menu');
+    if (this.inputSubscription) {
+      this.inputSubscription.unsubscribe();
     }
   }
 
@@ -351,6 +375,37 @@ export class GameService {
         RenderingService.instance().deleteRenderingObjektByName("player1")
       }
     }
+  }
+
+  /**
+   * Startet die GameOver-Loop nachdem das Spiel beendet ist.
+   * Rendert den GameOverScreen mit Score und verdientem Geld.
+   */
+  private startGameOverLoop(): void {
+    this.gameOverScreen = new GameOverScreen(this.ctx, this.ctx.canvas.width, this.ctx.canvas.height, this.playerService, this.images);
+
+    this.gameOverScreen.setBackgroundImage("/images/ifm-gameover-background.png")
+
+    // GameOver Loop
+    const gameOverLoop = () => {
+      if (!this.GameRunning) return;
+
+      // Loesche GameCanvas
+      this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+      // Rendere GameOverScreen
+      this.gameOverScreen?.renderGameOverScreen();
+
+      // Prüfe auf Space-Taste zum Fortfahren
+      if (this.inputService.keyboardState[' '] === true || this.inputService.keyboardState['e'] === true) {
+        this.GameRunning = false;
+        return;
+      }
+
+      requestAnimationFrame(gameOverLoop);
+    };
+
+    requestAnimationFrame(gameOverLoop);
   }
 
 }
