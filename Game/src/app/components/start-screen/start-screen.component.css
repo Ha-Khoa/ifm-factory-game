@@ -13,7 +13,7 @@ canvas {
   width: 100%;
   height: 100%;
   /* Leichter Glow für den Screen-Inhalt */
-  filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5));
+  filter: drop-shadow(0 0 8px var(--secondary));
 }
 
 #phone #screen-container {
@@ -47,7 +47,7 @@ canvas {
   position: relative;
   max-height: 100%;
   /* Neon Glow um das ganze Gerät */
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), 0 0 50px rgba(255, 0, 255, 0.2); 
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), 0 0 30px var(--secondary); 
   border-radius: 20px; /* Optional, falls Radius Variable fehlt */
   --width: 3px;
 }
@@ -82,11 +82,11 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); /* Roter "Recording" Glow */
+  box-shadow: 0 0 10px var(--secondary); /* Orange "Recording" Glow */
 }
 #phone #top-section #camera::after {
   content: "";
-  background: red;
+  background: var(--secondary);
   border-radius: 100vmax;
   height: 40%;
   aspect-ratio: 1/1;
@@ -123,9 +123,9 @@ canvas {
   aspect-ratio: 1/1;
   border-radius: 100vmax;
   /* Arcade Button Style */
-  background: radial-gradient(circle, #ff00de 0%, #990085 100%);
-  border: 2px solid #ff5df0;
-  box-shadow: 0 0 15px #ff00de;
+  background: radial-gradient(circle, #FF8533 0%, var(--secondary) 100%);
+  border: 2px solid var(--secondary);
+  box-shadow: 0 0 15px var(--secondary);
   cursor: pointer;
 }
 

@@ -199,7 +199,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
    * Zeichnet ein animiertes Retro-Gitter (Synthwave-Stil).
    */
   private drawRetroGrid(time: number): void {
-    this.ctx.strokeStyle = "rgba(0, 255, 255, 0.15)";
+    this.ctx.strokeStyle = "rgba(255, 102, 0, 0.2)";
     this.ctx.lineWidth = 2;
     // Animations-Offset für den Bewegungseffekt
     const offset = (time / 40) % 60;
@@ -225,8 +225,8 @@ export class StartScreenComponent implements OnInit, OnDestroy {
 
     // Neon-Effekt Einstellungen
     this.ctx.shadowBlur = 10;
-    this.ctx.shadowColor = "#0ff";
-    this.ctx.fillStyle = "#0ff";
+    this.ctx.shadowColor = UI_THEME.secondary;
+    this.ctx.fillStyle = UI_THEME.secondary;
 
     this.drawSingleScoreboard('1 Player High Scores', this.onePlayerHighScores, leftBoardX, boardY, scoreboardWidth);
     this.drawSingleScoreboard('2 Player High Scores', this.twoPlayerHighScores, rightBoardX, boardY, scoreboardWidth);
@@ -284,7 +284,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     const title = 'IFM ARCADE';
     const hue = (time / 20) % 360;
     this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-    this.ctx.shadowColor = `hsl(${hue}, 100%, 50%)`;
+    this.ctx.shadowColor = UI_THEME.secondary;
     this.ctx.shadowBlur = 30;
 
     this.ctx.font = `italic 900 100px "Courier New", monospace`;
@@ -340,14 +340,14 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     const x = rect.x - (w - rect.width) / 2;
     const y = rect.y - (h - rect.height) / 2;
 
-    this.ctx.fillStyle = isSelected ? "rgba(255, 0, 255, 0.2)" : "rgba(0, 0, 0, 0.8)";
-    this.ctx.strokeStyle = isSelected ? "#ff00de" : "#555";
+    this.ctx.fillStyle = isSelected ? "rgba(255, 102, 0, 0.25)" : "rgba(0, 0, 0, 0.8)";
+    this.ctx.strokeStyle = isSelected ? UI_THEME.secondary : "#555";
     this.ctx.lineWidth = 4;
 
     // Leuchteffekt bei Auswahl
     if (isSelected) {
       this.ctx.shadowBlur = 20;
-      this.ctx.shadowColor = "#ff00de";
+      this.ctx.shadowColor = UI_THEME.secondary;
     } else {
       this.ctx.shadowBlur = 0;
     }
@@ -362,7 +362,7 @@ export class StartScreenComponent implements OnInit, OnDestroy {
 
     // Schnelles Blinken des Textes bei Auswahl
     if (isSelected && Math.floor(Date.now() / 100) % 2 === 0) {
-      this.ctx.fillStyle = "#ff00de";
+      this.ctx.fillStyle = UI_THEME.secondary;
     }
 
     this.ctx.fillText(text, x + w / 2, y + h / 2);
