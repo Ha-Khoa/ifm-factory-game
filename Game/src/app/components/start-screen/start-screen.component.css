@@ -12,123 +12,132 @@ canvas {
   display: block;
   width: 100%;
   height: 100%;
+  /* Leichter Glow für den Screen-Inhalt */
+  filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5));
 }
 
 #phone #screen-container {
   position: relative;
+  overflow: hidden;
 }
 
-#phone{
-	/* aspect-ratio: 16/9;
-	min-height: 50px;
-	max-height: 100vh; */
-	display: flex;
-	flex-direction: column;
-	position: relative;
-	/*filter: drop-shadow(0 10px 5px rgba(0,0,0,0.7));*/
-	max-height: 100%;
-	--after-height: 50px;
-  	--after-top: 50px;
-  	--before-height: 30px;
-  	--before-top: 120px;
-	--width: 3px;
+/* SCANLINE EFFEKT über dem Canvas */
+#phone #screen-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0),
+    rgba(255,255,255,0) 50%,
+    rgba(0,0,0,0.1) 50%,
+    rgba(0,0,0,0.1)
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 20;
 }
 
-/* #phone::after{
-	content: "";
-	height: var(--after-height);
-	width: var(--width);
-	background: black;
-	position: absolute;
-	top: var(--after-top);
-	right: 0;
-	transform: translatex(100%);
-	border-top-right-radius: 100vmax;
-	border-bottom-right-radius: 100vmax;
+#phone {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  max-height: 100%;
+  /* Neon Glow um das ganze Gerät */
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), 0 0 50px rgba(255, 0, 255, 0.2); 
+  border-radius: 20px; /* Optional, falls Radius Variable fehlt */
+  --width: 3px;
 }
-#phone::before{
-	content: "";
-	height: var(--before-height);
-	width: var(--width);
-	background: black;
-	position: absolute;
-	top: var(--before-top);
-	right: 0;
-	transform: translatex(100%);
-	border-top-right-radius: 100vmax;
-	border-bottom-right-radius: 0vmax;
-} */
 
 #phone #top-section,
-#phone #bottom-section{
-	/* --radius: 20px; */
-	corner-shape: squircle;
+#phone #bottom-section {
+  corner-shape: squircle;
+  /* Dunkles, technisches Material statt flaches Schwarz */
+  background: #050505;
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+  z-index: 2;
 }
 
-#phone #top-section{
-	background: black;
-	height: 100px;
-	border-top-left-radius: var(--radius);
-	border-top-right-radius: var(--radius);
-	display: flex;
-	justify-content: center;
-	align-items: center;
+#phone #top-section {
+  height: 100px;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 -5px 10px rgba(0,0,0,0.8);
 }
 
-
-#phone #top-section #camera{
-	height: 50px;
-	aspect-ratio: 1/1;
-	background: rgba(255 255 255 / .4);
-	border-radius: 100vmax;
-	display: flex;
-	justify-content: center;
-	align-items: center;
+/* Kamera wird zur "Status LED" oder ähnlichem */
+#phone #top-section #camera {
+  height: 50px;
+  aspect-ratio: 1/1;
+  background: #111;
+  border: 2px solid #333;
+  border-radius: 100vmax;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); /* Roter "Recording" Glow */
 }
-#phone #top-section #camera::after{
-	content: "";
-	background: black;
-	border-radius: 100vmax;
-	height:62%;
-	aspect-ratio: 1/1;
-}
-
-#phone #screen-container{
-	flex-grow:1;
-	border-right: 20px solid black;
-	border-left: 20px solid black;
-	display: flex;
-	position: relative;
-	box-sizing: border-box;
-	overflow: hidden;
-}
-#phone #bottom-section{
-	background: black;
-	height: 100px;
-	border-bottom-left-radius: var(--radius);
-	border-bottom-right-radius: var(--radius);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 0px 0;
+#phone #top-section #camera::after {
+  content: "";
+  background: red;
+  border-radius: 100vmax;
+  height: 40%;
+  aspect-ratio: 1/1;
+  animation: blink 2s infinite;
 }
 
-#phone #bottom-section #home-button{
-	--size-icon: 30px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 70%;
-	aspect-ratio: 1/1;
-	background: white;
-	border-radius: 100vmax;
-	background: #3b3b3b;
-	background: radial-gradient(circle,rgba(0, 0, 0, 1) 0%, rgba(49, 49, 49, 1) 96%, rgba(92, 92, 92, 1) 100%);
-	border: 1px solid rgba(92, 92, 92, 1);
+#phone #screen-container {
+  flex-grow: 1;
+  border-right: 20px solid #050505;
+  border-left: 20px solid #050505;
+  display: flex;
+  position: relative;
+  box-sizing: border-box;
+  background: black;
 }
 
-#phone #bottom-section #home-button::after{
-	content: "♠";
-	color: rgba(255 255 255 / .8);
-	font-size: var(--size-icon)
+#phone #bottom-section {
+  height: 100px;
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  box-shadow: inset 0 5px 10px rgba(0,0,0,0.8);
+}
+
+#phone #bottom-section #home-button {
+  --size-icon: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70%;
+  aspect-ratio: 1/1;
+  border-radius: 100vmax;
+  /* Arcade Button Style */
+  background: radial-gradient(circle, #ff00de 0%, #990085 100%);
+  border: 2px solid #ff5df0;
+  box-shadow: 0 0 15px #ff00de;
+  cursor: pointer;
+}
+
+#phone #bottom-section #home-button::after {
+  content: "♠"; /* Stern statt Pik */
+  color: white;
+  font-size: var(--size-icon);
+  text-shadow: 0 0 5px white;
+}
+
+@keyframes blink {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
 }

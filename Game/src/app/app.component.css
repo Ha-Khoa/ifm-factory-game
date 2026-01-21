@@ -1,8 +1,7 @@
 /* Importiere eine Font von Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap');
 
-body,
-html {
+body, html {
   margin: 0;
   padding: 0;
   /* Dunkler Hintergrund statt Weiß */

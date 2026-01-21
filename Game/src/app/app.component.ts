@@ -9,12 +9,13 @@ import { Subscription } from 'rxjs';
 import { RenderingService } from './services/rendering.service';
 import { ApiService } from './services/api.service';
 import { PlayerService } from './services/player.service';
+import { TutorialComponent } from './components/tutorial/tutorial.component'; 
 import { InputService } from './services/input.service';
 
 @Component({
   selector: 'app-root',
   standalone: true, // Assuming standalone based on `imports` usage
-  imports: [HudComponent, SettingsComponent, CommonModule, OrderComponent, StartScreenComponent], // Add StartScreenComponent
+  imports: [HudComponent, TutorialComponent, SettingsComponent, CommonModule, OrderComponent, StartScreenComponent], // Add StartScreenComponent
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -22,6 +23,8 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
   title = 'Game';
   cwidth = window.innerWidth;
   cheight = window.innerHeight;
+
+  isTutorialOpen: boolean = false;
 
   // Game canvas
   @ViewChild('game') canvasRef!: ElementRef<HTMLCanvasElement>;
@@ -122,5 +125,9 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
 
   onSettingsOpen(): void {
     this.isSettingsOpen = true;
+  }
+
+  onTutorialOpen(): void {
+    this.isTutorialOpen = true;
   }
 }
