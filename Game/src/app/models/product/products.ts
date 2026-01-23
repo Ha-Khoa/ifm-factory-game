@@ -30,17 +30,26 @@ export class Products {
    *   available for sale.
    * - Image Path: The file path for the image representation of the product.
    */
-  private static productsList: Product[] = [
-    new Product(1, "Raw Plastic", 6, 15, 5, true, "/images/Products/raw-plastic.png"),
-    new Product(2, "Raw Silicon", 16, 20, 9, true, "/images/Products/raw-silicon.png"),
-    new Product(3, "Copper Wire", 15, 22, 20, true, "/images/Products/copper-wire.png"),
-    new Product(4, "Plastic Case", 50, 50, [{productId: 1, quantity: 3}, {productId: 2, quantity: 1}], true, "/images/Products/plastic-case.png"),
-    new Product(5, "Circuit Board", 120, 150, [{productId: 2, quantity: 1}, {productId: 3, quantity: 1}], true, "/images/Products/circuit-board.png"),
-    new Product(6, "Basic Sensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png"),
-    new Product(7, "Iron Ingot", 30, 50, 20, true, "/images/Products/iron-ingot.png"),
-    new Product(8, "Iron Gear", 60, 100, [{productId: 7, quantity: 1}], true, "/images/Products/iron-gear.png"),
-    new Product(9, "Electric Motor", 200, 300, [{productId: 3, quantity: 2}, {productId: 8, quantity: 1}], true, "/images/Products/electric-motor.png")
-  ]
+  private static productsList: Product[] = [];
+  private static isInitialized = false;
+
+  public static init(): void {
+    if (this.isInitialized) {
+      return;
+    }
+    this.productsList = [
+      new Product(1, "Raw Plastic", 6, 15, 5, true, "/images/Products/raw-plastic.png"),
+      new Product(2, "Raw Silicon", 16, 20, 9, true, "/images/Products/raw-silicon.png"),
+      new Product(3, "Copper Wire", 15, 22, 20, true, "/images/Products/copper-wire.png"),
+      new Product(4, "Plastic Case", 50, 50, [{productId: 1, quantity: 3}, {productId: 2, quantity: 1}], true, "/images/Products/plastic-case.png"),
+      new Product(5, "Circuit Board", 120, 150, [{productId: 2, quantity: 1}, {productId: 3, quantity: 1}], true, "/images/Products/circuit-board.png"),
+      new Product(6, "Basic Sensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png"),
+      new Product(7, "Iron Ingot", 30, 50, 20, true, "/images/Products/iron-ingot.png"),
+      new Product(8, "Iron Gear", 60, 100, [{productId: 7, quantity: 1}], true, "/images/Products/iron-gear.png"),
+      new Product(9, "Electric Motor", 200, 300, [{productId: 3, quantity: 2}, {productId: 8, quantity: 1}], true, "/images/Products/electric-motor.png")
+    ];
+    this.isInitialized = true;
+  }
 
   /**
    * A list containing existing generated products, which can be either individual products

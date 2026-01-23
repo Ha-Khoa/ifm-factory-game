@@ -1,3 +1,4 @@
+@if (isVisible) {
 <div *ngIf="player$ | async as player" class="stats-box">
   <div class="stat-item">
     <img src="/images/fox/fox-coin.png" class="icon" alt="" />
@@ -9,3 +10,4 @@
     <span class="score-val">{{ player.score | number }}</span>
   </div>
 </div>
+}

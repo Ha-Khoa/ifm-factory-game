@@ -1,29 +1,18 @@
-import { UI_THEME } from './theme.manager';
-import { PlayerService } from '../player.service';
+import { UI_THEME } from '../../services/ui/theme.manager';
+import { PlayerService } from '../../services/player.service';
 
 export class GameOverScreen {
-  private ctx: CanvasRenderingContext2D;
-  private playerService: PlayerService;
-  private images: { [key: string]: HTMLImageElement };
   private backgroundImage: HTMLImageElement | null = null;
-  private canvasWidth: number;
-  private canvasHeight: number;
   private animationProgress: number = 0; // 0 to 1
   private startTime: number = 0;
   private animationDuration: number = 1000; // 1 second animation
 
   constructor(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    playerService: PlayerService,
-    images: { [key:string]: HTMLImageElement }
-    ) {
-    this.ctx = ctx;
-    this.canvasWidth = width;
-    this.canvasHeight = height;
-    this.playerService = playerService;
-    this.images = images;
+    private ctx: CanvasRenderingContext2D,
+    private canvasWidth: number,
+    private canvasHeight: number,
+    private playerService: PlayerService,
+  ) {
     this.startTime = Date.now();
   }
 
@@ -46,7 +35,7 @@ export class GameOverScreen {
   /**
    * Rendert den GameOver-Bildschirm mit animiertem Fade-In
    */
-  public renderGameOverScreen(): void {
+  public render(): void {
     const score = this.playerService.getScore();
     const earnedMoney = this.playerService.getMoney();
     const playerName = this.playerService.player?.name ?? 'Player';

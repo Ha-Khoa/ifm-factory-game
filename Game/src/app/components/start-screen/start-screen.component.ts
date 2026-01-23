@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, HostListener, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, HostListener, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { UI_THEME, loadTheme } from '../../services/ui/theme.manager';
 import { RenderingService } from '../../services/rendering.service';
 import { Gamefield } from '../../models/gamefield/gamefield';
@@ -7,6 +7,9 @@ import { ApiService } from '../../services/api.service';
 import { PlayerInterface } from '../../interfaces/ui/playerInterface';
 import { InputService } from '../../services/input.service';
 import { Subscription } from 'rxjs';
+import { PlayerService } from '../../services/player.service';
+import { GameOverScreen } from './game-over.screen';
+import { StartScreenRenderer } from './start-screen.renderer';
 
 /**
  * Die StartScreenComponent stellt den Einstiegsbildschirm des Spiels dar.
@@ -20,7 +23,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './start-screen.component.html',
   styleUrls: ['./start-screen.component.css']
 })
-export class StartScreenComponent implements OnInit, OnDestroy {
+export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
   // --- Referenzen auf DOM-Elemente ---
   @ViewChild('startScreenCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('startScreenContainer') containerRef!: ElementRef<HTMLDivElement>;
@@ -36,12 +39,14 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   @Output() settingsClicked = new EventEmitter<void>();
   @Output() tutorialClicked = new EventEmitter<void>();
 
+  public screen: 'start' | 'game-over' = 'start';
+  private gameOverScreen!: GameOverScreen;
+  private renderer!: StartScreenRenderer;
+  private styledElements: ElementRef[] = [];
+
+
   // --- Interne Zustandsvariablen ---
   private ctx!: CanvasRenderingContext2D;
-  private buttonRect = { x: 0, y: 0, width: 0, height: 0 };
-  private playerModeButtonRect = { x: 0, y: 0, width: 0, height: 0 };
-  private settingsButtonRect = { x: 0, y: 0, width: 0, height: 0 };
-  private tutorialButtonRect = { x: 0, y: 0, width: 0, height: 0 };
   private highScores: PlayerInterface[] = [];
   private backgroundVideo!: HTMLVideoElement;
 
@@ -62,7 +67,12 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   private inputSubscriptions: Subscription[] = [];
   private lastInputTime = 0;
 
-  constructor(private gameService: GameService, private apiService: ApiService, private inputService: InputService) { }
+  constructor(
+    private gameService: GameService,
+    private apiService: ApiService,
+    private inputService: InputService,
+    private playerService: PlayerService,
+  ) { }
 
   /**
    * Initialisierung der Komponente.
@@ -72,24 +82,41 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     loadTheme();
     this.ctx = this.canvasRef.nativeElement.getContext('2d')!;
     this.setCanvasSize();
-    this.setupInputHandlers();
+    this.renderer = new StartScreenRenderer(this.ctx, this.width, this.height, this.gameService);
 
-    // Hintergrundvideo initialisieren
-    this.backgroundVideo = document.createElement('video');
-    this.backgroundVideo.src = "/images/background.mp4";
-    this.backgroundVideo.loop = true;
-    this.backgroundVideo.muted = true; // Notwendig für Autoplay ohne Benutzerinteraktion
-    this.backgroundVideo.play();
+    this.gameOverScreen = new GameOverScreen(this.ctx, this.width, this.height, this.playerService);
+    this.gameOverScreen.setBackgroundImage('/images/ifm-gameover-background.png');
 
-    this.loadHighScores();
-    this.animate();
+    this.gameService.gameOver$.subscribe(() => {
+      this.showGameOver();
+    });
 
+    if (this.screen === 'start') {
+      this.setupInputHandlers();
+      // Hintergrundvideo initialisieren
+      this.backgroundVideo = document.createElement('video');
+      this.backgroundVideo.src = "/images/background.mp4";
+      this.backgroundVideo.loop = true;
+      this.backgroundVideo.muted = true; // Notwendig für Autoplay ohne Benutzerinteraktion
+      this.backgroundVideo.play();
+
+      this.loadHighScores();
+      this.animate();
+    }
   }
 
-  /**
-   * Aufräumen beim Zerstören der Komponente.
-   * Stoppt den Animations-Loop, um Speicherlecks zu verhindern.
-   */
+  ngAfterViewInit(): void {
+    this.styledElements = [
+      this.containerRef,
+      this.canvasRef,
+      this.topSectionRef,
+      this.bottomSectionRef,
+      this.screenContainerRef,
+      this.homeButtonRef,
+      this.startScreenContainerRef
+    ];
+  }
+
   ngOnDestroy(): void {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
@@ -161,212 +188,50 @@ export class StartScreenComponent implements OnInit, OnDestroy {
    */
   private animate(): void {
     if (this.isHidden) return;
-    this.draw();
+    if (this.screen === 'start') {
+      this.draw();
+    } else {
+      this.gameOverScreen.render();
+    }
     this.animationFrameId = requestAnimationFrame(() => this.animate());
   }
 
   /**
    * Zeichnet einen einzelnen Frame des Startbildschirms.
-   * Beinhaltet Hintergrund, Grid, Scoreboards, Titel und Buttons.
+   * Delegiert das Zeichnen an den StartScreenRenderer.
    */
   private draw(): void {
-    const time = Date.now();
-    // Berechnet einen Puls-Wert zwischen 0 und 1 basierend auf der Zeit
-    const pulse = (Math.sin(time / 200) + 1) / 2;
+    this.renderer.drawFrame(
+      Date.now(),
+      this.backgroundVideo,
+      this.onePlayerHighScores,
+      this.twoPlayerHighScores,
+      this.selectedButtonIndex
+    );
+  }
 
-    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-
-    // Video-Hintergrund zeichnen, falls bereit
-    if (this.backgroundVideo.readyState >= 2) {
-      this.ctx.drawImage(this.backgroundVideo, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    } else {
-      // Fallback-Hintergrundfarbe
-      this.ctx.fillStyle = "#050505";
-      this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+  public showGameOver(): void {
+    this.resetAllInlineStyles();
+    this.screen = 'game-over';
+    this.isHidden = false;
+    this.gameOverScreen.resetAnimation();
+    this.setCanvasSize();
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
     }
-
-    // Halbtransparentes Overlay zum Abdunkeln des Hintergrunds
-    this.ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-    this.ctx.fillRect(0, 0, this.width, this.height);
-
-    this.drawRetroGrid(time);
-    this.drawScoreboards();
-    this.drawTitle(time);
-    this.drawButtons(pulse);
+    this.animate();
   }
 
   /**
-   * Zeichnet ein animiertes Retro-Gitter (Synthwave-Stil).
+   * Entfernt alle inline-Styles von den relevanten Komponenten-Elementen.
    */
-  private drawRetroGrid(time: number): void {
-    this.ctx.strokeStyle = "rgba(255, 102, 0, 0.2)";
-    this.ctx.lineWidth = 2;
-    // Animations-Offset für den Bewegungseffekt
-    const offset = (time / 40) % 60;
+  private resetAllInlineStyles(): void {
+    for (const elRef of this.styledElements) {
 
-    // Horizontale Linien zeichnen
-    for(let y = 0; y < this.height; y += 60) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(0, y + offset);
-      this.ctx.lineTo(this.width, y + offset);
-      this.ctx.stroke();
+      if (elRef) {
+        elRef.nativeElement.style.cssText = '';
+      }
     }
-  }
-
-  /**
-   * Koordiniert das Zeichnen der beiden Highscore-Tafeln.
-   */
-  private drawScoreboards(): void {
-    const scoreboardWidth = 400;
-    const padding = 50;
-    const leftBoardX = padding;
-    const rightBoardX = this.width - scoreboardWidth - padding;
-    const boardY = 280;
-
-    // Neon-Effekt Einstellungen
-    this.ctx.shadowBlur = 10;
-    this.ctx.shadowColor = UI_THEME.secondary;
-    this.ctx.fillStyle = UI_THEME.secondary;
-
-    this.drawSingleScoreboard('1 Player High Scores', this.onePlayerHighScores, leftBoardX, boardY, scoreboardWidth);
-    this.drawSingleScoreboard('2 Player High Scores', this.twoPlayerHighScores, rightBoardX, boardY, scoreboardWidth);
-
-    // Schatten zurücksetzen
-    this.ctx.shadowBlur = 0;
-  }
-
-  /**
-   * Zeichnet eine einzelne Anzeigetafel mit Titel und einer Liste von Spielständen.
-   * @param title Der Titel der Anzeigetafel.
-   * @param highScores Die Liste der Highscores, die angezeigt werden sollen.
-   * @param x Die X-Koordinate der linken oberen Ecke.
-   * @param y Die Y-Koordinate der linken oberen Ecke.
-   * @param width Die Breite der Anzeigetafel.
-   */
-  private drawSingleScoreboard(title: string, highScores: PlayerInterface[], x: number, y: number, width: number): void {
-    if (highScores.length === 0) return;
-
-    const lineHeight = 40;
-    const listY = y + lineHeight + 15;
-    const padding = 10;
-    const originalTextAlign = this.ctx.textAlign;
-
-    // Titel der Tafel
-    this.ctx.font = `bold 32px "Courier New", monospace`;
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText(title, x + width / 2, y);
-
-    // Listeneinträge
-    this.ctx.font = `28px "Courier New", monospace`;
-    this.ctx.fillStyle = "#eee";
-
-    // Spielstände zeichnen
-    highScores.forEach((player, index) => {
-      const scoreY = listY + index * lineHeight;
-      // Goldene Farbe für den ersten Platz
-      if(index === 0) this.ctx.fillStyle = "#FFFF00";
-      else this.ctx.fillStyle = "#fff";
-
-      this.ctx.textAlign = 'left';
-      this.ctx.fillText(`${index + 1}.`, x, scoreY);
-      this.ctx.textAlign = 'center';
-      this.ctx.fillText(player.name, x + width / 2, scoreY);
-      this.ctx.textAlign = 'right';
-      this.ctx.fillText(player.score.toLocaleString(), x + width - padding, scoreY);
-    });
-    this.ctx.textAlign = originalTextAlign;
-  }
-
-  /**
-   * Zeichnet den Spieltitel mit Farbwechsel-Effekt.
-   */
-  private drawTitle(time: number): void {
-    const title = 'IFM ARCADE';
-    const hue = (time / 20) % 360;
-    this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-    this.ctx.shadowColor = UI_THEME.secondary;
-    this.ctx.shadowBlur = 30;
-
-    this.ctx.font = `italic 900 100px "Courier New", monospace`;
-    this.ctx.textAlign = 'center';
-    this.ctx.textBaseline = 'middle';
-
-    // Leichter Zoom-Effekt im Takt
-    const scale = 1 + Math.sin(time / 200) * 0.05;
-    this.ctx.save();
-    this.ctx.translate(this.ctx.canvas.width / 2, this.ctx.canvas.height / 4);
-    this.ctx.scale(scale, scale);
-    this.ctx.fillText(title, 0, 0);
-    this.ctx.restore();
-
-    this.ctx.shadowBlur = 0;
-  }
-
-  /**
-   * Zeichnet das Hauptmenü (Start, Modus, Einstellungen, tutorial).
-   */
-  private drawButtons(pulse: number): void {
-    const buttonWidth = 350;
-    const buttonHeight = 70;
-    const buttonGap = 20;
-    const buttonX = this.ctx.canvas.width / 2 - buttonWidth / 2;
-
-    const totalHeight = (buttonHeight * 4) + (buttonGap * 3);
-    const startY = (this.ctx.canvas.height - totalHeight) / 2 + 150;
-
-
-    this.buttonRect = { x: buttonX, y: startY, width: buttonWidth, height: buttonHeight };
-    this.playerModeButtonRect = { x: buttonX, y: startY + buttonHeight + buttonGap, width: buttonWidth, height: buttonHeight };
-
-    this.tutorialButtonRect = { x: buttonX, y: startY + (buttonHeight + buttonGap) * 2, width: buttonWidth, height: buttonHeight };
-
-    this.settingsButtonRect = { x: buttonX, y: startY + (buttonHeight + buttonGap) * 3, width: buttonWidth, height: buttonHeight };
-
-
-    this.drawArcadeButton('START', this.buttonRect, this.selectedButtonIndex === 0);
-    const playerModeText = this.gameService.twoPlayerMode ? '2 PLAYERS' : '1 PLAYER';
-    this.drawArcadeButton(playerModeText, this.playerModeButtonRect, this.selectedButtonIndex === 1);
-    this.drawArcadeButton('TUTORIAL', this.tutorialButtonRect, this.selectedButtonIndex === 2);
-    this.drawArcadeButton('SETTINGS', this.settingsButtonRect, this.selectedButtonIndex === 3);
-}
-
-  /**
-   * Hilfsfunktion zum Zeichnen eines einzelnen Menü-Buttons im Arcade-Stil.
-   */
-  private drawArcadeButton(text: string, rect: { x: number, y: number, width: number, height: number }, isSelected: boolean): void {
-    const scale = isSelected ? 1.1 : 1.0;
-    const w = rect.width * scale;
-    const h = rect.height * scale;
-    const x = rect.x - (w - rect.width) / 2;
-    const y = rect.y - (h - rect.height) / 2;
-
-    this.ctx.fillStyle = isSelected ? "rgba(255, 102, 0, 0.25)" : "rgba(0, 0, 0, 0.8)";
-    this.ctx.strokeStyle = isSelected ? UI_THEME.secondary : "#555";
-    this.ctx.lineWidth = 4;
-
-    // Leuchteffekt bei Auswahl
-    if (isSelected) {
-      this.ctx.shadowBlur = 20;
-      this.ctx.shadowColor = UI_THEME.secondary;
-    } else {
-      this.ctx.shadowBlur = 0;
-    }
-
-    this.ctx.fillRect(x, y, w, h);
-    this.ctx.strokeRect(x, y, w, h);
-
-    this.ctx.fillStyle = isSelected ? "#fff" : "#aaa";
-    this.ctx.font = `bold 35px "Courier New", monospace`;
-    this.ctx.textAlign = 'center';
-    this.ctx.textBaseline = 'middle';
-
-    // Schnelles Blinken des Textes bei Auswahl
-    if (isSelected && Math.floor(Date.now() / 100) % 2 === 0) {
-      this.ctx.fillStyle = UI_THEME.secondary;
-    }
-
-    this.ctx.fillText(text, x + w / 2, y + h / 2);
-    this.ctx.shadowBlur = 0;
   }
 
   /**
@@ -375,14 +240,6 @@ export class StartScreenComponent implements OnInit, OnDestroy {
   @HostListener('window:resize')
   onResize(): void {
     this.setCanvasSize();
-  }
-
-  /**
-   * Prüft, ob ein Punkt (Mausklick) innerhalb eines Rechtecks liegt.
-   */
-  private isPointInRect(x: number, y: number, rect: { x: number, y: number, width: number, height: number }): boolean {
-    return x >= rect.x && x <= rect.x + rect.width &&
-           y >= rect.y && y <= rect.y + rect.height;
   }
 
   /**
@@ -400,16 +257,10 @@ export class StartScreenComponent implements OnInit, OnDestroy {
     const x = (event.clientX - rect.left) * scaleX;
     const y = (event.clientY - rect.top) * scaleY;
 
-    if (this.isPointInRect(x, y, this.buttonRect)) {
-      this.handleSelection(0);
-    } else if (this.isPointInRect(x, y, this.playerModeButtonRect)) {
-      this.handleSelection(1)
-    } else if (this.isPointInRect(x, y, this.settingsButtonRect)) {
-      this.handleSelection(3)
-    } else if (this.isPointInRect(x, y, this.tutorialButtonRect)) {
-      this.handleSelection(2)
+    const clickedButtonIndex = this.renderer.getClickedButtonIndex(x, y);
+    if (clickedButtonIndex !== null) {
+      this.handleSelection(clickedButtonIndex);
     }
-
   }
 
   /**

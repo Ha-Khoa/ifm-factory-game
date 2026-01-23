@@ -18,7 +18,6 @@ import {PlayerService} from './player.service';
 import {PrepMachineManager} from "../models/preProcess/prep-machine-manager";
 import { RenderObject } from '../models/rendering/render-object';
 import { InputService } from './input.service';
-import { GameOverScreen } from './ui/gameover.screen';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +26,9 @@ export class GameService {
 
   private gameLoopTick = new Subject<void>();
   public gameLoopTick$ = this.gameLoopTick.asObservable();
+
+  private gameOverSubject = new Subject<void>();
+  public gameOver$ = this.gameOverSubject.asObservable();
 
   // Gibt an, ob das Spiel aktuell läuft
   private GameRunning!: boolean;
@@ -46,8 +48,7 @@ export class GameService {
   private prepMachine!: PrepMachineManager;
 
   private gameEnd: boolean = false;
-  // GameOver Screen
-  private gameOverScreen: GameOverScreen | null = null;
+
   private ctxUI!: CanvasRenderingContext2D;
 
   // Input und Assets
@@ -68,6 +69,7 @@ export class GameService {
     // Initialisiere UI Service
     this.ctxUI = ctxUI;
     this.gamefield = new Gamefield();
+    Products.init();
 
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
@@ -382,30 +384,10 @@ export class GameService {
    * Rendert den GameOverScreen mit Score und verdientem Geld.
    */
   private startGameOverLoop(): void {
-    this.gameOverScreen = new GameOverScreen(this.ctx, this.ctx.canvas.width, this.ctx.canvas.height, this.playerService, this.images);
-
-    this.gameOverScreen.setBackgroundImage("/images/ifm-gameover-background.png")
-
-    // GameOver Loop
-    const gameOverLoop = () => {
-      if (!this.GameRunning) return;
-
-      // Loesche GameCanvas
-      this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-
-      // Rendere GameOverScreen
-      this.gameOverScreen?.renderGameOverScreen();
-
-      // Prüfe auf Space-Taste zum Fortfahren
-      if (this.inputService.keyboardState[' '] === true || this.inputService.keyboardState['e'] === true) {
-        this.GameRunning = false;
-        return;
-      }
-
-      requestAnimationFrame(gameOverLoop);
-    };
-
-    requestAnimationFrame(gameOverLoop);
+    Orders.destroy();
+    this.uiService.clearAll();
+    this.gameOverSubject.next();
+    this.stopGame();
   }
 
 }

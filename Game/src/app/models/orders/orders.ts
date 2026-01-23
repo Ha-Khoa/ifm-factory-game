@@ -268,5 +268,12 @@ export class Orders {
 
     //maybe using generateRandomOrders to create progressive orders based on player level
 
+    /**
+     * Resets all orders and the order ID counter.
+     */
+    static destroy(): void {
+        this.ordersList$.next([]);
+        this.maxOderId = 0;
+    }
 }
 
