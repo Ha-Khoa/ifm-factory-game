@@ -10,6 +10,7 @@ import { Product } from '../../models/product/product';
 import { Package } from '../../models/package/package';
 import { Coordinates } from '../../models/coordinates/coordinates';
 import { Player } from '../../models/player/player';
+import { PlayerService } from '../player.service';
 
 /**
  * Handles drawing all UI elements related to machines,
@@ -26,7 +27,7 @@ export class MachinePopupDrawer {
    * @param machine The machine to display.
    * @returns An array of Rects for later clearing.
    */
-  public drawDetails(machine: Machine, player: Player): Rect[] {
+  public drawDetails(machine: Machine, player: Player, playerService: PlayerService): Rect[] {
     this.ctx.save();
 
     // Check ob es sich um eine PrepMachine handelt
@@ -48,7 +49,7 @@ export class MachinePopupDrawer {
     const xPlayer1 = window.innerWidth * 0.02
     const xPlayer2 = window.innerWidth * 0.98 - popupConfig.width;
     const x = player.id === 0 ? xPlayer1 : xPlayer2;
-    const y = 100;
+    const y = window.innerHeight * 0.98 - totalHeight;
 
     CanvasHelper.drawStyledPopupBackground(this.ctx, x, y, popupConfig, isPrepMachine ? true : machine.unlocked);
 
@@ -85,7 +86,8 @@ export class MachinePopupDrawer {
     this.drawProgressBar(x, currentY, machine, popupConfig);
 
     if (!isPrepMachine) {
-      this.drawUpgradeButton(x, currentY + 15, machine, popupConfig);
+      const canUpgrade = machine.canUpgrade(playerService);
+      this.drawUpgradeButton(x, currentY + 15, machine, popupConfig, canUpgrade);
     }
 
     const fKeyImage = this.images['/images/KeyBindings/keyBindings_F.png'];
@@ -101,116 +103,6 @@ export class MachinePopupDrawer {
     return [mainRect, buttonRect];
   }
 
-  /**
-   * Draws indicators for items that are required by machines but not yet inserted.
-   * @param machines An array of all machines on the field.
-   * @param offsetCamera
-   * @param fov
-   * @returns An array of Rects for later clearing.
-   */
-  public drawNeeds(machines: Machine[], offsetCamera: [number, number], fov: number, players: Player[] | null): Rect[] {
-    const drawnRects: Rect[] = [];
-    const isometricAngle = RenderingService.instance().angle;
-    // console.log(offsetCamera)
-
-    for (const machine of machines) {
-      const neededRequirements = machine.inputRequirements.filter(req => !machine.inventory.some(invItem => invItem.product.id === req.product.id && invItem.quantity >= req.quantity));
-      const itemsAlreadyInserted = machine.inventory.map(invItem => invItem.product.id);
-
-      // update the neededItems quantity
-      neededRequirements.forEach(req => {
-        if(itemsAlreadyInserted.includes(req.product.id)) {
-          req.quantity -= machine.inventory.find(invItem => invItem.product.id === req.product.id)?.quantity ?? 0;
-        }
-      })
-
-      const neededItems = neededRequirements.map(req => req.product);
-
-      for (let i = 0; i < neededItems.length; i++) {
-        const item = neededItems[i];
-        const size = Gamefield.fieldsize * fov / 2;
-        const offset = size / 2;
-        const gap = 8 * fov / RenderingService.instance().gameFov;
-
-        let x = neededItems.indexOf(item) == 0
-          ? fov * machine.position.x + offset + offsetCamera[0]
-          : fov * machine.position.x + ((size + gap) * (neededItems.indexOf(item) % 2 === 0 ? -1 : 1)) + offset + offsetCamera[0];
-
-
-
-        if(neededItems.length % 2 === 0)
-          x -= size / 2 + gap/2;
-        let y = fov * machine.position.y * Math.cos(isometricAngle) - size * 1.5 + offsetCamera[1] * Math.cos(isometricAngle) + RenderingService.instance().rotationZ;
-        // Zeichne ein Pfeil wenn die Maschiene außerhalb den Sichtbereiches ist
-        for (let i = 0; i < players?.length!; i++) {
-          const playerInventory = players![i].inventory;
-          if(playerInventory instanceof Product && playerInventory.id === item.id) {
-            const isOutOfBounds = x < 0 || x > window.innerWidth - size || y < 0 || y > window.innerHeight - size;
-
-            if(isOutOfBounds) {
-              let arrowY = this.clamp(y, 0, window.innerHeight - size);
-            let arrowX = this.clamp(x, 0, window.innerWidth - size);
-            let newY = this.clamp(y, size / 2, window.innerHeight - 2*size);
-            let newX = this.clamp(x, size, window.innerWidth - 2*size);
-            this.ctx.save();
-            this.ctx.translate(arrowX + size / 2, arrowY + size / 2);
-            const camera = RenderingService.instance().camera;
-            const hypotenuse = 80;
-            let angle: number;
-
-            if(playerInventory.position.x - machine.position.x === 0) {
-              angle = Math.PI / 2;
-            } else {
-              angle = Math.atan((machine.position.y - playerInventory.position.y) / (machine.position.x - playerInventory.position.x));
-            }
-
-            if(machine.position.x - playerInventory.position.x < 0) {
-              angle += Math.PI;
-            }
-            let a = false;
-            if(-angle > Math.PI + 1/10 * Math.PI && -angle < Math.PI - 1/10 * Math.PI) {angle = Math.PI;}
-            y = -Math.sin(angle) * hypotenuse + arrowY;
-            x = -Math.cos(angle) * hypotenuse + arrowX;
-            this.ctx.rotate(angle);
-            this.ctx.drawImage(this.images["/images/arrow.png"], -size / 2, -size / 2, size, size);
-            drawnRects.push({x: arrowX , y: arrowY, width: size * fov, height: size * fov, radius: 0});
-
-            this.ctx.restore();
-          }
-        }
-      }
-
-        this.ctx.save();
-        this.ctx.fillStyle = UI_THEME.tertiary;
-        this.ctx.beginPath();
-        this.ctx.roundRect(x, y, size, size, 10);
-        this.ctx.fill();
-        drawnRects.push({x, y, width: size, height: size, radius: 10});
-
-        const img = this.images[item._img!];
-        const quantity = neededRequirements.find(req => req.product.id === item.id)?.quantity ?? 0;
-        if (img) {
-          this.ctx.drawImage(img, x + size / 4, y + size / 4, size / 2, size / 2);
-        }
-
-        if(quantity > 1) {
-
-          this.ctx.beginPath();
-          this.ctx.fillStyle = UI_THEME.primary;
-          this.ctx.roundRect(x - 10, y + size - 10, 20, 20, 10);
-          this.ctx.fill();
-          this.ctx.fillStyle = '#000000';
-          this.ctx.textAlign = 'center';
-          this.ctx.font = `clamp(12px, min(1dvw, 1dvh), 16px) ${UI_THEME.fontFamily}`;
-          this.ctx.fillText(`${quantity}`, x, y + size + 5);
-          drawnRects.push({x:x - 10, y:y + size - 10, width: 20, height: 20, radius: 10});
-        }
-
-        this.ctx.restore();
-      }
-    }
-    return drawnRects;
-  }
 
   /**
    * Draws a circular progress indicator for machines that are currently producing.
@@ -380,7 +272,7 @@ export class MachinePopupDrawer {
     this.ctx.stroke();
   }
 
-  private drawUpgradeButton(x: number, y: number, machine: Machine, config: any) {
+  private drawUpgradeButton(x: number, y: number, machine: Machine, config: any, canUpgrade: boolean) {
     if (!machine.upgradable) return;
 
     const btnWidth = config.width * 0.7;
@@ -388,17 +280,16 @@ export class MachinePopupDrawer {
     const btnX = x + (config.width - btnWidth) / 2;
 
     this.ctx.save();
-    this.ctx.fillStyle = UI_THEME.tertiary;
+    this.ctx.fillStyle = canUpgrade ? '#9CCC65' : UI_THEME.tertiary;
     this.ctx.beginPath();
     this.ctx.roundRect(btnX, y, btnWidth, btnHeight, 15);
     this.ctx.fill();
 
-    this.ctx.fillStyle = UI_THEME.secondary;
+    this.ctx.fillStyle = canUpgrade ? 'white' : UI_THEME.secondary;
     this.ctx.font = `bold 14px ${UI_THEME.fontFamily}`;
     this.ctx.textAlign = 'center';
     this.ctx.fillText(`Upgrade (${machine.getUpgradeCost()}$)`, x + config.width / 2, y + 20);
     this.ctx.restore();
-
   }
 
   private clamp(value: number, min: number, max: number): number {

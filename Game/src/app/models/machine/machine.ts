@@ -292,6 +292,17 @@ export class Machine extends InteractableObject {
     return Math.floor(100 * Math.pow(1.5, this._level - 1));
   }
 
+  public canUpgrade(playerService: PlayerService): boolean {
+    if (!this._upgradable || this._level >= this.maxLevel) {
+      return false;
+    }
+    const upgradeCost = this.getUpgradeCost();
+    if (playerService.getMoney() < upgradeCost) {
+      return false;
+    }
+    return true;
+  }
+
   get isProducing(): boolean {
     return this._producting;
   }

@@ -11,6 +11,8 @@ import {Player} from '../models/player/player';
 import {PlayerThoughtsDrawer, PlayerThoughtsType} from './ui/player-thoughts.drawer';
 import {Coordinates} from '../models/coordinates/coordinates';
 import { GameTimer } from './ui/game.timer';
+import { MachineNeedsDrawer } from './ui/machine-needs.drawer';
+import { PlayerService } from './player.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +25,7 @@ export class UIService {
   // Drawer instances
   private itemPopupDrawer!: ItemPopupDrawer;
   private machinePopupDrawer!: MachinePopupDrawer;
+  private machineNeedsDrawer!: MachineNeedsDrawer;
   private playerThoughtsDrawer!: PlayerThoughtsDrawer;
   private gameTimer!: GameTimer;
 
@@ -34,7 +37,7 @@ export class UIService {
   private playerThoughtsPopups: Rect[] = [];
   private timerText: Rect[] = [];
 
-  constructor() {}
+  constructor(private playerService: PlayerService) {}
 
   /**
    * Initializes the UIService with the canvas context and other required resources.
@@ -56,6 +59,7 @@ export class UIService {
     loadTheme();
     this.itemPopupDrawer = new ItemPopupDrawer(this.ctxUI, this.images);
     this.machinePopupDrawer = new MachinePopupDrawer(this.ctxUI, this.images);
+    this.machineNeedsDrawer = new MachineNeedsDrawer(this.ctxUI, this.images);
     this.playerThoughtsDrawer = new PlayerThoughtsDrawer(this.ctxUI, this.images);
     this.gameTimer = new GameTimer(this.ctxUI, this.images);
   }
@@ -78,7 +82,7 @@ export class UIService {
 
   /** Draws the detailed information popup for a machine. */
   public drawMachinePopUp(machine: Machine, player: Player): void {
-    this.machinePopups.push(...this.machinePopupDrawer.drawDetails(machine, player));
+    this.machinePopups.push(...this.machinePopupDrawer.drawDetails(machine, player, this.playerService));
   }
 
   /** Clears the currently visible machine detail popup. */
@@ -91,7 +95,7 @@ export class UIService {
   public drawMachineNeedsPopup(machines: Machine[], offsetCamera: [number, number], fov: number, players: Player[] | null): void {
     //this.neededItemPopups.forEach(rect => CanvasHelper.clearRectRounded(this.ctxUI, rect, rect.radius ?? 10, true));
     this.neededItemPopups = [];
-    this.neededItemPopups = this.machinePopupDrawer.drawNeeds(machines, offsetCamera, fov, players);
+    this.neededItemPopups = this.machineNeedsDrawer.draw(machines, offsetCamera, fov, players);
   }
 
   /** Draws progress rings for machines that are currently producing. */

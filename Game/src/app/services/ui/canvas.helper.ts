@@ -63,7 +63,7 @@ export class CanvasHelper {
       ctx.roundRect(x, y, config.width, config.height, config.radius);
       ctx.stroke();
     }
-    
+
     // Inner stroke for a slight inset detail
     ctx.strokeStyle = 'rgba(0,0,0,0.1)';
     ctx.lineWidth = 2;

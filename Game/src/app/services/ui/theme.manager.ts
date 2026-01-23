@@ -19,6 +19,8 @@ export const UI_THEME = {
   tertiary: '',
   transparent: '',
   black: '',
+  white: '',
+  outline: ''
 };
 
 /**
@@ -43,4 +45,6 @@ export function loadTheme(): void {
   UI_THEME.progressBorder = rootStyle.getPropertyValue('--progress-border').trim();
   UI_THEME.transparent = rootStyle.getPropertyValue('--md-sys-color-transparent').trim();
   UI_THEME.black = rootStyle.getPropertyValue('--md-sys-color-black').trim(); // Corrected from 'transparent' in original code
+  UI_THEME.white = rootStyle.getPropertyValue('--md-sys-color-white').trim();
+  UI_THEME.outline = rootStyle.getPropertyValue('--md-sys-color-outline').trim();
 }
