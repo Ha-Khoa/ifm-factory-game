@@ -44,6 +44,10 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
   private renderer!: StartScreenRenderer;
   private styledElements: ElementRef[] = [];
 
+  private isTransitioning = false;
+  private transitionStartTime = 0;
+  private readonly transitionDuration = 800; // ms
+
 
   // --- Interne Zustandsvariablen ---
   private ctx!: CanvasRenderingContext2D;
@@ -138,6 +142,12 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
     const now = Date.now();
     if (now - this.lastInputTime < 150) return; // 150ms debounce
     this.lastInputTime = now;
+    if (this.screen === 'game-over') {
+      if (action === 'confirm' && !this.isTransitioning) {
+        this.startReturnToMenuTransition();
+      }
+      return;
+    }
 
     switch (action) {
       case 'up':
@@ -152,6 +162,11 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
         this.handleSelection();
         break;
     }
+  }
+
+  private startReturnToMenuTransition(): void {
+    this.isTransitioning = true;
+    this.transitionStartTime = Date.now();
   }
 
   /**
@@ -188,7 +203,36 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   private animate(): void {
     if (this.isHidden) return;
-    if (this.screen === 'start') {
+
+    if (this.isTransitioning) {
+      const now = Date.now();
+      const elapsed = now - this.transitionStartTime;
+      let progress = elapsed / this.transitionDuration;
+
+      if (progress >= 1) {
+        progress = 1;
+        this.isTransitioning = false;
+        window.location.reload();
+        return;
+      }
+
+      // Easing function (ease-in-out)
+      const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+      const yOffset = ease * this.height;
+
+      // Draw Start Screen (Background)
+      this.renderer.drawFrame(
+        now,
+        this.backgroundVideo,
+        this.onePlayerHighScores,
+        this.twoPlayerHighScores,
+        this.selectedButtonIndex
+      );
+
+      // Draw Game Over Screen (Foreground, sliding down)
+      this.gameOverScreen.render(yOffset, false);
+
+    } else if (this.screen === 'start') {
       this.draw();
     } else {
       this.gameOverScreen.render();
@@ -214,6 +258,7 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
     this.resetAllInlineStyles();
     this.screen = 'game-over';
     this.isHidden = false;
+    this.setupInputHandlers();
     this.gameOverScreen.resetAnimation();
     this.setCanvasSize();
     if (this.animationFrameId) {
@@ -293,6 +338,7 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isHidden = true;
     if(this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
     this.inputSubscriptions.forEach(sub => sub.unsubscribe());
+    this.inputSubscriptions = [];
     const style = this.containerRef.nativeElement.style;
 
     style.setProperty('top', '0px');

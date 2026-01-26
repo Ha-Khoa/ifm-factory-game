@@ -346,7 +346,7 @@ export class GameService {
 
   stopGame() {
     this.GameRunning = false;
-    this.inputService.stop();
+    // this.inputService.stop();
     this.inputService.setInputState('menu');
     if (this.inputSubscription) {
       this.inputSubscription.unsubscribe();

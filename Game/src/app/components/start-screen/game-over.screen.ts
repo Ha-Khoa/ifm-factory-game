@@ -34,46 +34,71 @@ export class GameOverScreen {
 
   /**
    * Rendert den GameOver-Bildschirm mit animiertem Fade-In
+   * @param yOffset Verschiebung auf der Y-Achse (für Slide-Animation)
+   * @param clearScreen Ob der Screen vorher geleert werden soll
    */
-  public render(): void {
+  public render(yOffset: number = 0, clearScreen: boolean = true): void {
     const score = this.playerService.getScore();
     const earnedMoney = this.playerService.getMoney();
     const playerName = this.playerService.player?.name ?? 'Player';
+    const currentTime = Date.now();
+    const elapsed = currentTime - this.startTime;
 
     // Update animation progress
-    const elapsed = Date.now() - this.startTime;
     this.animationProgress = Math.min(elapsed / this.animationDuration, 1);
 
     // Bildschirm löschen
-    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+    if (clearScreen) {
+      this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+    }
 
-    // Hintergrund zeichnen
-    this.drawBackground();
+    this.ctx.save();
+    this.ctx.translate(0, yOffset);
+
+    // Hintergrund zeichnen (angepasst an Start Screen Design)
+    this.drawBackground(currentTime);
 
     // Dunkellay mit Animation
     this.drawDarkOverlay();
 
     // GameOver Container mit Animationen
-    this.drawGameOverContainer(score, earnedMoney, playerName);
+    this.drawGameOverContainer(score, earnedMoney, playerName, currentTime);
 
-    // Decorative Elemente
-    this.drawDecorations();
+    this.ctx.restore();
   }
 
   /**
-   * Zeichnet den Hintergrund oder eine Standardfarbe
+   * Zeichnet den Hintergrund oder eine Standardfarbe + Retro Grid
    */
-  private drawBackground(): void {
+  private drawBackground(time: number): void {
     if (this.backgroundImage && this.backgroundImage.complete) {
       this.ctx.drawImage(this.backgroundImage, 0, 0, this.canvasWidth, this.canvasHeight);
     } else {
-      // Gradient Hintergrund als Fallback
-      const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
-      gradient.addColorStop(0, '#1a1a2e');
-      gradient.addColorStop(1, '#16213e');
-      this.ctx.fillStyle = gradient;
+      // Dunkler Hintergrund als Fallback (wie im Start Screen Video-Fallback)
+      this.ctx.fillStyle = '#050505';
       this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     }
+
+    // Retro Grid Overlay (vom Start Screen übernommen)
+    this.drawRetroGrid(time);
+  }
+
+  /**
+   * Zeichnet ein animiertes Retro-Gitter (Synthwave-Stil)
+   */
+  private drawRetroGrid(time: number): void {
+    this.ctx.save();
+    this.ctx.strokeStyle = "rgba(255, 102, 0, 0.2)"; // IFM Orange schwach
+    this.ctx.lineWidth = 2;
+    const offset = (time / 40) % 60;
+
+    for(let y = 0; y < this.canvasHeight; y += 60) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, y + offset);
+      this.ctx.lineTo(this.canvasWidth, y + offset);
+      this.ctx.stroke();
+    }
+    this.ctx.restore();
   }
 
   /**
@@ -87,7 +112,7 @@ export class GameOverScreen {
   /**
    * Zeichnet den GameOver-Container mit Informationen
    */
-  private drawGameOverContainer(score: number, earnedMoney: number, playerName: string): void {
+  private drawGameOverContainer(score: number, earnedMoney: number, playerName: string, time: number): void {
     const containerWidth = 800;
     const containerHeight = 600;
     const containerX = (this.canvasWidth - containerWidth) / 2;
@@ -104,33 +129,34 @@ export class GameOverScreen {
     this.ctx.translate(-this.canvasWidth / 2, -this.canvasHeight / 2);
 
     // --- Pulsing Glow Effect ---
-    const time = Date.now();
-    const pulse = Math.sin(time / 400) * 0.5 + 0.5; // Creates a value between 0 and 1
-    const glowBlur = 15 + pulse * 15; // Pulsates between 15 and 30
-    const glowAlpha = 0.7 + pulse * 0.3; // Pulsates between 0.7 and 1.0
-    this.ctx.shadowColor = `rgba(255, 102, 0, ${glowAlpha})`;
+    const pulse = Math.sin(time / 400) * 0.5 + 0.5;
+    const glowBlur = 20 + pulse * 10;
+    
+    // IFM Orange (Primary/Secondary from Theme)
+    const orangeColor = "rgba(255, 102, 0, 1)";
+    const orangeDim = "rgba(255, 102, 0, 0.3)";
+
+    this.ctx.shadowColor = orangeColor;
     this.ctx.shadowBlur = glowBlur;
 
-    // Draw container background
-    this.ctx.fillStyle = 'rgba(10, 20, 40, 0.85)';
+    // Draw container background (Darker opacity for contrast)
+    this.ctx.fillStyle = 'rgba(10, 15, 20, 0.9)';
     this.ctx.fillRect(containerX, containerY, containerWidth, containerHeight);
 
-    // Draw container border
-    this.ctx.strokeStyle = '#FF6600'; // ifm Orange
-    this.ctx.lineWidth = 3;
+    // Draw container border (Thicker retro style)
+    this.ctx.strokeStyle = orangeColor;
+    this.ctx.lineWidth = 4;
     this.ctx.strokeRect(containerX, containerY, containerWidth, containerHeight);
 
-    // Glow-Effekt
-    this.ctx.shadowColor = '#00d4ff';
-    this.ctx.shadowBlur = 20;
-    this.ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
-    this.ctx.lineWidth = 1;
-    this.ctx.strokeRect(containerX - 5, containerY - 5, containerWidth + 10, containerHeight + 10);
+    // Inner Border Decoration
     this.ctx.shadowBlur = 0;
+    this.ctx.strokeStyle = orangeDim;
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeRect(containerX + 15, containerY + 15, containerWidth - 30, containerHeight - 30);
 
 
-    // Texte zeichnen (innerhalb save/restore damit sie mit Container animieren)
-    this.drawGameOverText(containerX, containerY, containerWidth, containerHeight, score, earnedMoney, playerName);
+    // Texte zeichnen
+    this.drawGameOverText(containerX, containerY, containerWidth, containerHeight, score, earnedMoney, playerName, time);
 
     this.ctx.restore();
   }
@@ -145,134 +171,67 @@ export class GameOverScreen {
     height: number,
     score: number,
     earnedMoney: number,
-    playerName: string
+    playerName: string,
+    time: number
   ): void {
     const centerX = x + width / 2;
     let currentY = y + 120;
+    const font = '"Courier New", monospace';
 
-    // Helper to calculate staggered alpha
-    const getStaggeredAlpha = (delay: number) => Math.max(0, Math.min(1, (this.animationProgress - delay) / (1 - delay)));
-
-    // --- GAME OVER Title ---
+    // --- GAME OVER / TIME IS UP Title ---
     this.ctx.save();
-    this.ctx.globalAlpha = getStaggeredAlpha(0.2);
-    this.ctx.font = `bold 80px ${UI_THEME.fontFamily}, sans-serif`;
+    this.ctx.font = `italic 900 80px ${font}`;
     this.ctx.fillStyle = '#FFFFFF';
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
     this.ctx.shadowColor = '#FF6600';
-    this.ctx.shadowBlur = 15;
+    this.ctx.shadowBlur = 20;
     this.ctx.fillText('TIME IS UP!', centerX, currentY);
     this.ctx.restore();
-    currentY += 120;
-
-    // --- Final Score ---
-    this.ctx.save();
-    this.ctx.globalAlpha = getStaggeredAlpha(0.4);
-    this.ctx.font = `40px ${UI_THEME.fontFamily}, sans-serif`;
-    this.ctx.fillStyle = '#FFFFFF';
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText('Final Score', centerX, currentY);
-    currentY += 55;
-
-    this.ctx.font = `bold 60px ${UI_THEME.fontFamily}, sans-serif`;
-    this.ctx.fillStyle = '#FFC107'; // A bright gold color
-    this.ctx.fillText(score.toLocaleString(), centerX, currentY);
-    this.ctx.restore();
+    
     currentY += 100;
 
-    // Spieler Name
-    this.ctx.font = `30px ${UI_THEME.fontFamily}`;
-    this.ctx.fillStyle = '#00d4ff';
-    this.ctx.fillText(`${playerName}`, centerX, currentY);
-    currentY += 60;
-
-    // Separator Line
-    this.ctx.strokeStyle = '#00d4ff';
-    this.ctx.lineWidth = 2;
-    this.ctx.beginPath();
-    this.ctx.moveTo(x + 50, currentY);
-    this.ctx.lineTo(x + width - 50, currentY);
-    this.ctx.stroke();
-    currentY += 40;
-
-    // Score Label und Wert
-    this.ctx.font = `24px ${UI_THEME.fontFamily}`;
-    this.ctx.fillStyle = '#a0aec0';
-    this.ctx.textAlign = 'left';
-    this.ctx.fillText('Final Score:', x + 80, currentY);
-
-    this.ctx.font = `bold 32px ${UI_THEME.fontFamily}`;
-    this.ctx.fillStyle = '#ffd700';
-    this.ctx.textAlign = 'right';
-    this.ctx.fillText(score.toLocaleString(), x + width - 80, currentY);
-    currentY += 60;
-
-    // Earned Money Label und Wert
-    this.ctx.font = `24px ${UI_THEME.fontFamily}`;
-    this.ctx.fillStyle = '#a0aec0';
-    this.ctx.textAlign = 'left';
-    this.ctx.fillText('Earned Money:', x + 80, currentY);
-
-    this.ctx.font = `bold 32px ${UI_THEME.fontFamily}`;
-    this.ctx.fillStyle = '#4ade80';
-    this.ctx.textAlign = 'right';
-    this.ctx.fillText(`$${earnedMoney.toLocaleString()}`, x + width - 80, currentY);
+    // --- Player Name ---
+    this.ctx.font = `bold 36px ${font}`;
+    this.ctx.fillStyle = '#FF6600'; // IFM Orange
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText(playerName.toUpperCase(), centerX, currentY);
     currentY += 80;
 
+    // --- Score ---
+    this.ctx.font = `28px ${font}`;
+    this.ctx.fillStyle = '#aaa';
+    this.ctx.fillText('FINAL SCORE', centerX, currentY);
+    currentY += 50;
+
+    this.ctx.font = `bold 60px ${font}`;
+    this.ctx.fillStyle = '#FFFF00'; // Yellow highlight (Arcade style)
+    this.ctx.shadowColor = '#FFFF00';
+    this.ctx.shadowBlur = 10;
+    this.ctx.fillText(score.toLocaleString(), centerX, currentY);
+    this.ctx.shadowBlur = 0;
+    currentY += 80;
+
+    // --- Money ---
+    this.ctx.font = `28px ${font}`;
+    this.ctx.fillStyle = '#aaa';
+    this.ctx.fillText('EARNED MONEY', centerX, currentY);
+    currentY += 50;
+
+    this.ctx.font = `bold 50px ${font}`;
+    this.ctx.fillStyle = '#4ade80'; // Green
+    this.ctx.fillText(`$${earnedMoney.toLocaleString()}`, centerX, currentY);
+    currentY += 70;
+
     // Continue-Hinweis
-    this.ctx.font = `18px ${UI_THEME.fontFamily}`;
-    this.ctx.fillStyle = '#888888';
+    if (Math.floor(time / 500) % 2 === 0) {
+        this.ctx.fillStyle = '#FFFFFF';
+    } else {
+        this.ctx.fillStyle = '#888888';
+    }
+    this.ctx.font = `20px ${font}`;
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('Drücke F5 zum restarten', centerX, y + height - 30);
-  }
-
-  /**
-   * Zeichnet dekorative Elemente wie Ecken und Effekte
-   */
-  private drawDecorations(): void {
-    const containerWidth = 800;
-    const containerHeight = 600;
-    const containerX = (this.canvasWidth - containerWidth) / 2;
-    const containerY = (this.canvasHeight - containerHeight) / 2;
-    const cornerSize = 20;
-    const opacity = this.animationProgress;
-
-    this.ctx.globalAlpha = opacity;
-
-    // Eckenverzierungen
-    this.ctx.strokeStyle = '#ffd700';
-    this.ctx.lineWidth = 3;
-
-    // Top-Left corner
-    this.ctx.beginPath();
-    this.ctx.moveTo(containerX, containerY + cornerSize);
-    this.ctx.lineTo(containerX, containerY);
-    this.ctx.lineTo(containerX + cornerSize, containerY);
-    this.ctx.stroke();
-
-    // Top-Right corner
-    this.ctx.beginPath();
-    this.ctx.moveTo(containerX + containerWidth - cornerSize, containerY);
-    this.ctx.lineTo(containerX + containerWidth, containerY);
-    this.ctx.lineTo(containerX + containerWidth, containerY + cornerSize);
-    this.ctx.stroke();
-
-    // Bottom-Left corner
-    this.ctx.beginPath();
-    this.ctx.moveTo(containerX, containerY + containerHeight - cornerSize);
-    this.ctx.lineTo(containerX, containerY + containerHeight);
-    this.ctx.lineTo(containerX + cornerSize, containerY + containerHeight);
-    this.ctx.stroke();
-
-    // Bottom-Right corner
-    this.ctx.beginPath();
-    this.ctx.moveTo(containerX + containerWidth - cornerSize, containerY + containerHeight);
-    this.ctx.lineTo(containerX + containerWidth, containerY + containerHeight);
-    this.ctx.lineTo(containerX + containerWidth, containerY + containerHeight - cornerSize);
-    this.ctx.stroke();
-
-    this.ctx.globalAlpha = 1;
+    this.ctx.fillText('PRESS ENTER TO RESTART', centerX, y + height - 30);
   }
 
   /**
