@@ -13,10 +13,11 @@ export class MachineNeedsDrawer {
     private images: { [key:string]: HTMLImageElement }
   ) {}
 
-  public draw(machines: Machine[], offsetCamera: [number, number], fov: number, players: Player[] | null): Rect[] {
+  public draw(machines: Machine[], offsetCamera: [number, number], fov: number, players: Player[] | null) : Rect[]{
     const drawnRects: Rect[] = [];
     const isometricAngle = RenderingService.instance().angle;
     const ifmOrange = UI_THEME.secondary;
+    const size = Gamefield.fieldsize * fov / 2;
 
     for (const machine of machines) {
       if (machine instanceof PrepMachine || !machine.outputProduct) {
@@ -54,23 +55,64 @@ export class MachineNeedsDrawer {
       // --- Arrow logic for off-screen machines ---
       const playerCarryingItem = players?.find(p => p.inventory instanceof Product && neededRequirements.some(req => req.product.id === (p.inventory as Product).id));
       const isOutOfBounds = x + totalWidth < 0 || x > window.innerWidth || y + boxHeight < 0 || y > window.innerHeight;
+      const neededItems = neededRequirements.map(req => req.product);
 
-      if (isOutOfBounds && playerCarryingItem) {
-        const arrowSize = 32 * fovScale;
-        let arrowX = this.clamp(x, arrowSize, window.innerWidth - arrowSize*2);
-        let arrowY = this.clamp(y, arrowSize, window.innerHeight - arrowSize*2);
-        
-        this.ctx.save();
-        this.ctx.translate(arrowX + arrowSize / 2, arrowY + arrowSize / 2);
+      for (let i = 0; i < neededItems.length; i++) {
+        const item = neededItems[i];
+        const size = Gamefield.fieldsize * fov;
+        const offset = size / 2;
+        const gap = 8 * fov / RenderingService.instance().gameFov;
 
-        let angle = Math.atan2(machine.position.y - playerCarryingItem.position.y, machine.position.x - playerCarryingItem.position.x);
-        
-        this.ctx.rotate(angle);
-        this.ctx.drawImage(this.images["/images/arrow.png"], -arrowSize / 2, -arrowSize / 2, arrowSize, arrowSize);
-        this.ctx.restore();
-        drawnRects.push({ x: arrowX, y: arrowY, width: arrowSize, height: arrowSize, radius: 0 });
-        continue;
+        let x = neededItems.indexOf(item) == 0
+          ? fov * machine.position.x + offset + offsetCamera[0]
+          : fov * machine.position.x + ((size + gap) * (neededItems.indexOf(item) % 2 === 0 ? -1 : 1)) + offset + offsetCamera[0];
+
+
+
+        if(neededItems.length % 2 === 0)
+          x -= size / 2 + gap/2;
+        let y = fov * machine.position.y * Math.cos(isometricAngle) - size * 1.5 + offsetCamera[1] * Math.cos(isometricAngle) + RenderingService.instance().rotationZ;
+        // Zeichne ein Pfeil wenn die Maschiene außerhalb den Sichtbereiches ist
+        for (let i = 0; i < players?.length!; i++) {
+          const playerInventory = players![i].inventory;
+          if(playerInventory instanceof Product && playerInventory.id === item.id) {
+            const isOutOfBounds = x < -size || x > window.innerWidth - size || y <-size || y > window.innerHeight - size;
+            if(isOutOfBounds) {
+              let arrowY = this.clamp(y, 0, window.innerHeight - size);
+            let arrowX = this.clamp(x, 0, window.innerWidth - size);
+            let newY = this.clamp(y, size, window.innerHeight - 2*size);
+            let newX = this.clamp(x, size, window.innerWidth - 2*size);
+            this.ctx.save();
+            this.ctx.translate(arrowX + size / 2, arrowY + size / 2);
+            const camera = RenderingService.instance().camera;
+            const hypotenuse = size*3/4;
+            let angle: number;
+
+            if(playerInventory.position.x - machine.position.x === 0) {
+              angle = Math.PI / 2;
+            } else {
+              angle = Math.atan((machine.position.y - playerInventory.position.y) / (machine.position.x - playerInventory.position.x));
+            }
+
+            if(machine.position.x - playerInventory.position.x < 0) {
+              angle += Math.PI;
+            }
+            let a = false;
+            if(-angle > Math.PI + 1/10 * Math.PI && -angle < Math.PI - 1/10 * Math.PI) {angle = Math.PI;}
+            newY = -Math.sin(angle) * hypotenuse + arrowY;
+            newX = -Math.cos(angle) * hypotenuse + arrowX;
+            this.ctx.rotate(angle);
+            this.ctx.drawImage(this.images["/images/arrow.png"], -size / 2, -size / 2, size, size);
+            drawnRects.push({x: arrowX , y: arrowY, width: size * fov, height: size * fov, radius: 0});
+                          
+            this.ctx.restore();
+            this.ctx.drawImage(this.images[playerInventory.img!], newX + size / 3, newY + size / 3, size / 3, size / 3);
+
+
+          }
+        }
       }
+    }
 
       // --- On-screen popup drawing ---
       this.ctx.save();
@@ -81,6 +123,7 @@ export class MachineNeedsDrawer {
       drawnRects.push({ x, y, width: totalWidth, height: boxHeight, radius: 8 * fovScale });
 
       let currentX = x + padding;
+      
 
       // Draw input items
       for (const req of neededRequirements) {
@@ -129,10 +172,11 @@ export class MachineNeedsDrawer {
       }
 
       this.ctx.restore();
-    }
-    return drawnRects;
+    
   }
-
+    return drawnRects;
+  
+  }
   private clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
   }
