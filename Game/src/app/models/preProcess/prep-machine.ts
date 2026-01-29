@@ -1,8 +1,11 @@
 import { Product} from '../product/product'
 import { Products } from '../product/products'
-import { RenderObject } from '../rendering/render-object';
 import { RenderingService } from '../../services/rendering.service';
 import { Gamefield } from '../gamefield/gamefield';
+import { InteractableObject } from '../interactableObject/interactable-object';
+import { Coordinates } from '../coordinates/coordinates';
+import { Direction } from '../../enums/direction';
+import { RenderType } from '../../enums/render-type';
 
 /**
  * PrepMachine Klasse: 
@@ -14,7 +17,7 @@ import { Gamefield } from '../gamefield/gamefield';
  * - Iron Ingot -> PrepMachine -> Iron Gear
  * - Iron Gear + Copper Wire -> Elektrische Motor 
  */
-export class PrepMachine extends RenderObject {
+export class PrepMachine extends InteractableObject {
     /**
      * - Id von PrepMachine
      * - Zeit, die benötigt wird, um ein Produkt zu verarbeiten (in ms)
@@ -51,6 +54,7 @@ export class PrepMachine extends RenderObject {
 
         public prepFrameIndex: number = 0;
         public prepNextFrame: string = this.prepFrames[0];
+        
         constructor(
             x: number,
             y: number,
@@ -62,17 +66,15 @@ export class PrepMachine extends RenderObject {
         ) {
            super(
                 `PrepMachine_${PrepMachine.pre_machine_id++}`,
-                'rect',
-                x,
-                y,
-                Gamefield.fieldsize,
+                new Coordinates(x, y),
                 width,
                 height,
-                90,
+                [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT],
+                RenderType.RECT,
                 undefined,
                 undefined,
-                "#FFE797",   //rectColor
-                ["#FCB53B", "#aa6a17ff"]   //rectLayers
+                "#FFE797",
+                ["#FCB53B", "#aa6a17ff"] 
            );
             this.processingTime = processingTime;
             this.inputProduct = inputProduct;

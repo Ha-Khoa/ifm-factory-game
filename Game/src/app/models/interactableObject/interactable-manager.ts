@@ -41,6 +41,7 @@ export class InteractableManager {
       new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 4, 40, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Electric Motor", "/images/machine1.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(9)!, RenderType.THREE_D_IMG, 8000)
     ];
+    private prepMachines: PrepMachine[] = [];
     private _slotMachine!: SlotMachine;
 
     private _submissionArea:SubmissionArea;
@@ -56,6 +57,7 @@ export class InteractableManager {
       2 * Gamefield.fieldsize,
       this.playerService
     );
+    this.initializePrepMachines();
     // Standard-Maschinen freischalten
     this.updateUnlockedMachine(0);
     this.updateUnlockedMachine(1);
@@ -66,6 +68,9 @@ export class InteractableManager {
       this.generateInteractionField(machine)
       this.addParticleField(machine)
     })
+    this.prepMachines.forEach((prepMachine) => {
+      this.generateInteractionField(prepMachine);
+    });
     this.generateInteractionField(this._submissionArea)
     this.setSubmissionAreaParticles()
     this.generateInteractionField(this._slotMachine)
@@ -77,6 +82,20 @@ export class InteractableManager {
       RenderingService.instance().addRenderObject(particleRenderObject)
     })
   }
+
+  private initializePrepMachines(): void {
+    //Iron gear machine - positioned near player start
+    const ironGearMachine = new PrepMachine (
+        14 * Gamefield.fieldsize,
+        5 * Gamefield.fieldsize,
+        Gamefield.fieldsize,
+        Gamefield.fieldsize,
+        3000
+    );
+    ironGearMachine.setRecipe(7, 8);  //Eingang: Iron Ingot (ID 7), Ausgang: Iron Gear (ID 8)
+
+    this.prepMachines.push(ironGearMachine);
+}
 
   /** Gibt alle Maschinen zurück */
   getMachines(): Machine[] {
@@ -93,6 +112,9 @@ export class InteractableManager {
     this.machines.forEach(machine => {
       this._gamefield.interactableObjects.push(machine.renderObject);
       this._gamefield.interactableObjects.push(this._submissionArea.renderObject);
+    });
+    this.prepMachines.forEach(prepMachine => {
+      this._gamefield.interactableObjects.push(prepMachine.renderObject);
     });
   }
 
@@ -186,16 +208,13 @@ export class InteractableManager {
       }
     }
 
-    // Check PrepMachines
+    // Kollision mit PrepMachines prüfen
     if (!collision) {
-      for (let obj of this._gamefield.interactableObjects) {
-        if (obj.name.startsWith('PrepMachine_')) {
-          const prepMachine = obj as PrepMachine;
-          collision = this.interactionObjectPrepMachine(prepMachine, player);
-          if (collision) {
-            this.updatePrepMachineOnInteraction(prepMachine, player);
-            break;
-          }
+      for (let prepMachine of this.prepMachines) {
+        collision = this.interactionObject(prepMachine, player);
+        if (collision) {
+          this.updatePrepMachineOnInteraction(prepMachine, player);
+          break;
         }
       }
     }
@@ -227,34 +246,6 @@ export class InteractableManager {
                            direction === Direction.UP ? interactableObject.position.y - Gamefield.fieldsize : interactableObject.position.y;
       const interactionHeight = direction === Direction.DOWN || direction === Direction.UP ?  Gamefield.fieldsize : interactableObject.height;
       const interactionWidth = direction === Direction.RIGHT || direction === Direction.LEFT ? Gamefield.fieldsize : interactableObject.width;
-
-      const interactionHitbox: Hitbox = new Hitbox(
-        new Coordinates(interactionX, interactionY),
-        interactionWidth,
-        interactionHeight
-      );
-      const collision = Collision.checkCollision(player.hitbox, interactionHitbox);
-      if (collision) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Check Interaktion mit PrepMachine (die extends RenderObject, nicht InteractableObject)
-   */
-  interactionObjectPrepMachine(prepMachine: PrepMachine, player: Player): boolean {
-    // PrepMachine  von allen Seiten (ähnlich wie ein Tisch) interagierbar
-    const directions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT];
-
-    for (let direction of directions) {
-      const interactionX = direction === Direction.RIGHT ? prepMachine.x + prepMachine.width :
-                           direction === Direction.LEFT ? prepMachine.x - Gamefield.fieldsize : prepMachine.x;
-      const interactionY = direction === Direction.DOWN ? prepMachine.y + prepMachine.height :
-                           direction === Direction.UP ? prepMachine.y - Gamefield.fieldsize : prepMachine.y;
-      const interactionHeight = direction === Direction.DOWN || direction === Direction.UP ? Gamefield.fieldsize : prepMachine.height;
-      const interactionWidth = direction === Direction.RIGHT || direction === Direction.LEFT ? Gamefield.fieldsize : prepMachine.width;
 
       const interactionHitbox: Hitbox = new Hitbox(
         new Coordinates(interactionX, interactionY),
@@ -336,8 +327,8 @@ export class InteractableManager {
    */
   updatePrepMachineOnInteraction(prepMachine: PrepMachine, player: Player) {
     // Visual feedback: color the machine green
-    prepMachine.rectColor = "rgba(81, 255, 81, 1)";
-    prepMachine.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
+    prepMachine.renderObject.rectColor = "rgba(81, 255, 81, 1)";
+    prepMachine.renderObject.rectLayers = ["#08db08ff", "#03b603ff", "#009900", "#006600", "#003300"];
     // Cast to Machine for UI compatibility
     this.ui.drawMachinePopUp(prepMachine as any, player);
   }
@@ -350,13 +341,11 @@ export class InteractableManager {
       machine.renderObject.rectColor = "rgba(226, 229, 255, 1)";
       machine.renderObject.rectLayers = ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"];
     });
-    // Reset PrepMachines
-    for (let obj of this._gamefield.interactableObjects) {
-      if (obj.name.startsWith('PrepMachine_')) {
-        obj.rectColor = "#FFE797";
-        obj.rectLayers = ["#FCB53B", "#aa6a17ff"];
-      }
-    }
+    
+    this.prepMachines.forEach(prepMachine => {
+      prepMachine.renderObject.rectColor = "#FFE797";
+      prepMachine.renderObject.rectLayers = ["#FCB53B", "#aa6a17ff"];
+    });
    // this.ui.clearMachinePopUp();
   }
 
@@ -445,6 +434,7 @@ export class InteractableManager {
   public getAllRenderObjects(): RenderObject[] {
     const renderObjects: RenderObject[] = [];
     this.machines.forEach(machine => renderObjects.push(machine.renderObject));
+    this.prepMachines.forEach(prepMachine => renderObjects.push(prepMachine.renderObject));
     renderObjects.push(this._slotMachine.renderObject);
     renderObjects.push(this._submissionArea.renderObject);
     return renderObjects;
