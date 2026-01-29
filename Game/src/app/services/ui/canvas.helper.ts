@@ -89,10 +89,45 @@ export class CanvasHelper {
     ctx.beginPath();
     ctx.moveTo(xCenter - width / 2, y);
     ctx.lineTo(xCenter + width / 2, y);
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.lineWidth = 1.5;
     ctx.setLineDash([2, 4]);
     ctx.stroke();
+    ctx.restore();
+  }
+
+  /**
+   * Draws a styled key or button, like those on a keyboard or gamepad.
+   * @param ctx The canvas rendering context.
+   * @param key The text to display inside the key (e.g., 'P', 'Space').
+   * @param x The x-coordinate of the key.
+   * @param y The y-coordinate of the key.
+   * @param width The width of the key.
+   * @param height The height of the key.
+   */
+  public static drawKey(ctx: CanvasRenderingContext2D, key: string, x: number, y: number, width: number, height: number): void {
+    const cornerRadius = 8;
+    ctx.save();
+
+    ctx.fillStyle = UI_THEME.tertiary;
+    ctx.strokeStyle = UI_THEME.secondary;
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, cornerRadius);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    const fontSize = height * (key.length > 2 ? 0.35 : 0.5);
+    ctx.font = `bold ${fontSize}px ${UI_THEME.fontFamily}`;
+    ctx.fillStyle = UI_THEME.secondary;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.fillText(key, x + width / 2, y + height / 2);
+
     ctx.restore();
   }
 }

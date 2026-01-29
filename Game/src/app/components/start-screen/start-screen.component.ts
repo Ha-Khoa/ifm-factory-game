@@ -37,7 +37,6 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // --- Ereignisse (Outputs) ---
   @Output() startClicked = new EventEmitter<void>();
-  @Output() settingsClicked = new EventEmitter<void>();
   @Output() tutorialClicked = new EventEmitter<void>();
   @Output() resumeGame = new EventEmitter<void>();
 
@@ -408,8 +407,8 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
       case 2:
         this.tutorialClicked.emit()
         break
-      case 3: // EINSTELLUNGEN
-        this.settingsClicked.emit();
+      case 3: // Steuerung einstellen
+        GameService.gamePad = !GameService.gamePad;
         break
     }}
 

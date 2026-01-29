@@ -11,6 +11,7 @@ import { Package } from '../../models/package/package';
 import { Coordinates } from '../../models/coordinates/coordinates';
 import { Player } from '../../models/player/player';
 import { PlayerService } from '../player.service';
+import { GameService } from '../game.service';
 
 /**
  * Handles drawing all UI elements related to machines,
@@ -49,7 +50,7 @@ export class MachinePopupDrawer {
     const xPlayer1 = window.innerWidth * 0.02
     const xPlayer2 = window.innerWidth * 0.98 - popupConfig.width;
     const x = player.id === 0 ? xPlayer1 : xPlayer2;
-    const y = window.innerHeight * 0.98 - totalHeight;
+    const y = window.innerHeight * 0.95 - totalHeight;
 
     CanvasHelper.drawStyledPopupBackground(this.ctx, x, y, popupConfig, isPrepMachine ? true : machine.unlocked);
 
@@ -87,13 +88,11 @@ export class MachinePopupDrawer {
 
     if (!isPrepMachine) {
       const canUpgrade = machine.canUpgrade(playerService);
-      this.drawUpgradeButton(x, currentY + 15, machine, popupConfig, canUpgrade);
+      this.drawUpgradeButton(x, currentY + 20, machine, popupConfig, canUpgrade);
     }
 
-    const fKeyImage = this.images['/images/KeyBindings/keyBindings_F.png'];
-    if (fKeyImage) {
-        this.ctx.drawImage(fKeyImage, popupConfig.width + x - 25, popupConfig.height + y - 25, 40, 40);
-    }
+    const key = GameService.gamePad ? 'Y' : 'U';
+    CanvasHelper.drawKey(this.ctx, key, popupConfig.width/2 + x - 15, currentY + 55, 30, 30)
 
     this.ctx.restore();
 
@@ -198,7 +197,7 @@ export class MachinePopupDrawer {
 
       this.ctx.font = `14px ${UI_THEME.fontFamily}`;
       const productionTime = machine.productionRate / 1000;
-      this.ctx.fillText(`Dauer: ${productionTime.toFixed(2)}s`, x, currentY);
+      this.ctx.fillText(`Duration: ${productionTime.toFixed(2)}s`, x, currentY);
       currentY += lineHeight;
     }
 
@@ -208,13 +207,13 @@ export class MachinePopupDrawer {
   private drawRequirements(x: number, y: number, machine: Machine, lineHeight: number): number {
     let currentY = y;
     this.ctx.font = `bold 14px ${UI_THEME.fontFamily}`;
-    this.ctx.fillText('Benötigt:', x, currentY);
+    this.ctx.fillText('Requirements:', x, currentY);
     currentY += lineHeight;
     this.ctx.font = `13px ${UI_THEME.fontFamily}`;
 
     if (machine.inputRequirements.length === 0) {
       this.ctx.fillStyle = '#8d6e63';
-      this.ctx.fillText('- Nichts -', x, currentY);
+      this.ctx.fillText('- Nothing -', x, currentY);
       this.ctx.fillStyle = UI_THEME.textColor;
       currentY += lineHeight;
     } else {
@@ -280,7 +279,7 @@ export class MachinePopupDrawer {
     const btnX = x + (config.width - btnWidth) / 2;
 
     this.ctx.save();
-    this.ctx.fillStyle = canUpgrade ? '#9CCC65' : UI_THEME.tertiary;
+    this.ctx.fillStyle = canUpgrade ? '#7ebb39' : UI_THEME.tertiary;
     this.ctx.beginPath();
     this.ctx.roundRect(btnX, y, btnWidth, btnHeight, 15);
     this.ctx.fill();

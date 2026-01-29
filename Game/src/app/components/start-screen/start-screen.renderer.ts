@@ -9,7 +9,7 @@ export class StartScreenRenderer {
   // Button-Rechtecke für die Klickerkennung
   private buttonRect = { x: 0, y: 0, width: 0, height: 0 };
   private playerModeButtonRect = { x: 0, y: 0, width: 0, height: 0 };
-  private settingsButtonRect = { x: 0, y: 0, width: 0, height: 0 };
+  private controlsButtonRect = { x: 0, y: 0, width: 0, height: 0 };
   private tutorialButtonRect = { x: 0, y: 0, width: 0, height: 0 };
 
   constructor(
@@ -60,7 +60,7 @@ export class StartScreenRenderer {
     if (this.isPointInRect(x, y, this.buttonRect)) return 0;
     if (this.isPointInRect(x, y, this.playerModeButtonRect)) return 1;
     if (this.isPointInRect(x, y, this.tutorialButtonRect)) return 2;
-    if (this.isPointInRect(x, y, this.settingsButtonRect)) return 3;
+    if (this.isPointInRect(x, y, this.controlsButtonRect)) return 3;
     return null;
   }
 
@@ -172,13 +172,14 @@ export class StartScreenRenderer {
     this.buttonRect = { x: buttonX, y: startY, width: buttonWidth, height: buttonHeight };
     this.playerModeButtonRect = { x: buttonX, y: startY + buttonHeight + buttonGap, width: buttonWidth, height: buttonHeight };
     this.tutorialButtonRect = { x: buttonX, y: startY + (buttonHeight + buttonGap) * 2, width: buttonWidth, height: buttonHeight };
-    this.settingsButtonRect = { x: buttonX, y: startY + (buttonHeight + buttonGap) * 3, width: buttonWidth, height: buttonHeight };
+    this.controlsButtonRect = { x: buttonX, y: startY + (buttonHeight + buttonGap) * 3, width: buttonWidth, height: buttonHeight };
 
     this.drawArcadeButton('START', this.buttonRect, selectedButtonIndex === 0);
     const playerModeText = this.gameService.twoPlayerMode ? '2 PLAYERS' : '1 PLAYER';
     this.drawArcadeButton(playerModeText, this.playerModeButtonRect, selectedButtonIndex === 1);
     this.drawArcadeButton('TUTORIAL', this.tutorialButtonRect, selectedButtonIndex === 2);
-    this.drawArcadeButton('SETTINGS', this.settingsButtonRect, selectedButtonIndex === 3);
+    const controlModeText = GameService.gamePad ? 'Arcade' : 'Keyboard'
+    this.drawArcadeButton(controlModeText, this.controlsButtonRect, selectedButtonIndex === 3);
   }
 
   /**

@@ -13,6 +13,7 @@ import {Coordinates} from '../models/coordinates/coordinates';
 import { GameTimer } from './ui/game.timer';
 import { MachineNeedsDrawer } from './ui/machine-needs.drawer';
 import { PlayerService } from './player.service';
+import { ControlsDrawer } from './ui/controls.drawer';
 
 @Injectable({
   providedIn: 'root'
@@ -28,6 +29,7 @@ export class UIService {
   private machineNeedsDrawer!: MachineNeedsDrawer;
   private playerThoughtsDrawer!: PlayerThoughtsDrawer;
   private gameTimer!: GameTimer;
+  private controlsDrawer!: ControlsDrawer;
 
   // State management for drawn elements that need clearing
   private machinePopups: Rect[] = [];
@@ -62,11 +64,17 @@ export class UIService {
     this.machineNeedsDrawer = new MachineNeedsDrawer(this.ctxUI, this.images);
     this.playerThoughtsDrawer = new PlayerThoughtsDrawer(this.ctxUI, this.images);
     this.gameTimer = new GameTimer(this.ctxUI, this.images);
+    this.controlsDrawer = new ControlsDrawer(this.ctxUI, this.images)
   }
 
   // ==========================================================================
   // --- Popup Drawing Methods (Delegation) ---
   // ==========================================================================
+
+  /** Draws controls popup. */
+  public drawControls() {
+    this.controlsDrawer.draw()
+  }
 
   /** Draws a popup for a product or package on the ground. */
   public drawItemPopup(item: Product | Package, offsetCamera: [number, number], fov: number): void {

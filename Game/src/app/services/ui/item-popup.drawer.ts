@@ -4,6 +4,7 @@ import { Rect } from './rect.interface';
 import { CanvasHelper } from './canvas.helper';
 import { UI_THEME } from './theme.manager';
 import { RenderingService } from '../rendering.service';
+import { GameService } from '../game.service';
 
 /**
  * Handles drawing popups for items on the ground (Products and Packages).
@@ -12,7 +13,6 @@ export class ItemPopupDrawer {
   /**
    * @param ctx The canvas rendering context.
    * @param images A map of loaded image elements.
-   * @param angle The isometric projection angle.
    */
 
   constructor(
@@ -49,7 +49,7 @@ export class ItemPopupDrawer {
     const angle = RenderingService.instance().angle;
     const popupConfig = { width, height, radius: 10, borderWidth: 2 };
 
-    const x = item.position.x * fov + (item.size / 2) - (width / 2) + offsetCamera[0];
+    const x = item.position.x * fov + (item.size / 2) - (width / 2.5) + offsetCamera[0];
     const y = item.position.y * Math.cos(angle) * fov - height - 40 + offsetCamera[1] * Math.cos(angle) + RenderingService.instance().rotationZ;
 
     // The 'unlocked' parameter is undefined to trigger the special highlight border
@@ -65,12 +65,12 @@ export class ItemPopupDrawer {
     this.ctx.font = `bold 13px ${UI_THEME.fontFamily}`;
     this.ctx.fillText(title, centerX, currentY);
     if (titleImage) {
-      this.ctx.drawImage(titleImage, x + 10, currentY - 15, 20, 20);
+      this.ctx.drawImage(titleImage, x + 10, currentY - 15, 18, 18);
     }
 
     // Separator
     currentY += 5;
-    CanvasHelper.drawSeparator(this.ctx, centerX, currentY, width);
+    if (contentLines.length != 0) CanvasHelper.drawSeparator(this.ctx, centerX, currentY, width);
 
     // Content (for packages)
     currentY += 15;
@@ -83,12 +83,6 @@ export class ItemPopupDrawer {
       }
       currentY += lineHeight;
     });
-
-    // Interaction hint
-    const eKeyImage = this.images['/images/KeyBindings/keyBindings_E.png'];
-    if (eKeyImage) {
-      this.ctx.drawImage(eKeyImage, x + width - 20, y + height - 20, 35, 35);
-    }
 
     this.ctx.restore();
 
