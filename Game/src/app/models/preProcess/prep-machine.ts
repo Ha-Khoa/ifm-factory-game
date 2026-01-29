@@ -1,11 +1,8 @@
 import { Product} from '../product/product'
 import { Products } from '../product/products'
+import { RenderObject } from '../rendering/render-object';
 import { RenderingService } from '../../services/rendering.service';
 import { Gamefield } from '../gamefield/gamefield';
-import { InteractableObject } from '../interactableObject/interactable-object';
-import { Coordinates } from '../coordinates/coordinates';
-import { Direction } from '../../enums/direction';
-import { RenderType } from '../../enums/render-type';
 
 /**
  * PrepMachine Klasse: 
@@ -17,7 +14,7 @@ import { RenderType } from '../../enums/render-type';
  * - Iron Ingot -> PrepMachine -> Iron Gear
  * - Iron Gear + Copper Wire -> Elektrische Motor 
  */
-export class PrepMachine extends InteractableObject {
+export class PrepMachine extends RenderObject {
     /**
      * - Id von PrepMachine
      * - Zeit, die benötigt wird, um ein Produkt zu verarbeiten (in ms)
@@ -54,7 +51,6 @@ export class PrepMachine extends InteractableObject {
 
         public prepFrameIndex: number = 0;
         public prepNextFrame: string = this.prepFrames[0];
-        
         constructor(
             x: number,
             y: number,
@@ -66,15 +62,17 @@ export class PrepMachine extends InteractableObject {
         ) {
            super(
                 `PrepMachine_${PrepMachine.pre_machine_id++}`,
-                new Coordinates(x, y),
+                'rect',
+                x,
+                y,
+                Gamefield.fieldsize,
                 width,
                 height,
-                [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT],
-                RenderType.RECT,
+                90,
                 undefined,
                 undefined,
-                "#FFE797",
-                ["#FCB53B", "#aa6a17ff"] 
+                "#FFE797",   //rectColor
+                ["#FCB53B", "#aa6a17ff"]   //rectLayers
            );
             this.processingTime = processingTime;
             this.inputProduct = inputProduct;
