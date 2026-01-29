@@ -30,8 +30,10 @@ export class GameService {
   private gameOverSubject = new Subject<void>();
   public gameOver$ = this.gameOverSubject.asObservable();
 
+  public isPaused: boolean = false;
+
   // Gibt an, ob das Spiel aktuell läuft
-  private GameRunning!: boolean;
+  public GameRunning!: boolean;
 
   // Canvas und Rendering
   private ctx!: CanvasRenderingContext2D;
@@ -47,7 +49,7 @@ export class GameService {
   private conveyorBeltManager!: ConveyorBeltManager;
   private prepMachine!: PrepMachineManager;
 
-  private gameEnd: boolean = false;
+  private _gameEnd: boolean = false;
 
   private ctxUI!: CanvasRenderingContext2D;
 
@@ -57,6 +59,24 @@ export class GameService {
   private inputSubscription!: Subscription;
 
   constructor(private uiService: UIService, private playerService: PlayerService, private inputService: InputService) { }
+
+  public pauseGame(): void {
+    if (this.GameRunning) {
+      this.isPaused = true;
+      this.inputService.setInputState('menu');
+    }
+  }
+
+  public resumeGame(): void {
+    if (this.GameRunning) {
+      this.isPaused = false;
+      this.inputService.setInputState('game');
+    }
+  }
+
+  public isGameLoopRunning(): boolean {
+    return this.GameRunning;
+  }
 
 
   /**
@@ -211,12 +231,19 @@ export class GameService {
    */
   startGame() {
     this.GameRunning = true;
+    this.isPaused = false;
     this.inputService.setInputState('game');
     this.ctx.imageSmoothingEnabled = true;
     // Initialize the first orders
     Orders.initializeOrders();
     const loop = () => {
       if (!this.GameRunning) return;
+
+      if (this.isPaused) {
+        requestAnimationFrame(loop);
+        return;
+      }
+
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
       this.uiService.clearAll();
@@ -353,6 +380,14 @@ export class GameService {
     }
   }
 
+  get gameEnd(): boolean {
+    return this._gameEnd
+  }
+
+  set gameEnd(value: boolean) {
+    this._gameEnd = value
+  }
+
   get twoPlayerMode(): boolean {
     return this._twoPlayerMode;
   }
@@ -383,7 +418,7 @@ export class GameService {
    * Startet die GameOver-Loop nachdem das Spiel beendet ist.
    * Rendert den GameOverScreen mit Score und verdientem Geld.
    */
-  private startGameOverLoop(): void {
+  public startGameOverLoop(): void {
     Orders.destroy();
     this.uiService.clearAll();
     this.gameOverSubject.next();
@@ -391,3 +426,4 @@ export class GameService {
   }
 
 }
+

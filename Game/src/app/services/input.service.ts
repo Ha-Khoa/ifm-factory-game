@@ -41,6 +41,9 @@ export class InputService {
   private tutorialCloseSubject = new Subject<void>();
   public tutorialClose$ = this.tutorialCloseSubject.asObservable();
 
+  private pauseSubject = new Subject<void>();
+  public pause$ = this.pauseSubject.asObservable();
+
   private upgradeSubject = new Subject<number>();
   public upgrade$ = this.upgradeSubject.asObservable();
 
@@ -51,6 +54,7 @@ export class InputService {
   private lastTutorialNext = false;
   private lastTutorialPrev = false;
   private lastTutorialClose = false;
+  private lastPause = false;
 
   constructor() {
     window.addEventListener('gamepadconnected', (e: GamepadEvent) => {
@@ -98,6 +102,22 @@ export class InputService {
     requestAnimationFrame(() => this.poll());
   }
 
+  private processPauseInput() {
+    let pause = this.keyboardState['p'];
+
+    for (const gamepad of this.gamepads) {
+      if (gamepad && gamepad.buttons[9].pressed) {
+        pause = true;
+        break;
+      }
+    }
+
+    if (pause && !this.lastPause) {
+      this.pauseSubject.next();
+    }
+    this.lastPause = !!pause;
+  }
+
   private pollGamepads() {
     const gps = navigator.getGamepads();
     for (let i = 0; i < gps.length; i++) {
@@ -108,6 +128,7 @@ export class InputService {
   }
 
   private processInputs() {
+    this.processPauseInput();
     if (this.inputState === 'menu') {
       this.processMenuInputs();
     } else if (this.inputState === 'tutorial') {

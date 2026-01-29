@@ -20,8 +20,8 @@ export class GameTimer {
   constructor(
     private ctx: CanvasRenderingContext2D,
     private images: { [key: string]: HTMLImageElement },
-    initialMinutes: number = 0,
-    initialSeconds: number = 3
+    initialMinutes: number = 5,
+    initialSeconds: number = 0
   ) {
     this.initialTime = (initialMinutes * 60 + initialSeconds) * 1000;
     this.currentTime = this.initialTime;
@@ -145,9 +145,12 @@ export class GameTimer {
   public updateTimer(): boolean {
     const dt = RenderingService.instance().deltaTime;
 
+    // Clamp delta time to a max of 250ms to prevent large jumps after unpausing.
+    const clampedDt = Math.min(dt, 250);
+
     // Prevent time from going below zero
     if (this.currentTime > 0) {
-      this.currentTime -= dt || 16; // Use 16ms as a fallback delta
+      this.currentTime -= clampedDt || 16; // Use clampedDt and 16ms as a fallback delta
       if (this.currentTime < 0) {
         this.currentTime = 0;
       }

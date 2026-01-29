@@ -19,6 +19,7 @@ export class Orders {
    * @type {number}
    */
   private static maxOderId: number = 0;
+  private static timerPaused = false;
 
 
   /**
@@ -101,8 +102,15 @@ export class Orders {
     return this.maxOderId;
   }
 
+  public static stopTimer(stop: boolean): void {
+    this.timerPaused = stop;
+  }
+
   public static updateOrderTime()
   {
+    if (this.timerPaused) {
+      return;
+    }
     this.activeOrders$.pipe(take(1)).subscribe( orders => {
       for (const order of orders)
       {

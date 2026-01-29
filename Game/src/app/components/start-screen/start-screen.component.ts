@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { PlayerService } from '../../services/player.service';
 import { GameOverScreen } from './game-over.screen';
 import { StartScreenRenderer } from './start-screen.renderer';
+import { PauseScreen } from './pause.screen';
 
 /**
  * Die StartScreenComponent stellt den Einstiegsbildschirm des Spiels dar.
@@ -38,9 +39,11 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
   @Output() startClicked = new EventEmitter<void>();
   @Output() settingsClicked = new EventEmitter<void>();
   @Output() tutorialClicked = new EventEmitter<void>();
+  @Output() resumeGame = new EventEmitter<void>();
 
-  public screen: 'start' | 'game-over' = 'start';
+  public screen: 'start' | 'game-over' | 'pause' = 'start';
   private gameOverScreen!: GameOverScreen;
+  private pauseScreen!: PauseScreen;
   private renderer!: StartScreenRenderer;
   private styledElements: ElementRef[] = [];
 
@@ -53,6 +56,7 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
   private ctx!: CanvasRenderingContext2D;
   private highScores: PlayerInterface[] = [];
   private backgroundVideo!: HTMLVideoElement;
+  private gameCanvasSnapshot: HTMLImageElement | null = null;
 
   // ID für den Animations-Loop (wichtig zum Beenden)
   private animationFrameId: number | null = null;
@@ -90,9 +94,23 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.gameOverScreen = new GameOverScreen(this.ctx, this.width, this.height, this.playerService);
     this.gameOverScreen.setBackgroundImage('/images/ifm-gameover-background.png');
+    this.pauseScreen = new PauseScreen(this.ctx, this.width, this.height);
+    this.pauseScreen.setBackgroundImage('/images/ifm-gameover-background.png');
 
     this.gameService.gameOver$.subscribe(() => {
       this.showGameOver();
+    });
+
+    this.inputService.pause$.subscribe(() => {
+      if (!this.gameService.isGameLoopRunning()) return;
+
+      if (this.gameService.isPaused) {
+        this.gameService.resumeGame();
+        this.hidePauseScreenAndResume();
+      } else {
+        this.gameService.pauseGame();
+        this.showPauseScreen();
+      }
     });
 
     if (this.screen === 'start') {
@@ -142,6 +160,7 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
     const now = Date.now();
     if (now - this.lastInputTime < 150) return; // 150ms debounce
     this.lastInputTime = now;
+
     if (this.screen === 'game-over') {
       if (action === 'confirm' && !this.isTransitioning) {
         this.startReturnToMenuTransition();
@@ -149,6 +168,22 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    if (this.screen === 'pause') {
+      switch (action) {
+        case 'up':
+          this.selectedButtonIndex = (this.selectedButtonIndex - 1 + 2) % 2;
+          break;
+        case 'down':
+          this.selectedButtonIndex = (this.selectedButtonIndex + 1) % 2;
+          break;
+        case 'confirm':
+          this.handleSelection();
+          break;
+      }
+      return;
+    }
+
+    // Default Start Screen navigation
     switch (action) {
       case 'up':
         this.selectedButtonIndex = (this.selectedButtonIndex - 1 + 4) % 4;
@@ -202,7 +237,7 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
    * Ruft sich selbst rekursiv über requestAnimationFrame auf.
    */
   private animate(): void {
-    if (this.isHidden) return;
+    if (this.isHidden && this.screen !== 'pause') return;
 
     if (this.isTransitioning) {
       const now = Date.now();
@@ -234,8 +269,11 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
 
     } else if (this.screen === 'start') {
       this.draw();
-    } else {
+    } else if (this.screen === 'game-over') {
       this.gameOverScreen.render();
+    } else if (this.screen === 'pause') {
+      this.ctx.clearRect(0, 0, this.width, this.height);
+      this.pauseScreen.render(this.selectedButtonIndex);
     }
     this.animationFrameId = requestAnimationFrame(() => this.animate());
   }
@@ -252,6 +290,27 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
       this.twoPlayerHighScores,
       this.selectedButtonIndex
     );
+  }
+
+  public showPauseScreen(): void {
+    this.screen = 'pause';
+    this.isHidden = false;
+    this.resetAllInlineStyles();
+    this.setCanvasSize();
+    this.setupInputHandlers();
+    this.selectedButtonIndex = 0; // Default to RESUME
+    this.pauseScreen.resetAnimation();
+
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+    this.animate();
+  }
+
+  private hidePauseScreenAndResume(): void {
+    this.gameCanvasSnapshot = null;
+    this.zoomOut(); // Hides the component and unsubscribes from inputs
+    this.resumeGame.emit();
   }
 
   public showGameOver(): void {
@@ -302,6 +361,15 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
     const x = (event.clientX - rect.left) * scaleX;
     const y = (event.clientY - rect.top) * scaleY;
 
+    if (this.screen === 'pause') {
+        const clickedButtonIndex = this.pauseScreen.getClickedButtonIndex(x, y);
+        if (clickedButtonIndex !== null) {
+            this.handleSelection(clickedButtonIndex);
+        }
+        return;
+    }
+
+
     const clickedButtonIndex = this.renderer.getClickedButtonIndex(x, y);
     if (clickedButtonIndex !== null) {
       this.handleSelection(clickedButtonIndex);
@@ -313,6 +381,22 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   private handleSelection(index?: number): void {
     const selection = index ?? this.selectedButtonIndex;
+
+    if (this.screen === 'pause') {
+        switch(selection) {
+            case 0: // RESUME
+                this.gameService.resumeGame();
+                this.hidePauseScreenAndResume();
+                break;
+            case 1: // END GAME
+                this.gameService.resumeGame();
+                this.hidePauseScreenAndResume();
+                this.gameService.gameEnd = true;
+                break;
+        }
+        return;
+    }
+
     switch (selection) {
       case 0: // START
         this.startClicked.emit();
