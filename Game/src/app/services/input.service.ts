@@ -178,8 +178,8 @@ export class InputService {
     if (gamepad1) {
       const deadzone = 0.5;
       const axisY = gamepad1.axes[1];
-      menuUp = menuUp || gamepad1.buttons[12].pressed || axisY < -deadzone;
-      menuDown = menuDown || gamepad1.buttons[13].pressed || axisY > deadzone;
+      menuUp = menuUp  || axisY < -deadzone;
+      menuDown = menuDown || axisY > deadzone;
       menuConfirm = menuConfirm || gamepad1.buttons[0].pressed; // 'A' button
     }
 
