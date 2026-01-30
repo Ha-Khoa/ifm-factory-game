@@ -20,7 +20,7 @@ export class GameTimer {
   constructor(
     private ctx: CanvasRenderingContext2D,
     private images: { [key: string]: HTMLImageElement },
-    initialMinutes: number = 0,
+    initialMinutes: number = 5,
     initialSeconds: number = 3
   ) {
     this.initialTime = (initialMinutes * 60 + initialSeconds) * 1000;
