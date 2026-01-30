@@ -29,6 +29,7 @@ export class MachinePopupDrawer {
    * @returns An array of Rects for later clearing.
    */
   public drawDetails(machine: Machine, player: Player, playerService: PlayerService): Rect[] {
+    //console.log('drawDetails called for machine:', machine.name, 'isPrepMachine:', machine instanceof PrepMachine);
     this.ctx.save();
 
     // Check ob es sich um eine PrepMachine handelt
@@ -159,6 +160,8 @@ export class MachinePopupDrawer {
   private drawInfoText(x: number, y: number, machine: Machine, lineHeight: number): number {
     let currentY = y;
     const isPrepMachine = machine instanceof PrepMachine;
+
+    //console.log('drawInfoText - machine name:', machine.name, 'isPrepMachine:', isPrepMachine);
 
     this.ctx.font = `bold 16px ${UI_THEME.fontFamily}`;
     this.ctx.fillText(machine.name, x, currentY);

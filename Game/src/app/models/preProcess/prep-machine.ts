@@ -61,15 +61,17 @@ export class PrepMachine extends RenderObject {
             outputProduct?: Product
         ) {
            super(
-                `PrepMachine_${PrepMachine.pre_machine_id++}`,
-                'rect',
+                `PrepMachine: ${inputProduct?.name || 'Unknown'}`,
+                //'rect',
+                'img',
                 x,
                 y,
                 Gamefield.fieldsize,
                 width,
                 height,
                 90,
-                undefined,
+                //undefined,
+                '/images/prepmachine.png',
                 undefined,
                 "#FFE797",   //rectColor
                 ["#FCB53B", "#aa6a17ff"]   //rectLayers
@@ -91,6 +93,10 @@ export class PrepMachine extends RenderObject {
             this.recipe = {inputId, outputId};
             this.inputProduct = Products.getProductById(inputId);
             this.outputProduct = Products.getProductById(outputId);
+            // Name der Maschine aktualisieren
+            if (this.inputProduct) {
+                this.name = `PrepMachine: ${this.inputProduct.name}`;
+            }
         }
         /**
          * 

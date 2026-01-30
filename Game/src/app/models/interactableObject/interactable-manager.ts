@@ -189,7 +189,7 @@ export class InteractableManager {
     // Check PrepMachines
     if (!collision) {
       for (let obj of this._gamefield.interactableObjects) {
-        if (obj.name.startsWith('PrepMachine_')) {
+        if (obj instanceof PrepMachine) {
           const prepMachine = obj as PrepMachine;
           collision = this.interactionObjectPrepMachine(prepMachine, player);
           if (collision) {
