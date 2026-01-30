@@ -532,8 +532,12 @@ export class Player {
         let nearestMachine: PrepMachine | null = null;
         let shortestDistance: number = Infinity;
 
-        for (const obj of this._gamefield.interactableObjects){
-            if (obj.name.startsWith('PrepMachine')) {
+        // Get all PrepMachines from the gamefield
+        const allObjects = this._gamefield.getAllRenderObjects();
+        //console.log('Looking for PrepMachine in all objects:', allObjects.length);
+        
+        for (const obj of allObjects){
+            if (obj instanceof PrepMachine) {
                 const machine = obj as PrepMachine;
                 const distance = Math.sqrt(
                     Math.pow((this._position.x + this._hitbox.width/2) - (machine.x + machine.width/2), 2) +
@@ -546,6 +550,7 @@ export class Player {
                 }
             }
         }
+        //console.log('Found nearest PrepMachine:', nearestMachine?.name);
 
         return nearestMachine;
    }

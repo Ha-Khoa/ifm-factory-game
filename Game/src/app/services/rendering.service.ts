@@ -165,32 +165,6 @@ export class RenderingService {
           objHeight * Math.cos(this._angle) + 1
         );
         this._ctx.fill();
-
-        // Render Produkt auf PrepMachine
-        if (Obj instanceof PrepMachine) {
-          const prepMachine = Obj as PrepMachine;
-          const visualState = prepMachine.getVisualState();
-          
-          if ((visualState.isActive || visualState.hasOutput) && prepMachine.prepNextFrame) {
-            // Zeichne das Animationsbild
-            const frameImage = this._images[prepMachine.prepNextFrame];
-            if (frameImage) {
-              // Berechne die Position und Größe der Animation relativ zur Maschine
-              const animWidth = objWidth * 0.7; // Mache die Animation 70% der Maschinengröße
-              const animHeight = animWidth * Math.cos(this._angle); // Behalte das quadratische Seitenverhältnis bei
-              const xCenter = Math.round(xObj + (objWidth - animWidth) / 2);
-              const yCenter = yProjection + (objHeight * Math.cos(this._angle) - animHeight) / 2;
-              
-              this._ctx.drawImage(
-                frameImage,
-                xCenter,
-                yCenter,
-                animWidth,
-                animHeight
-              );
-            }
-          }
-        }
       }
       // Bild mit Wand
       else if (Obj.type === RenderType.IMG) {
@@ -209,6 +183,32 @@ export class RenderingService {
             objWidth,
             this._fov * Obj.z * Math.sin(this._angle)
           );
+        }
+        
+        // Render Produkt auf PrepMachine
+        if (Obj instanceof PrepMachine) {
+          const prepMachine = Obj as PrepMachine;
+          const visualState = prepMachine.getVisualState();
+          
+          if ((visualState.isActive || visualState.hasOutput) && prepMachine.prepNextFrame) {
+            //Zeichen das Animationsbild
+            const frameImage = this._images[prepMachine.prepNextFrame];
+            if (frameImage) {
+              //Berechne Position und Größe der Animation
+              const animWidth = objWidth * 0.7;     //Mache die Animation 70% der Prepmachine
+              const animHeight = animWidth * Math.cos(this._angle); // Behalte das quadratische Seitenverhältnis bei
+              const xCenter = Math.round(xObj + (objWidth - animWidth) / 2);
+              const yCenter = yProjection + (objHeight * Math.cos(this._angle) - animHeight) / 2;
+              
+              this._ctx.drawImage(
+                frameImage,
+                xCenter,
+                yCenter,
+                animWidth,
+                animHeight
+              );
+            }
+          }
         }
       }
       else if (Obj.type === RenderType.CARD_BOARD) {

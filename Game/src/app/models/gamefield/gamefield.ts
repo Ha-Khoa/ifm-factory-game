@@ -16,6 +16,8 @@ export class Gamefield {
     environmetObjects!: RenderObject[];
     // Interaktive Objekte (Wände, Maschinen)
     interactableObjects!: RenderObject[];
+    // PrepMachines
+    private prepMachinesList: PrepMachine[] = [];
     // Größe eines einzelnen Feldes in Pixeln
     static fieldsize: number = 50;
     // Anzahl der Reihen
@@ -254,8 +256,11 @@ export class Gamefield {
     }
 
     updatePrepMachines(prepMachines: PrepMachine[]): void {
+        //Store the PrepMachines for later access
+        this.prepMachinesList = prepMachines;
+        
         //Entfernt alte PrepMachines aus den interaktiven Objekten
-        this.interactableObjects = this.interactableObjects.filter (obj => !obj.name.startsWith('PrepMachine_'));
+        this.interactableObjects = this.interactableObjects.filter (obj => !(obj instanceof PrepMachine));
 
         //Fügt die aktuellen PrepMachines hinzu
         prepMachines.forEach(machine =>{
@@ -270,6 +275,10 @@ export class Gamefield {
             }
         });
         console.log('Total interactable objects:', this.interactableObjects.length);
+    }
+
+    public getPrepMachines(): PrepMachine[] {
+        return this.prepMachinesList;
     }
 
     public getAllRenderObjects(): RenderObject[] {
