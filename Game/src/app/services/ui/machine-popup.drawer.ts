@@ -92,7 +92,7 @@ export class MachinePopupDrawer {
       this.drawUpgradeButton(x, currentY + 20, machine, popupConfig, canUpgrade);
     }
 
-    const key = GameService.gamePad ? 'Y' : 'U';
+    const key = GameService.gamePad ? 'A' : 'U';
     CanvasHelper.drawKey(this.ctx, key, popupConfig.width/2 + x - 15, currentY + 55, 30, 30)
 
     this.ctx.restore();

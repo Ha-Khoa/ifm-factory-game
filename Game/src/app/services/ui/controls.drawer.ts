@@ -20,8 +20,8 @@ const controlLayouts: { [inputType: string]: { [state: string]: ControlHint[] } 
   gamepad: {
     default: [
       { key: 'Start', text: 'Pause' },
-      { key: 'X', text: 'Sprinten' },
-      { key: 'A', text: 'Interact'}
+      { key: 'B', text: 'Sprinten' },
+      { key: 'Y', text: 'Interact'}
     ],
   },
 };

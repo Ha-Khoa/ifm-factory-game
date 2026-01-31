@@ -180,7 +180,7 @@ export class InputService {
       const axisY = gamepad1.axes[1];
       menuUp = menuUp  || axisY < -deadzone;
       menuDown = menuDown || axisY > deadzone;
-      menuConfirm = menuConfirm || gamepad1.buttons[0].pressed; // 'A' button
+      menuConfirm = menuConfirm || gamepad1.buttons[3].pressed; // 'Y' button
     }
 
     if (menuUp && !this.lastMenuUp) this.menuUpSubject.next();
@@ -208,10 +208,10 @@ export class InputService {
       const axis1 = gamepad1.axes[1];
       if (Math.abs(axis0) > deadzone) p1Horizontal = axis0;
       if (Math.abs(axis1) > deadzone) p1Vertical = axis1;
-      p1Interact = p1Interact || gamepad1.buttons[0].pressed; // 'A' button
-      p1Boost = p1Boost || gamepad1.buttons[2].pressed; // 'X' button
+      p1Interact = p1Interact || gamepad1.buttons[3].pressed; // Y
+      p1Boost = p1Boost || gamepad1.buttons[2].pressed; // B
 
-      if (gamepad1.buttons[3].pressed) { // 'Y' button for upgrade
+      if (gamepad1.buttons[1].pressed) {  // A
         this.upgradeSubject.next(0);
       }
     }
@@ -236,9 +236,9 @@ export class InputService {
       const axis1 = gamepad2.axes[1];
       if (Math.abs(axis0) > deadzone) p2Horizontal = axis0;
       if (Math.abs(axis1) > deadzone) p2Vertical = axis1;
-      p2Interact = p2Interact || gamepad2.buttons[0].pressed; // 'A' button
-      p2Boost = p2Boost || gamepad2.buttons[2].pressed; // 'X' button
-      if (gamepad2.buttons[3].pressed) { // 'Y' button
+      p2Interact = p2Interact || gamepad2.buttons[3].pressed; // 'Y' button
+      p2Boost = p2Boost || gamepad2.buttons[2].pressed; // 'B' button
+      if (gamepad2.buttons[1].pressed) { // 'A' button
         this.upgradeSubject.next(1);
       }
     }
