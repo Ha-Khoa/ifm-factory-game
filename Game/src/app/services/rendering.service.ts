@@ -195,10 +195,10 @@ export class RenderingService {
             const frameImage = this._images[prepMachine.prepNextFrame];
             if (frameImage) {
               //Berechne Position und Größe der Animation
-              const animWidth = objWidth * 0.7;     //Mache die Animation 70% der Prepmachine
+              const animWidth = objWidth * 0.2;     //Mache die Animation 40% der Prepmachine
               const animHeight = animWidth * Math.cos(this._angle); // Behalte das quadratische Seitenverhältnis bei
               const xCenter = Math.round(xObj + (objWidth - animWidth) / 2);
-              const yCenter = yProjection + (objHeight * Math.cos(this._angle) - animHeight) / 2;
+              const yCenter = yProjection + (objHeight * Math.cos(this._angle) * 0.35);
               
               this._ctx.drawImage(
                 frameImage,

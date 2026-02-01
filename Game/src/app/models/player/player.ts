@@ -544,7 +544,7 @@ export class Player {
                     Math.pow((this._position.y + this._hitbox.height/2) - (machine.y + machine.height/2), 2)
                 );
 
-                if (distance < Gamefield.fieldsize * 1.0 && distance < shortestDistance) {
+                if (distance < Gamefield.fieldsize * 1.5 && distance < shortestDistance) {
                     shortestDistance = distance;
                     nearestMachine = machine;
                 }
