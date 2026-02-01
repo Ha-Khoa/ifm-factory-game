@@ -127,8 +127,8 @@ export class Machine extends InteractableObject {
           this._inventory = [];
           this._producting = false;
           const produced = this._outputProduct.copy();
-          produced.z = this.z;
-          Products.addProduct(produced, new Coordinates(this.x + Gamefield.fieldsize / 2 - produced.size / 2, this.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
+          produced.z = 0;
+          Products.addProduct(produced, new Coordinates(this.x + Gamefield.fieldsize / 2 - produced.size / 2 + Gamefield.fieldsize, this.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
           resolve(this._outputProduct);
         }
       }, intervalMs);

@@ -315,17 +315,20 @@ export class RenderingService {
     {
       this._camera.x = x;
     }
-    else if(this._camera.x < x)
+    else if(this._camera.x + 5 < x)
     {
-      this._camera.x += 0.5;
+      this._camera.x += 5;
     }
-    else if(this._camera.x > x)
+    else if(this._camera.x - 5 > x)
     {
-      this._camera.x -= 0.5;
+      this._camera.x -= 5;
+    }
+    else{
+      this._camera.x = x
     }
     if(this._angle < angle)
     {
-      this._angle += this._angle * 0.01;
+      this._angle += this._angle * 0.011;
     }
     else if(this._angle > angle)
     {
@@ -367,7 +370,7 @@ export class RenderingService {
   }
 
   rotateMap() {
-    if(this._angle === 0) this._angle = 0.0000000000000001
+    if(this._angle < 0) this._angle = 0.001
     const max = 30 / 360 * 2 * Math.PI;
     if(this._camera.position.z !== 0)
     {

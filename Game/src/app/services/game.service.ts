@@ -102,13 +102,13 @@ export class GameService {
     // Initialisiere Spielobjekte
     this.playerVelocity = Gamefield.fieldsize * 4; // in Pixel pro Sekunde
     this.player = new Player(
-      new Hitbox(new Coordinates(200, 250), Gamefield.fieldsize * 4/5 , Gamefield.fieldsize * 2/5),
+      new Hitbox(new Coordinates(50, 28 * Gamefield.fieldsize), Gamefield.fieldsize * 4/5 , Gamefield.fieldsize * 2/5),
       this.playerVelocity,
       this.gamefield,
       this.playerService
     );
     this.twoPlayerMode = TwoPlayerMode;
-        RenderingService.instance().convertToCameraPOV(this.player.camera);
+    //RenderingService.instance().convertToCameraPOV(this.player.camera);
     this.interactableManager = new InteractableManager(this.gamefield, this.uiService, this.inputService, this.playerService);
 
     this.inputSubscription = this.inputService.upgrade$.subscribe(playerIndex => {
@@ -137,6 +137,10 @@ export class GameService {
       "/images/truck_roof.png",
       "/images/truck_back.png",
       "/images/arrow.png",
+      "/images/tisch.png",
+      "/images/sofa.png",
+      "/images/chef.png",
+      "/images/temp/plant.png",
       // Conveyor
       "/images/conveyorBelt/conveyorbelt-1.jpg",
       "/images/conveyorBelt/conveyorbelt-2.jpg",
@@ -168,6 +172,8 @@ export class GameService {
       "/images/KeyBindings/keyBindings_,.png", "/images/KeyBindings/keyBindings_..png", "/images/KeyBindings/keyBindings_0.png", "/images/KeyBindings/keyBindings_1.png", "/images/KeyBindings/keyBindings_2.png", "/images/KeyBindings/keyBindings_3.png", "/images/KeyBindings/keyBindings_4.png", "/images/KeyBindings/keyBindings_5.png", "/images/KeyBindings/keyBindings_6.png", "/images/KeyBindings/keyBindings_7.png", "/images/KeyBindings/keyBindings_8.png", "/images/KeyBindings/keyBindings_9.png","/images/KeyBindings/keyBindings_Start.png", "/images/KeyBindings/keyBindings_Space.png", "/images/KeyBindings/keyBindings_A.png", "/images/KeyBindings/keyBindings_B.png", "/images/KeyBindings/keyBindings_C.png", "/images/KeyBindings/keyBindings_D.png", "/images/KeyBindings/keyBindings_E.png", "/images/KeyBindings/keyBindings_F.png", "/images/KeyBindings/keyBindings_G.png", "/images/KeyBindings/keyBindings_H.png", "/images/KeyBindings/keyBindings_I.png", "/images/KeyBindings/keyBindings_J.png", "/images/KeyBindings/keyBindings_K.png", "/images/KeyBindings/keyBindings_L.png", "/images/KeyBindings/keyBindings_M.png", "/images/KeyBindings/keyBindings_N.png", "/images/KeyBindings/keyBindings_O.png", "/images/KeyBindings/keyBindings_P.png", "/images/KeyBindings/keyBindings_Q.png", "/images/KeyBindings/keyBindings_R.png", "/images/KeyBindings/keyBindings_S.png", "/images/KeyBindings/keyBindings_T.png", "/images/KeyBindings/keyBindings_U.png", "/images/KeyBindings/keyBindings_V.png", "/images/KeyBindings/keyBindings_W.png", "/images/KeyBindings/keyBindings_X.png", "/images/KeyBindings/keyBindings_Y.png", "/images/KeyBindings/keyBindings_Z.png", "/images/KeyBindings/keyBindings_Left.png", "/images/KeyBindings/keyBindings_Right.png", "/images/KeyBindings/keyBindings_Up.png", "/images/KeyBindings/keyBindings_Down.png", "/images/KeyBindings/keyBindings_Controller_Left.png", "/images/KeyBindings/keyBindings_Controller_Right.png", "/images/KeyBindings/keyBindings_Controller_Up.png", "/images/KeyBindings/keyBindings_Controller_Down.png", "/images/KeyBindings/keyBindings_Controller_Button_1.png", "/images/KeyBindings/keyBindings_Controller_Button_2.png", "/images/KeyBindings/keyBindings_Controller_Button_3.png", "/images/KeyBindings/keyBindings_Controller_Button_4.png", "/images/KeyBindings/keyBindings_Controller_Button_5.png", "/images/KeyBindings/keyBindings_Controller_Button_6.png",
     ];
 
+
+
     // 4. Kombiniere alle Pfade und entferne Duplikate
     const allImagesToLoad = [...new Set([...dynamicImagePaths, ...productImages, ...playerImages, ...staticImagePaths])];
 
@@ -181,6 +187,7 @@ export class GameService {
     this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
     this.prepMachine = new PrepMachineManager(this.gamefield);
     Products.generateProducts();
+    
   }
 
   /**
@@ -231,7 +238,7 @@ export class GameService {
    * Startet die Hauptspielschleife (Game Loop).
    * Zeichnet und aktualisiert das Spiel solange GameRunning true ist.
    */
-  startGame() {
+  startGame() {RenderingService.instance().convertToCameraPOV(this.player.camera);
     this.GameRunning = true;
     this.isPaused = false;
     this.inputService.setInputState('game');
@@ -318,13 +325,12 @@ export class GameService {
 
         RenderingService.instance().rotateMap();
       }
-
       const zoomFinished = !playerInteractSlotMachine ? RenderingService.instance().zoomOut() : false;
 
       if(!playerInteractSlotMachine && zoomFinished) this.player.cameraFix = true;
 
-      RenderingService.instance().convertToCameraPOV(this.player.camera);
       RenderingService.instance().sortRenderingBuffer();
+      RenderingService.instance().convertToCameraPOV(this.player.camera);
       RenderingService.instance().render();
 
       // Render Particles
@@ -415,7 +421,7 @@ export class GameService {
     if (value) {
       if (!this.player2) {
         this.player2 = new Player(
-          new Hitbox(new Coordinates(300, 250), Gamefield.fieldsize * 4 / 5, Gamefield.fieldsize * 2 / 5),
+          new Hitbox(new Coordinates(4 * Gamefield.fieldsize, 18 * Gamefield.fieldsize), Gamefield.fieldsize * 4 / 5, Gamefield.fieldsize * 2 / 5),
           this.playerVelocity,
           this.gamefield,
           this.playerService

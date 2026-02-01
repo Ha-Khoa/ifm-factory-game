@@ -28,18 +28,27 @@ export class InteractableManager {
     private ui: UIService;
     private playerService: PlayerService;
     private machines: Machine[] = [
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Basic Sensor", "/images/machine1.png", "/images/wall.png",
-                  [Direction.DOWN], Products.getProductById(6)!, RenderType.THREE_D_IMG),
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 7, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Photo Diode", "/images/machine1.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(11)!, RenderType.THREE_D_IMG),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(Gamefield.fieldsize * 4, Gamefield.fieldsize * 8, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/machine2.png", "/images/wall.png",
-                  [Direction.UP], Products.getProductById(4)!, RenderType.THREE_D_IMG,10000),
-      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 4, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/machine3.png", "/images/wall.png",
-                  [Direction.DOWN], Products.getProductById(5)!, RenderType.THREE_D_IMG),
-      new Machine(Gamefield.fieldsize * 7, Gamefield.fieldsize * 8, 40,Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Circuit Board", "/images/machine4.png", "/images/wall.png",
-                  [Direction.LEFT], Products.getProductById(5)!, RenderType.THREE_D_IMG),
-      // Electric Motor-Maschine (benötigt Copper Wire x2 + Iron Gear x1)
-      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 4, 40, Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Electric Motor", "/images/machine1.png", "/images/wall.png",
-                  [Direction.DOWN], Products.getProductById(9)!, RenderType.THREE_D_IMG, 8000)
+      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 13, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Plastic Case", "/images/machine2.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(4)!, RenderType.THREE_D_IMG,10000),
+      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 9, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Circuit Board", "/images/machine3.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(5)!, RenderType.THREE_D_IMG),
+      new Machine(Gamefield.fieldsize * 24, Gamefield.fieldsize * 2, 40, Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Photo Sensor", "/images/machine4.png", "/images/wall.png",
+                  [Direction.LEFT], Products.getProductById(10)!, RenderType.THREE_D_IMG, 8000),
+      new Machine(Gamefield.fieldsize * 24, Gamefield.fieldsize * 6, 40, Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Temperatur Sensor", "/images/machine4.png", "/images/wall.png",
+                  [Direction.LEFT], Products.getProductById(12)!, RenderType.THREE_D_IMG, 8000),
+      new Machine(Gamefield.fieldsize * 24, Gamefield.fieldsize * 10, 40, Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Druck Sensor", "/images/machine4.png", "/images/wall.png",
+                  [Direction.LEFT], Products.getProductById(13)!, RenderType.THREE_D_IMG, 8000),
+      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 17, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Iron Case", "/images/machine3.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(14)!, RenderType.THREE_D_IMG),
+      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 5, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Kabel", "/images/machine3.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(15)!, RenderType.THREE_D_IMG),
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 11, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Thermoelement", "/images/machine3.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(17)!, RenderType.THREE_D_IMG),
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 15, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Messzelle", "/images/machine3.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(16)!, RenderType.THREE_D_IMG)
     ];
     private _slotMachine!: SlotMachine;
 
@@ -49,19 +58,14 @@ export class InteractableManager {
     this._gamefield = _gamefield;
     this.ui = ui;
     this.playerService = playerService;
-    this._slotMachine = new SlotMachine(800, 100, this._gamefield);
+    this._slotMachine = new SlotMachine(7 * Gamefield.fieldsize, 24 * Gamefield.fieldsize, this._gamefield);
     this._submissionArea = new SubmissionArea(
-      new Coordinates(Gamefield.fieldsize * 29, Gamefield.fieldsize * 10),
+      new Coordinates(Gamefield.fieldsize * 30, Gamefield.fieldsize * 13, 50),
       Gamefield.fieldsize,
       2 * Gamefield.fieldsize,
       this.playerService
     );
-    // Standard-Maschinen freischalten
-    this.updateUnlockedMachine(0);
-    this.updateUnlockedMachine(1);
-    this.updateUnlockedMachine(2);
-    this.updateUnlockedMachine(4);
-    this.updateUnlockedMachine(3);
+
     this.machines.forEach((machine) => {
       this.generateInteractionField(machine)
       this.addParticleField(machine)
@@ -277,7 +281,7 @@ export class InteractableManager {
    */
   async updateMachineOnInteraction(machine: Machine, player: Player) {
     // Produkt-Eingabe nur wenn E gedrückt, Maschine freigeschaltet und Spieler trägt was
-    if (player.pressedInteract === true && machine.unlocked && player.inventory instanceof Product) {
+    if (player.pressedInteract === true && player.inventory instanceof Product) {
       const product: Product = player.inventory;
       let result;
 
