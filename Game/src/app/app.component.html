@@ -7,7 +7,6 @@
   <app-hud *ngIf="!showStartScreen"></app-hud>
   <app-settings *ngIf="isSettingsOpen"
                 (closeSettingsRequest)="isSettingsOpen = false"></app-settings>
-  <app-order *ngIf="!showStartScreen"></app-order>
 </div>
 <app-tutorial
       *ngIf="isTutorialOpen"

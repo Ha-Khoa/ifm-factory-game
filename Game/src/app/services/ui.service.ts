@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, OnDestroy} from '@angular/core';
 import {Machine} from '../models/machine/machine';
 import {Package} from '../models/package/package';
 import {Product} from '../models/product/product';
@@ -14,11 +14,15 @@ import { GameTimer } from './ui/game.timer';
 import { MachineNeedsDrawer } from './ui/machine-needs.drawer';
 import { PlayerService } from './player.service';
 import { ControlsDrawer } from './ui/controls.drawer';
+import { OrderDrawer } from './ui/order.drawer';
+import { Subscription } from 'rxjs';
+import { Orders } from '../models/orders/orders';
+import { Order } from '../interfaces/order';
 
 @Injectable({
   providedIn: 'root'
 })
-export class UIService {
+export class UIService implements OnDestroy {
   private ctxUI!: CanvasRenderingContext2D;
   private angle!: number;
   private images: { [key: string]: HTMLImageElement } = {};
@@ -30,6 +34,7 @@ export class UIService {
   private playerThoughtsDrawer!: PlayerThoughtsDrawer;
   private gameTimer!: GameTimer;
   private controlsDrawer!: ControlsDrawer;
+  private orderDrawer!: OrderDrawer;
 
   // State management for drawn elements that need clearing
   private machinePopups: Rect[] = [];
@@ -38,6 +43,12 @@ export class UIService {
   private producingPopups: Rect[] = [];
   private playerThoughtsPopups: Rect[] = [];
   private timerText: Rect[] = [];
+  private orderPopups: Rect[] = [];
+
+  private ordersSubscription!: Subscription;
+  private activeOrders: Order[] = [];
+  private orderInitialTimes: Map<number, number> = new Map();
+  private showOrders = true;
 
   constructor(private playerService: PlayerService) {}
 
@@ -64,7 +75,48 @@ export class UIService {
     this.machineNeedsDrawer = new MachineNeedsDrawer(this.ctxUI, this.images);
     this.playerThoughtsDrawer = new PlayerThoughtsDrawer(this.ctxUI, this.images);
     this.gameTimer = new GameTimer(this.ctxUI, this.images);
-    this.controlsDrawer = new ControlsDrawer(this.ctxUI, this.images)
+    this.controlsDrawer = new ControlsDrawer(this.ctxUI, this.images);
+    this.orderDrawer = new OrderDrawer(this.ctxUI, this.images);
+
+    this.ordersSubscription = Orders.activeOrders$.subscribe(orders => {
+      this.activeOrders = orders;
+      const currentOrderIds = new Set(orders.map(o => o.id));
+
+      for (const order of orders) {
+        if (!this.orderInitialTimes.has(order.id)) {
+          this.orderInitialTimes.set(order.id, order.timeSeconds ?? 0);
+        }
+      }
+
+      for (const id of this.orderInitialTimes.keys()) {
+        if (!currentOrderIds.has(id)) {
+          this.orderInitialTimes.delete(id);
+        }
+      }
+    });
+
+    window.addEventListener('keydown', this.onKeyDown.bind(this));
+    window.addEventListener('keyup', this.onKeyUp.bind(this));
+  }
+
+  ngOnDestroy(): void {
+    if (this.ordersSubscription) {
+      this.ordersSubscription.unsubscribe();
+    }
+    window.removeEventListener('keydown', this.onKeyDown.bind(this));
+    window.removeEventListener('keyup', this.onKeyUp.bind(this));
+  }
+
+  private onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'o') {
+      this.showOrders = false;
+    }
+  }
+
+  private onKeyUp(event: KeyboardEvent): void {
+    if (event.key === 'o') {
+      this.showOrders = true;
+    }
   }
 
   // ==========================================================================
@@ -74,6 +126,21 @@ export class UIService {
   /** Draws controls popup. */
   public drawControls() {
     this.controlsDrawer.draw()
+  }
+
+  public drawOrder(): void {
+    if (this.showOrders) {
+      const PADDING = 15;
+      const ORDER_WIDTH = 300;
+      const GAP = 15;
+      let currentX = PADDING;
+
+      for (const order of this.activeOrders) {
+        const initialTime = this.orderInitialTimes.get(order.id);
+        this.orderDrawer.draw(order, initialTime, currentX, PADDING);
+        currentX += ORDER_WIDTH + GAP;
+      }
+    }
   }
 
   /** Draws a popup for a product or package on the ground. */
@@ -125,7 +192,8 @@ export class UIService {
 
   public clearAll()
   {
-    this.ctxUI.clearRect(0, 0, this.ctxUI.canvas.width, this.ctxUI.canvas.height)
+    this.ctxUI.clearRect(0, 0, this.ctxUI.canvas.width, this.ctxUI.canvas.height);
+    this.orderPopups = [];
   }
 
   public drawTimer() : boolean

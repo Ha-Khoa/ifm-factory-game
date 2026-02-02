@@ -63,7 +63,7 @@ export class Orders {
       { ...this.createOrder([{id: 4, quantity: 1}, {id: 5, quantity: 1}]), status: false },
       { ...this.createOrder([{id: 5, quantity: 2}]), status: false },
       { ...this.createOrder([{id: 6, quantity: 1}]), status: false },*/
-      { ...this.createOrder([{id: 4, quantity: 1}, {id: 5, quantity: 1}, {id: 6, quantity: 1}]), status: false }
+      // { ...this.createOrder([{id: 4, quantity: 1}, {id: 5, quantity: 1}, {id: 6, quantity: 1}]), status: false }
     ];
     this.ordersList$.next(initialOrders);
   }
@@ -89,7 +89,9 @@ export class Orders {
     const minTime = 30000
     let time = totals.reward * 200
     if(time < minTime) time = minTime
-    return { status: false , id: id, items: items, ...totals, time: time};
+
+    const timeSeconds = Math.round(time / 1000 + 0.5);
+    return { status: false , id: id, items: items, ...totals, time: time, initialTime: time, timeSeconds };
   }
 
   /**
@@ -118,7 +120,7 @@ export class Orders {
         if(!dt) dt = 0.5;
         order.time -= dt;
         order.timeSeconds = Math.round(order.time / 1000 + 0.5);
-        if(order.time <= 0) 
+        if(order.time <= 0)
         {
           this.completeOrder(order.id);
           this.generateRandomOrder();

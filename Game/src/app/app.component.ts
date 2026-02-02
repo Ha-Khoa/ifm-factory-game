@@ -3,7 +3,6 @@ import { GameService } from './services/game.service';
 import { HudComponent } from './components/hud/hud.component';
 import { CommonModule } from '@angular/common';
 import { SettingsComponent } from './components/settings/settings.component';
-import { OrderComponent } from "./components/order/order.component";
 import { StartScreenComponent } from './components/start-screen/start-screen.component'; // New import
 import { Subscription } from 'rxjs';
 import { RenderingService } from './services/rendering.service';
@@ -15,7 +14,7 @@ import { InputService } from './services/input.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [HudComponent, TutorialComponent, SettingsComponent, CommonModule, OrderComponent, StartScreenComponent],
+  imports: [HudComponent, TutorialComponent, SettingsComponent, CommonModule, StartScreenComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

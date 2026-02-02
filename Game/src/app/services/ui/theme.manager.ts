@@ -20,7 +20,8 @@ export const UI_THEME = {
   transparent: '',
   black: '',
   white: '',
-  outline: ''
+  outline: '',
+  info: ''
 };
 
 /**
@@ -47,4 +48,5 @@ export function loadTheme(): void {
   UI_THEME.black = rootStyle.getPropertyValue('--md-sys-color-black').trim(); // Corrected from 'transparent' in original code
   UI_THEME.white = rootStyle.getPropertyValue('--md-sys-color-white').trim();
   UI_THEME.outline = rootStyle.getPropertyValue('--md-sys-color-outline').trim();
+  UI_THEME.info = rootStyle.getPropertyValue('--md-sys-color-info').trim();
 }

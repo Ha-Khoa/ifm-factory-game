@@ -149,6 +149,7 @@ export class GameService {
       // Fox Coin
       "/images/fox/fox-coin.png",
       "/images/fox/no-fox-coin.png",
+      "/images/fox/fox-trophy.png",
       // Slot Machine
       "/images/slotMachine/cherry.png",
       "/images/slotMachine/Bar.png",
@@ -344,6 +345,7 @@ export class GameService {
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
       this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
       this.uiService.drawControls()
+      this.uiService.drawOrder(); // Add this line
 
       // Orders
       Orders.updateOrderTime();
