@@ -53,10 +53,10 @@ export class InputService {
   private upgradeSubject = new Subject<number>();
   public upgrade$ = this.upgradeSubject.asObservable();
 
-  private lastMenuUp = false;
-  private lastMenuDown = false;
-  private lastMenuLeft = false;
-  private lastMenuRight = false;
+  private menuUpHeldTime = 0;
+  private menuDownHeldTime = 0;
+  private menuLeftHeldTime = 0;
+  private menuRightHeldTime = 0;
   private lastMenuConfirm = false;
 
   private lastTutorialNext = false;
@@ -178,6 +178,7 @@ export class InputService {
     this.player1Input = { horizontal: 0, vertical: 0, interact: false, boost: false };
     this.player2Input = { horizontal: 0, vertical: 0, interact: false, boost: false };
 
+    // --- Get current state from devices ---
     let menuUp = this.keyboardState['w'] || this.keyboardState['arrowup'];
     let menuDown = this.keyboardState['s'] || this.keyboardState['arrowdown'];
     let menuLeft = this.keyboardState['a'] || this.keyboardState['arrowleft'];
@@ -196,16 +197,44 @@ export class InputService {
       menuConfirm = menuConfirm || gamepad1.buttons[3].pressed; // 'Y' button
     }
 
-    if (menuUp && !this.lastMenuUp) this.menuUpSubject.next();
-    if (menuDown && !this.lastMenuDown) this.menuDownSubject.next();
-    if (menuLeft && !this.lastMenuLeft) this.menuLeftSubject.next();
-    if (menuRight && !this.lastMenuRight) this.menuRightSubject.next();
-    if (menuConfirm && !this.lastMenuConfirm) this.menuConfirmSubject.next();
+    // --- Process directional inputs with hold-to-repeat logic ---
+    const initialDelay = 20; // Frames to wait before repeating (~333ms at 60fps)
+    const repeatInterval = 6;  // Frames between repeats (~100ms at 60fps)
 
-    this.lastMenuUp = menuUp;
-    this.lastMenuDown = menuDown;
-    this.lastMenuLeft = menuLeft;
-    this.lastMenuRight = menuRight;
+    // Up
+    if (menuUp) this.menuUpHeldTime++; else this.menuUpHeldTime = 0;
+    if (this.menuUpHeldTime > 0) {
+        if (this.menuUpHeldTime === 1 || (this.menuUpHeldTime > initialDelay && (this.menuUpHeldTime - initialDelay) % repeatInterval === 0)) {
+            this.menuUpSubject.next();
+        }
+    }
+
+    // Down
+    if (menuDown) this.menuDownHeldTime++; else this.menuDownHeldTime = 0;
+    if (this.menuDownHeldTime > 0) {
+        if (this.menuDownHeldTime === 1 || (this.menuDownHeldTime > initialDelay && (this.menuDownHeldTime - initialDelay) % repeatInterval === 0)) {
+            this.menuDownSubject.next();
+        }
+    }
+
+    // Left
+    if (menuLeft) this.menuLeftHeldTime++; else this.menuLeftHeldTime = 0;
+    if (this.menuLeftHeldTime > 0) {
+        if (this.menuLeftHeldTime === 1 || (this.menuLeftHeldTime > initialDelay && (this.menuLeftHeldTime - initialDelay) % repeatInterval === 0)) {
+            this.menuLeftSubject.next();
+        }
+    }
+
+    // Right
+    if (menuRight) this.menuRightHeldTime++; else this.menuRightHeldTime = 0;
+    if (this.menuRightHeldTime > 0) {
+        if (this.menuRightHeldTime === 1 || (this.menuRightHeldTime > initialDelay && (this.menuRightHeldTime - initialDelay) % repeatInterval === 0)) {
+            this.menuRightSubject.next();
+        }
+    }
+
+    // --- Process confirm (no repeat) ---
+    if (menuConfirm && !this.lastMenuConfirm) this.menuConfirmSubject.next();
     this.lastMenuConfirm = menuConfirm;
   }
 
