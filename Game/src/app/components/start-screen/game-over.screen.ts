@@ -40,7 +40,7 @@ export class GameOverScreen {
   public render(yOffset: number = 0, clearScreen: boolean = true): void {
     const score = this.playerService.getScore();
     const earnedMoney = this.playerService.getMoney();
-    const playerName = this.playerService.player?.name ?? 'Player';
+    const playerName = this.playerService.player?.name ?? 'SPIELER';
     const currentTime = Date.now();
     const elapsed = currentTime - this.startTime;
 
@@ -131,7 +131,7 @@ export class GameOverScreen {
     // --- Pulsing Glow Effect ---
     const pulse = Math.sin(time / 400) * 0.5 + 0.5;
     const glowBlur = 20 + pulse * 10;
-    
+
     // IFM Orange (Primary/Secondary from Theme)
     const orangeColor = "rgba(255, 102, 0, 1)";
     const orangeDim = "rgba(255, 102, 0, 0.3)";
@@ -188,7 +188,7 @@ export class GameOverScreen {
     this.ctx.shadowBlur = 20;
     this.ctx.fillText('TIME IS UP!', centerX, currentY);
     this.ctx.restore();
-    
+
     currentY += 100;
 
     // --- Player Name ---
@@ -201,7 +201,7 @@ export class GameOverScreen {
     // --- Score ---
     this.ctx.font = `28px ${font}`;
     this.ctx.fillStyle = '#aaa';
-    this.ctx.fillText('FINAL SCORE', centerX, currentY);
+    this.ctx.fillText('FINALER SCORE', centerX, currentY);
     currentY += 50;
 
     this.ctx.font = `bold 60px ${font}`;
@@ -215,7 +215,7 @@ export class GameOverScreen {
     // --- Money ---
     this.ctx.font = `28px ${font}`;
     this.ctx.fillStyle = '#aaa';
-    this.ctx.fillText('EARNED MONEY', centerX, currentY);
+    this.ctx.fillText('GELD VERDIENT', centerX, currentY);
     currentY += 50;
 
     this.ctx.font = `bold 50px ${font}`;
@@ -231,7 +231,7 @@ export class GameOverScreen {
     }
     this.ctx.font = `20px ${font}`;
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('PRESS ENTER TO RESTART', centerX, y + height - 30);
+    this.ctx.fillText('DRÜCKE E ODER Y ZUM NEUSTARTEN', centerX, y + height - 30);
   }
 
   /**

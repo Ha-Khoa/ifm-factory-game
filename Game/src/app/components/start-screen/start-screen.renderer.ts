@@ -94,8 +94,8 @@ export class StartScreenRenderer {
     this.ctx.shadowColor = UI_THEME.secondary;
     this.ctx.fillStyle = UI_THEME.secondary;
 
-    this.drawSingleScoreboard('1 Player High Scores', onePlayerHighScores, leftBoardX, boardY, scoreboardWidth);
-    this.drawSingleScoreboard('2 Player High Scores', twoPlayerHighScores, rightBoardX, boardY, scoreboardWidth);
+    this.drawSingleScoreboard('1 SPIELER High Scores', onePlayerHighScores, leftBoardX, boardY, scoreboardWidth);
+    this.drawSingleScoreboard('2 SPIELER High Scores', twoPlayerHighScores, rightBoardX, boardY, scoreboardWidth);
 
     this.ctx.shadowBlur = 0;
   }
@@ -137,7 +137,7 @@ export class StartScreenRenderer {
    * Zeichnet den Spieltitel.
    */
   private drawTitle(time: number): void {
-    const title = 'IFM ARCADE';
+    const title = 's.FACTORY';
     const hue = (time / 20) % 360;
     this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
     this.ctx.shadowColor = UI_THEME.secondary;
@@ -174,11 +174,11 @@ export class StartScreenRenderer {
     this.tutorialButtonRect = { x: buttonX, y: startY + (buttonHeight + buttonGap) * 2, width: buttonWidth, height: buttonHeight };
     this.controlsButtonRect = { x: buttonX, y: startY + (buttonHeight + buttonGap) * 3, width: buttonWidth, height: buttonHeight };
 
-    this.drawArcadeButton('START', this.buttonRect, selectedButtonIndex === 0);
-    const playerModeText = this.gameService.twoPlayerMode ? '2 PLAYERS' : '1 PLAYER';
+    this.drawArcadeButton('STARTEN', this.buttonRect, selectedButtonIndex === 0);
+    const playerModeText = this.gameService.twoPlayerMode ? '2 SPIELER' : '1 SPIELER';
     this.drawArcadeButton(playerModeText, this.playerModeButtonRect, selectedButtonIndex === 1);
     this.drawArcadeButton('TUTORIAL', this.tutorialButtonRect, selectedButtonIndex === 2);
-    const controlModeText = GameService.gamePad ? 'Arcade' : 'Keyboard'
+    const controlModeText = GameService.gamePad ? 'ARCADE' : 'TASTATUR'
     this.drawArcadeButton(controlModeText, this.controlsButtonRect, selectedButtonIndex === 3);
   }
 

@@ -38,20 +38,20 @@ export class Products {
       return;
     }
     this.productsList = [
-      new Product(1, "Raw Plastic", 6, 15, 5, true, "/images/Products/raw-plastic.png"),
+      new Product(1, "Kunstoff", 6, 15, 5, true, "/images/Products/raw-plastic.png"),
       new Product(2, "Silizium", 16, 20, 9, true, "/images/Products/raw-silicon.png"),
-      new Product(3, "Copper Wire", 15, 22, 20, true, "/images/Products/copper-wire.png"),
-      new Product(4, "Plastic Case", 50, 50, [{productId: 1, quantity: 2}], true, "/images/Products/plastic-case.png"),
-      new Product(5, "Circuit Board", 120, 150, [{productId: 2, quantity: 1}, {productId: 18, quantity: 1}], true, "/images/Products/circuit-board.png"),
-      new Product(6, "Basic Sensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png"),
-      new Product(7, "Iron Ingot", 30, 50, 20, true, "/images/Products/iron-ingot.png"),
-      new Product(8, "Iron Gear", 60, 100, [{productId: 7, quantity: 1}], true, "/images/Products/iron-gear.png"),
-      new Product(9, "Electric Motor", 200, 300, [{productId: 18, quantity: 2}, {productId: 8, quantity: 1}], true, "/images/Products/electric-motor.png"),
+      new Product(3, "Kupfer Draht", 15, 22, 20, true, "/images/Products/copper-wire.png"),
+      new Product(4, "Kunststoffgehäuse", 50, 50, [{productId: 1, quantity: 2}], true, "/images/Products/plastic-case.png"),
+      new Product(5, "Platine", 120, 150, [{productId: 2, quantity: 1}, {productId: 18, quantity: 1}], true, "/images/Products/circuit-board.png"),
+      new Product(6, "Basissensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png"),
+      new Product(7, "Eisen", 30, 50, 20, true, "/images/Products/iron-ingot.png"),
+      new Product(8, "Eisen Zahnrad", 60, 100, [{productId: 7, quantity: 1}], true, "/images/Products/iron-gear.png"),
+      new Product(9, "Elektromotor", 200, 300, [{productId: 18, quantity: 2}, {productId: 8, quantity: 1}], true, "/images/Products/electric-motor.png"),
       new Product(10, "Photoelektrischer Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 4, quantity: 1}, {productId: 15, quantity: 1}, {productId: 11, quantity: 1}],true, "/images/Products/photo_sensor.png"),
       new Product(11, "Photo Diode", 30, 30, [{productId: 18, quantity: 1}, {productId: 2, quantity: 1}],true, "/images/Products/photo_diode.png"),
       new Product(12, "Temperatur Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 14, quantity: 1}, {productId: 15, quantity: 1}, {productId: 17, quantity: 1}],true, "/images/Products/temperatur_sensor.png", 0, 0.6 * Gamefield.fieldsize),
       new Product(13, "Druck Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 14, quantity: 1}, {productId: 15, quantity: 1}, {productId: 16, quantity: 1}],true, "/images/Products/druck_sensor.png", 0, 0.6 * Gamefield.fieldsize),
-      new Product(14, "Iron Case", 15, 15, [{productId: 7, quantity: 1}], true, "/images/Products/iron-case.png"),
+      new Product(14, "Eisengehäuse", 15, 15, [{productId: 7, quantity: 1}], true, "/images/Products/iron-case.png"),
       new Product(15, "Kabel", 15, 15, [{productId: 18, quantity: 1}, {productId: 1,  quantity: 1}], true, "/images/Products/cable.png"),
       new Product(16, "Mess Zelle", 15, 15, [{productId: 14, quantity: 1}, {productId: 2, quantity: 1}], true, "/images/Products/messzelle.png"),
       new Product(17, "Thermoelement", 15, 15, [{productId: 7, quantity: 1}, {productId: 18, quantity: 1}], true, "/images/Products/thermoelement.png"),
@@ -239,7 +239,7 @@ export class Products {
    * @return {void} This method does not return a value.
    */
   public static generateProducts(): void {
-    
+
     let newProduct = Products.getProductByName("Druck    Sensor");
     if (newProduct) {
       let copy1 = newProduct.copy();

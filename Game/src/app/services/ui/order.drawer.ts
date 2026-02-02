@@ -24,6 +24,7 @@ export class OrderDrawer {
   ) {}
 
   public draw(order: Order, initialTime: number | undefined, x: number, y: number): void {
+    this.ctx.save();
     // --- 1. Calculate height ---
     const itemsHeight = order.items.length > 0 ? order.items.length * (this.ICON_SIZE + this.ITEM_GAP) - this.ITEM_GAP : 0;
     const contentHeight =
@@ -61,7 +62,8 @@ export class OrderDrawer {
     currentY += this.PADDING;
 
     this.drawFooter(order, x, currentY)
-
+    this.ctx.restore
+    this.ctx.textBaseline = "alphabetic"
   }
 
   private drawCardBase(x: number, y: number, height: number): void {
@@ -76,6 +78,7 @@ export class OrderDrawer {
     this.ctx.closePath();
     this.ctx.fill();
     this.ctx.stroke();
+    this.ctx.restore
   }
 
   private drawHeader(x: number, y: number): void {
@@ -108,7 +111,7 @@ export class OrderDrawer {
   private drawCosts(order: Order, x: number, y: number): number {
     this.ctx.textBaseline = 'middle';
     this.ctx.fillStyle = UI_THEME.secondary;
-    const costsText = `Costs: ${order.costs}`;
+    const costsText = `Kosten: ${order.costs}`;
     this.ctx.drawImage(this.images['/images/fox/fox-coin.png'], x , y, this.ICON_SIZE, this.ICON_SIZE);
     this.ctx.fillText(costsText, x + this.ICON_SIZE + 10, y + this.ICON_SIZE / 2);
     return y + this.ICON_SIZE + this.PADDING;
@@ -120,7 +123,7 @@ export class OrderDrawer {
     this.ctx.font = `bold ${this.FONT_SIZE}px ${UI_THEME.fontFamily}`;
     this.ctx.textBaseline = 'middle';
 
-    this.ctx.fillText('REWARD', x, y)
+    this.ctx.fillText('BELOHNUNG', x, y)
     y += this.PADDING
 
     this.ctx.fillStyle = UI_THEME.secondary;

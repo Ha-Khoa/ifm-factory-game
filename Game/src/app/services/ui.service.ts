@@ -94,28 +94,11 @@ export class UIService implements OnDestroy {
         }
       }
     });
-
-    window.addEventListener('keydown', this.onKeyDown.bind(this));
-    window.addEventListener('keyup', this.onKeyUp.bind(this));
   }
 
   ngOnDestroy(): void {
     if (this.ordersSubscription) {
       this.ordersSubscription.unsubscribe();
-    }
-    window.removeEventListener('keydown', this.onKeyDown.bind(this));
-    window.removeEventListener('keyup', this.onKeyUp.bind(this));
-  }
-
-  private onKeyDown(event: KeyboardEvent): void {
-    if (event.key === 'o') {
-      this.showOrders = false;
-    }
-  }
-
-  private onKeyUp(event: KeyboardEvent): void {
-    if (event.key === 'o') {
-      this.showOrders = true;
     }
   }
 
@@ -193,7 +176,6 @@ export class UIService implements OnDestroy {
   public clearAll()
   {
     this.ctxUI.clearRect(0, 0, this.ctxUI.canvas.width, this.ctxUI.canvas.height);
-    this.orderPopups = [];
   }
 
   public drawTimer() : boolean

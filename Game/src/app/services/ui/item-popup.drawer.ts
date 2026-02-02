@@ -28,18 +28,26 @@ export class ItemPopupDrawer {
   public draw(item: Product | Package, offsetCamera: [number, number], fov: number): Rect[] {
     this.ctx.save();
     let title: string;
-    let contentLines: { content: string; counted: number }[] = [];
+    let contentLines: { content: string; counted: number; img?: string; }[] = [];
     let titleImage: HTMLImageElement;
 
     if (item instanceof Package) {
       title = 'Paket';
       titleImage = this.images['/images/package.png'];
-      const map = new Map<string, number>();
-      item.products.forEach(({ name }) => map.set(name, (map.get(name) ?? 0) + 1));
-      contentLines = [...map].map(([content, counted]) => ({ content, counted }));
+      const productSummary = new Map<string, { count: number, img: string | undefined }>();
+      item.products.forEach(product => {
+        const entry = productSummary.get(product.name);
+        if (entry) {
+          entry.count++;
+        } else {
+          productSummary.set(product.name, { count: 1, img: product.img });
+        }
+      });
+      contentLines = [...productSummary].map(([name, { count, img }]) => ({ content: name, counted: count, img: img }));
     } else {
       title = item.name;
-      titleImage = this.images[`/images/Products/${item.name.toLowerCase().replace(' ', '-')}.png`];
+      titleImage = this.images['/images/package.png']
+      if (item.img) titleImage = this.images[item.img];
     }
 
     const lineHeight = 20;
@@ -64,9 +72,8 @@ export class ItemPopupDrawer {
     currentY += 17.5;
     this.ctx.font = `bold 13px ${UI_THEME.fontFamily}`;
     this.ctx.fillText(title, centerX, currentY);
-    if (titleImage) {
-      this.ctx.drawImage(titleImage, x + 10, currentY - 15, 18, 18);
-    }
+
+    this.ctx.drawImage(titleImage, x + 10, currentY - 15, 18, 18);
 
     // Separator
     currentY += 5;
@@ -77,7 +84,7 @@ export class ItemPopupDrawer {
     this.ctx.font = `12px ${UI_THEME.fontFamily}`;
     contentLines.forEach(line => {
       this.ctx.fillText(`${line.counted}x ${line.content}`, centerX, currentY);
-      const image = this.images[`/images/Products/${line.content.toLowerCase().replace(' ', '-')}.png`];
+      const image = line.img ? this.images[line.img] : undefined;
       if (image) {
         this.ctx.drawImage(image, x + 10, currentY - 15, 20, 20);
       }

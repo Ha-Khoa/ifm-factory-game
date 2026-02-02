@@ -14,14 +14,14 @@ const controlLayouts: { [inputType: string]: { [state: string]: ControlHint[] } 
     default: [
       { key: 'P', text: 'Pause' },
       { key: 'Space', text: 'Sprinten' },
-      { key: 'E', text: 'Interact'}
+      { key: 'E', text: 'Benutzen'}
     ],
   },
   gamepad: {
     default: [
       { key: 'Start', text: 'Pause' },
       { key: 'B', text: 'Sprinten' },
-      { key: 'Y', text: 'Interact'}
+      { key: 'Y', text: 'Benutzen'}
     ],
   },
 };

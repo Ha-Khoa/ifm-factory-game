@@ -94,7 +94,7 @@ export class PauseScreen {
     this.ctx.fillStyle = '#FFFFFF';
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
-    this.ctx.fillText('PAUSED', this.canvasWidth / 2, containerY + 100);
+    this.ctx.fillText('PAUSIERT', this.canvasWidth / 2, containerY + 100);
 
     // Buttons
     const buttonWidth = 300;
@@ -106,8 +106,8 @@ export class PauseScreen {
     this.resumeButtonRect = { x: buttonX, y: startY, width: buttonWidth, height: buttonHeight };
     this.endGameButtonRect = { x: buttonX, y: startY + buttonHeight + buttonGap, width: buttonWidth, height: buttonHeight };
 
-    this.drawArcadeButton('RESUME', this.resumeButtonRect, selectedButtonIndex === 0);
-    this.drawArcadeButton('END GAME', this.endGameButtonRect, selectedButtonIndex === 1);
+    this.drawArcadeButton('FORTFAHREN', this.resumeButtonRect, selectedButtonIndex === 0);
+    this.drawArcadeButton('SPIEL BEENDEN', this.endGameButtonRect, selectedButtonIndex === 1);
 
     this.ctx.restore();
   }

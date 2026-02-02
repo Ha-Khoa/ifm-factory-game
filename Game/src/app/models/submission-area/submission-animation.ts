@@ -51,7 +51,7 @@ export class SubmissionAnimation {
         RenderType.IMG,
         this._positionTruck.x,
         this._positionTruck.y,
-        this._positionTruck.z, 
+        this._positionTruck.z,
         100,
         350,
         100,
@@ -86,16 +86,16 @@ export class SubmissionAnimation {
         "/images/package.png",
         undefined
     )
-    
+
     this._packageRenderObj.render = false;
     RenderingService.instance().addRenderObject(this._truckRenderObj)
-    RenderingService.instance().addRenderObject(this._employeeRenderObj)    
+    RenderingService.instance().addRenderObject(this._employeeRenderObj)
     RenderingService.instance().addRenderObject(this._packageRenderObj)
    }
 
   updateTruck()
   {
-    
+
   }
 
   pickProduct() : boolean

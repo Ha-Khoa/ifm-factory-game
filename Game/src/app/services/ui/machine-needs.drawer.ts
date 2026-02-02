@@ -18,9 +18,8 @@ export class MachineNeedsDrawer {
     const isometricAngle = RenderingService.instance().angle;
     const ifmOrange = UI_THEME.secondary;
     const size = Gamefield.fieldsize * fov / 2;
-
     for (const machine of machines) {
-      if (machine instanceof PrepMachine || !machine.outputProduct) {
+      if (machine instanceof PrepMachine || !machine.outputProduct || machine.isProducing) {
         continue; // Skip PrepMachines and others without a defined output for this combined view.
       }
 
@@ -104,7 +103,7 @@ export class MachineNeedsDrawer {
             this.ctx.rotate(angle);
             this.ctx.drawImage(this.images["/images/arrow.png"], -size / 2, -size / 2, size, size);
             drawnRects.push({x: arrowX , y: arrowY, width: size * fov, height: size * fov, radius: 0});
-                          
+
             this.ctx.restore();
             this.ctx.drawImage(this.images[playerInventory.img!], newX + size / 3, newY + size / 3, size / 3, size / 3);
 
@@ -123,7 +122,7 @@ export class MachineNeedsDrawer {
       drawnRects.push({ x, y, width: totalWidth, height: boxHeight, radius: 8 * fovScale });
 
       let currentX = x + padding;
-      
+
 
       // Draw input items
       for (const req of neededRequirements) {
@@ -172,10 +171,10 @@ export class MachineNeedsDrawer {
       }
 
       this.ctx.restore();
-    
+
   }
     return drawnRects;
-  
+
   }
   private clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);

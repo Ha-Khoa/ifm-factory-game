@@ -31,7 +31,6 @@ export class MachinePopupDrawer {
   public drawDetails(machine: Machine, player: Player, playerService: PlayerService): Rect[] {
     //console.log('drawDetails called for machine:', machine.name, 'isPrepMachine:', machine instanceof PrepMachine);
     this.ctx.save();
-
     // Check ob es sich um eine PrepMachine handelt
     const isPrepMachine = machine instanceof PrepMachine;
     const requiredItemsCount = isPrepMachine ? 0 : machine.inputRequirements.length;
@@ -164,7 +163,7 @@ export class MachinePopupDrawer {
     //console.log('drawInfoText - machine name:', machine.name, 'isPrepMachine:', isPrepMachine);
 
     this.ctx.font = `bold 16px ${UI_THEME.fontFamily}`;
-    this.ctx.fillText(machine.name, x, currentY);
+    this.ctx.fillText(machine.name, x, currentY, 180);
     currentY += lineHeight;
 
     this.ctx.font = `12px ${UI_THEME.fontFamily}`;
@@ -179,6 +178,11 @@ export class MachinePopupDrawer {
     this.ctx.fillStyle = UI_THEME.textColor;
     currentY += lineHeight - 5;
 
+    this.ctx.font = `italic 14px ${UI_THEME.fontFamily}`;
+    this.ctx.fillText(machine.outputProduct.name, x, currentY, 130);
+    let textWidth = this.ctx.measureText(machine.outputProduct.name).width
+    textWidth = textWidth < 130 ? textWidth : 130
+
     //Für PrepMachine speziellen Text
     if (isPrepMachine) {
       this.ctx.font = `italic 14px ${UI_THEME.fontFamily}`;
@@ -191,16 +195,14 @@ export class MachinePopupDrawer {
     } else {
       const img = this.images[machine.outputProduct._img!];
       if (img) {
-        this.ctx.drawImage(img, x - 70, currentY - 15, 20, 20);
+        this.ctx.drawImage(img, x - textWidth/2 - 20 - 5, currentY - 15, 20, 20);
       }
 
-      this.ctx.font = `italic 14px ${UI_THEME.fontFamily}`;
-      this.ctx.fillText(machine.outputProduct.name, x, currentY);
       currentY += lineHeight;
 
       this.ctx.font = `14px ${UI_THEME.fontFamily}`;
       const productionTime = machine.productionRate / 1000;
-      this.ctx.fillText(`Duration: ${productionTime.toFixed(2)}s`, x, currentY);
+      this.ctx.fillText(`Dauer: ${productionTime.toFixed(2)}s`, x, currentY);
       currentY += lineHeight;
     }
 
@@ -210,13 +212,13 @@ export class MachinePopupDrawer {
   private drawRequirements(x: number, y: number, machine: Machine, lineHeight: number): number {
     let currentY = y;
     this.ctx.font = `bold 14px ${UI_THEME.fontFamily}`;
-    this.ctx.fillText('Requirements:', x, currentY);
+    this.ctx.fillText('Eingang:', x, currentY);
     currentY += lineHeight;
     this.ctx.font = `13px ${UI_THEME.fontFamily}`;
 
     if (machine.inputRequirements.length === 0) {
       this.ctx.fillStyle = '#8d6e63';
-      this.ctx.fillText('- Nothing -', x, currentY);
+      this.ctx.fillText('- Nichts -', x, currentY);
       this.ctx.fillStyle = UI_THEME.textColor;
       currentY += lineHeight;
     } else {
