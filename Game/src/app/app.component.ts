@@ -52,17 +52,7 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
     private cdr: ChangeDetectorRef
   ) { }
   ngOnInit(): void {
-    this.apiService.getPlayers().subscribe(players => {
-      if (players.length === 0) {
-        // No players exist, create 'Player1' automatically
-        this.apiService.createPlayer('Player1').subscribe(newPlayer => {
-          this.playerService.setPlayer(newPlayer);
-        });
-      } else {
-        // Load the first player if available
-        this.playerService.setPlayer(players[0]);
-      }
-    });
+    // Player is created in onStartGame() when the user starts the game.
   }
 
   async ngAfterViewInit() {
@@ -107,19 +97,40 @@ export class AppComponent implements AfterViewInit, OnDestroy, OnInit {
     }
   }
 
-  async onStartGame(): Promise<void> {
-    this.game.startGame();
-    this.startScreen?.zoomOut();
-    if (this.game.twoPlayerMode === true) {
-      this.apiService.setTwoPlayerMode(this.playerService.player!.name, true).subscribe({
-        next: () => { /* Successfully updated backend */ },
-        error: (err) => { /* Handle error if needed */ }
+  async onStartGame(name: string): Promise<void> {
+    const finalName = name ? name.trim() : '';
+
+    if (finalName && finalName.length >= 3) {
+      this.createPlayerAndStartGame(finalName);
+    } else {
+      // Fallback logic if name is too short or not provided
+      this.apiService.getPlayers().subscribe(players => {
+        const newPlayerId = players.length + 1;
+        const newPlayerName = `Spieler${newPlayerId}`;
+        this.createPlayerAndStartGame(newPlayerName);
       });
     }
-    setTimeout(() => {
-     this.showStartScreen = false;
-      this.alignSubscription.unsubscribe();
-    }, 2000);
+  }
+
+  private createPlayerAndStartGame(name: string): void {
+    this.apiService.createPlayer(name).subscribe(newPlayer => {
+      this.playerService.setPlayer(newPlayer);
+
+      this.game.startGame();
+      this.startScreen?.zoomOut();
+      if (this.game.twoPlayerMode === true) {
+        this.apiService.setTwoPlayerMode(newPlayer.name, true).subscribe({
+          next: () => { /* Successfully updated backend */ },
+          error: (err) => { /* Handle error if needed */ }
+        });
+      }
+      setTimeout(() => {
+        this.showStartScreen = false;
+        if (this.alignSubscription) {
+            this.alignSubscription.unsubscribe();
+        }
+      }, 2000);
+    });
   }
 
   onSettingsOpen(): void {

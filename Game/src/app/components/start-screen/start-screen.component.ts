@@ -36,11 +36,19 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('camera') startScreenContainerRef!: ElementRef<HTMLDivElement>;
 
   // --- Ereignisse (Outputs) ---
-  @Output() startClicked = new EventEmitter<void>();
+  @Output() startClicked = new EventEmitter<string>();
   @Output() tutorialClicked = new EventEmitter<void>();
   @Output() resumeGame = new EventEmitter<void>();
 
-  public screen: 'start' | 'game-over' | 'pause' = 'start';
+  public screen: 'start' | 'game-over' | 'pause' | 'name-input' = 'start';
+  private playerName: string = '';
+  private keyboardLayout = [
+    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
+    ['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'],
+    ['U', 'V', 'W', 'X', 'Y', 'Z', '_', '-'],
+    ['BACKSPACE', 'ZURÜCK', 'START']
+  ];
+  private keyboardSelection = { row: 0, col: 0 };
   private gameOverScreen!: GameOverScreen;
   private pauseScreen!: PauseScreen;
   private renderer!: StartScreenRenderer;
@@ -150,15 +158,23 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
     this.inputSubscriptions.push(
       this.inputService.menuUp$.subscribe(() => this.handleMenuNavigation('up')),
       this.inputService.menuDown$.subscribe(() => this.handleMenuNavigation('down')),
+      this.inputService.menuLeft$.subscribe(() => this.handleMenuNavigation('left')),
+      this.inputService.menuRight$.subscribe(() => this.handleMenuNavigation('right')),
       this.inputService.menuConfirm$.subscribe(() => this.handleMenuNavigation('confirm'))
     );
   }
 
-  private handleMenuNavigation(action: 'up' | 'down' | 'confirm'): void {
+  private handleMenuNavigation(action: 'up' | 'down' | 'left' | 'right' | 'confirm'): void {
     if (this.isHidden) return;
     const now = Date.now();
     if (now - this.lastInputTime < 150) return; // 150ms debounce
     this.lastInputTime = now;
+
+    if (this.screen === 'name-input') {
+      this.handleNameInputNavigation(action);
+      this.draw();
+      return;
+    }
 
     if (this.screen === 'game-over') {
       if (action === 'confirm' && !this.isTransitioning) {
@@ -192,9 +208,55 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
         this.selectedButtonIndex = (this.selectedButtonIndex + 1) % 4;
         this.draw();
         break;
+      case 'left':
+      case 'right':
+        // No left/right navigation on main menu, but we need to handle the case
+        break;
       case 'confirm':
         this.handleSelection();
         break;
+    }
+  }
+
+  private handleNameInputNavigation(action: 'up' | 'down' | 'left' | 'right' | 'confirm'): void {
+    const { row, col } = this.keyboardSelection;
+
+    switch (action) {
+        case 'up':
+            this.keyboardSelection.row = (row - 1 + this.keyboardLayout.length) % this.keyboardLayout.length;
+            // Adjust column if the new row is shorter or to align special keys
+            if (this.keyboardSelection.col >= this.keyboardLayout[this.keyboardSelection.row].length) {
+                this.keyboardSelection.col = this.keyboardLayout[this.keyboardSelection.row].length - 1;
+            }
+            break;
+        case 'down':
+            this.keyboardSelection.row = (row + 1) % this.keyboardLayout.length;
+            // Adjust column if the new row is shorter or to align special keys
+            if (this.keyboardSelection.col >= this.keyboardLayout[this.keyboardSelection.row].length) {
+                this.keyboardSelection.col = this.keyboardLayout[this.keyboardSelection.row].length - 1;
+            }
+            break;
+        case 'left':
+            this.keyboardSelection.col = (col - 1 + this.keyboardLayout[row].length) % this.keyboardLayout[row].length;
+            break;
+        case 'right':
+            this.keyboardSelection.col = (col + 1) % this.keyboardLayout[row].length;
+            break;
+        case 'confirm':
+            const selectedKey = this.keyboardLayout[row][col];
+            if (selectedKey === 'START') {
+                this.startClicked.emit(this.playerName);
+            } else if (selectedKey === 'ZURÜCK') {
+                this.screen = 'start';
+                this.selectedButtonIndex = 0; // Reset selection for main menu
+            } else if (selectedKey === 'BACKSPACE') {
+                this.playerName = this.playerName.slice(0, -1);
+            } else {
+                 if (this.playerName.length < 15) { // Max name length
+                    this.playerName += selectedKey;
+                 }
+            }
+            break;
     }
   }
 
@@ -260,13 +322,17 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
         this.backgroundVideo,
         this.onePlayerHighScores,
         this.twoPlayerHighScores,
-        this.selectedButtonIndex
+        this.selectedButtonIndex,
+        'start', // The background is always the start screen during transitions
+        this.playerName,
+        this.keyboardSelection,
+        this.keyboardLayout
       );
 
       // Draw Game Over Screen (Foreground, sliding down)
       this.gameOverScreen.render(yOffset, false);
 
-    } else if (this.screen === 'start') {
+    } else if (this.screen === 'start' || this.screen === 'name-input') {
       this.draw();
     } else if (this.screen === 'game-over') {
       this.gameOverScreen.render();
@@ -287,7 +353,11 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
       this.backgroundVideo,
       this.onePlayerHighScores,
       this.twoPlayerHighScores,
-      this.selectedButtonIndex
+      this.selectedButtonIndex,
+      this.screen,
+      this.playerName,
+      this.keyboardSelection,
+      this.keyboardLayout
     );
   }
 
@@ -398,7 +468,8 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
 
     switch (selection) {
       case 0: // START
-        this.startClicked.emit();
+        this.screen = 'name-input';
+        this.keyboardSelection = { row: 0, col: 0 }; // Reset keyboard selection
         break;
       case 1: // Spielermodus
         this.gameService.twoPlayerMode = !this.gameService.twoPlayerMode;

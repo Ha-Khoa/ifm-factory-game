@@ -10,8 +10,9 @@ namespace API.Models.User;
 /// A player object includes an identifier, a name, a score, and a reference to a related factory.
 /// Each player has a one-to-one relationship with a factory in the database.
 /// </remarks>
-public class Player {
-#region Variables
+public class Player
+{
+    #region Variables
     /// <summary>
     /// Gets or sets the unique identifier for the player.
     /// </summary>
@@ -53,7 +54,7 @@ public class Player {
     /// It is stored as an integer in the database and can be updated to reflect gains or deductions.
     /// </remarks>
     [Column(TypeName = "int")]
-    public int Money { get; set; } = 50;
+    public int Money { get; set; } = 100;
 
     // Navigation Property: Ein Player hat genau eine Factory
     public Factory.Factory? Factory { get; set; }
@@ -62,21 +63,21 @@ public class Player {
     /// Gets or sets a value indicating whether the player is in two-player mode.
     /// </summary>
     public bool TwoPlayerMode { get; set; } = false;
-#endregion
+    #endregion
 
-#region Services
+    #region Services
     // No Services
-#endregion
+    #endregion
 
-#region Constructors
+    #region Constructors
     // No Constructors
-#endregion
+    #endregion
 
-#region Methods
+    #region Methods
     // No Methods
-#endregion
+    #endregion
 
-#region Event Handlers
+    #region Event Handlers
     // No Event Handlers
-#endregion
+    #endregion
 }

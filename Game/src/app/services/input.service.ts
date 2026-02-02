@@ -29,6 +29,12 @@ export class InputService {
   private menuDownSubject = new Subject<void>();
   public menuDown$ = this.menuDownSubject.asObservable();
 
+  private menuLeftSubject = new Subject<void>();
+  public menuLeft$ = this.menuLeftSubject.asObservable();
+
+  private menuRightSubject = new Subject<void>();
+  public menuRight$ = this.menuRightSubject.asObservable();
+
   private menuConfirmSubject = new Subject<void>();
   public menuConfirm$ = this.menuConfirmSubject.asObservable();
 
@@ -49,6 +55,8 @@ export class InputService {
 
   private lastMenuUp = false;
   private lastMenuDown = false;
+  private lastMenuLeft = false;
+  private lastMenuRight = false;
   private lastMenuConfirm = false;
 
   private lastTutorialNext = false;
@@ -172,23 +180,32 @@ export class InputService {
 
     let menuUp = this.keyboardState['w'] || this.keyboardState['arrowup'];
     let menuDown = this.keyboardState['s'] || this.keyboardState['arrowdown'];
+    let menuLeft = this.keyboardState['a'] || this.keyboardState['arrowleft'];
+    let menuRight = this.keyboardState['d'] || this.keyboardState['arrowright'];
     let menuConfirm = this.keyboardState['e'] || this.keyboardState['enter'];
 
     const gamepad1 = this.gamepads[0];
     if (gamepad1) {
       const deadzone = 0.5;
       const axisY = gamepad1.axes[1];
+      const axisX = gamepad1.axes[0];
       menuUp = menuUp  || axisY < -deadzone;
       menuDown = menuDown || axisY > deadzone;
+      menuLeft = menuLeft || axisX < -deadzone;
+      menuRight = menuRight || axisX > deadzone;
       menuConfirm = menuConfirm || gamepad1.buttons[3].pressed; // 'Y' button
     }
 
     if (menuUp && !this.lastMenuUp) this.menuUpSubject.next();
     if (menuDown && !this.lastMenuDown) this.menuDownSubject.next();
+    if (menuLeft && !this.lastMenuLeft) this.menuLeftSubject.next();
+    if (menuRight && !this.lastMenuRight) this.menuRightSubject.next();
     if (menuConfirm && !this.lastMenuConfirm) this.menuConfirmSubject.next();
 
     this.lastMenuUp = menuUp;
     this.lastMenuDown = menuDown;
+    this.lastMenuLeft = menuLeft;
+    this.lastMenuRight = menuRight;
     this.lastMenuConfirm = menuConfirm;
   }
 

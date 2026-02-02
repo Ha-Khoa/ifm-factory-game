@@ -28,7 +28,11 @@ export class StartScreenRenderer {
     backgroundVideo: HTMLVideoElement,
     onePlayerHighScores: PlayerInterface[],
     twoPlayerHighScores: PlayerInterface[],
-    selectedButtonIndex: number
+    selectedButtonIndex: number,
+    screen: 'start' | 'name-input' | 'game-over' | 'pause',
+    playerName: string,
+    keyboardSelection: { row: number, col: number },
+    keyboardLayout: string[][]
   ): void {
     const pulse = (Math.sin(time / 200) + 1) / 2;
 
@@ -47,9 +51,74 @@ export class StartScreenRenderer {
     this.ctx.fillRect(0, 0, this.width, this.height);
 
     this.drawRetroGrid(time);
-    this.drawScoreboards(onePlayerHighScores, twoPlayerHighScores);
-    this.drawTitle(time);
-    this.drawButtons(pulse, selectedButtonIndex);
+
+    if (screen === 'name-input') {
+        this.drawNameInputScreen(time, playerName, keyboardSelection, keyboardLayout);
+    } else {
+        this.drawScoreboards(onePlayerHighScores, twoPlayerHighScores);
+        this.drawTitle(time);
+        this.drawButtons(pulse, selectedButtonIndex);
+    }
+  }
+
+  private drawNameInputScreen(
+    time: number,
+    playerName: string,
+    keyboardSelection: { row: number, col: number },
+    keyboardLayout: string[][]
+  ) {
+    // Titel
+    this.ctx.fillStyle = UI_THEME.primary;
+    this.ctx.shadowColor = UI_THEME.primary;
+    this.ctx.shadowBlur = 20;
+    this.ctx.font = `bold 60px "Courier New", monospace`;
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText("NAMEN EINGEBEN", this.width / 2, 150);
+    this.ctx.shadowBlur = 0;
+
+    // Eingabefeld
+    const inputWidth = 800;
+    const inputHeight = 80;
+    const inputX = (this.width - inputWidth) / 2;
+    const inputY = 250;
+
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    this.ctx.strokeStyle = UI_THEME.secondary;
+    this.ctx.lineWidth = 3;
+    this.ctx.strokeRect(inputX, inputY, inputWidth, inputHeight);
+
+    this.ctx.fillStyle = '#FFF';
+    this.ctx.font = `bold 50px "Courier New", monospace`;
+    this.ctx.textAlign = 'left';
+    this.ctx.textBaseline = 'middle';
+    const cursor = (Math.floor(time / 400) % 2 === 0) ? '_' : ' ';
+    this.ctx.fillText(playerName + cursor, inputX + 20, inputY + inputHeight / 2);
+
+    // Tastatur
+    const keyWidth = 80;
+    const keyHeight = 80;
+    const keyGap = 15;
+    const keyboardYStart = 400;
+
+    keyboardLayout.forEach((row, rowIndex) => {
+        const rowWidth = row.reduce((acc, key) => acc + (this.getSpecialKeyWidth(key, keyWidth) + keyGap), -keyGap);
+        const rowXStart = (this.width - rowWidth) / 2;
+        let currentX = rowXStart;
+
+        row.forEach((key, colIndex) => {
+            const isSelected = rowIndex === keyboardSelection.row && colIndex === keyboardSelection.col;
+            const currentKeyWidth = this.getSpecialKeyWidth(key, keyWidth);
+            const rect = { x: currentX, y: keyboardYStart + rowIndex * (keyHeight + keyGap), width: currentKeyWidth, height: keyHeight };
+            this.drawArcadeButton(key, rect, isSelected);
+            currentX += currentKeyWidth + keyGap;
+        });
+    });
+  }
+
+  private getSpecialKeyWidth(key: string, baseWidth: number): number {
+      if (key === 'BACKSPACE') return baseWidth * 2.5;
+      if (key === 'ZURÜCK' || key === 'START') return baseWidth * 3;
+      return baseWidth;
   }
 
   /**
@@ -186,7 +255,7 @@ export class StartScreenRenderer {
    * Hilfsfunktion zum Zeichnen eines einzelnen Buttons.
    */
   private drawArcadeButton(text: string, rect: { x: number, y: number, width: number, height: number }, isSelected: boolean): void {
-    const scale = isSelected ? 1.1 : 1.0;
+    const scale = isSelected ? 1.05 : 1.0;
     const w = rect.width * scale;
     const h = rect.height * scale;
     const x = rect.x - (w - rect.width) / 2;
@@ -207,15 +276,20 @@ export class StartScreenRenderer {
     this.ctx.strokeRect(x, y, w, h);
 
     this.ctx.fillStyle = isSelected ? "#fff" : "#aaa";
-    this.ctx.font = `bold 35px "Courier New", monospace`;
+    let fontSize = 35;
+    if (text.length > 8) fontSize = 28;
+    if (text.length > 12) fontSize = 22;
+    this.ctx.font = `bold ${fontSize}px "Courier New", monospace`;
+
+
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
 
-    if (isSelected && Math.floor(Date.now() / 100) % 2 === 0) {
+    if (isSelected && Math.floor(Date.now() / 150) % 2 === 0) {
       this.ctx.fillStyle = UI_THEME.secondary;
     }
 
-    this.ctx.fillText(text, x + w / 2, y + h / 2);
+    this.ctx.fillText(text.toUpperCase(), x + w / 2, y + h / 2);
     this.ctx.shadowBlur = 0;
   }
 
