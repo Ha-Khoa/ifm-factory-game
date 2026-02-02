@@ -5,6 +5,9 @@ import { map } from 'rxjs/operators';
 import {Product} from '../product/product';
 import { take } from 'rxjs';
 import { RenderingService } from '../../services/rendering.service';
+import {PlayerService} from '../../services/player.service';
+import {ApiService} from '../../services/api.service';
+import {GameService} from '../../services/game.service';
 
 
 export class Orders {
@@ -20,6 +23,8 @@ export class Orders {
    */
   private static maxOderId: number = 0;
   private static timerPaused = false;
+  private static PlayerService: PlayerService;
+  private static GameService: GameService;
 
 
   /**
@@ -48,6 +53,14 @@ export class Orders {
   public static activeOrders$: Observable<Order[]> = this.ordersList$.pipe(
       map(orders => orders.filter(order => !order.status))
   );
+
+  public static setPlayerService(playerService: PlayerService) {
+    Orders.PlayerService = playerService
+  }
+
+  public static setGameService(gameService: GameService) {
+    Orders.GameService = gameService
+  }
 
   /**
    * Initializes a predefined list of orders with specific items and quantities.
@@ -235,12 +248,26 @@ export class Orders {
         const productCount = Math.floor(Math.random() * 3) + 1;
         const items= [];
 
+        let totalCosts: number = 0;
+        const playerMoney:number = Orders.PlayerService.getMoney();
+
         for (let i = 0; i < productCount; i++) {
             const randomProductId = Products.getRandomProductId();
-            const randomQuantity = Math.floor(Math.random() * 3) + 1;
-            if(!items.map(product => (product.productId === randomProductId)).includes(true)) {
-              items.push({productId: randomProductId, quantity: randomQuantity});
+            const product = Products.getProductById(randomProductId)!;
+            let randomQuantity = Math.floor(Math.random() * 3) + 1;
+            while(totalCosts + (product.costs * randomQuantity) > playerMoney && randomQuantity > 0){
+              randomQuantity--;
             }
+            totalCosts += product.costs * randomQuantity;
+
+            if(!items.map(product => (product.productId === randomProductId)).includes(true)) {
+              if(randomQuantity > 0)
+                items.push({productId: randomProductId, quantity: randomQuantity});
+            }
+        }
+
+        if(totalCosts == 0){
+          Orders.GameService.gameEnd = true;
         }
 
         return Orders.addOrder(items);
