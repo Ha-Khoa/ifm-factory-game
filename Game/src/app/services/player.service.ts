@@ -52,6 +52,16 @@ export class PlayerService {
   }
 
   getMoney(): number {
+    if (!this.player) return 0;
+    this.api.getMoney(this.player.name).subscribe({
+      next: (money:number) => {
+        this.playerSubject.next({
+          ...this.player!,
+          money
+        })
+      },
+      error: console.error
+    })
     return this.player?.money ?? 0;
   }
 
