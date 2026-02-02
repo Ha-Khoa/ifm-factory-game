@@ -282,7 +282,7 @@ export class GameService {
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
       this.uiService.clearAll();
-      if(this.gameEnd || this.uiService.drawTimer())
+      if((this.gameEnd || this.uiService.drawTimer()) && !this.interactableManager.checkPlayerInSlotMachineArea(this.player))
       {
         this.gameEnd = true;
         Player._cameraFix = false;
