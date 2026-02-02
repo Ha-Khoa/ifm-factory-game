@@ -269,6 +269,8 @@ export class GameService {
     this.ctx.imageSmoothingEnabled = true;
     // Initialize the first orders
     Orders.initializeOrders();
+    Orders.setPlayerService(this.playerService);
+    Orders.setGameService(this);
     const loop = () => {
       if (!this.GameRunning) return;
 
