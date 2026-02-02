@@ -21,7 +21,7 @@ export class Gamefield {
     // Größe eines einzelnen Feldes in Pixeln
     static fieldsize: number = 50;
     // Anzahl der Reihen
-    static rows: number = 19;
+    static rows: number = 30;
     // Anzahl der Spalten
     static cols: number = 35;
 
@@ -76,10 +76,34 @@ export class Gamefield {
 
     generateEnvironment()
     {
+        this.environmetObjects.push(new RenderObject(
+                    `plant-1`,
+                    RenderType.IMG,
+                    1.1 * Gamefield.fieldsize,
+                    25.4 * Gamefield.fieldsize,
+                    0, 
+                    0.7 * Gamefield.fieldsize,
+                    1.5 * Gamefield.fieldsize,
+                    -500, // Draw priority
+                    "/images/temp/plant.png",
+                    undefined
+                ));
+        this.environmetObjects.push(new RenderObject(
+                    `plant-2`,
+                    RenderType.IMG,
+                    4.2 * Gamefield.fieldsize,
+                    25.4 * Gamefield.fieldsize,
+                    0,
+                    0.7 * Gamefield.fieldsize,
+                    1.5 * Gamefield.fieldsize,
+                    -500, // Draw priority
+                    "/images/temp/plant.png", 
+                    undefined
+                ));
         // Generate procedural floor with a checkerboard pattern
         for(let i = 0; i < Gamefield.rows + 1; i++)
         {
-            for(let j = 0; j < Gamefield.cols; j++)
+            for(let j = -1; j < Gamefield.cols; j++)
             {
                 // Use two slightly different shades of grey for a subtle tile effect
                 const tileColor = (i + j) % 2 === 0 ? '#3a3a3a' : '#404040';
@@ -91,7 +115,7 @@ export class Gamefield {
                     0, // z-index for the floor
                     Gamefield.fieldsize,
                     Gamefield.fieldsize,
-                    -1000, // Draw priority
+                    -30000, // Draw priority
                     undefined, // No image path
                     undefined,
                     tileColor, // Assign procedural color
@@ -103,7 +127,7 @@ export class Gamefield {
         const lineColor = '#2a2a2a'; // Dark color for the "seams"
 
         // Generate horizontal grid lines
-        for(let i = 0; i < Gamefield.rows + 1; i++)
+        for(let i = -1; i < Gamefield.rows + 1; i++)
         {
             this.environmetObjects.push(new RenderObject(
                 `line-h-${i}`,
@@ -113,7 +137,7 @@ export class Gamefield {
                 1, // z-index slightly above the floor to ensure visibility
                 Gamefield.cols * Gamefield.fieldsize,
                 2, // Line thickness
-                -999,
+                -2000,
                 undefined,
                 undefined,
                 lineColor,
@@ -122,7 +146,7 @@ export class Gamefield {
         }
 
         // Generate vertical grid lines
-        for(let j = 0; j < Gamefield.cols + 1; j++)
+        for(let j = -1; j < Gamefield.cols + 1; j++)
         {
             this.environmetObjects.push(new RenderObject(
                 `line-v-${j}`,
@@ -154,10 +178,110 @@ export class Gamefield {
                     -2280,
                     undefined, // No image
                     undefined,
-                    "#202020", // Dark solid color for the wall
+                    "#202020", 
                     ["#181818"]
                 ));
         }
+        const linecolor = "#dddda9ff";
+        this.environmetObjects.push(new RenderObject(
+            `line-1`,
+            RenderType.RECT,
+            9 * Gamefield.fieldsize,
+            28 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 10,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            9 * Gamefield.fieldsize,
+            25 * Gamefield.fieldsize - 4,
+            0,
+            Gamefield.fieldsize * 7,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            9 * Gamefield.fieldsize,
+            25 * Gamefield.fieldsize - 5,
+            0,
+            Gamefield.fieldsize * 7,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            16 * Gamefield.fieldsize-4,
+            15 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 10,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            19 * Gamefield.fieldsize,
+            15 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 13 + 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            19 * Gamefield.fieldsize,
+            15 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 10,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            19 * Gamefield.fieldsize,
+            13 * Gamefield.fieldsize - 4,
+            0,
+            Gamefield.fieldsize * 10,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+
     }
 
     /**
@@ -170,58 +294,45 @@ export class Gamefield {
     const layerColors = ["#FCB53B","#aa6a17ff"]
     const priority = 90;
 
-    for(let i = 0; i < 10; i++)
-    {
         this.interactableObjects.push(new RenderObject(
-            `table-${i}`,
-            RenderType.RECT,
-            i * Gamefield.fieldsize,
-            10 * Gamefield.fieldsize,
-            Gamefield.fieldsize,
-            Gamefield.fieldsize,
-            Gamefield.fieldsize,
+            `tisch`,
+            RenderType.THREE_D_IMG,
+            2 * Gamefield.fieldsize,
+            27 * Gamefield.fieldsize,
+            50,
+            2 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
             priority,
-            undefined,
-            undefined,
-            rectColor,
-            layerColors
+            "/images/tisch.png",
+            undefined
         ))
-    }
-    for(let i = 0; i < 7; i++)
-    {
         this.interactableObjects.push(new RenderObject(
-            `table-${i}-2`,
-            RenderType.RECT,
-            10 * Gamefield.fieldsize,
-            (i + 4) * Gamefield.fieldsize,
-            Gamefield.fieldsize,
-            Gamefield.fieldsize,
-            Gamefield.fieldsize,
+            `sofa`,
+            RenderType.THREE_D_IMG,
+            2 * Gamefield.fieldsize,
+            25.8 * Gamefield.fieldsize,
+            50,
+            2 * Gamefield.fieldsize,
+            1 * Gamefield.fieldsize,
             priority,
-            undefined,
-            undefined,
-            rectColor,
-            layerColors
+            "/images/sofa.png",
+            undefined
         ))
-    }
-    for(let i = 0; i < 10; i++)
-    {
-        this.interactableObjects.push(new RenderObject(
-            `table-${i}-3`,
-            RenderType.RECT,
-            30 * Gamefield.fieldsize,
-            i * Gamefield.fieldsize,
-            Gamefield.fieldsize,
-            Gamefield.fieldsize,
-            Gamefield.fieldsize,
-            priority,
-            undefined,
-            undefined,
-            rectColor,
-            layerColors
+        this.environmetObjects.push(new RenderObject(
+            `chef`,
+            RenderType.CARD_BOARD,
+            6.5 * Gamefield.fieldsize,
+            0 * Gamefield.fieldsize,
+            80,
+            0.8 * Gamefield.fieldsize,
+            1.2 * Gamefield.fieldsize,
+            0,
+            "/images/chef.png",
+            undefined
         ))
-    }
-    for(let i = 12; i < Gamefield.rows; i++)
+
+
+    for(let i = 15; i < Gamefield.rows; i++)
     {
         this.interactableObjects.push(new RenderObject(
             `table-${i}-3`,
@@ -238,6 +349,75 @@ export class Gamefield {
             layerColors
         ))
     }
+    for(let i = 0; i < 13; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table-${i}-4`,
+            RenderType.RECT,
+            30 * Gamefield.fieldsize,
+            i * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
+    for(let i = 0; i < 9; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table-${i}-1`,
+            RenderType.RECT,
+            i * Gamefield.fieldsize,
+            23  * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
+    for(let i = 28; i < 30; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table`,
+            RenderType.RECT,
+            8 * Gamefield.fieldsize,
+            i * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
+    for(let i = 23; i < 25; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table`,
+            RenderType.RECT,
+            8 * Gamefield.fieldsize,
+            i * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
+    
     }
 
     updateConveyorBelts(conveyorBelts: ConveyorBelt[]): void {

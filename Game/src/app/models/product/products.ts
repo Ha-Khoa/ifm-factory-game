@@ -39,17 +39,27 @@ export class Products {
     }
     this.productsList = [
       new Product(1, "Raw Plastic", 6, 15, 5, true, "/images/Products/raw-plastic.png"),
-      new Product(2, "Raw Silicon", 16, 20, 9, true, "/images/Products/raw-silicon.png"),
+      new Product(2, "Silizium", 16, 20, 9, true, "/images/Products/raw-silicon.png"),
       new Product(3, "Copper Wire", 15, 22, 20, true, "/images/Products/copper-wire.png"),
-      new Product(4, "Plastic Case", 50, 50, [{productId: 1, quantity: 3}, {productId: 2, quantity: 1}], true, "/images/Products/plastic-case.png"),
-      new Product(5, "Circuit Board", 120, 150, [{productId: 2, quantity: 1}, {productId: 3, quantity: 1}], true, "/images/Products/circuit-board.png"),
+      new Product(4, "Plastic Case", 50, 50, [{productId: 1, quantity: 2}], true, "/images/Products/plastic-case.png"),
+      new Product(5, "Circuit Board", 120, 150, [{productId: 2, quantity: 1}, {productId: 18, quantity: 1}], true, "/images/Products/circuit-board.png"),
       new Product(6, "Basic Sensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png"),
       new Product(7, "Iron Ingot", 30, 50, 20, true, "/images/Products/iron-ingot.png"),
       new Product(8, "Iron Gear", 60, 100, [{productId: 7, quantity: 1}], true, "/images/Products/iron-gear.png"),
-      new Product(9, "Electric Motor", 200, 300, [{productId: 3, quantity: 2}, {productId: 8, quantity: 1}], true, "/images/Products/electric-motor.png")
+      new Product(9, "Electric Motor", 200, 300, [{productId: 18, quantity: 2}, {productId: 8, quantity: 1}], true, "/images/Products/electric-motor.png"),
+      new Product(10, "Photoelektrischer Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 4, quantity: 1}, {productId: 15, quantity: 1}, {productId: 11, quantity: 1}],true, "/images/Products/photo_sensor.png"),
+      new Product(11, "Photo Diode", 30, 30, [{productId: 18, quantity: 1}, {productId: 2, quantity: 1}],true, "/images/Products/photo_diode.png"),
+      new Product(12, "Temperatur Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 14, quantity: 1}, {productId: 15, quantity: 1}, {productId: 17, quantity: 1}],true, "/images/Products/temperatur_sensor.png", 0, 0.6 * Gamefield.fieldsize),
+      new Product(13, "Druck Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 14, quantity: 1}, {productId: 15, quantity: 1}, {productId: 16, quantity: 1}],true, "/images/Products/druck_sensor.png", 0, 0.6 * Gamefield.fieldsize),
+      new Product(14, "Iron Case", 15, 15, [{productId: 7, quantity: 1}], true, "/images/Products/iron-case.png"),
+      new Product(15, "Kabel", 15, 15, [{productId: 18, quantity: 1}, {productId: 1,  quantity: 1}], true, "/images/Products/cable.png"),
+      new Product(16, "Mess Zelle", 15, 15, [{productId: 14, quantity: 1}, {productId: 2, quantity: 1}], true, "/images/Products/messzelle.png"),
+      new Product(17, "Thermoelement", 15, 15, [{productId: 7, quantity: 1}, {productId: 18, quantity: 1}], true, "/images/Products/thermoelement.png"),
+      new Product(18, "Kupfer", 15, 15, 20, true, "/images/Products/copper.png")
     ];
     this.isInitialized = true;
   }
+
 
   /**
    * A list containing existing generated products, which can be either individual products
@@ -118,7 +128,6 @@ export class Products {
         if (!this.checkItemOnTable(interactionObject, product)) {
           collisions.push(interactionObject)
           continue;
-
         }
         returnvalue = 1;
       }
@@ -230,37 +239,13 @@ export class Products {
    * @return {void} This method does not return a value.
    */
   public static generateProducts(): void {
-    /*
-    let newProduct = Products.getProductByName("Raw Plastic");
+    
+    let newProduct = Products.getProductByName("Druck    Sensor");
     if (newProduct) {
       let copy1 = newProduct.copy();
-      copy1.init(new Coordinates(100, 200));
+      copy1.init(new Coordinates(200, 200));
       this.generatedProducts.push(copy1);
-
-      let copy2 = newProduct.copy();
-      copy2.init(new Coordinates(300, 400));
-      this.generatedProducts.push(copy2);
-
-      let copy3 = newProduct.copy();
-      copy3.init(new Coordinates(500, 150));
-      this.generatedProducts.push(copy3);
-
-      newProduct = Products.getProductByName("Raw Silicon");
-      let copy4 = newProduct!.copy();
-      copy4.init(new Coordinates(700, 300));
-      this.generatedProducts.push(copy4);
-
-      newProduct = Products.getProductByName("Circuit Board");
-      let copy5 = newProduct!.copy();
-      copy5.init(new Coordinates(600, 300));
-      this.generatedProducts.push(copy5);
     }
-    let pack = new Package(new Coordinates(800, 100))
-    this.generatedProducts.push(pack);
-    let pack2 = new Package(new Coordinates(850, 150))
-    this.generatedProducts.push(pack2);
-    let pack3 = new Package(new Coordinates(750, 150))
-    this.generatedProducts.push(pack3);*/
   }
 
   /**

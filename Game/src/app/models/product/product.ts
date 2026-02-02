@@ -23,10 +23,10 @@ export class Product {
   private _size: number;
   private _z : number;
 
-  constructor(id: number, name: string, grants: number, reward: number, costs: number, unlocked?:boolean, img? :string, z?: number);
-  constructor(id: number, name: string, grants: number, reward: number, requires: {productId: number, quantity:number}[], unlocked?:boolean, img? :string, z?: number);
+  constructor(id: number, name: string,grants: number, reward: number, costs: number, unlocked?:boolean, img? :string, z?: number, size?: number);
+  constructor(id: number, name: string, grants: number, reward: number, requires: {productId: number, quantity:number}[], unlocked?:boolean, img? :string, z?: number,size?: number);
 
-  constructor(id: number, name: string, grants: number, reward: number, arg5: number | {productId: number, quantity:number}[], unlocked:boolean = false, img? :string, z?: number) {
+  constructor(id: number, name: string, grants: number, reward: number, arg5: number | {productId: number, quantity:number}[], unlocked:boolean = false, img? :string, z?: number, size?: number) {
 
     // Check what type of constructor was called
     if (typeof arg5 === "number") {
@@ -42,7 +42,7 @@ export class Product {
     this._name = name;
     this._img = img;
     this._position = new Coordinates(0, 0);
-    this._size = 2/5 * Gamefield.fieldsize; // Standardgröße für Produkte
+    this._size = !size ? 2/5 * Gamefield.fieldsize : size; // Standardgröße für Produkte
     this._z = z !== undefined ? z : 0;
     this._grants = grants;
     this._reward = reward;
@@ -73,8 +73,8 @@ export class Product {
 
   copy(): Product {
     if(this._requires.length > 0)
-      return new Product(this._id, this._name, this._grants, this._reward, this._requires, this._unlocked, this._img, this._z);
-    return new Product(this._id, this._name, this._grants, this._reward, this._costs, this._unlocked, this._img, this._z);
+      return new Product(this._id, this._name, this._grants, this._reward, this._requires, this._unlocked, this._img, this._z, this._size);
+    return new Product(this._id, this._name, this._grants, this._reward, this._costs, this._unlocked, this._img, this._z, this._size);
   }
 
   destroy() {

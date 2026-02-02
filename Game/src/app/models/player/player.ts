@@ -27,6 +27,7 @@ export class Player {
    private _hitbox!: Hitbox;
    // Bild/Sprite des Spielers
    private _img: string;
+   private _img2: string;
    // Geschwindigkeit pro Frame (FPS-abhängig)
    private _frameVelocity!: number;
    // Basis-Geschwindigkeit in Pixel pro Sekunde
@@ -63,6 +64,8 @@ export class Player {
    private _renderingObject: RenderObject;
    private _walkingAnimation: string[];
    private _holdingAnimation: string[];
+   private _walkingAnimation2: string[];
+   private _holdingAnimation2: string[];
    private static _camera: Camera;
    private static _playerPositions: Coordinates[] = [new Coordinates(0, 0), new Coordinates(0, 0)];
    public static _cameraFix: boolean = false;
@@ -86,8 +89,11 @@ export class Player {
    constructor(hitbox: Hitbox, velocity: number, gamefield: Gamefield, playerService: PlayerService) {
         this._lastDirection = Direction.RIGHT;
        this._img = "/images/fox/fox.png";
+       this._img2 = "images/fox/fox2/fox.png"
        this._walkingAnimation = ["/images/fox/walking_5.png", "/images/fox/walking_2.png", "/images/fox/walking_3.png", "/images/fox/walking_4.png"]
        this._holdingAnimation = ["/images/fox/4-fox-holding.png", "/images/fox/3-fox-holding.png", "/images/fox/2-fox-holding.png", "/images/fox/1-fox-holding.png"]
+        this._walkingAnimation2 = ["/images/fox/fox2/walking_5.png", "/images/fox/fox2/walking_2.png", "/images/fox/fox2/walking_3.png", "/images/fox/fox2/walking_4.png"]
+       this._holdingAnimation2 = ["/images/fox/fox2/4-fox-holding.png", "/images/fox/fox2/3-fox-holding.png", "/images/fox/fox2/2-fox-holding.png", "/images/fox/fox2/1-fox-holding.png"]
        this._hasPicked = false;
        this._hitbox = hitbox;
        this._position = hitbox.position
@@ -97,7 +103,13 @@ export class Player {
        const angle = RenderingService.instance().angle
        const rotationZ = (window.innerHeight / 2 - window.innerHeight / 2 * Math.cos(angle)) / 60
        if(Player._camera) this._id = 1; else this._id = 0;
-       if (!Player._camera) Player._camera = new Camera(new Coordinates(Gamefield.fieldsize*10 + Gamefield.fieldsize/2, Gamefield.fieldsize*5 + Gamefield.fieldsize/2), window.innerHeight / 1080 * 60);
+       if (!Player._camera) Player._camera = new Camera(new Coordinates(Gamefield.fieldsize*3, Gamefield.fieldsize*27), window.innerHeight / 1080 * 60);
+       if(this._id === 1)
+       {
+        this._walkingAnimation = this._walkingAnimation2;
+        this._holdingAnimation = this._holdingAnimation2;
+        this._img = this._img2;
+       }
        this._z = hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI); // Bildverhältnis der Spielertextur ohne Winkelverzerrung
        const height = this._hitbox.width * 1.35 / Math.sin(30 / 360 * 2 * Math.PI);
        this._renderingObject = new RenderObject(
@@ -209,7 +221,7 @@ export class Player {
         this._lastBoostTime = performance.now();
         this._velocity = this._boostVelocity; // Boost-Geschwindigkeit
         this._renderingObject.type = 'gif'
-        this._renderingObject.frames = ['/images/fox/fox-sprint.png']
+        this._renderingObject.frames = this._id === 0 ? ['/images/fox/fox-sprint.png'] : ['/images/fox/fox2/fox-sprint.png']
 
         setTimeout(() => {
             this._velocity = this._baseVelocity;
@@ -339,7 +351,7 @@ export class Player {
             // Starte den Timer nur, wenn keiner läuft (sonst wird er ständig neu gestartet)
             if (!this._timerManagerService.isRunning()) {
                 await this._timerManagerService.start(3000);
-                this._renderingObject.img = "/images/fox/sitting.png";
+                this._renderingObject.img = this._id === 0 ? "/images/fox/sitting.png" : "/images/fox/fox2/sitting.png";
             }
         }
 
@@ -544,7 +556,7 @@ export class Player {
                     Math.pow((this._position.y + this._hitbox.height/2) - (machine.y + machine.height/2), 2)
                 );
 
-                if (distance < Gamefield.fieldsize * 1.0 && distance < shortestDistance) {
+                if (distance < Gamefield.fieldsize * 1.5 && distance < shortestDistance) {
                     shortestDistance = distance;
                     nearestMachine = machine;
                 }
@@ -661,10 +673,15 @@ export class Player {
   public getAllImagePaths(): string[] {
     const imagePaths = [
       this._img,
+      this._img2,
       "/images/fox/sitting.png",
       "/images/fox/fox-sprint.png",
+      "/images/fox/fox2/sitting.png",
+      "/images/fox/fox2/fox-sprint.png",
       ...this._walkingAnimation,
-      ...this._holdingAnimation
+      ...this._holdingAnimation,
+      ...this._walkingAnimation2,
+      ...this._holdingAnimation2
     ];
     // Return unique paths
     return [...new Set(imagePaths)];

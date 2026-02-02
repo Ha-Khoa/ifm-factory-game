@@ -20,7 +20,7 @@ export class ConveyorBeltManager {
    private initializeConveyorBelts(): void {
     //Package Förderband
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              12*Gamefield.fieldsize,
+              20*Gamefield.fieldsize,
               -2*Gamefield.fieldsize,
               1*Gamefield.fieldsize,
               4*Gamefield.fieldsize,
@@ -42,10 +42,10 @@ export class ConveyorBeltManager {
            true,
            2000,
            3,
-           ConveyorType.COPPER_WIRE
+           ConveyorType.COPPER
        ));
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              8*Gamefield.fieldsize,
+              6*Gamefield.fieldsize,
               -2*Gamefield.fieldsize,
               1*Gamefield.fieldsize,
               4*Gamefield.fieldsize,
@@ -57,7 +57,7 @@ export class ConveyorBeltManager {
             ConveyorType.RAW_PLASTIC
        ));
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              6*Gamefield.fieldsize,
+              2*Gamefield.fieldsize,
               -2*Gamefield.fieldsize,
               1*Gamefield.fieldsize,
               4*Gamefield.fieldsize,

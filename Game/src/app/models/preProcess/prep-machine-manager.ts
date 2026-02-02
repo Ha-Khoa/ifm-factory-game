@@ -17,8 +17,8 @@ export class PrepMachineManager {
         const ironGearMachine = new PrepMachine (
             14 * Gamefield.fieldsize,
             5 * Gamefield.fieldsize,
-            Gamefield.fieldsize,
-            Gamefield.fieldsize,
+            Gamefield.fieldsize * 1.5,
+            Gamefield.fieldsize * 1.5,
             3000
         );
         ironGearMachine.setRecipe(7, 8);  //Eingang: Iron Ingot (ID 7), Ausgang: Iron Gear (ID 8)

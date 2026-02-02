@@ -195,10 +195,10 @@ export class RenderingService {
             const frameImage = this._images[prepMachine.prepNextFrame];
             if (frameImage) {
               //Berechne Position und Größe der Animation
-              const animWidth = objWidth * 0.7;     //Mache die Animation 70% der Prepmachine
+              const animWidth = objWidth * 0.2;     //Mache die Animation 40% der Prepmachine
               const animHeight = animWidth * Math.cos(this._angle); // Behalte das quadratische Seitenverhältnis bei
               const xCenter = Math.round(xObj + (objWidth - animWidth) / 2);
-              const yCenter = yProjection + (objHeight * Math.cos(this._angle) - animHeight) / 2;
+              const yCenter = yProjection + (objHeight * Math.cos(this._angle) * 0.35);
               
               this._ctx.drawImage(
                 frameImage,
@@ -315,17 +315,20 @@ export class RenderingService {
     {
       this._camera.x = x;
     }
-    else if(this._camera.x < x)
+    else if(this._camera.x + 5 < x)
     {
-      this._camera.x += 0.5;
+      this._camera.x += 5;
     }
-    else if(this._camera.x > x)
+    else if(this._camera.x - 5 > x)
     {
-      this._camera.x -= 0.5;
+      this._camera.x -= 5;
+    }
+    else{
+      this._camera.x = x
     }
     if(this._angle < angle)
     {
-      this._angle += this._angle * 0.01;
+      this._angle += this._angle * 0.011;
     }
     else if(this._angle > angle)
     {
@@ -367,7 +370,7 @@ export class RenderingService {
   }
 
   rotateMap() {
-    if(this._angle === 0) this._angle = 0.0000000000000001
+    if(this._angle < 0) this._angle = 0.001
     const max = 30 / 360 * 2 * Math.PI;
     if(this._camera.position.z !== 0)
     {

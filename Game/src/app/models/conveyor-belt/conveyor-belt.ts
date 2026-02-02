@@ -13,7 +13,8 @@ export enum ConveyorType {
     RAW_PLASTIC = "raw_plastic",
     RAW_SILICON = "raw_silicon",
     IRON_INGOT = "iron_ingot",
-    PACKAGES = 'packages'
+    PACKAGES = 'packages',
+    COPPER = 'copper'
 }
 
 
@@ -273,6 +274,7 @@ export class ConveyorBelt {
                          this._conveyorType === ConveyorType.RAW_PLASTIC ? Products.getProductById(1) :
                          this._conveyorType === ConveyorType.RAW_SILICON ? Products.getProductById(2) :
                          this._conveyorType === ConveyorType.IRON_INGOT ? Products.getProductById(7) :
+                         this._conveyorType === ConveyorType.COPPER ? Products.getProductById(18) :
                          undefined;
         if(typeProduct)
         {

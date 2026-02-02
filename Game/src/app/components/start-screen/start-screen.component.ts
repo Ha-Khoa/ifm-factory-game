@@ -484,8 +484,8 @@ export class StartScreenComponent implements OnInit, OnDestroy, AfterViewInit {
     cameraStyle.setProperty('height', `${cameraSize}px`);
 
     // 3D-Positionierung im Raum berechnen
-    const gameY = fov * ((Gamefield.fieldsize * 5 + Gamefield.fieldsize / 2) + yOffset / fov) * Math.cos(angle) + rotationZ - this.height / 2 * fovRatio - 20 * fovRatio;
-    const x = fov * (Gamefield.fieldsize * 10 + Gamefield.fieldsize / 2) + xOffset - fov * (this.width) / 120;
+    const gameY = fov * ((Gamefield.fieldsize * 27) + yOffset / fov) * Math.cos(angle) + rotationZ - this.height / 2 * fovRatio - 20 * fovRatio;
+    const x = fov * (Gamefield.fieldsize * 3) + xOffset - fov * (this.width) / 120;
 
     style.setProperty('top', `${gameY}px`);
     style.setProperty('left', `${x}px`);

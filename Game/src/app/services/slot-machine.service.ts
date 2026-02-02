@@ -688,11 +688,11 @@ export class SlotMachineService {
     this._ctx.fillText(
       string,
       this._ctx.canvas.width / 2 - this._ctx.measureText(string).width / 2 - px + shake,
-      this._ctx.canvas.height * this._sizePercentage / 400 + px / 3);  
+      this._ctx.canvas.height - this._ctx.canvas.height * this._sizePercentage / 400 + px / 3);  
     this._ctx.drawImage(
       this._images["/images/fox/fox-coin.png"],
       this._ctx.canvas.width / 2 + this._ctx.measureText(string).width / 2 - px + 10 + shake,
-      this._ctx.canvas.height * this._sizePercentage / 400 - px / 2,
+      this._ctx.canvas.height - this._ctx.canvas.height * this._sizePercentage / 400 - px / 2,
       px,
       px
     )
