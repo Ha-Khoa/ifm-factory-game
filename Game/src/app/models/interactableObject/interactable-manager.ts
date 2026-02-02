@@ -324,7 +324,7 @@ export class InteractableManager {
   upgradeMachineOnInteraction(player: Player) {
     for(let machine of this.machines)
     {
-    if (machine.unlocked && this.interactionObject(machine, player)) {
+    if (this.interactionObject(machine, player)) {
       machine.upgrade(this.playerService).subscribe({
         error: (err) => {
           console.error("Maschinen-Upgrade fehlgeschlagen:", err.message);

@@ -8,6 +8,7 @@ import { Gamefield } from "../gamefield/gamefield";
 import { RenderType } from "../../enums/render-type";
 import { PlayerService } from "../../services/player.service";
 import { catchError, map, Observable, of, tap, throwError } from "rxjs";
+import { SoundService } from "../../services/sound.service";
 
 
 
@@ -265,6 +266,7 @@ export class Machine extends InteractableObject {
 
     return playerService.removeMoney(upgradeCost).pipe(
       tap(() => {
+        SoundService.instance().playSound('upgrade')
         this._level += 1;
         this._productionRate = Math.max(500, this._productionRate * 0.85); // 15% schneller, min. 0.5s
         this._productionTimer = this._productionRate / 1000

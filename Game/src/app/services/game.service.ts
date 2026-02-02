@@ -18,6 +18,7 @@ import {PlayerService} from './player.service';
 import {PrepMachineManager} from "../models/preProcess/prep-machine-manager";
 import { RenderObject } from '../models/rendering/render-object';
 import { InputService } from './input.service';
+import { SoundService } from './sound.service';
 
 @Injectable({
   providedIn: 'root'
@@ -59,12 +60,13 @@ export class GameService {
   private images: { [key: string]: HTMLImageElement } = {};
   private inputSubscription!: Subscription;
 
-  constructor(private uiService: UIService, private playerService: PlayerService, private inputService: InputService) { }
+  constructor(private uiService: UIService, private playerService: PlayerService, private inputService: InputService, private soundService: SoundService) { }
 
   public pauseGame(): void {
     if (this.GameRunning) {
       this.isPaused = true;
       this.inputService.setInputState('menu');
+      this.soundService.pauseSound('background_music');
     }
   }
 
@@ -72,7 +74,16 @@ export class GameService {
     if (this.GameRunning) {
       this.isPaused = false;
       this.inputService.setInputState('game');
+      this.soundService.resumeSound('background_music');
     }
+  }
+
+  public setGlobalGameVolume(volume: number): void {
+    this.soundService.setGlobalVolume(volume);
+  }
+
+  public setGameSoundVolume(key: string, volume: number): void {
+    this.soundService.setSoundVolume(key, volume);
   }
 
   public isGameLoopRunning(): boolean {
@@ -181,6 +192,14 @@ export class GameService {
     // 5. Lade alle Bilder vor
     await this.preloadImages(allImagesToLoad);
 
+    // 6. Lade alle Sounds vor
+    await this.soundService.loadSounds([
+      { key: 'drop_sound', path: 'sounds/drop_sound.wav' },
+      { key: 'background_music', path: 'sounds/background_music.mp3' },
+      { key: 'boost', path:'sounds/boost.wav'},
+      { key: 'upgrade', path:'sounds/upgrade.wav'}
+    ]);
+
     // Füge Spielfeld zum Rendering-Buffer hinzu
     this.interactableManager.addToInteractableObjects();
     this.gamefield.addGameFieldToRenderingBuffer();
@@ -188,7 +207,7 @@ export class GameService {
     this.conveyorBeltManager = new ConveyorBeltManager(this.gamefield);
     this.prepMachine = new PrepMachineManager(this.gamefield);
     Products.generateProducts();
-    
+
   }
 
   /**
@@ -239,7 +258,11 @@ export class GameService {
    * Startet die Hauptspielschleife (Game Loop).
    * Zeichnet und aktualisiert das Spiel solange GameRunning true ist.
    */
-  startGame() {RenderingService.instance().convertToCameraPOV(this.player.camera);
+  startGame() {
+    this.setGlobalGameVolume(0.5)
+    this.setGameSoundVolume("background_music", 0.05)
+    this.soundService.playSound('background_music', true);
+    RenderingService.instance().convertToCameraPOV(this.player.camera);
     this.GameRunning = true;
     this.isPaused = false;
     this.inputService.setInputState('game');
@@ -289,7 +312,12 @@ export class GameService {
       this.player.updatePlayer(this._twoPlayerMode);
       this.interactableManager.checkForInteraction(this.player);
       this.player.pickProduct();
+
+      const player1WasHolding = this.player.inventory !== null;
       this.player.dropProduct();
+      if (player1WasHolding && this.player.inventory === null) {
+        this.soundService.playSound('drop_sound');
+      }
 
       if(this._twoPlayerMode && this.player2)
       {
@@ -297,7 +325,11 @@ export class GameService {
         this.player2.updatePlayer(this._twoPlayerMode);
         this.interactableManager.checkForInteraction(this.player2);
         this.player2.pickProduct();
+        const player2WasHolding = this.player2.inventory !== null;
         this.player2.dropProduct();
+        if (player2WasHolding && this.player2.inventory === null) {
+          this.soundService.playSound('drop_sound');
+        }
         this.player2.render();
         this.player2.updateProductInHand();
 
@@ -401,6 +433,7 @@ export class GameService {
     if (this.inputSubscription) {
       this.inputSubscription.unsubscribe();
     }
+    this.soundService.stopAllSounds();
   }
 
   get gameEnd(): boolean {

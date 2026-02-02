@@ -17,6 +17,7 @@ import { PlayerService } from '../../services/player.service';
 import { PrepMachine } from '../preProcess/prep-machine';
 import { firstValueFrom } from 'rxjs';
 import { PlayerInput } from '../../interfaces/player-input';
+import { SoundService } from '../../services/sound.service';
 
 /**
 * Player-Klasse: Repräsentiert den Spieler mit Bewegung, Kollision und Inventar.
@@ -218,6 +219,7 @@ export class Player {
      */
     private activateBoost() {
         this._isBoosting = true;
+        SoundService.instance().playSound('boost')
         this._lastBoostTime = performance.now();
         this._velocity = this._boostVelocity; // Boost-Geschwindigkeit
         this._renderingObject.type = 'gif'
@@ -547,7 +549,7 @@ export class Player {
         // Get all PrepMachines from the gamefield
         const allObjects = this._gamefield.getAllRenderObjects();
         //console.log('Looking for PrepMachine in all objects:', allObjects.length);
-        
+
         for (const obj of allObjects){
             if (obj instanceof PrepMachine) {
                 const machine = obj as PrepMachine;

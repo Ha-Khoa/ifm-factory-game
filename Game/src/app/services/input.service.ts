@@ -244,7 +244,7 @@ export class InputService {
     let p1Vertical = (this.keyboardState['s'] ? 1 : 0) - (this.keyboardState['w'] ? 1 : 0);
     let p1Interact = this.keyboardState['e'] || false;
     let p1Boost = this.keyboardState[' '] || false;
-    const p1Upgrade = this.keyboardState['u'] || false;
+    let p1Upgrade = this.keyboardState['u'] || false;
 
     const gamepad1 = this.gamepads[0];
     if (gamepad1) {
@@ -273,7 +273,7 @@ export class InputService {
     let p2Vertical = (this.keyboardState['arrowdown'] ? 1 : 0) - (this.keyboardState['arrowup'] ? 1 : 0);
     let p2Interact = this.keyboardState['enter'] || false;
     let p2Boost = this.keyboardState['shift'] || false;
-    const p2Upgrade = this.keyboardState['numpad0'] || false; // Assuming a different key for P2 upgrade
+    let p2Upgrade = this.keyboardState['numpad0'] || false; // Assuming a different key for P2 upgrade
 
     const gamepad2 = this.gamepads[1];
     if (gamepad2) {
