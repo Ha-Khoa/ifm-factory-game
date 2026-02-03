@@ -412,7 +412,7 @@ export class Player {
                Products.deleteGeneratedProduct(this._inventory)
                this._inventory.renderObject.priority = 200
               //  console.log("Produkt vom Förderband aufgenommen:", this._inventory);
-               Products.generatedProducts.push(productFromConveyor);
+               //Products.generatedProducts.push(productFromConveyor);
                this._inventory!.z = 50
                return this._inventory;
            }

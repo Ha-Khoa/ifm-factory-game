@@ -6,6 +6,7 @@ import {Package} from "../package/package";
 import {Gamefield} from "../gamefield/gamefield";
 import { RenderType } from "../../enums/render-type";
 import { RenderingService } from "../../services/rendering.service";
+import { Direction } from "../../enums/direction";
 
 export enum ConveyorType {
     RAW_MATERIALS = "raw_materials",
@@ -85,6 +86,7 @@ export class ConveyorBelt {
              this._width = width;
              this._height = height;
              this._priority = 0;
+
              this._img = undefined;
              this._imgWall = undefined;
              this._rectColor = '#5a5a5aff';
@@ -95,6 +97,16 @@ export class ConveyorBelt {
                 "/images/conveyorBelt/conveyorbelt-3.jpg",
                 "/images/conveyorBelt/conveyorbelt-4.jpg"
              ];
+             if(direction === 'up')
+             {
+                this._frames = [
+                "/images/conveyorBelt/conveyorbelt-4.jpg",
+                "/images/conveyorBelt/conveyorbelt-3.jpg",
+                "/images/conveyorBelt/conveyorbelt-2.jpg",
+                "/images/conveyorBelt/conveyorbelt-1.jpg"
+             ];
+             this._priority = 150
+             }
              this._framesPerSecond = 10;
        this.conveyorId = ConveyorBelt.lastId++;
        this._direction = direction;
