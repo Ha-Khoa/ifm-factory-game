@@ -442,7 +442,6 @@ export class GameService {
     if(!RenderingService.instance().deltaTime) dt = 1;
     else dt = RenderingService.instance().deltaTime
     this.lastMoneyGenTime += dt;
-    console.log(this.lastMoneyGenTime)
       if(this.playerService.getMoney() < 10 && this.lastMoneyGenTime >= this.generateMoneyIntervall)
       {
         this.playerService.addMoney(1);
