@@ -1410,7 +1410,7 @@ export class Gamefield {
     for(let i = 0; i < 5; i++)
     {
     this.interactableObjects.push(new RenderObject(
-            `line`,
+            `server`,
             RenderType.THREE_D_IMG,
             (11 + i) * Gamefield.fieldsize,
             12 * Gamefield.fieldsize,
@@ -1423,7 +1423,7 @@ export class Gamefield {
     }
 
     this.interactableObjects.push(new RenderObject(
-            `line`,
+            `robotArm`,
             RenderType.THREE_D_IMG,
             19.5 * Gamefield.fieldsize,
             10 * Gamefield.fieldsize,
@@ -1432,6 +1432,74 @@ export class Gamefield {
             Gamefield.fieldsize,
             -550,
             "/images/temp/robotArm.png"
+        ))
+    this.interactableObjects.push(new RenderObject(
+            `robotArm`,
+            RenderType.THREE_D_IMG,
+            6.5 * Gamefield.fieldsize,
+            19 * Gamefield.fieldsize,
+            200,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize,
+            -550,
+            "/images/temp/robotArm.png"
+        ))
+
+    this.interactableObjects.push(new RenderObject(
+            `car`,
+            RenderType.THREE_D_IMG,
+            3.75 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            50,
+            Gamefield.fieldsize * 1.75,
+            Gamefield.fieldsize * 0.75,
+            100,
+            "/images/temp/car.png"
+        ))
+     this.interactableObjects.push(new RenderObject(
+            `toolBox`,
+            RenderType.THREE_D_IMG,
+            20.15 * Gamefield.fieldsize,
+            4.4 * Gamefield.fieldsize,
+            35,
+            Gamefield.fieldsize * 0.8,
+            Gamefield.fieldsize * 0.4,
+            150,
+            "/images/temp/toolBox.png"
+        ))
+    this.interactableObjects.push(new RenderObject(
+            `tischUndStuehle`,
+            RenderType.THREE_D_IMG,
+            23 * Gamefield.fieldsize,
+            25 * Gamefield.fieldsize,
+            50,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize * 1,
+            150,
+            "/images/temp/tischUndStuhl.png"
+        ))
+    this.interactableObjects.push(new RenderObject(
+            `tischUndStuehle`,
+            RenderType.THREE_D_IMG,
+            23 * Gamefield.fieldsize,
+            20 * Gamefield.fieldsize,
+            50,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize * 1,
+            150,
+            "/images/temp/tischUndStuhl.png"
+        ))
+    
+    this.interactableObjects.push(new RenderObject(
+            `lampe`,
+            RenderType.THREE_D_IMG,
+            18.7 * Gamefield.fieldsize,
+            19.7 * Gamefield.fieldsize,
+            100,
+            Gamefield.fieldsize * 1,
+            Gamefield.fieldsize * 1,
+            150,
+            "/images/temp/lamp.png"
         ))
 
 
