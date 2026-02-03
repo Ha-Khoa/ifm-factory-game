@@ -71,7 +71,7 @@ export class Orders {
    */
   public static initializeOrders(): void {
     const initialOrders: Order[] = [
-      { ...this.createOrder([{id: 1, quantity: 1}]), status: false },
+      { ...this.createOrder([{id: 5, quantity: 1}]), status: false },
       /*{ ...this.createOrder([{id: 2, quantity: 1}, {id: 3, quantity: 1}]), status: false },
       { ...this.createOrder([{id: 4, quantity: 1}, {id: 5, quantity: 1}]), status: false },
       { ...this.createOrder([{id: 5, quantity: 2}]), status: false },
@@ -97,13 +97,17 @@ export class Orders {
     }));
 
     const totals = this.calculateOrderTotals(items);
-
     let id = this.getNextOrderId();
+<<<<<<< HEAD
     const minTime = 30000
     let time = totals.reward * 200;
+=======
+    const minTime = 60000
+    let time = totals.reward * 1000
+>>>>>>> 414671608f05a5baf2230ae616af1a5be672d07f
     if(time < minTime) time = minTime
 
-    const timeSeconds = Math.round(time / 1000 + 0.5);
+    const timeSeconds = Math.round(time);
     return { status: false , id: id, items: items, ...totals, time: time, initialTime: time, timeSeconds };
   }
 
@@ -221,21 +225,24 @@ export class Orders {
      * @return {Order} The newly created order.
      */
     static addOrder(items: {productId: number, quantity: number}[]): Order {
-        const newOrderItems: OrderItem[] = [];
+      if (items.length === 0) {
+        return this.generateRandomOrder();
+      }
+      const newOrderItems: OrderItem[] = [];
 
-        for (const item of items) {
-            const product = Products.getProductById(item.productId);
-            if (!product) {
-                throw new Error(`Product with ID ${item.productId} not found`);
-            }
-            newOrderItems.push({product: product, quantity: item.quantity});
-        }
-        const newOrder: Order = {
-            ...this.createOrder(newOrderItems.map(item => ({id: item.product.id, quantity: item.quantity}))),
-            status: false
-        };
-        this.ordersList$.next([...this.ordersList$.getValue(), newOrder]);
-        return newOrder;
+      for (const item of items) {
+          const product = Products.getProductById(item.productId);
+          if (!product) {
+              throw new Error(`Product with ID ${item.productId} not found`);
+          }
+          newOrderItems.push({product: product, quantity: item.quantity});
+      }
+      const newOrder: Order = {
+          ...this.createOrder(newOrderItems.map(item => ({id: item.product.id, quantity: item.quantity}))),
+          status: false
+      };
+      this.ordersList$.next([...this.ordersList$.getValue(), newOrder]);
+      return newOrder;
     }
 
 
@@ -246,29 +253,61 @@ export class Orders {
      * @return {Order} The newly created order with randomly selected products and quantities.
      */
     static generateRandomOrder(): Order {
-        const productCount = Math.floor(Math.random() * 3) + 1;
-        const items: {productId: number, quantity: number}[] = [];
+        // This implementation assumes a static method `Products.getAllProducts()` exists, returning all products.
+        // This is necessary to properly filter products by their stage.
+        const availableProducts = Products.getAllProducts().filter(p => p.unlocked && p.stage > 1);
 
-        let totalCosts: number = 0;
-        const playerMoney:number = Orders.PlayerService.getMoney();
+        const highStageProducts = availableProducts.filter(p => p.stage > 2);
+        const mediumStageProducts = availableProducts.filter(p => p.stage === 2);
 
-        for (let i = 0; i < productCount; i++) {
-            const randomProductId = Products.getRandomProductId();
-            const product = Products.getProductById(randomProductId)!;
-            let randomQuantity = Math.floor(Math.random() * 3) + 1;
-            while(totalCosts + (product.costs * randomQuantity) > playerMoney && randomQuantity > 0){
-              randomQuantity--;
-            }
-            totalCosts += product.costs * randomQuantity;
+        let items: {productId: number, quantity: number}[] = [];
+        let productCount = 0;
+        let productsToChooseFrom: Product[] = [];
 
-            if(!items.some(item => item.productId === randomProductId)) {
-              if(randomQuantity > 0)
-                items.push({productId: randomProductId, quantity: randomQuantity});
-            }
+        const canDoHighStage = highStageProducts.length > 0;
+        const canDoMediumStage = mediumStageProducts.length > 0;
+
+        // Decide if we create a high-stage (stage > 2) or medium-stage (stage = 2) order
+        const createHighStageOrder = canDoHighStage && (Math.random() < 0.8 || !canDoMediumStage);
+
+        if (createHighStageOrder) {
+            // Order will have 1 product with stage > 2
+            productCount = 1;
+            productsToChooseFrom = highStageProducts;
+        } else if (canDoMediumStage) {
+            // Order will have 1 or 2 products with stage = 2
+            productCount = Math.min(mediumStageProducts.length, Math.floor(Math.random() * 2) + 1);
+            productsToChooseFrom = mediumStageProducts;
         }
 
-        if(totalCosts == 0){
-          Orders.GameService.gameEnd = true;
+        if (productsToChooseFrom.length > 0) {
+            const playerMoney: number = Orders.PlayerService.getMoney();
+            let totalCosts: number = 0;
+            const usedProductIds = new Set<number>();
+
+            for (let i = 0; i < productCount; i++) {
+                if (usedProductIds.size >= productsToChooseFrom.length) break;
+
+                let product: Product;
+                do {
+                    const randomIndex = Math.floor(Math.random() * productsToChooseFrom.length);
+                    product = productsToChooseFrom[randomIndex];
+                } while (usedProductIds.has(product.id));
+
+                usedProductIds.add(product.id);
+
+                let randomQuantity = Math.floor(Math.random() * 3) + 1;
+                while(totalCosts + (product.costs * randomQuantity) > playerMoney && randomQuantity > 0){
+                    randomQuantity--;
+                }
+
+                if (randomQuantity > 0) {
+                    if(!items.some(item => item.productId === product.id)) {
+                        totalCosts += product.costs * randomQuantity;
+                        items.push({productId: product.id, quantity: randomQuantity});
+                    }
+                }
+            }
         }
 
         return Orders.addOrder(items);

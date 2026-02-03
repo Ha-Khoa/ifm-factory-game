@@ -38,24 +38,24 @@ export class Products {
       return;
     }
     this.productsList = [
-      new Product(1, "Kunstoff", 6, 15, 5, true, "/images/Products/raw-plastic.png"),
-      new Product(2, "Silizium", 16, 20, 9, true, "/images/Products/raw-silicon.png"),
+      Product.createBaseProduct(1, "Kunstoff", 10, 10, 5, 1, true, "/images/Products/raw-plastic.png"),
+      Product.createBaseProduct(2, "Silizium", 20, 20, 10, 1, true, "/images/Products/raw-silicon.png"),
       // new Product(3, "Kupfer Draht", 15, 22, 20, true, "/images/Products/copper-wire.png"),
-      new Product(4, "Kunststoffgehäuse", 50, 50, [{productId: 1, quantity: 2}], true, "/images/Products/plastic-case.png"),
-      new Product(5, "Platine", 120, 150, [{productId: 2, quantity: 1}, {productId: 18, quantity: 1}], true, "/images/temp/circuitBoard1.png"),
+      Product.createComplexProduct(4, "Kunststoffgehäuse", 50, 50, [{productId: 1, quantity: 2}], 2, true, "/images/Products/plastic-case.png"),
+      Product.createComplexProduct(5, "Platine", 120, 150, [{productId: 2, quantity: 1}, {productId: 18, quantity: 1}], 2, true, "/images/temp/circuitBoard1.png"),
       // new Product(6, "Basissensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png"),
-      new Product(7, "Eisen", 30, 50, 20, true, "/images/Products/iron-ingot.png"),
-      new Product(8, "Eisen Zahnrad", 60, 100, [{productId: 7, quantity: 1}], true, "/images/Products/iron-gear.png"),
+      Product.createBaseProduct(7, "Eisen", 20, 20, 10, 1, true, "/images/Products/iron-ingot.png"),
+      // Product.createComplexProduct(8, "Eisen Zahnrad", 60, 100, [{productId: 7, quantity: 1}], 2, true, "/images/Products/iron-gear.png"),
       // new Product(9, "Elektromotor", 200, 300, [{productId: 18, quantity: 2}, {productId: 8, quantity: 1}], true, "/images/Products/electric-motor.png"),
-      new Product(10, "Photoelektrischer Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 4, quantity: 1}, {productId: 15, quantity: 1}, {productId: 11, quantity: 1}],true, "/images/Products/photo_sensor.png"),
-      new Product(11, "Photo Diode", 30, 30, [{productId: 18, quantity: 1}, {productId: 2, quantity: 1}],true, "/images/Products/photo_diode.png"),
-      new Product(12, "Temperatur Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 14, quantity: 1}, {productId: 15, quantity: 1}, {productId: 17, quantity: 1}],true, "/images/Products/temperatur_sensor.png", 0, 0.6 * Gamefield.fieldsize),
-      new Product(13, "Druck Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 14, quantity: 1}, {productId: 15, quantity: 1}, {productId: 16, quantity: 1}],true, "/images/Products/druck_sensor.png", 0, 0.6 * Gamefield.fieldsize),
-      new Product(14, "Eisengehäuse", 15, 15, [{productId: 7, quantity: 1}], true, "/images/Products/iron-case.png"),
-      new Product(15, "Kabel", 15, 15, [{productId: 18, quantity: 1}, {productId: 1,  quantity: 1}], true, "/images/temp/cable.png"),
-      new Product(16, "Mess Zelle", 15, 15, [{productId: 14, quantity: 1}, {productId: 2, quantity: 1}], true, "/images/Products/messzelle.png"),
-      new Product(17, "Thermoelement", 15, 15, [{productId: 7, quantity: 1}, {productId: 18, quantity: 1}], true, "/images/Products/thermoelement.png"),
-      new Product(18, "Kupfer", 15, 15, 20, true, "/images/Products/copper.png")
+      Product.createComplexProduct(10, "Photoelektrischer Sensor", 150, 150, [{productId: 5, quantity: 1}, {productId: 4, quantity: 1}, {productId: 15, quantity: 1}, {productId: 11, quantity: 1}], 3,true, "/images/Products/photo_sensor.png"),
+      Product.createComplexProduct(11, "Photo Diode", 40, 40, [{productId: 18, quantity: 1}, {productId: 2, quantity: 1}], 2,true, "/images/Products/photo_diode.png"),
+      Product.createComplexProduct(12, "Temperatur Sensor", 150, 150, [{productId: 5, quantity: 1}, {productId: 14, quantity: 1}, {productId: 15, quantity: 1}, {productId: 17, quantity: 1}], 3,true, "/images/Products/temperatur_sensor.png", 0, 0.6 * Gamefield.fieldsize),
+      Product.createComplexProduct(13, "Druck Sensor", 150, 150, [{productId: 5, quantity: 1}, {productId: 14, quantity: 1}, {productId: 15, quantity: 1}, {productId: 16, quantity: 1}], 3,true, "/images/Products/druck_sensor.png", 0, 0.6 * Gamefield.fieldsize),
+      Product.createComplexProduct(14, "Eisengehäuse", 20, 20, [{productId: 7, quantity: 1}], 2, true, "/images/Products/iron-case.png"),
+      Product.createComplexProduct(15, "Kabel", 30, 30, [{productId: 18, quantity: 1}, {productId: 1,  quantity: 1}], 2, true, "/images/Products/cable.png"),
+      Product.createComplexProduct(16, "Mess Zelle", 40, 40, [{productId: 14, quantity: 1}, {productId: 2, quantity: 1}], 2, true, "/images/Products/messzelle.png"),
+      Product.createComplexProduct(17, "Thermoelement", 40, 40, [{productId: 7, quantity: 1}, {productId: 18, quantity: 1}], 2, true, "/images/Products/thermoelement.png"),
+      Product.createBaseProduct(18, "Kupfer", 20, 20, 10, 1, true, "/images/Products/copper.png")
     ];
     this.isInitialized = true;
   }
