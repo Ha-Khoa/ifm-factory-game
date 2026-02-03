@@ -22,11 +22,9 @@ export class Product {
   private _renderObject!: RenderObject;
   private _size: number;
   private _z : number;
+  private _stage: number;
 
-  constructor(id: number, name: string,grants: number, reward: number, costs: number, unlocked?:boolean, img? :string, z?: number, size?: number);
-  constructor(id: number, name: string, grants: number, reward: number, requires: {productId: number, quantity:number}[], unlocked?:boolean, img? :string, z?: number,size?: number);
-
-  constructor(id: number, name: string, grants: number, reward: number, arg5: number | {productId: number, quantity:number}[], unlocked:boolean = false, img? :string, z?: number, size?: number) {
+  private constructor(id: number, name: string, grants: number, reward: number, arg5: number | {productId: number, quantity:number}[], stage: number, unlocked:boolean = false, img? :string, z?: number, size?: number) {
 
     // Check what type of constructor was called
     if (typeof arg5 === "number") {
@@ -47,6 +45,7 @@ export class Product {
     this._grants = grants;
     this._reward = reward;
     this._unlocked = unlocked;
+    this._stage = stage;
     this._renderObject = new RenderObject(
       `product:${this._name}:${this._instanceId}`,
       RenderType.IMG,
@@ -63,6 +62,14 @@ export class Product {
     );
   }
 
+  public static createBaseProduct(id: number, name: string, grants: number, reward: number, costs: number, stage: number, unlocked?:boolean, img? :string, z?: number, size?: number): Product {
+    return new Product(id, name, grants, reward, costs, stage, unlocked, img, z, size);
+  }
+
+  public static createComplexProduct(id: number, name: string, grants: number, reward: number, requires: {productId: number, quantity:number}[], stage: number, unlocked?:boolean, img? :string, z?: number, size?: number): Product {
+    return new Product(id, name, grants, reward, requires, stage, unlocked, img, z, size);
+  }
+
   init(position: Coordinates) {
     this._position = position;
     this._renderObject.x = position.x;
@@ -73,8 +80,8 @@ export class Product {
 
   copy(): Product {
     if(this._requires.length > 0)
-      return new Product(this._id, this._name, this._grants, this._reward, this._requires, this._unlocked, this._img, this._z, this._size);
-    return new Product(this._id, this._name, this._grants, this._reward, this._costs, this._unlocked, this._img, this._z, this._size);
+      return Product.createComplexProduct(this._id, this._name, this._grants, this._reward, this._requires, this._stage, this._unlocked, this._img, this._z, this._size);
+    return Product.createBaseProduct(this._id, this._name, this._grants, this._reward, this.costs, this._stage, this._unlocked, this._img, this._z, this._size);
   }
 
   destroy() {
@@ -138,4 +145,5 @@ export class Product {
   set requires(value: {productId: number, quantity:number}[]) { this._requires = value; }
   get unlocked(): boolean { return this._unlocked; }
   private set unlocked(value: boolean) { this._unlocked = value; }
+  get stage(): number { return this._stage; }
 }

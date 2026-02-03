@@ -271,6 +271,7 @@ export class GameService {
     Orders.initializeOrders();
     Orders.setPlayerService(this.playerService);
     Orders.setGameService(this);
+    if( this._twoPlayerMode) RenderingService.instance().gameFov = 1.5
     const loop = () => {
       if (!this.GameRunning) return;
 
