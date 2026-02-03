@@ -98,13 +98,8 @@ export class Orders {
 
     const totals = this.calculateOrderTotals(items);
     let id = this.getNextOrderId();
-<<<<<<< HEAD
-    const minTime = 30000
-    let time = totals.reward * 200;
-=======
     const minTime = 60000
     let time = totals.reward * 1000
->>>>>>> 414671608f05a5baf2230ae616af1a5be672d07f
     if(time < minTime) time = minTime
 
     const timeSeconds = Math.round(time);
