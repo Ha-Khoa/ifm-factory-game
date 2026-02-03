@@ -81,7 +81,7 @@ export class Gamefield {
                     RenderType.IMG,
                     1.1 * Gamefield.fieldsize,
                     25.4 * Gamefield.fieldsize,
-                    0, 
+                    0,
                     0.7 * Gamefield.fieldsize,
                     1.5 * Gamefield.fieldsize,
                     -500, // Draw priority
@@ -97,7 +97,7 @@ export class Gamefield {
                     0.7 * Gamefield.fieldsize,
                     1.5 * Gamefield.fieldsize,
                     -500, // Draw priority
-                    "/images/temp/plant.png", 
+                    "/images/temp/plant.png",
                     undefined
                 ));
         // Generate procedural floor with a checkerboard pattern
@@ -178,7 +178,7 @@ export class Gamefield {
                     -2280,
                     undefined, // No image
                     undefined,
-                    "#202020", 
+                    "#202020",
                     ["#181818"]
                 ));
         }
@@ -359,18 +359,6 @@ export class Gamefield {
             undefined
         ))
         this.environmetObjects.push(new RenderObject(
-            `chef2`,
-            RenderType.CARD_BOARD,
-            7.5 * Gamefield.fieldsize,
-            0 * Gamefield.fieldsize,
-            80,
-            1 * Gamefield.fieldsize,
-            1 * Gamefield.fieldsize,
-            0,
-            "/images/chef2.png",
-            undefined
-        ))
-        this.environmetObjects.push(new RenderObject(
             `cocain`,
             RenderType.CARD_BOARD,
             6.5 * Gamefield.fieldsize,
@@ -481,7 +469,7 @@ export class Gamefield {
             layerColors
         ))
     }
-    
+
     }
 
     updateConveyorBelts(conveyorBelts: ConveyorBelt[]): void {
@@ -502,7 +490,7 @@ export class Gamefield {
     updatePrepMachines(prepMachines: PrepMachine[]): void {
         //Store the PrepMachines for later access
         this.prepMachinesList = prepMachines;
-        
+
         //Entfernt alte PrepMachines aus den interaktiven Objekten
         this.interactableObjects = this.interactableObjects.filter (obj => !(obj instanceof PrepMachine));
 
@@ -531,5 +519,5 @@ export class Gamefield {
 
 
 }
- 
+
 
