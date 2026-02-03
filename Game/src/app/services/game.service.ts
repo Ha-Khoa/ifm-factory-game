@@ -404,7 +404,7 @@ export class GameService {
           this.uiService.drawItemPopup(itemInRange, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
         } else {
           this.uiService.clearItemPopup();
-        }
+        }}
 
       if(this._twoPlayerMode && this.player2) {
         if (this.player2.inventory === null) {
@@ -416,11 +416,6 @@ export class GameService {
           } else {
             this.uiService.clearItemPopup();
         }}
-      }
-
-      } else {
-        // Wenn wir was tragen: Sicherstellen, dass das Popup weg ist!
-        this.uiService.clearItemPopup();
       }
 
 
