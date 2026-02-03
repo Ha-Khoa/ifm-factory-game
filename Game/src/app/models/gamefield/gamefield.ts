@@ -1234,6 +1234,7 @@ export class Gamefield {
             linecolor,
             []
         ))
+        
 
     }
 
@@ -1406,6 +1407,33 @@ export class Gamefield {
             layerColors
         ))
     }
+    for(let i = 0; i < 5; i++)
+    {
+    this.interactableObjects.push(new RenderObject(
+            `line`,
+            RenderType.THREE_D_IMG,
+            (11 + i) * Gamefield.fieldsize,
+            12 * Gamefield.fieldsize,
+            80,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            0,
+            "/images/temp/server.png"
+        ))
+    }
+
+    this.interactableObjects.push(new RenderObject(
+            `line`,
+            RenderType.THREE_D_IMG,
+            19.5 * Gamefield.fieldsize,
+            10 * Gamefield.fieldsize,
+            200,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize,
+            -550,
+            "/images/temp/robotArm.png"
+        ))
+
 
     }
 

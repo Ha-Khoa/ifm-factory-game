@@ -52,7 +52,7 @@ export class Products {
       new Product(12, "Temperatur Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 14, quantity: 1}, {productId: 15, quantity: 1}, {productId: 17, quantity: 1}],true, "/images/Products/temperatur_sensor.png", 0, 0.6 * Gamefield.fieldsize),
       new Product(13, "Druck Sensor", 120, 150, [{productId: 5, quantity: 1}, {productId: 14, quantity: 1}, {productId: 15, quantity: 1}, {productId: 16, quantity: 1}],true, "/images/Products/druck_sensor.png", 0, 0.6 * Gamefield.fieldsize),
       new Product(14, "Eisengehäuse", 15, 15, [{productId: 7, quantity: 1}], true, "/images/Products/iron-case.png"),
-      new Product(15, "Kabel", 15, 15, [{productId: 18, quantity: 1}, {productId: 1,  quantity: 1}], true, "/images/Products/cable.png"),
+      new Product(15, "Kabel", 15, 15, [{productId: 18, quantity: 1}, {productId: 1,  quantity: 1}], true, "/images/temp/cable.png"),
       new Product(16, "Mess Zelle", 15, 15, [{productId: 14, quantity: 1}, {productId: 2, quantity: 1}], true, "/images/Products/messzelle.png"),
       new Product(17, "Thermoelement", 15, 15, [{productId: 7, quantity: 1}, {productId: 18, quantity: 1}], true, "/images/Products/thermoelement.png"),
       new Product(18, "Kupfer", 15, 15, 20, true, "/images/Products/copper.png")
