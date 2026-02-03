@@ -6,6 +6,7 @@ export class GameOverScreen {
   private animationProgress: number = 0; // 0 to 1
   private startTime: number = 0;
   private animationDuration: number = 1000; // 1 second animation
+  public gameEndText: string = 'Zeit ist abgelaufen!';
 
   constructor(
     private ctx: CanvasRenderingContext2D,
@@ -186,7 +187,7 @@ export class GameOverScreen {
     this.ctx.textBaseline = 'middle';
     this.ctx.shadowColor = '#FF6600';
     this.ctx.shadowBlur = 20;
-    this.ctx.fillText('TIME IS UP!', centerX, currentY);
+    this.ctx.fillText(this.gameEndText, centerX, currentY);
     this.ctx.restore();
 
     currentY += 100;

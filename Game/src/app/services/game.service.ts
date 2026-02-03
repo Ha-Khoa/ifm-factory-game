@@ -34,6 +34,11 @@ export class GameService {
   public isPaused: boolean = false;
   static gamePad: boolean = true;
 
+  public static gameOverNotEnoughMoney: boolean = false;
+
+  private generateMoneyIntervall: number = 2000;
+  private lastMoneyGenTime: number = 0;
+
   // Gibt an, ob das Spiel aktuell läuft
   public GameRunning!: boolean;
 
@@ -51,7 +56,7 @@ export class GameService {
   private conveyorBeltManager!: ConveyorBeltManager;
   private prepMachine!: PrepMachineManager;
 
-  private _gameEnd: boolean = false;
+  public static _gameEnd: boolean = false;
 
   private ctxUI!: CanvasRenderingContext2D;
 
@@ -102,7 +107,7 @@ export class GameService {
     this.ctxUI = ctxUI;
     this.gamefield = new Gamefield();
     Products.init();
-
+    this.lastMoneyGenTime = 0;
     // Initialisiere Canvas und Rendering
     this.ctx = ctx;
     this.angle = 30 / 360 * 2 * Math.PI; // 30 Grad in Radiant
@@ -283,9 +288,9 @@ export class GameService {
       // Bildschirm löschen
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
       this.uiService.clearAll();
-      if((this.gameEnd || this.uiService.drawTimer()) && !this.interactableManager.checkPlayerInSlotMachineArea(this.player))
+      if((GameService._gameEnd || this.uiService.drawTimer()) && !this.interactableManager.checkPlayerInSlotMachineArea(this.player))
       {
-        this.gameEnd = true;
+        GameService._gameEnd = true;
         Player._cameraFix = false;
         if(this.interactableManager.submissionArea.finishGameAnimation())
         {
@@ -293,6 +298,8 @@ export class GameService {
           return;
         }
       }
+
+      this.checkGenMoney();
 
       // Handle Inputs
       const player1Input = this.inputService.getPlayerInput(0);
@@ -337,7 +344,7 @@ export class GameService {
       }
       const zoomFinished = !playerInteractSlotMachine ? RenderingService.instance().zoomOut() : false;
 
-      if(!playerInteractSlotMachine && zoomFinished) this.player.cameraFix = true;
+      if(!playerInteractSlotMachine && zoomFinished && !GameService._gameEnd) this.player.cameraFix = true;
 
       RenderingService.instance().sortRenderingBuffer();
       RenderingService.instance().convertToCameraPOV(this.player.camera);
@@ -428,6 +435,23 @@ export class GameService {
     requestAnimationFrame(loop);
   }
 
+
+  checkGenMoney()
+  {
+    let dt;
+    if(!RenderingService.instance().deltaTime) dt = 1;
+    else dt = RenderingService.instance().deltaTime
+    this.lastMoneyGenTime += dt;
+    console.log(this.lastMoneyGenTime)
+      if(this.playerService.getMoney() < 10 && this.lastMoneyGenTime >= this.generateMoneyIntervall)
+      {
+        this.playerService.addMoney(1);
+        this.lastMoneyGenTime = 0;
+      }
+  }
+
+
+
   stopGame() {
     this.GameRunning = false;
     // this.inputService.stop();
@@ -439,11 +463,11 @@ export class GameService {
   }
 
   get gameEnd(): boolean {
-    return this._gameEnd
+    return GameService._gameEnd;
   }
 
   set gameEnd(value: boolean) {
-    this._gameEnd = value
+    GameService._gameEnd = value
   }
 
   get twoPlayerMode(): boolean {

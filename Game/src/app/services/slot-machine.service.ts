@@ -5,6 +5,7 @@ import { Gamefield } from '../models/gamefield/gamefield';
 import { Player } from '../models/player/player';
 
 import { PlayerInput } from './input.service';
+import { GameService } from './game.service';
 
 export interface SlotIcon {
   img: string;
@@ -289,6 +290,10 @@ export class SlotMachineService {
     if(won > 0)
     {
       this._playerService.addMoney(won);
+    }
+    else if(won < 0)
+    {
+      GameService._gameEnd = true;
     }
   }
 
