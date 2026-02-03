@@ -42,7 +42,7 @@ export class Products {
       new Product(2, "Silizium", 16, 20, 9, true, "/images/Products/raw-silicon.png"),
       // new Product(3, "Kupfer Draht", 15, 22, 20, true, "/images/Products/copper-wire.png"),
       new Product(4, "Kunststoffgehäuse", 50, 50, [{productId: 1, quantity: 2}], true, "/images/Products/plastic-case.png"),
-      new Product(5, "Platine", 120, 150, [{productId: 2, quantity: 1}, {productId: 18, quantity: 1}], true, "/images/Products/circuit-board.png"),
+      new Product(5, "Platine", 120, 150, [{productId: 2, quantity: 1}, {productId: 18, quantity: 1}], true, "/images/temp/circuitBoard1.png"),
       // new Product(6, "Basissensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png"),
       new Product(7, "Eisen", 30, 50, 20, true, "/images/Products/iron-ingot.png"),
       new Product(8, "Eisen Zahnrad", 60, 100, [{productId: 7, quantity: 1}], true, "/images/Products/iron-gear.png"),
