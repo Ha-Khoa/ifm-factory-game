@@ -161,7 +161,7 @@ export class InputService {
       const axisX = gamepad1.axes[0];
       tutorialNext = tutorialNext || gamepad1.buttons[15].pressed || axisX > deadzone;
       tutorialPrev = tutorialPrev || gamepad1.buttons[14].pressed || axisX < -deadzone;
-      tutorialClose = tutorialClose || gamepad1.buttons[0].pressed || gamepad1.buttons[1].pressed;
+      tutorialClose = tutorialClose || gamepad1.buttons[3].pressed || gamepad1.buttons[1].pressed;
     }
 
     if (tutorialNext && !this.lastTutorialNext) this.tutorialNextSubject.next();
