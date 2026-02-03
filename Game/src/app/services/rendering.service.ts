@@ -168,22 +168,29 @@ export class RenderingService {
       }
       // Bild mit Wand
       else if (Obj.type === RenderType.IMG) {
+        let mirror = 1;
+          this._ctx.save();
+          if (Obj.animationDirection === Direction.LEFT) {
+            mirror = -1;
+            this._ctx.scale(-1, 1);
+          }
         this._ctx.drawImage(
           this._images[Obj.img!],
-          Math.round(xObj),
+          mirror * Math.round(xObj),
           yProjection,
-          objWidth,
+          mirror * objWidth,
           objHeight * Math.cos(this._angle)
         );
         if (Obj.imgWall) {
           this._ctx.drawImage(
             this._images[Obj.imgWall!],
-            Math.round(xObj),
+            mirror * Math.round(xObj),
             yProjection + Obj.height * Math.cos(this._angle) * this._fov,
-            objWidth,
+            mirror * objWidth,
             this._fov * Obj.z * Math.sin(this._angle)
           );
         }
+        this._ctx.restore();
         
         // Render Produkt auf PrepMachine
         if (Obj instanceof PrepMachine) {
@@ -212,15 +219,22 @@ export class RenderingService {
         }
       }
       else if (Obj.type === RenderType.CARD_BOARD) {
+        let mirror = 1;
+          this._ctx.save();
+          if (Obj.animationDirection === Direction.LEFT) {
+            mirror = -1;
+            this._ctx.scale(-1, 1);
+          }
           if (Obj.img) {
             this._ctx.drawImage(
               this._images[Obj.img!],
-              Math.round(xObj),
+              mirror * Math.round(xObj),
               yProjection,
-              objWidth,
+              mirror * objWidth,
               this._fov * Obj.height * Math.sin(this._angle)
             );
           }
+          this._ctx.restore();
       }
       // Slot Machine Rendering
       else if (Obj.type === RenderType.SLOT_MACHINE) {

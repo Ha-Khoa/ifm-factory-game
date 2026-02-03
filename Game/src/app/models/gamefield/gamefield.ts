@@ -4,6 +4,7 @@ import { RenderObject } from "../rendering/render-object";
 import { RenderingService } from "../../services/rendering.service";
 import { ConveyorBelt } from "../conveyor-belt/conveyor-belt";
 import { RenderType } from "../../enums/render-type";
+import { Direction } from "../../enums/direction";
 import { PrepMachine } from "../preProcess/prep-machine";
 
 /**
@@ -1436,8 +1437,8 @@ export class Gamefield {
     this.interactableObjects.push(new RenderObject(
             `robotArm`,
             RenderType.THREE_D_IMG,
-            6.5 * Gamefield.fieldsize,
-            19 * Gamefield.fieldsize,
+            1.5 * Gamefield.fieldsize,
+            17.5 * Gamefield.fieldsize,
             200,
             Gamefield.fieldsize * 2,
             Gamefield.fieldsize,
@@ -1489,18 +1490,67 @@ export class Gamefield {
             150,
             "/images/temp/tischUndStuhl.png"
         ))
-    
     this.interactableObjects.push(new RenderObject(
-            `lampe`,
+            `wassertank`,
             RenderType.THREE_D_IMG,
-            18.7 * Gamefield.fieldsize,
-            19.7 * Gamefield.fieldsize,
+            12.1 * Gamefield.fieldsize,
+            23 * Gamefield.fieldsize,
+            70,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize * 1.5,
             100,
-            Gamefield.fieldsize * 1,
-            Gamefield.fieldsize * 1,
-            150,
-            "/images/temp/lamp.png"
+            "/images/temp/wassertank.png"
         ))
+    this.interactableObjects.push(new RenderObject(
+            `pipe`,
+            RenderType.IMG,
+            12.85 * Gamefield.fieldsize,
+            20.8 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 0.65,
+            Gamefield.fieldsize * 3,
+            100,
+            "/images/temp/pipe-straight.png"
+        ))
+        this.interactableObjects[this.interactableObjects.length -1].animationDirection = Direction.LEFT;
+        this.interactableObjects.push(new RenderObject(
+            `pipe`,
+            RenderType.IMG,
+            12.85 * Gamefield.fieldsize,
+            17.8 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 0.65,
+            Gamefield.fieldsize * 3,
+            100,
+            "/images/temp/pipe-straight.png"
+        ))
+        this.interactableObjects[this.interactableObjects.length -1].animationDirection = Direction.LEFT;
+    this.interactableObjects.push(new RenderObject(
+            `pipe`,
+            RenderType.IMG,
+            12 * Gamefield.fieldsize,
+            16.1 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 1.5,
+            Gamefield.fieldsize * 1.7,
+            100,
+            "/images/temp/pipe-curve.png"
+        ))
+        this.interactableObjects[this.interactableObjects.length -1].animationDirection = Direction.LEFT;
+    this.interactableObjects.push(new RenderObject(
+            `pipe`,
+            RenderType.IMG,
+            8.9 * Gamefield.fieldsize,
+            16.1 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 3.1,
+            Gamefield.fieldsize * 0.7,
+            100,
+            "/images/temp/pipe-straight-horizontal.png"
+        ))
+    
+    
+    
 
 
     }
