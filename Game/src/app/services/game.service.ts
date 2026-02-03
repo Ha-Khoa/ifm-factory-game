@@ -382,7 +382,6 @@ export class GameService {
 
       // Draw machines Item Needs Popup
       if(!playerInteractSlotMachine && zoomFinished) this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov, Player.players);
-      else this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov, null);
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
       this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
       this.uiService.drawControls()
