@@ -50,6 +50,8 @@ export class UIService implements OnDestroy {
   private orderInitialTimes: Map<number, number> = new Map();
   private showOrders = true;
 
+  private render = true;
+
   constructor(private playerService: PlayerService) {}
 
   /**
