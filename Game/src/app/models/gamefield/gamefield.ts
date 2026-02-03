@@ -1374,6 +1374,23 @@ export class Gamefield {
             layerColors
         ))
     }
+    for(let i = 18; i < 30; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table`,
+            RenderType.RECT,
+            20 * Gamefield.fieldsize,
+            i * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
     for(let i = 4; i < 12; i++)
     {
         this.interactableObjects.push(new RenderObject(
@@ -1523,6 +1540,17 @@ export class Gamefield {
             RenderType.THREE_D_IMG,
             12.1 * Gamefield.fieldsize,
             23 * Gamefield.fieldsize,
+            70,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize * 1.5,
+            100,
+            "/images/temp/wassertank.png"
+        ))
+    this.interactableObjects.push(new RenderObject(
+            `wassertank`,
+            RenderType.THREE_D_IMG,
+            27 * Gamefield.fieldsize,
+            28 * Gamefield.fieldsize,
             70,
             Gamefield.fieldsize * 2,
             Gamefield.fieldsize * 1.5,
