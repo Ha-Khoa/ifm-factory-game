@@ -123,7 +123,7 @@ export class Products {
     for (let interactionObject of objects) {
 
       collision = Collision.checkCollision(new Hitbox(product.position, product.size, product.size), new Hitbox(new Coordinates(interactionObject.x, interactionObject.y), interactionObject.width, interactionObject.height))
-      if (collision && !interactionObject.name.startsWith("conveyor") && !interactionObject.name.startsWith("Machine")) {
+      if (collision && interactionObject.name.startsWith("table") ) {
 
         if (!this.checkItemOnTable(interactionObject, product)) {
           collisions.push(interactionObject)
