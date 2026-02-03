@@ -1340,19 +1340,29 @@ export class Gamefield {
             layerColors
         ))
     }
-<<<<<<< HEAD
     for(let i = 26; i < 30; i++)
-=======
-    for(let i = 19; i < 30; i++)
->>>>>>> gameDesign
     {
         this.interactableObjects.push(new RenderObject(
             `table`,
             RenderType.RECT,
             i * Gamefield.fieldsize,
-<<<<<<< HEAD
-            19 * Gamefield.fieldsize,
-=======
+    19 * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
+    for(let i = 19; i < 30; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table`,
+            RenderType.RECT,
+            i * Gamefield.fieldsize,
             12 * Gamefield.fieldsize,
             Gamefield.fieldsize,
             Gamefield.fieldsize,
@@ -1405,7 +1415,6 @@ export class Gamefield {
             RenderType.RECT,
             6 * Gamefield.fieldsize,
             i * Gamefield.fieldsize,
->>>>>>> gameDesign
             Gamefield.fieldsize,
             Gamefield.fieldsize,
             Gamefield.fieldsize,
