@@ -277,13 +277,20 @@ export class RenderingService {
       }
       //3D Bild
       else if (Obj.type === RenderType.THREE_D_IMG) {
+        let mirror = 1;
+          this._ctx.save();
+          if (Obj.animationDirection === Direction.LEFT) {
+            mirror = -1;
+            this._ctx.scale(-1, 1);
+          }
         this._ctx.drawImage(
           this._images[Obj.img!],
-          Math.round(xObj),
+          mirror * Math.round(xObj),
           yProjection,
-          objWidth,
+          objWidth * mirror,
           this._fov * Obj.height * Math.cos(this._angle) + this._fov * Obj.z * Math.sin(this._angle)
         );
+        this._ctx.restore();
       }
       //Flat GIF
       else if (Obj.type === RenderType.FLAT_GIF)

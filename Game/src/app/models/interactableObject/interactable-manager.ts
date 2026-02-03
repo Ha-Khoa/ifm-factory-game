@@ -48,7 +48,7 @@ export class InteractableManager {
       new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 11, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Thermoelement", "/images/machine3.png", "/images/wall.png",
                   [Direction.DOWN], Products.getProductById(17)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 0)),
       new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 16, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Messzelle", "/images/machine3.png", "/images/wall.png",
-                  [Direction.UP], Products.getProductById(16)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 0))
+                  [Direction.UP], Products.getProductById(16)!, RenderType.THREE_D_IMG, new Coordinates(-Gamefield.fieldsize, 0, 0))
     ];
     private _slotMachine!: SlotMachine;
 

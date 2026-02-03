@@ -1291,7 +1291,7 @@ export class Gamefield {
             7.6 * Gamefield.fieldsize,
             0 * Gamefield.fieldsize,
             80,
-            0.8 * Gamefield.fieldsize,
+            1 * Gamefield.fieldsize,
             1.2 * Gamefield.fieldsize,
             0,
             "/images/chef2.png",
@@ -1310,9 +1310,9 @@ export class Gamefield {
             undefined
         ))
         this.environmetObjects.push(new RenderObject(
-            `cocain`,
+            `joint`,
             RenderType.CARD_BOARD,
-            7.9 * Gamefield.fieldsize,
+            8 * Gamefield.fieldsize,
             0 * Gamefield.fieldsize,
             62,
             0.9 * Gamefield.fieldsize,
@@ -1408,6 +1408,74 @@ export class Gamefield {
             layerColors
         ))
     }
+    for(let i = 19; i < 30; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table`,
+            RenderType.RECT,
+            i * Gamefield.fieldsize,
+            12 * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
+    for(let i = 4; i < 12; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table`,
+            RenderType.RECT,
+            15 * Gamefield.fieldsize,
+            i * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
+    for(let i = 10; i < 15; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table`,
+            RenderType.RECT,
+            i * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
+    for(let i = 4; i < 13; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table`,
+            RenderType.RECT,
+            6 * Gamefield.fieldsize,
+            i * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
     for(let i = 0; i < 5; i++)
     {
     this.interactableObjects.push(new RenderObject(
@@ -1445,7 +1513,18 @@ export class Gamefield {
             -550,
             "/images/temp/robotArm.png"
         ))
-
+    this.interactableObjects.push(new RenderObject(
+            `robotArm`,
+            RenderType.THREE_D_IMG,
+            10 * Gamefield.fieldsize,
+            8 * Gamefield.fieldsize,
+            200,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize,
+            -550,
+            "/images/temp/robotArm.png"
+        ))
+    this.interactableObjects[this.interactableObjects.length -1].animationDirection = Direction.LEFT;
     this.interactableObjects.push(new RenderObject(
             `car`,
             RenderType.THREE_D_IMG,
