@@ -380,12 +380,13 @@ export class GameService {
       }
       this.interactableManager.submissionArea.updateAnimation();
 
-      // Draw machines Item Needs Popup
-      if(!playerInteractSlotMachine && zoomFinished) this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov, Player.players);
+      if(!playerInteractSlotMachine && zoomFinished) {
+      this.uiService.drawMachineNeedsPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov, Player.players);
       this.uiService.drawMachineProducingPopup(this.interactableManager.getMachines(), [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
       this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
       this.uiService.drawControls()
-      this.uiService.drawOrder(); // Add this line
+      this.uiService.drawOrder();
+      }
 
       // Orders
       Orders.updateOrderTime();
