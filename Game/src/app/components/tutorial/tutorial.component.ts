@@ -15,10 +15,13 @@ export class TutorialComponent implements OnInit, OnDestroy {
 
 
   slides: string[] = [
-    '/images/tutorial/Screen1.png', 
-    '/images/tutorial/Screen2.png',
-    '/images/tutorial/Screen3.png',
-    '/images/tutorial/Screen4.png',
+    '/images/tutorial/screen1.png', 
+    '/images/tutorial/screen2.png',
+    '/images/tutorial/screen3.png',
+    '/images/tutorial/screen4.png',
+    '/images/tutorial/screen5.png',
+    '/images/tutorial/screen6.png',
+    '/images/tutorial/screen7.png',
   ];
   
   currentSlide = 0;
