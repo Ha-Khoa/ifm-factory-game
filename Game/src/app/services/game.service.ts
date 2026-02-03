@@ -308,35 +308,9 @@ export class GameService {
         }
       }
 
-      // Update-Phase
-      this.uiService.clearMachinePopUp();
-      RenderingService.instance().updateFPS()
-      this.player.changeVelocity();
-      this.player.updatePlayer(this._twoPlayerMode);
-      this.interactableManager.checkForInteraction(this.player);
-      this.player.pickProduct();
 
-      const player1WasHolding = this.player.inventory !== null;
-      this.player.dropProduct();
-      if (player1WasHolding && this.player.inventory === null) {
-        this.soundService.playSound('drop_sound');
-      }
 
-      if(this._twoPlayerMode && this.player2)
-      {
-        this.player2.changeVelocity();
-        this.player2.updatePlayer(this._twoPlayerMode);
-        this.interactableManager.checkForInteraction(this.player2);
-        this.player2.pickProduct();
-        const player2WasHolding = this.player2.inventory !== null;
-        this.player2.dropProduct();
-        if (player2WasHolding && this.player2.inventory === null) {
-          this.soundService.playSound('drop_sound');
-        }
-        this.player2.render();
-        this.player2.updateProductInHand();
 
-      }
 
       this.conveyorBeltManager.update();
 
@@ -386,6 +360,36 @@ export class GameService {
       this.uiService.drawPlayerThoughts(this.player, [RenderingService.instance().xOffset, RenderingService.instance().yOffset], RenderingService.instance().fov);
       this.uiService.drawControls()
       this.uiService.drawOrder();
+      }
+
+      // Update-Phase
+      this.uiService.clearMachinePopUp();
+      RenderingService.instance().updateFPS()
+      this.player.changeVelocity();
+      this.player.updatePlayer(this._twoPlayerMode);
+      this.interactableManager.checkForInteraction(this.player);
+      this.player.pickProduct();
+
+      const player1WasHolding = this.player.inventory !== null;
+      this.player.dropProduct();
+      if (player1WasHolding && this.player.inventory === null) {
+        this.soundService.playSound('drop_sound');
+      }
+
+      if(this._twoPlayerMode && this.player2)
+      {
+        this.player2.changeVelocity();
+        this.player2.updatePlayer(this._twoPlayerMode);
+        this.interactableManager.checkForInteraction(this.player2);
+        this.player2.pickProduct();
+        const player2WasHolding = this.player2.inventory !== null;
+        this.player2.dropProduct();
+        if (player2WasHolding && this.player2.inventory === null) {
+          this.soundService.playSound('drop_sound');
+        }
+        this.player2.render();
+        this.player2.updateProductInHand();
+
       }
 
       // Orders
