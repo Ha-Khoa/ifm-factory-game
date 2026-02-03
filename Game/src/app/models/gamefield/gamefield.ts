@@ -309,6 +309,932 @@ export class Gamefield {
             linecolor,
             []
         ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            9 * Gamefield.fieldsize,
+            15 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 7,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            9 * Gamefield.fieldsize,
+            15 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 2,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            8 * Gamefield.fieldsize - 4,
+            15 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 2 + 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            8 * Gamefield.fieldsize,
+            17 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize + 4,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            6 * Gamefield.fieldsize,
+            15 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            9 * Gamefield.fieldsize,
+            11 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 2,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            8 * Gamefield.fieldsize - 4,
+            11 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 2 + 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            8 * Gamefield.fieldsize,
+            11 * Gamefield.fieldsize - 4,
+            0,
+            Gamefield.fieldsize + 4,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            6 * Gamefield.fieldsize,
+            13 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            9 * Gamefield.fieldsize,
+            13 * Gamefield.fieldsize - 4,
+            0,
+            Gamefield.fieldsize * 7,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            6 * Gamefield.fieldsize,
+            15 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 6,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize,
+            21 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 4 + 4,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize - 4,
+            20 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize + 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize - 4,
+            20 * Gamefield.fieldsize - 4,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            4 * Gamefield.fieldsize - 4,
+            16 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+
+
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize,
+            16 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize - 4,
+            15 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize + 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize - 4,
+            15 * Gamefield.fieldsize - 4,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            4 * Gamefield.fieldsize - 4,
+            11 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+
+
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize,
+            11 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize - 4,
+            10 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize + 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize - 4,
+            10 * Gamefield.fieldsize - 4,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            4 * Gamefield.fieldsize - 4,
+            6 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+
+
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize - 4,
+            6 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize - 4,
+            5 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize + 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize - 4,
+            5 * Gamefield.fieldsize - 4,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            6 * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 9,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            4 * Gamefield.fieldsize - 4,
+            4 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            6 * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            8 * Gamefield.fieldsize - 4,
+            4 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 2,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            9 * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 2 + 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            8 * Gamefield.fieldsize - 4,
+            6 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize + 4,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            9 * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 7,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            16 * Gamefield.fieldsize - 4,
+            4 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 9,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            19 * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            19 * Gamefield.fieldsize,
+            8 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 5,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            19 * Gamefield.fieldsize,
+            8 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 3,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            19 * Gamefield.fieldsize,
+            5 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 3,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            19 * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            19 * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 2,
+            4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            21 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 2 + 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            20 * Gamefield.fieldsize - 4,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize ,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            20 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            15 * Gamefield.fieldsize,
+            3 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 5,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+
+
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            14 * Gamefield.fieldsize - 4,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            15 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize ,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            14 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            10 * Gamefield.fieldsize - 4,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            11 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize ,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            10 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            11 * Gamefield.fieldsize,
+            3 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 3,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+
+
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            6 * Gamefield.fieldsize - 4,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            7 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize ,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            6 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            7 * Gamefield.fieldsize,
+            3 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 3,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+
+
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize - 4,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 2 + 4,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            3 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize ,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            2 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            3 * Gamefield.fieldsize,
+            3 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 3,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            22 * Gamefield.fieldsize - 4,
+            1 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            22 * Gamefield.fieldsize - 4,
+            8 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            22 * Gamefield.fieldsize,
+            1 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 6,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            22 * Gamefield.fieldsize - 4,
+            12 * Gamefield.fieldsize,
+            0,
+            Gamefield.fieldsize * 6 + 4,
+            4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            28 * Gamefield.fieldsize,
+            1 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize * 11 + 4,
+            -100,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        
 
     }
 
@@ -481,6 +1407,101 @@ export class Gamefield {
             layerColors
         ))
     }
+    for(let i = 0; i < 5; i++)
+    {
+    this.interactableObjects.push(new RenderObject(
+            `server`,
+            RenderType.THREE_D_IMG,
+            (11 + i) * Gamefield.fieldsize,
+            12 * Gamefield.fieldsize,
+            80,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            0,
+            "/images/temp/server.png"
+        ))
+    }
+
+    this.interactableObjects.push(new RenderObject(
+            `robotArm`,
+            RenderType.THREE_D_IMG,
+            19.5 * Gamefield.fieldsize,
+            10 * Gamefield.fieldsize,
+            200,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize,
+            -550,
+            "/images/temp/robotArm.png"
+        ))
+    this.interactableObjects.push(new RenderObject(
+            `robotArm`,
+            RenderType.THREE_D_IMG,
+            6.5 * Gamefield.fieldsize,
+            19 * Gamefield.fieldsize,
+            200,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize,
+            -550,
+            "/images/temp/robotArm.png"
+        ))
+
+    this.interactableObjects.push(new RenderObject(
+            `car`,
+            RenderType.THREE_D_IMG,
+            3.75 * Gamefield.fieldsize,
+            2 * Gamefield.fieldsize,
+            50,
+            Gamefield.fieldsize * 1.75,
+            Gamefield.fieldsize * 0.75,
+            100,
+            "/images/temp/car.png"
+        ))
+     this.interactableObjects.push(new RenderObject(
+            `toolBox`,
+            RenderType.THREE_D_IMG,
+            20.15 * Gamefield.fieldsize,
+            4.4 * Gamefield.fieldsize,
+            35,
+            Gamefield.fieldsize * 0.8,
+            Gamefield.fieldsize * 0.4,
+            150,
+            "/images/temp/toolBox.png"
+        ))
+    this.interactableObjects.push(new RenderObject(
+            `tischUndStuehle`,
+            RenderType.THREE_D_IMG,
+            23 * Gamefield.fieldsize,
+            25 * Gamefield.fieldsize,
+            50,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize * 1,
+            150,
+            "/images/temp/tischUndStuhl.png"
+        ))
+    this.interactableObjects.push(new RenderObject(
+            `tischUndStuehle`,
+            RenderType.THREE_D_IMG,
+            23 * Gamefield.fieldsize,
+            20 * Gamefield.fieldsize,
+            50,
+            Gamefield.fieldsize * 2,
+            Gamefield.fieldsize * 1,
+            150,
+            "/images/temp/tischUndStuhl.png"
+        ))
+    
+    this.interactableObjects.push(new RenderObject(
+            `lampe`,
+            RenderType.THREE_D_IMG,
+            18.7 * Gamefield.fieldsize,
+            19.7 * Gamefield.fieldsize,
+            100,
+            Gamefield.fieldsize * 1,
+            Gamefield.fieldsize * 1,
+            150,
+            "/images/temp/lamp.png"
+        ))
+
 
     }
 
