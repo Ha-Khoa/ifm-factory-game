@@ -149,7 +149,7 @@ export class Machine extends InteractableObject {
       const requiredProduct = this.inputRequirements.find(req => req.product.id === product.id);
 
       if(!requiredProduct) {
-        console.log(`The product ${product.name} is not required for machine ${this._name}!`)
+        // console.log(`The product ${product.name} is not required for machine ${this._name}!`)
         return resolve(false);
       }
 
@@ -165,19 +165,19 @@ export class Machine extends InteractableObject {
       }
       else {
         inventoryEntry.quantity += 1;
-        console.log("test", inventoryEntry, requiredProduct)
+        // console.log("test", inventoryEntry, requiredProduct)
         }
 
       product.destroy();
       Products.deleteGeneratedProduct(product);
 
-      console.log(`Added product ${product.name} to machine ${this._name}! Now checking if machine can produce.`);
+      // console.log(`Added product ${product.name} to machine ${this._name}! Now checking if machine can produce.`);
       if (this._inventory.length === this.inputRequirements.length) {
         // Check if the amount of each product in the inventory equals than the required amount
         for(let invItem of this._inventory){
           let missingAmount = this.getQuantityOfThisMissingProduct(invItem.product);
           if(missingAmount > 0) {
-            console.log(`The product ${invItem.product.name} is not enough for machine ${this._name}! Need ${missingAmount} more of it.`)
+            // console.log(`The product ${invItem.product.name} is not enough for machine ${this._name}! Need ${missingAmount} more of it.`)
             return resolve(true);
           }
         }
@@ -244,23 +244,23 @@ export class Machine extends InteractableObject {
     const cooldown = 200;
 
     if (this._isUpgrading) {
-      console.log("Upgrade bereits im Gange.");
+      // console.log("Upgrade bereits im Gange.");
       return of(false);
     }
 
     if (now - this._lastUpgradeTimestamp < cooldown) {
-      console.log("Upgrade ist auf Cooldown.");
+      // console.log("Upgrade ist auf Cooldown.");
       return of(false);
     }
 
     if (!this._upgradable || this._level >= this.maxLevel) {
-      console.log("Maschine kann nicht aufgerüstet werden oder hat das maximale Level erreicht.");
+      // console.log("Maschine kann nicht aufgerüstet werden oder hat das maximale Level erreicht.");
       return of(false);
     }
 
     const upgradeCost = this.getUpgradeCost();
     if (playerService.getMoney() < upgradeCost) {
-      console.log("Nicht genug Geld für ein Upgrade (Client-Check).");
+      // console.log("Nicht genug Geld für ein Upgrade (Client-Check).");
       return of(false);
     }
 
@@ -273,7 +273,7 @@ export class Machine extends InteractableObject {
         this._level += 1;
         this._productionRate = Math.max(500, this._productionRate * 0.85); // 15% schneller, min. 0.5s
         this._productionTimer = this._productionRate / 1000
-        console.log(`${this._name} auf Level ${this._level} verbessert! Neue Produktionsrate: ${this._productionRate}ms`);
+        // console.log(`${this._name} auf Level ${this._level} verbessert! Neue Produktionsrate: ${this._productionRate}ms`);
       }),
       map(() => {
         this._isUpgrading = false;

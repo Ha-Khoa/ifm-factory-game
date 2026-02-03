@@ -184,13 +184,13 @@ export class SlotMachineService {
   render(x: number, y: number, width: number, height: number)
   {
     this._ctx.save();
-    
+
     this._ctx.beginPath();
     this._ctx.rect(x, y, width, height);
     this._ctx.clip();
-    
+
     this._ctx.translate(x, y);
-    
+
     const scaleX = width / this._ctx.canvas.width;
     const scaleY = height / this._ctx.canvas.height;
     this._ctx.scale(scaleX, scaleY);
@@ -240,7 +240,7 @@ export class SlotMachineService {
   calcNewIcon(): string
   {
     const rand = Math.random();
-    let probSum = 0; 
+    let probSum = 0;
     for(let i = 0; i < this._probabilitys.length; i++)
     {
       probSum += this._probabilitys[i];
@@ -266,7 +266,7 @@ export class SlotMachineService {
       this._locking[i] = false;
       this._lockT[i] = 0;
     }
-    
+
     this.stopSpin();
   }
 
@@ -435,7 +435,7 @@ export class SlotMachineService {
       check[i] = [1,1,1];
       totalWon += this.checkPattern(check, 4);
     }
-    totalWon += this.checkPattern([[1,1,1],[1,1,1],[1,1,1],[1,1,1],[1,1,1]], 500); 
+    totalWon += this.checkPattern([[1,1,1],[1,1,1],[1,1,1],[1,1,1],[1,1,1]], 500);
 
     // Horizontal lines (top/middle/bottom): pay 3/4/5 in a row
     totalWon += checkPayline([0, 0, 0, 0, 0], 10);
@@ -509,7 +509,7 @@ export class SlotMachineService {
       const multiplier2 = idx >= 0 ? this._iconMultiplier[idx] : 1;
       return matched * multiplier * multiplier2;
     }
-    
+
     return 0;
   }
 
@@ -549,7 +549,7 @@ export class SlotMachineService {
       const [r, g, b] = palette[pIndex % palette.length];
       const fill = `rgba(${r}, ${g}, ${b}, 0.18)`;
       const stroke = `rgba(${r}, ${g}, ${b}, 0.70)`;
-      console.log(r, g, b, this._activePatterns.length)
+      // console.log(r, g, b, this._activePatterns.length)
 
       for(let i = 0; i < pattern.length; i++)
       {
@@ -614,7 +614,7 @@ export class SlotMachineService {
         icon.progress += this._velocitys[reelIndex] * dt;
       });
     }
-    
+
     Icons.forEach((icon) => {
       this._ctx.drawImage(
         this._images[icon.img],
@@ -624,7 +624,7 @@ export class SlotMachineService {
         this._imgSizeY
       );
     });
-    
+
   }
 
   /**
@@ -688,7 +688,7 @@ export class SlotMachineService {
     this._ctx.fillText(
       string,
       this._ctx.canvas.width / 2 - this._ctx.measureText(string).width / 2 - px + shake,
-      this._ctx.canvas.height - this._ctx.canvas.height * this._sizePercentage / 400 + px / 3);  
+      this._ctx.canvas.height - this._ctx.canvas.height * this._sizePercentage / 400 + px / 3);
     this._ctx.drawImage(
       this._images["/images/fox/fox-coin.png"],
       this._ctx.canvas.width / 2 + this._ctx.measureText(string).width / 2 - px + 10 + shake,

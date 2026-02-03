@@ -20,11 +20,11 @@ export class ConveyorBeltManager {
    private initializeConveyorBelts(): void {
     //Package Förderband
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              20*Gamefield.fieldsize,
-              -2*Gamefield.fieldsize,
+              26*Gamefield.fieldsize,
+              15*Gamefield.fieldsize,
               1*Gamefield.fieldsize,
               4*Gamefield.fieldsize,
-              'down',
+              'up',
               0.1,
               true,
               5000,
@@ -40,7 +40,7 @@ export class ConveyorBeltManager {
            'down',
            0.1,
            true,
-           2000,
+           1000,
            3,
            ConveyorType.COPPER
        ));
@@ -57,15 +57,15 @@ export class ConveyorBeltManager {
             ConveyorType.RAW_PLASTIC
        ));
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
-              2*Gamefield.fieldsize,
+              18*Gamefield.fieldsize,
               -2*Gamefield.fieldsize,
               1*Gamefield.fieldsize,
               4*Gamefield.fieldsize,
               'down',
               0.1,
               true,
-              10000,
-              2,
+              1000,
+              3,
             ConveyorType.RAW_SILICON
        ));
        ConveyorBeltManager.conveyorBelts.push(new ConveyorBelt(
@@ -76,7 +76,7 @@ export class ConveyorBeltManager {
                 'down',
                 0.1,
                 true,
-                2500,
+                1000,
                 3,
                 ConveyorType.IRON_INGOT
        ));
@@ -115,7 +115,7 @@ export class ConveyorBeltManager {
        const index = this.conveyorBelts.findIndex(conv => conv.getConveyorId() === id);
        if (index !== -1) {
            this.conveyorBelts.splice(index, 1);
-          
+
            if (gamefield) {
                gamefield.updateConveyorBelts(this.conveyorBelts);
            }
@@ -164,7 +164,7 @@ export class ConveyorBeltManager {
            }
        });
        this.conveyorBelts = [];
-      
+
        if (gamefield) {
            gamefield.updateConveyorBelts(this.conveyorBelts);
        }

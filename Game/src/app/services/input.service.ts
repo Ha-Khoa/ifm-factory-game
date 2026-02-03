@@ -66,12 +66,12 @@ export class InputService {
 
   constructor() {
     window.addEventListener('gamepadconnected', (e: GamepadEvent) => {
-      console.log('Gamepad connected at index %d: %s.', e.gamepad.index, e.gamepad.id);
+      // console.log('Gamepad connected at index %d: %s.', e.gamepad.index, e.gamepad.id);
       this.gamepads[e.gamepad.index] = e.gamepad;
     });
 
     window.addEventListener('gamepaddisconnected', (e: GamepadEvent) => {
-      console.log('Gamepad disconnected from index %d: %s', e.gamepad.index, e.gamepad.id);
+      // console.log('Gamepad disconnected from index %d: %s', e.gamepad.index, e.gamepad.id);
       this.gamepads[e.gamepad.index] = null;
     });
   }

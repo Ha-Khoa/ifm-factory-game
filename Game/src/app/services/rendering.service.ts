@@ -191,12 +191,12 @@ export class RenderingService {
           );
         }
         this._ctx.restore();
-        
+
         // Render Produkt auf PrepMachine
         if (Obj instanceof PrepMachine) {
           const prepMachine = Obj as PrepMachine;
           const visualState = prepMachine.getVisualState();
-          
+
           if ((visualState.isActive || visualState.hasOutput) && prepMachine.prepNextFrame) {
             //Zeichen das Animationsbild
             const frameImage = this._images[prepMachine.prepNextFrame];
@@ -206,7 +206,7 @@ export class RenderingService {
               const animHeight = animWidth * Math.cos(this._angle); // Behalte das quadratische Seitenverhältnis bei
               const xCenter = Math.round(xObj + (objWidth - animWidth) / 2);
               const yCenter = yProjection + (objHeight * Math.cos(this._angle) * 0.35);
-              
+
               this._ctx.drawImage(
                 frameImage,
                 xCenter,
@@ -409,7 +409,7 @@ export class RenderingService {
       else if(this._deltaTime > 50) dt = 50;
       else dt = this._deltaTime
     const df = (this._fov - this._gameFov) * 0.01 / Math.abs(this._fov - this._gameFov) * Math.abs(this._fov) * dt / 5
-    console.log(this._fov)
+    // console.log(this._fov)
     if(this._fov - df < 0) this._fov = 0.1
     else this._fov -= df
     this._camera.fov = this._fov

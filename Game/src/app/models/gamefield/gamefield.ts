@@ -30,7 +30,7 @@ export class Gamefield {
 
     constructor()
     {
-      console.log(window.innerHeight)
+      // console.log(window.innerHeight)
         this.environmetObjects = [];
         this.interactableObjects = [];
         //Gamefield.fieldsize = Math.round(window.innerWidth / this.cols);
@@ -709,20 +709,7 @@ export class Gamefield {
             linecolor,
             []
         ))
-        this.environmetObjects.push(new RenderObject(
-            `line`,
-            RenderType.RECT,
-            2 * Gamefield.fieldsize,
-            4 * Gamefield.fieldsize,
-            0,
-            Gamefield.fieldsize * 2,
-            4,
-            0,
-            undefined,
-            undefined,
-            linecolor,
-            []
-        ))
+
         this.environmetObjects.push(new RenderObject(
             `line`,
             RenderType.RECT,
@@ -811,10 +798,10 @@ export class Gamefield {
             `line`,
             RenderType.RECT,
             19 * Gamefield.fieldsize,
-            4 * Gamefield.fieldsize,
+            3 * Gamefield.fieldsize,
             0,
             4,
-            Gamefield.fieldsize,
+            Gamefield.fieldsize * 2,
             0,
             undefined,
             undefined,
@@ -863,83 +850,14 @@ export class Gamefield {
             linecolor,
             []
         ))
-        this.environmetObjects.push(new RenderObject(
-            `line`,
-            RenderType.RECT,
-            19 * Gamefield.fieldsize,
-            4 * Gamefield.fieldsize,
-            0,
-            Gamefield.fieldsize * 2,
-            4,
-            0,
-            undefined,
-            undefined,
-            linecolor,
-            []
-        ))
-        this.environmetObjects.push(new RenderObject(
-            `line`,
-            RenderType.RECT,
-            19 * Gamefield.fieldsize,
-            4 * Gamefield.fieldsize,
-            0,
-            Gamefield.fieldsize * 2,
-            4,
-            0,
-            undefined,
-            undefined,
-            linecolor,
-            []
-        ))
-        this.environmetObjects.push(new RenderObject(
-            `line`,
-            RenderType.RECT,
-            21 * Gamefield.fieldsize,
-            2 * Gamefield.fieldsize,
-            0,
-            4,
-            Gamefield.fieldsize * 2 + 4,
-            0,
-            undefined,
-            undefined,
-            linecolor,
-            []
-        ))
-        this.environmetObjects.push(new RenderObject(
-            `line`,
-            RenderType.RECT,
-            20 * Gamefield.fieldsize - 4,
-            2 * Gamefield.fieldsize,
-            0,
-            4,
-            Gamefield.fieldsize ,
-            0,
-            undefined,
-            undefined,
-            linecolor,
-            []
-        ))
-        this.environmetObjects.push(new RenderObject(
-            `line`,
-            RenderType.RECT,
-            20 * Gamefield.fieldsize,
-            2 * Gamefield.fieldsize,
-            0,
-            Gamefield.fieldsize,
-            4,
-            -100,
-            undefined,
-            undefined,
-            linecolor,
-            []
-        ))
+
         this.environmetObjects.push(new RenderObject(
             `line`,
             RenderType.RECT,
             15 * Gamefield.fieldsize,
             3 * Gamefield.fieldsize,
             0,
-            Gamefield.fieldsize * 5,
+            Gamefield.fieldsize * 3,
             4,
             -100,
             undefined,
@@ -1111,11 +1029,11 @@ export class Gamefield {
         this.environmetObjects.push(new RenderObject(
             `line`,
             RenderType.RECT,
-            2 * Gamefield.fieldsize - 4,
-            2 * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize - 4,
+            3 * Gamefield.fieldsize,
             0,
             4,
-            Gamefield.fieldsize * 2 + 4,
+            Gamefield.fieldsize + 4,
             0,
             undefined,
             undefined,
@@ -1125,7 +1043,21 @@ export class Gamefield {
         this.environmetObjects.push(new RenderObject(
             `line`,
             RenderType.RECT,
-            3 * Gamefield.fieldsize,
+            18 * Gamefield.fieldsize - 4,
+            2 * Gamefield.fieldsize,
+            0,
+            4,
+            Gamefield.fieldsize,
+            0,
+            undefined,
+            undefined,
+            linecolor,
+            []
+        ))
+        this.environmetObjects.push(new RenderObject(
+            `line`,
+            RenderType.RECT,
+            19 * Gamefield.fieldsize,
             2 * Gamefield.fieldsize,
             0,
             4,
@@ -1139,7 +1071,7 @@ export class Gamefield {
         this.environmetObjects.push(new RenderObject(
             `line`,
             RenderType.RECT,
-            2 * Gamefield.fieldsize,
+            18 * Gamefield.fieldsize,
             2 * Gamefield.fieldsize,
             0,
             Gamefield.fieldsize,
@@ -1153,10 +1085,10 @@ export class Gamefield {
         this.environmetObjects.push(new RenderObject(
             `line`,
             RenderType.RECT,
-            3 * Gamefield.fieldsize,
+            4 * Gamefield.fieldsize,
             3 * Gamefield.fieldsize,
             0,
-            Gamefield.fieldsize * 3,
+            Gamefield.fieldsize * 2,
             4,
             -100,
             undefined,
@@ -1235,7 +1167,7 @@ export class Gamefield {
             linecolor,
             []
         ))
-        
+
 
     }
 
@@ -1408,6 +1340,23 @@ export class Gamefield {
             layerColors
         ))
     }
+    for(let i = 26; i < 30; i++)
+    {
+        this.interactableObjects.push(new RenderObject(
+            `table`,
+            RenderType.RECT,
+            i * Gamefield.fieldsize,
+            19 * Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            Gamefield.fieldsize,
+            priority,
+            undefined,
+            undefined,
+            rectColor,
+            layerColors
+        ))
+    }
     for(let i = 0; i < 5; i++)
     {
     this.interactableObjects.push(new RenderObject(
@@ -1548,9 +1497,9 @@ export class Gamefield {
             100,
             "/images/temp/pipe-straight-horizontal.png"
         ))
-    
-    
-    
+
+
+
 
 
     }
@@ -1567,7 +1516,7 @@ export class Gamefield {
                 this.interactableObjects.push(obj)
             }
         });
-        console.log(this.interactableObjects.length)
+        // console.log(this.interactableObjects.length)
     }
 
     updatePrepMachines(prepMachines: PrepMachine[]): void {
@@ -1579,17 +1528,17 @@ export class Gamefield {
 
         //Fügt die aktuellen PrepMachines hinzu
         prepMachines.forEach(machine =>{
-            console.log('Adding PrepMachine to gamefield:', machine.name, 'color:', machine.rectColor);
+
             this.interactableObjects.push(machine)
             // Stelle sicher, dass neue PrepMachines auch im Renderer landen
             if (!RenderingService.instance().getRenderingObjektByName(machine.name)) {
-                console.log('Adding PrepMachine to renderer:', machine.name);
+
                 RenderingService.instance().addRenderObject(machine);
             } else {
-                console.log('PrepMachine already in renderer:', machine.name);
+
             }
         });
-        console.log('Total interactable objects:', this.interactableObjects.length);
+
     }
 
     public getPrepMachines(): PrepMachine[] {

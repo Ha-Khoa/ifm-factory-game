@@ -24,9 +24,9 @@ export class PrepMachineManager {
         ironGearMachine.setRecipe(7, 8);  //Eingang: Iron Ingot (ID 7), Ausgang: Iron Gear (ID 8)
 
         //PrepMachineManager.prepMachines.push(ironGearMachine);
-        console.log('PrepMachine created:', ironGearMachine.name, 'at position:', ironGearMachine.x, ironGearMachine.y);
+        // console.log('PrepMachine created:', ironGearMachine.name, 'at position:', ironGearMachine.x, ironGearMachine.y);
         this.updateGamefield();
-        console.log('PrepMachines in gamefield:', PrepMachineManager.prepMachines.length);
+        // console.log('PrepMachines in gamefield:', PrepMachineManager.prepMachines.length);
     }
 
     update(deltaMs: number): void {
@@ -64,11 +64,11 @@ export class PrepMachineManager {
         machine.setRecipe(inputProductId, outputProductId);
 
         this.prepMachines.push(machine);
-        
+
         if (gamefield) {
             gamefield.updatePrepMachines(this.prepMachines);
         }
-        
+
         return machine;
     }
 
@@ -76,7 +76,7 @@ export class PrepMachineManager {
         const index = this.prepMachines.findIndex(machine => machine.name === name);
         if (index !== -1) {
             this.prepMachines.splice(index, 1);
-            
+
             if (gamefield) {
                 gamefield.updatePrepMachines(this.prepMachines);
             }
@@ -99,7 +99,7 @@ export class PrepMachineManager {
 
     static reset(gamefield?: Gamefield): void {
         this.prepMachines = [];
-        
+
         if (gamefield) {
             gamefield.updatePrepMachines(this.prepMachines);
         }

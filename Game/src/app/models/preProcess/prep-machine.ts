@@ -5,14 +5,14 @@ import { RenderingService } from '../../services/rendering.service';
 import { Gamefield } from '../gamefield/gamefield';
 
 /**
- * PrepMachine Klasse: 
+ * PrepMachine Klasse:
  * - Idee: um das Spiel komlizierter zu machen, werden einige Produkte andere Wege verarbeiten müssen, bevor sie verkauft werden können.
  * Mit der PrepMachine können einige Produkte vorverarbeitet werden, bevor in der Maschine weiterverarbeitet oder verkauft werden können.
  * - Inspiration: Schneidebrett, Mixer in Overcooked (Fleisch erst schneiden bevor es gekocht werden kann)
  * - Ein Produkt wurde in Produktliste hinzugefügt: "Iron Ingot". Nach der Verarbeitung von "Iron Ingot" bekommen wir "Iron Gear" durch PrepMachine.
  * - Wir können in der Zukunft weitere Rezepte mit "Iron Gear" hinzufügen:
  * - Iron Ingot -> PrepMachine -> Iron Gear
- * - Iron Gear + Copper Wire -> Elektrische Motor 
+ * - Iron Gear + Copper Wire -> Elektrische Motor
  */
 export class PrepMachine extends RenderObject {
     /**
@@ -85,7 +85,7 @@ export class PrepMachine extends RenderObject {
             }
         }
         /**
-         * 
+         *
          * @param inputId : Id des Eingangsprodukts (z.B. Iron Ingot (Produkt Id 7))
          * @param outputId : Id des Ausgangsprodukts (z.B. Iron Gear (Produkt Id 8))
          */
@@ -99,7 +99,7 @@ export class PrepMachine extends RenderObject {
             }
         }
         /**
-         * 
+         *
          * @param product - Produkt, das von der Maschine akzeptiert werden soll
          * @returns boolean - true, wenn das Produkt akzeptiert wurde, false sonst
          */
@@ -112,7 +112,7 @@ export class PrepMachine extends RenderObject {
         }
 
         /**
-         * 
+         *
          * @param product - ProduktId
          * Startet die Verarbeitung des Produkts
          */
@@ -126,11 +126,11 @@ export class PrepMachine extends RenderObject {
             this.prepFrameIndex = 0;
             this.prepNextFrame = this.prepFrames[0];
 
-            console.log(`Started processing ${product.name}`)
+            // console.log(`Started processing ${product.name}`)
         }
         /**
          * Aktualisiert den Status der Maschine, überprüft den Fortschritt der Verarbeitung und aktualisiert die Animation.
-         * 
+         *
          */
         update(deltaMs: number, isBeingWorked: boolean = false): void{
             if (!this.isProcessing || !isBeingWorked) {
@@ -162,10 +162,10 @@ export class PrepMachine extends RenderObject {
 
             this.prepFrameIndex = this.prepFrames.length - 1;
             this.prepNextFrame = this.prepFrames[this.prepFrameIndex];
-            console.log(`Processing complete! ${this.outputProduct?.name}`)
+            // console.log(`Processing complete! ${this.outputProduct?.name}`)
         }
         /**
-         * 
+         *
          * @returns - Produkt - das verarbeitete Ausgangsprodukt, wenn es bereit ist, sonst null
          * Sammelt das Ausgangsprodukt, wenn es bereit ist, und setzt den Maschinenstatus zurück.
          */
@@ -183,15 +183,15 @@ export class PrepMachine extends RenderObject {
                     this.prepNextFrame = this.prepFrames[0];
                 }
 
-                console.log(`Collected output: ${output.name}`);
-                console.log(`Output image: ${output.renderObject.img}`);
+                // console.log(`Collected output: ${output.name}`);
+                // console.log(`Output image: ${output.renderObject.img}`);
                 return output;
             }
             return null;
         }
         /**
-         * 
-         * @param product  
+         *
+         * @param product
          * @returns boolean - ob die Produkte verarbeitet werden können
          */
 
@@ -202,9 +202,9 @@ export class PrepMachine extends RenderObject {
                 else{
                     return false;
                 }
-                    
-                    
-                    
+
+
+
         }
         getCurrentFrame(): string {
             return this.prepNextFrame;
@@ -225,14 +225,14 @@ export class PrepMachine extends RenderObject {
             };
         }
         /**
-         * 
+         *
          * @returns boolean - ob die Maschine frei sind
          */
         isIdle(): boolean {
             return !this.isProcessing && !this.outputReady;
         }
         /**
-         * 
+         *
          * @returns boolean - ob das Ausgangsprodukt bereit ist
          */
         isOutputReady(): boolean {
@@ -251,8 +251,8 @@ export class PrepMachine extends RenderObject {
             this.currentInput = undefined;
             this.workedMillis = 0;
             this.processingProgress = 0;
-        
-        
+
+
             if (this.prepFrames && this.prepFrames.length > 0) {
                this.prepFrameIndex = 0;
                 this.prepNextFrame = this.prepFrames[0];
@@ -264,7 +264,7 @@ export class PrepMachine extends RenderObject {
         }
 
         /**
-         * 
+         *
          * @returns - der visuelle Zustand der Maschine
          */
         getVisualState(): {

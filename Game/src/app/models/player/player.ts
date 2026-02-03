@@ -411,7 +411,7 @@ export class Player {
                this._hasPicked = true;
                Products.deleteGeneratedProduct(this._inventory)
                this._inventory.renderObject.priority = 200
-               console.log("Produkt vom Förderband aufgenommen:", this._inventory);
+              //  console.log("Produkt vom Förderband aufgenommen:", this._inventory);
                Products.generatedProducts.push(productFromConveyor);
                this._inventory!.z = 50
                return this._inventory;
@@ -452,7 +452,7 @@ export class Player {
             const nearestMachine = this.getNearestPrepMachine();
             if (nearestMachine && nearestMachine.canAcceptProduct(this._inventory)) {
                 if (nearestMachine.acceptProduct(this._inventory)){
-                    console.log("Produkt der PrepMachine übergeben:", this._inventory);
+                    // console.log("Produkt der PrepMachine übergeben:", this._inventory);
 
                     //Entferne das Produkt aus dem Inventar
                     const placedProduct = this._inventory;
@@ -609,14 +609,14 @@ export class Player {
                 Products.generatedProducts.push(output);
                 this._inventory!.z = 50;
 
-                console.log("Produkt von PrepMachine aufgenommen:", this._inventory);
+                // console.log("Produkt von PrepMachine aufgenommen:", this._inventory);
                 return true;
             }
         }
         // Übergibt das Produkt an die PrepMachine
         if (this._inventory instanceof Product && nearestMachine.canAcceptProduct(this._inventory)){
             if (nearestMachine.acceptProduct(this._inventory)){
-                console.log("Produkt der PrepMachine übergeben:", this._inventory);
+                // console.log("Produkt der PrepMachine übergeben:", this._inventory);
 
                 this._inventory.destroy();
                 this._inventory = null;

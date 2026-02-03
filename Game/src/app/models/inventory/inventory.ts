@@ -62,12 +62,12 @@ export class InventoryManager {
         }
         else {
             if (this.inventory.items.length >= this.inventory.maxSlots) {
-                console.log("Voll!");
+                // console.log("Voll!");
                 return false
             }
             this.inventory.items.push({product: product, quantity: quantity});
         }
-        console.log(` ${quantity} von ${product.name} zum Inventar hinzugefügt.`);
+        // console.log(` ${quantity} von ${product.name} zum Inventar hinzugefügt.`);
         return true;
     }
 
@@ -82,10 +82,10 @@ export class InventoryManager {
             else{
                 this.inventory.items.splice(itemIndex, 1);
             }
-            console.log(` ${quantity} von ${item.product.name} aus dem Inventar entfernt.`);
+            // console.log(` ${quantity} von ${item.product.name} aus dem Inventar entfernt.`);
             return true;
         }
-        console.log(`Produkt ${productId} nicht im Inventar gefunden.`);
+        // console.log(`Produkt ${productId} nicht im Inventar gefunden.`);
         return false;
     }
     static getInventory(): InventoryItem[] {
@@ -102,16 +102,16 @@ export class InventoryManager {
 
     static async transferToMachine(machine: Machine, product: Product):Promise<boolean> {
         if (!this.hasProduct(product.id, 1)) {
-            console.log(`Nicht genug ${product.name} im Inventar`);
+            // console.log(`Nicht genug ${product.name} im Inventar`);
             return false;
         }
         if (!this.canMachineAccept(machine, product)){
-            console.log(`Maschine kann ${product.name} nicht akzeptieren`);
+            // console.log(`Maschine kann ${product.name} nicht akzeptieren`);
             return false;
         }
 
         if (this.doesMachineHaveProduct(machine, product)){
-            console.log(`Maschine hat ${product.name} bereits`);
+            // console.log(`Maschine hat ${product.name} bereits`);
             return false;
         }
 
@@ -121,17 +121,17 @@ export class InventoryManager {
             if (result === true){
                 this.removeFromInventory(product.id, 1);
                 this.addToInventory(product, 1);
-                console.log(`${product.name} zu ${machine.name} hinzugefügt`);
+                // console.log(`${product.name} zu ${machine.name} hinzugefügt`);
                 return true;
             }
             else {
-                console.log(`${machine.name} hat kann ${product.name} nicht produzieren`);
+                // console.log(`${machine.name} hat kann ${product.name} nicht produzieren`);
                 this.addToInventory(product, 1);
                 return true;
             }
         }
         catch (error) {
-            console.error('Fehler beim Machine-Transfer:', error);
+            // console.error('Fehler beim Machine-Transfer:', error);
             this.addToInventory(product, 1);
             return false;
         }
@@ -140,7 +140,7 @@ export class InventoryManager {
 
     static takeAllFromMachine(machine: Machine): boolean {
         if (machine.inventory.length === 0){
-            console.log(`${machine.name} ist leer`);
+            // console.log(`${machine.name} ist leer`);
             return false;
         }
         let success = true;
@@ -148,12 +148,12 @@ export class InventoryManager {
             const productRequirements = machine.inventory.pop();
             if (productRequirements && this.getAvailableSlots()){
                 this.addToInventory(productRequirements.product, 1);
-                console.log(`${productRequirements.product.name} von ${machine.name} genommen`);
+                // console.log(`${productRequirements.product.name} von ${machine.name} genommen`);
             }
             else if (productRequirements){
                 machine.inventory.push(productRequirements);
                 success = false;
-                console.log(`Nicht genug Platz im Inventar für ${productRequirements.product.name}`);
+                // console.log(`Nicht genug Platz im Inventar für ${productRequirements.product.name}`);
                 break;
             }
         }
@@ -163,19 +163,19 @@ export class InventoryManager {
     static takeProductFromMachine(machine: Machine, productName: string): boolean {
         const productIndex = machine.inventory.findIndex(productRequirements => productRequirements.product.name === productName);
         if (productIndex === -1){
-            console.log(`${productName} nicht in ${machine.name} gefunden`);
+            // console.log(`${productName} nicht in ${machine.name} gefunden`);
             return false;
         }
 
         if (!this.getAvailableSlots()){
-            console.log(`Nicht genug Platz im Inventar für ${productName}`);
+            // console.log(`Nicht genug Platz im Inventar für ${productName}`);
             return false;
         }
 
         const productRequirements = machine.inventory[productIndex];
         machine.inventory.splice(productIndex, 1);
         this.addToInventory(productRequirements.product, 1);
-        console.log(`${productRequirements.product.name} von ${machine.name} genommen`);
+        // console.log(`${productRequirements.product.name} von ${machine.name} genommen`);
         return true;
     }
 

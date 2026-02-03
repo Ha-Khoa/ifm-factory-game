@@ -290,7 +290,7 @@ export class InteractableManager {
 //The product is not already on the machine and the machine is not currently producing.`);
         result = await machine.addProduct(product);
 
-        console.log(`The result of ading the product ${product.name} to the machine ${machine.name} is:`, result)
+        // console.log(`The result of ading the product ${product.name} to the machine ${machine.name} is:`, result)
       }
       else {
         //console.log(`The user has the product ${product.name} and wants to add it to the machine ${machine.name}.
@@ -303,7 +303,7 @@ export class InteractableManager {
         product.destroy();
         Products.deleteGeneratedProduct(product);
         player.inventory = null;
-        console.log("Zutat hinzugefügt, wartet auf weitere Inputs");
+        // console.log("Zutat hinzugefügt, wartet auf weitere Inputs");
       }
       // Zutat nicht benötigt, zurücklegen
       else if (result === false) {
@@ -312,7 +312,7 @@ export class InteractableManager {
           //ddplayer.dropProduct();
           //Products.addProduct(product, product.position);
         }
-        console.log("Zutat nicht benötigt, zurückgelegt");
+        // console.log("Zutat nicht benötigt, zurückgelegt");
       }
     }
     // Visuelles Feedback: Maschine grün färben
@@ -418,11 +418,11 @@ export class InteractableManager {
 
       // Zutat erfolgreich hinzugefügt, warte auf weitere
       if (result === true) {
-        console.log("abgegeben");
+        // console.log("abgegeben");
       }
       // Zutat nicht benötigt, zurücklegen
       else if (result === false) {
-        console.log("falsche Bestellung");
+        // console.log("falsche Bestellung");
       }
     }
   }

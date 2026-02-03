@@ -192,7 +192,7 @@ export class ConveyorBelt {
             this._x + 5,
             this._y + this._height - 25,
             this._z,
-            5, 
+            5,
             this._z  ,
             -100,
             undefined,
@@ -206,7 +206,7 @@ export class ConveyorBelt {
             this._x + this._width - 10,
             this._y + this._height - 25,
             this._z,
-            5, 
+            5,
             this._z ,
             -100,
             undefined,
@@ -561,7 +561,7 @@ export class ConveyorBelt {
                const dy = productCenterY - position.y;
                const distance = Math.sqrt(dx * dx + dy * dy);
                //console.log(`  Product ${i}: pos(${productPos.x.toFixed(1)}, ${productPos.y.toFixed(1)}), center(${productCenterX.toFixed(1)}, ${productCenterY.toFixed(1)}), dist: ${distance.toFixed(2)}px`);
-                console.log(distance)
+                // console.log(distance)
                if (distance <= Gamefield.fieldsize){
                    this._items.splice(i, 1);
                    //productData.items.destroy();
