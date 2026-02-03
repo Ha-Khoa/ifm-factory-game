@@ -196,7 +196,7 @@ export class GameService {
     await this.soundService.loadSounds([
       { key: 'drop_sound', path: 'sounds/drop_sound.wav' },
       { key: 'background_music', path: 'sounds/background_music.mp3' },
-      { key: 'boost', path:'sounds/boost.wav'},
+      { key: 'boost', path:'sounds/boost.mp3'},
       { key: 'upgrade', path:'sounds/upgrade.wav'}
     ]);
 

@@ -21,7 +21,7 @@ export class Orders {
    *
    * @type {number}
    */
-  private static maxOderId: number = 0;
+  private static maxOrderId: number = 0;
   private static timerPaused = false;
   private static PlayerService: PlayerService;
   private static GameService: GameService;
@@ -113,8 +113,8 @@ export class Orders {
    * @return {number} The next unique order ID.
    */
   private static getNextOrderId(): number {
-    this.maxOderId += 1;
-    return this.maxOderId;
+    this.maxOrderId += 1;
+    return this.maxOrderId;
   }
 
   public static stopTimer(stop: boolean): void {
@@ -168,17 +168,20 @@ export class Orders {
     }
 
     /**
-     * Marks an order as complete by updating its status to true.
+     * Marks an order as complete by updating its status to true. This method is immutable.
      *
      * @param {number} orderId - The unique identifier of the order to complete.
      * @return {boolean} Returns true if the order was successfully completed, otherwise false.
      */
     static completeOrder(orderId: number): boolean {
-        const order =  this.ordersList$.getValue().find(order => !order.status && order.id === orderId);
+        const orders = this.ordersList$.getValue();
+        const orderExists = orders.some(order => !order.status && order.id === orderId);
 
-        if (order) {
-            order.status = true;
-            this.ordersList$.next([...this.ordersList$.getValue()]);
+        if (orderExists) {
+            const updatedOrders = orders.map(order =>
+                order.id === orderId ? { ...order, status: true } : order
+            );
+            this.ordersList$.next(updatedOrders);
             return true;
         }
 
@@ -187,18 +190,16 @@ export class Orders {
 
     /**
      * Marks all orders in the current orders list as completed by setting their status to true.
-     * Updates the orders list after modifying the statuses.
+     * This method is immutable and updates the orders list after modifying the statuses.
      *
      * @return {void} Does not return a value.
      */
     static completeAllOrders(): void {
       const currentOrders = this.ordersList$.getValue();
-      currentOrders.forEach(order => {
-        if (!order.status) {
-          order.status = true;
-        }
-      });
-      this.ordersList$.next([...currentOrders]);
+      const updatedOrders = currentOrders.map(order =>
+        order.status ? order : { ...order, status: true }
+      );
+      this.ordersList$.next(updatedOrders);
     }
 
     /**
@@ -246,7 +247,7 @@ export class Orders {
      */
     static generateRandomOrder(): Order {
         const productCount = Math.floor(Math.random() * 3) + 1;
-        const items= [];
+        const items: {productId: number, quantity: number}[] = [];
 
         let totalCosts: number = 0;
         const playerMoney:number = Orders.PlayerService.getMoney();
@@ -260,7 +261,7 @@ export class Orders {
             }
             totalCosts += product.costs * randomQuantity;
 
-            if(!items.map(product => (product.productId === randomProductId)).includes(true)) {
+            if(!items.some(item => item.productId === randomProductId)) {
               if(randomQuantity > 0)
                 items.push({productId: randomProductId, quantity: randomQuantity});
             }
@@ -310,7 +311,7 @@ export class Orders {
      */
     static destroy(): void {
         this.ordersList$.next([]);
-        this.maxOderId = 0;
+        this.maxOrderId = 0;
     }
 }
 
