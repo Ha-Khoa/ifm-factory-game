@@ -45,6 +45,8 @@ export class Machine extends InteractableObject {
   private _outputProduct!: Product;
   private _producting: boolean = false;
 
+  private _outputOffset: Coordinates = new Coordinates(0,0);
+
   /**
    * Erstellt eine neue Maschine
    *
@@ -71,6 +73,7 @@ export class Machine extends InteractableObject {
     accessDirection: Direction[],
     outputProduct: Product,
     type: RenderType,
+    outputOffset: Coordinates,
     productionRate:number = 5000
   ) {
     // Initialize InteractableObject: position, size, z, img, allowed directions
@@ -86,7 +89,7 @@ export class Machine extends InteractableObject {
       "rgba(200, 206, 255, 1)",
       ["#a0c0ffff", "#8299ffff", "#546effff", "#2b39ffff", "#0000ffff"]
     );
-
+    this._outputOffset = outputOffset;
     // ID und Grundeinstellungen
     this._id = Machine.lastID++;
     this._name = name;
@@ -128,8 +131,8 @@ export class Machine extends InteractableObject {
           this._inventory = [];
           this._producting = false;
           const produced = this._outputProduct.copy();
-          produced.z = 0;
-          Products.addProduct(produced, new Coordinates(this.x + Gamefield.fieldsize / 2 - produced.size / 2 + Gamefield.fieldsize, this.y + Gamefield.fieldsize / 2 - produced.size / 2 ));
+          produced.z = this._outputOffset.z;
+          Products.addProduct(produced, new Coordinates(this.x + this._hitbox.width / 2 - produced.size / 2 + this._outputOffset.x, this.y + this._hitbox.height / 2 - produced.size / 2 + this._outputOffset.y,this._outputOffset.z),500);
           resolve(this._outputProduct);
         }
       }, intervalMs);

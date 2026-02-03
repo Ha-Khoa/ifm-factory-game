@@ -28,27 +28,27 @@ export class InteractableManager {
     private ui: UIService;
     private playerService: PlayerService;
     private machines: Machine[] = [
-      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 7, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Photo Diode", "/images/machine1.png", "/images/wall.png",
-                  [Direction.RIGHT], Products.getProductById(11)!, RenderType.THREE_D_IMG),
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 6, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Photo Diode", "/images/machine1.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(11)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 0)),
       // Plastic Case-Maschine (benötigt Raw Plastic)
-      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 13, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Kunstoffgehäuse", "/images/machine2.png", "/images/wall.png",
-                  [Direction.RIGHT], Products.getProductById(4)!, RenderType.THREE_D_IMG,10000),
-      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 9, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Platine", "/images/machine3.png", "/images/wall.png",
-                  [Direction.RIGHT], Products.getProductById(5)!, RenderType.THREE_D_IMG),
+      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 15, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Kunstoffgehäuse", "/images/machine2.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(4)!, RenderType.THREE_D_IMG,new Coordinates(Gamefield.fieldsize, 0, 0)),
+      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 10, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Platine", "/images/machine3.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(5)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 0)),
       new Machine(Gamefield.fieldsize * 24, Gamefield.fieldsize * 2, 40, Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Photo Sensor", "/images/machine4.png", "/images/wall.png",
-                  [Direction.LEFT], Products.getProductById(10)!, RenderType.THREE_D_IMG, 8000),
+                  [Direction.LEFT], Products.getProductById(10)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 20), 8000),
       new Machine(Gamefield.fieldsize * 24, Gamefield.fieldsize * 6, 40, Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Temperatur Sensor", "/images/machine4.png", "/images/wall.png",
-                  [Direction.LEFT], Products.getProductById(12)!, RenderType.THREE_D_IMG, 8000),
+                  [Direction.LEFT], Products.getProductById(12)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 20), 8000),
       new Machine(Gamefield.fieldsize * 24, Gamefield.fieldsize * 10, 40, Gamefield.fieldsize * 2.5, Gamefield.fieldsize, "Machine: Druck Sensor", "/images/machine4.png", "/images/wall.png",
-                  [Direction.LEFT], Products.getProductById(13)!, RenderType.THREE_D_IMG, 8000),
-      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 17, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Eisengehäuse", "/images/machine3.png", "/images/wall.png",
-                  [Direction.RIGHT], Products.getProductById(14)!, RenderType.THREE_D_IMG),
+                  [Direction.LEFT], Products.getProductById(13)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 20), 8000),
+      new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 20, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Eisengehäuse", "/images/machine3.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(14)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 0)),
       new Machine(Gamefield.fieldsize * 2, Gamefield.fieldsize * 5, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Kabel", "/images/machine3.png", "/images/wall.png",
-                  [Direction.RIGHT], Products.getProductById(15)!, RenderType.THREE_D_IMG),
+                  [Direction.RIGHT], Products.getProductById(15)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 0)),
       new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 11, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Thermoelement", "/images/machine3.png", "/images/wall.png",
-                  [Direction.RIGHT], Products.getProductById(17)!, RenderType.THREE_D_IMG),
-      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 15, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Messzelle", "/images/machine3.png", "/images/wall.png",
-                  [Direction.RIGHT], Products.getProductById(16)!, RenderType.THREE_D_IMG)
+                  [Direction.RIGHT], Products.getProductById(17)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 0)),
+      new Machine(Gamefield.fieldsize * 8, Gamefield.fieldsize * 16, 40,Gamefield.fieldsize, Gamefield.fieldsize, "Machine: Messzelle", "/images/machine3.png", "/images/wall.png",
+                  [Direction.RIGHT], Products.getProductById(16)!, RenderType.THREE_D_IMG, new Coordinates(Gamefield.fieldsize, 0, 0))
     ];
     private _slotMachine!: SlotMachine;
 

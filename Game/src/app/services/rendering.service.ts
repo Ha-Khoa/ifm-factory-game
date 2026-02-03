@@ -390,11 +390,14 @@ export class RenderingService {
   {
     if(this._fov - 0.1 > this._gameFov || this.fov  + 0.1 < this._gameFov)
     {
-      let dt;
+      let dt = 1;
       if(!this._deltaTime) dt = 1;
+      else if(this._deltaTime > 50) dt = 50;
       else dt = this._deltaTime
     const df = (this._fov - this._gameFov) * 0.01 / Math.abs(this._fov - this._gameFov) * Math.abs(this._fov) * dt / 5
-    this._fov -= df
+    console.log(this._fov)
+    if(this._fov - df < 0) this._fov = 0.1
+    else this._fov -= df
     this._camera.fov = this._fov
     }
     else

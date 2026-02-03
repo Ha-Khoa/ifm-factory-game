@@ -44,7 +44,7 @@ export class SubmissionAnimation {
     this._positionTruck.x = 32 * Gamefield.fieldsize;
     this._positionTruck.y = 2 * Gamefield.fieldsize;
     this._positionTruck.z = 150;
-    this._packageSize = 4/5 * Gamefield.fieldsize;
+    this._packageSize = 3/5 * Gamefield.fieldsize;
     this._submissionCoordinates = this._positionEmployee.clone
     this._truckRenderObj = new RenderObject(
         "truck",

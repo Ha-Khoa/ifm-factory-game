@@ -117,6 +117,7 @@ export class MachineNeedsDrawer {
       this.ctx.save();
       this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
       this.ctx.beginPath();
+      if(totalWidth < 0 || boxHeight < 0) return [];
       this.ctx.roundRect(x, y, totalWidth, boxHeight, 8 * fovScale);
       this.ctx.fill();
       drawnRects.push({ x, y, width: totalWidth, height: boxHeight, radius: 8 * fovScale });
@@ -137,7 +138,10 @@ export class MachineNeedsDrawer {
           const quantityY = y + itemSize;
           this.ctx.fillStyle = ifmOrange;
           this.ctx.beginPath();
+          if(radius > 0)
+          {
           this.ctx.arc(quantityX, quantityY, radius, 0, 2 * Math.PI);
+          }
           this.ctx.fill();
           this.ctx.fillStyle = 'white';
           this.ctx.textAlign = 'center';

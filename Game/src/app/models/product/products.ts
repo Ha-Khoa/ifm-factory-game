@@ -214,9 +214,12 @@ export class Products {
    * @param {Coordinates} position - The coordinates where the product should be initialized.
    * @return {void} This method does not return a value.
    */
-  public static addProduct(product: Product, position: Coordinates): void {
+  public static addProduct(product: Product, position: Coordinates, priority?: number): void {
     let copy = product.copy();
     copy.init(position);
+    if(priority !== undefined) {
+      copy.renderObject.priority = priority;
+    }
     this.generatedProducts.push(copy);
   }
 
