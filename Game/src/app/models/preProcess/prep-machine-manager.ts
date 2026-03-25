@@ -23,7 +23,7 @@ export class PrepMachineManager {
         );
         ironGearMachine.setRecipe(7, 8);  //Eingang: Iron Ingot (ID 7), Ausgang: Iron Gear (ID 8)
 
-        //PrepMachineManager.prepMachines.push(ironGearMachine);
+        PrepMachineManager.prepMachines.push(ironGearMachine);
         // console.log('PrepMachine created:', ironGearMachine.name, 'at position:', ironGearMachine.x, ironGearMachine.y);
         this.updateGamefield();
         // console.log('PrepMachines in gamefield:', PrepMachineManager.prepMachines.length);

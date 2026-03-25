@@ -1205,55 +1205,6 @@ export class Gamefield {
             "/images/sofa.png",
             undefined
         ))
-        this.environmetObjects.push(new RenderObject(
-            `chef`,
-            RenderType.CARD_BOARD,
-            6.5 * Gamefield.fieldsize,
-            0 * Gamefield.fieldsize,
-            80,
-            0.8 * Gamefield.fieldsize,
-            1.2 * Gamefield.fieldsize,
-            0,
-            "/images/chef.png",
-            undefined
-        ))
-        this.environmetObjects.push(new RenderObject(
-            `chef2`,
-            RenderType.CARD_BOARD,
-            7.6 * Gamefield.fieldsize,
-            0 * Gamefield.fieldsize,
-            80,
-            1 * Gamefield.fieldsize,
-            1.2 * Gamefield.fieldsize,
-            0,
-            "/images/chef2.png",
-            undefined
-        ))
-        this.environmetObjects.push(new RenderObject(
-            `cocain`,
-            RenderType.CARD_BOARD,
-            6.5 * Gamefield.fieldsize,
-            0 * Gamefield.fieldsize,
-            63,
-            0.3 * Gamefield.fieldsize,
-            0.3 * Gamefield.fieldsize,
-            100,
-            "/images/cocain.png",
-            undefined
-        ))
-        this.environmetObjects.push(new RenderObject(
-            `joint`,
-            RenderType.CARD_BOARD,
-            8 * Gamefield.fieldsize,
-            0 * Gamefield.fieldsize,
-            62,
-            0.9 * Gamefield.fieldsize,
-            0.4 * Gamefield.fieldsize,
-            100,
-            "/images/joint.png",
-            undefined
-        ))
-
 
     for(let i = 15; i < Gamefield.rows; i++)
     {

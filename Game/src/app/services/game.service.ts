@@ -155,7 +155,6 @@ export class GameService {
       "/images/arrow.png",
       "/images/tisch.png",
       "/images/sofa.png",
-      "/images/chef.png",
       "/images/temp/plant.png",
       // Conveyor
       "/images/conveyorBelt/conveyorbelt-1.jpg",

@@ -45,7 +45,7 @@ export class Products {
       Product.createComplexProduct(5, "Platine", 40, 40, [{productId: 2, quantity: 1}, {productId: 18, quantity: 1}], 2, true, "/images/temp/circuitBoard1.png"),
       // new Product(6, "Basissensor", 250, 65, [{productId: 4, quantity: 1}, {productId: 2, quantity: 1}, {productId: 5, quantity: 1}], true, "/images/Products/basic-sensor.png"),
       Product.createBaseProduct(7, "Eisen", 20, 20, 10, 1, true, "/images/Products/iron-ingot.png"),
-      // Product.createComplexProduct(8, "Eisen Zahnrad", 60, 100, [{productId: 7, quantity: 1}], 2, true, "/images/Products/iron-gear.png"),
+      Product.createComplexProduct(8, "Eisen Zahnrad", 60, 100, [{productId: 7, quantity: 1}], 2, true, "/images/Products/iron-gear.png"),
       // new Product(9, "Elektromotor", 200, 300, [{productId: 18, quantity: 2}, {productId: 8, quantity: 1}], true, "/images/Products/electric-motor.png"),
       Product.createComplexProduct(10, "Photoelektrischer Sensor", 150, 150, [{productId: 5, quantity: 1}, {productId: 4, quantity: 1}, {productId: 15, quantity: 1}, {productId: 11, quantity: 1}], 3,true, "/images/Products/photo_sensor.png"),
       Product.createComplexProduct(11, "Photo Diode", 40, 40, [{productId: 18, quantity: 1}, {productId: 2, quantity: 1}], 2,true, "/images/Products/photo_diode.png"),

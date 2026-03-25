@@ -150,8 +150,8 @@ export class PrepMachine extends RenderObject {
          */
         private updateAnimation(): void{
             if (this.prepFrames && this.prepFrames.length > 0) {
-                const frameIndex = Math.floor(this.processingProgress * this.prepFrames.length);
-                this.prepFrameIndex = Math.min(frameIndex, this.prepFrames.length - 1);
+                const frameIndex = Math.min(Math.floor(this.processingProgress * this.prepFrames.length), this.prepFrames.length - 1);
+                this.prepFrameIndex = frameIndex;
                 this.prepNextFrame = this.prepFrames[this.prepFrameIndex];
             }
         }
